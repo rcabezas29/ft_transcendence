@@ -4,6 +4,8 @@
 
 layout: default
 title: ft_transcendence
+nav_order: 1
+permalink: /
 ---
 
 # ft_transcendence
