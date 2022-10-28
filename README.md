@@ -1,6 +1,6 @@
 # ft_transcendence
 
-## Run
+## Use
 
 ### Clone
     git clone git@github.com:rcabezas29/ft_transcendence.git
