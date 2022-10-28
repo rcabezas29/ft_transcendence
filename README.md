@@ -3,7 +3,7 @@
 ## Run
 
 ### Clone
-        git clone git@github.com:rcabezas29/ft_transcendence.git
+    git clone git@github.com:rcabezas29/ft_transcendence.git
         
 ### Run
-        docker-compose up --build
+    docker-compose up --build
