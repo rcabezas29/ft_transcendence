@@ -48,3 +48,16 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+# callouts
+callouts:
+  warning:
+    title: Warning
+    color: red
+  important:
+    title: Important 
+    color: yellow 
+  note:
+    title: Note
+    color: purple
+
