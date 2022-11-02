@@ -4,4 +4,6 @@ title: Workflow
 has_children: true
 ---
 
-Definition of the workflow
+# Workflow
+
+In this section is defined how to work on the project.
