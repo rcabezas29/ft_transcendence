@@ -17,6 +17,7 @@ To run the project execute **docker-compose** in the root folder.
 
 ```bash
 cd ft_transcendence
+mkdir data
 docker-compose up -d
 ```
 
