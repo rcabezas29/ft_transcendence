@@ -10,7 +10,7 @@ services:
     volumes:
      - ./docs/:/app/
   database:
-    image: 'postgres:15.0'
+    image: 'postgres:bullseye'
     container_name: database
     restart: always
     env_file:
@@ -20,7 +20,7 @@ services:
     volumes:
       - "database_volume:/var/lib/postgresql/data"
   backend:
-    image: 'nestjs/cli'
+    image: 'nestjs/cli:286d7b9930ef05f7c32484b48b208233c5f44329'
     container_name: backend
     tty: true
     restart: always
