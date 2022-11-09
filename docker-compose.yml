@@ -20,13 +20,15 @@ services:
     volumes:
       - "database_volume:/var/lib/postgresql/data"
   backend:
-    image: 'nestjs/cli:286d7b9930ef05f7c32484b48b208233c5f44329'
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
     container_name: backend
     tty: true
     restart: always
     volumes:
       - type: bind
-        source: ./srcs
+        source: ./srcs/backend
         target: /app
     ports:
       - 3000:3000
