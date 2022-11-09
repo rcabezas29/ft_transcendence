@@ -32,6 +32,19 @@ services:
         target: /app
     ports:
       - 3000:3000
+  frontend:
+    build:
+      context: ./requirements/frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    tty: true
+    restart: always
+    volumes:
+      - type: bind
+        source: ./srcs/frontend
+        target: /app
+    ports:
+      - 5173:5173
 
 volumes:
     database_volume:
