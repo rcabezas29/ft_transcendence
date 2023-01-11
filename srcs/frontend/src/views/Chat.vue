@@ -1,20 +1,21 @@
 <script setup lang="ts">
 
 import ChatFriendsSection from "../components/chat/ChatFriendsSection.vue";
-import ChatChannelsSection from "../components/chat/ChatFriendsSection.vue";
+import ChatChannelsSection from "../components/chat/ChatChannelsSection.vue";
 import ChatMessages from "@/components/chat/ChatMessages.vue";
-
 import { reactive } from "vue";
 
-interface IUser {
-	user: String
+interface Message {
+	from: string,
+	message: string
 }
 
-const user = reactive<IUser>({user: ""});
-
-function handleChatSectionClick(e: Event) {
-	
+interface Chat {
+	from: string,
+	messages: Message[]
 }
+
+const chat = reactive<Chat>({from: "", messages: []});
 
 </script>
 
@@ -23,10 +24,10 @@ function handleChatSectionClick(e: Event) {
 
 	<div class="chat-container">
 		<div>
-			<ChatFriendsSection/>
+			<ChatFriendsSection :chat="chat"/>
 			<ChatChannelsSection/>
 		</div>
-		<ChatMessages v-onclick="handleChatSectionClick" :user="user"/>
+		<ChatMessages v-if="chat.from != ''" :chat="chat"/>
 	</div>
 
 </template>

@@ -7,7 +7,7 @@ import ChatSection from './ChatSection.vue';
 <template>
 	<div>
 		<div class="chat-divider">
-			Cannels
+			Channels
 		</div>
 		<ChatSection/>
 	</div>

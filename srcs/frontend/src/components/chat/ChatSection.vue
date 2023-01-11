@@ -1,13 +1,17 @@
 <script setup lang="ts">
 
+const props = defineProps({
+	sections: null,
+	handleClick: null
+});
+
 </script>
 
 <template>
 	<div class="chat-section">
-
-		<div class="chat-card">
+		<div @click="(e: Event) => props.handleClick(e, section)" v-for="section in props.sections" class="chat-card">
 			<div class="chat-card-name">
-				Username
+				{{ section }}
 			</div>
 			<div class="chat-card-notification chat-card-notification-on">
 
