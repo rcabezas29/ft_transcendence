@@ -1,29 +1,19 @@
 <script setup lang="ts">
 
-const props = defineProps({
-	title: String
-});
-
 </script>
 
 <template>
-	<div>
+	<div class="chat-section">
 
-		<div class="chat-divider">
-			{{ props.title }}
-		</div>
-		<div class="chat-section">
-
-			<div class="chat-card">
-				<div class="chat-card-name">
-					Username
-				</div>
-				<div class="chat-card-notification chat-card-notification-on">
-
-				</div>
+		<div class="chat-card">
+			<div class="chat-card-name">
+				Username
 			</div>
+			<div class="chat-card-notification chat-card-notification-on">
 
+			</div>
 		</div>
+
 	</div>
 </template>
 
