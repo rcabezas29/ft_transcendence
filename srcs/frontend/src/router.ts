@@ -1,5 +1,5 @@
 import Index  from './components/Index.vue';
-import Chat from './components/Chat.vue';
+import Chat from './views/Chat.vue';
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
