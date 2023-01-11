@@ -1,11 +1,9 @@
 <script setup lang="ts">
-	import "./assets/main.css"
+
 </script>
 
 <template>
-		<h1>FT_TRANSCENDENCE</h1>
-
-		<router-view/>
+	<h1>Index Component</h1>
 </template>
 
 <style scoped>
