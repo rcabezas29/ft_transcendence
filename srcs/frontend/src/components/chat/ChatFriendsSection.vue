@@ -10,7 +10,7 @@ const props = defineProps({
 	<div>
 
 		<div class="chat-divider">
-			{{ props.title }}
+			Friends
 		</div>
 		<div class="chat-section">
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
-import ChatSection from "../components/chat/ChatSection.vue";
+import ChatFriendsSection from "../components/chat/ChatFriendsSection.vue";
+import ChatChannelsSection from "../components/chat/ChatFriendsSection.vue";
 import ChatMessages from "@/components/chat/ChatMessages.vue";
 
 import { reactive } from "vue";
@@ -21,7 +22,10 @@ function handleChatSectionClick(e: Event) {
 	<h1>Chat Component</h1>
 
 	<div class="chat-container">
-		<ChatSection :title="'friends'"/>
+		<div>
+			<ChatFriendsSection/>
+			<ChatChannelsSection/>
+		</div>
 		<ChatMessages v-onclick="handleChatSectionClick" :user="user"/>
 	</div>
 
