@@ -26,6 +26,8 @@ services:
     container_name: backend
     tty: true
     restart: always
+    env_file:
+      - ./.env
     volumes:
       - type: bind
         source: ./srcs/backend
