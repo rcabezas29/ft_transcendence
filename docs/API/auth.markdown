@@ -1,10 +1,10 @@
 ---
 layout: default
-title: User 
+title: Auth 
 parent: API 
 ---
 
-## User
+## Auth
 
 ### POST /auth/login
 
@@ -28,3 +28,7 @@ Creates new user and returns the created user
 	"passowrd": "password"
 }
 ```
+
+### POST /auth/validate
+
+Validates the token from the Authentication header
