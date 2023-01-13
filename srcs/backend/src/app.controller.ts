@@ -24,6 +24,12 @@ export class AppController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('auth/validate')
+  async validate(@Request() req) {
+	return this.authService.validateToken(req.token);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;

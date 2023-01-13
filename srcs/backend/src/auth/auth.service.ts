@@ -33,4 +33,8 @@ export class AuthService {
     }
     return this.usersService.create(createUserDto);
   }
+
+  async validateToken(token: string) {
+	return {statusCode: 200, message: "Bearer token is valid"};
+  }
 }
