@@ -9,11 +9,11 @@ export class User {
   username: string;
 
   @Column()
-  email: string;
+  readonly email: string;
 
-  @Column()
+  @Column({ nullable: true })
   avatar: string;
 
   @Column()
-  password: string;
+  readonly password: string;
 }

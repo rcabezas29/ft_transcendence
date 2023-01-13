@@ -12,8 +12,10 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    const user = await this.usersRepository.save(createUserDto);
+    const { password, ...result } = user;
+    return result;
   }
 
   findAll(): Promise<User[]> {
@@ -21,11 +23,15 @@ export class UsersService {
   }
 
   findOne(id: number): Promise<User> {
-    return this.usersRepository.findOneBy({ id });
+    return this.usersRepository.findOneBy({ id: id });
   }
 
   findOneByUsername(username: string) {
-    return this.usersRepository.findOneBy({ username });
+    return this.usersRepository.findOneBy({ username: username });
+  }
+
+  findOneByEmail(email: string) {
+    return this.usersRepository.findOneBy({ email: email });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
