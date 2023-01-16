@@ -37,4 +37,3 @@ In this page are specified all the functionalities the project must fulfill
 - Through the chat interface users must be able to see other players profiles
 
 ## Game
-
