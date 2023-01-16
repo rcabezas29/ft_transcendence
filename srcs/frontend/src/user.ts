@@ -13,24 +13,27 @@ class User {
 	}
 
 	async validateToken(token: string): Promise<boolean> {
-
 		const httpResponse = await fetch("http://localhost:3000/auth/validate", {
 			headers: {
 				"Authorization": `Bearer ${token}`,
 			}
 		});
-		
+
 		return httpResponse.status == 200 ? true : false;
 	}
 
-	async checkLocalStorage(): Promise<boolean> {
+	async checkLocalStorage(): Promise<string | null> {
 		const localStorageToken = localStorage.getItem("token");
+
 		if (!localStorageToken)
-			return false;
-	
-		const validToken = await user.validateToken(localStorageToken);
-	
-		return validToken;
+			return null;
+
+		const validToken = await this.validateToken(localStorageToken);
+
+		if (!validToken)
+			return null;
+
+		return localStorageToken;
 	}
 
 	isLogged(): boolean {	
@@ -38,6 +41,7 @@ class User {
 	}
 	
 	logout(): void {
+		localStorage.removeItem("token");
 		this.token = null;
 		this.socket = null
 	}

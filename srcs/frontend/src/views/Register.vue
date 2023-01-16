@@ -2,6 +2,7 @@
 	import { ref } from "vue"
 	import { user } from "../user";
 
+	const username = ref("");
 	const email = ref("");
 	const password = ref("");
 	const message = ref("");
@@ -10,11 +11,12 @@
 	async function handleSubmit(e: Event) {
 
 		const createUser = {
+			username: username.value,
 			email: email.value,
 			password: password.value
 		};
 
-		const httpResponse = await fetch("http://localhost:3000/auth/login", {
+		const httpResponse = await fetch("http://localhost:3000/auth/register", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
@@ -39,15 +41,18 @@
 
 <template>
 	<form @submit.prevent="handleSubmit">
+		<label>Username: </label>
+		<input type="text" v-model="username"/>
+		<br/>
 		<label>Email: </label>
-		<input type="text" v-model="email"/>
+		<input type="email" v-model="email"/>
 		<br/>
 		<label>Password: </label>
 		<input type="password" v-model="password"/>
 		<br/>
 		<label :class="messageClass">{{ message }}</label>
 		<br/>
-		<button>Login</button>
+		<button>Register</button>
 	</form>
 </template>
 

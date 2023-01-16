@@ -2,6 +2,20 @@
 	import "./assets/main.css"
 	import { user } from "./user";
 	import router from './router';
+	import { onBeforeMount } from "vue";
+
+	onBeforeMount(async () => {
+		const validLocalStorageToken = await user.checkLocalStorage();
+
+		if (!validLocalStorageToken) {
+			router.replace({"name": "login"});
+			return;
+		}
+
+		user.auth(validLocalStorageToken);
+	});
+
+	const routes = router.getRoutes();
 
 </script>
 
@@ -18,15 +32,9 @@
 			</div>
 		
 			<h4>Navigation</h4>
-			<div class="dev-links">
+			<div class="dev-links" v-for="route in routes">
 				<div>
-					<router-link to="/">index</router-link>
-				</div>
-				<div>
-					<router-link to="/login">login</router-link>
-				</div>
-				<div>
-					<router-link to="/home">home</router-link>
+					<router-link :to="route.path">{{ route.name }}</router-link>
 				</div>
 			</div>
 
