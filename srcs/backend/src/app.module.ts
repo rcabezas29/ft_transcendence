@@ -1,17 +1,14 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ChatModule } from './chat/chat.module';
 import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
+import { SeedModule } from './seed/seed.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    UsersModule,
     AuthModule,
-	ChatModule,
+    UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'database',
@@ -22,8 +19,7 @@ import { User } from './users/entities/user.entity';
       entities: [User],
       synchronize: true,
     }),
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+    SeedModule,
+  ]
 })
 export class AppModule {}
