@@ -9,7 +9,7 @@
 
 	async function handleSubmit(e: Event) {
 
-		const createUser = {
+		const loginUser = {
 			email: email.value,
 			password: password.value
 		};
@@ -19,7 +19,7 @@
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify(createUser)
+			body: JSON.stringify(loginUser)
 		});
 
 		const response = await httpResponse.json();

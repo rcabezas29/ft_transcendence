@@ -1,47 +1,28 @@
-import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { Subscriber } from 'rxjs';
+import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { map } from 'rxjs';
 import { Socket } from 'socket.io'
-
-interface User {
-	socket: Socket
-}
+import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
+import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 
 @WebSocketGateway({cors: true})
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect{
+export class ChatGateway  {
 
-	private users: User[] = [];
+	constructor(
+		private gatewayManagerService: GatewayManagerService
+	) { }
 
-	handleConnection(client: Socket, ...args: any[]) {
-		this.users.push({socket: client});
-		this.users.forEach((user) => user.socket.emit('fetch_users', this.getUsersIds()));
+	@SubscribeMessage("fetch-users")
+	fetchUsers(client: Socket) {
+		const users: GatewayUser[] = this.gatewayManagerService.getAllClients();
+		const userFriends = users.filter((user) => user.socket !== client);
+		const usersPayload = userFriends.map((user) => user.id );
+
+		client.emit('fetch-users', usersPayload);
 	}
 
-	handleDisconnect(client: Socket) {
-		console.log("User disconnected");
-
-		this.users = this.users.filter((user) => user.socket.id != client.id)
+	@SubscribeMessage("directMessage")
+	directMessage(client: Socket, payload: any) {
+		const user = this.gatewayManagerService.getClientBySocketId(client.id);
 	}
 
-	getUsersIds(): string {
-		return JSON.stringify(this.users.map((user) => user.socket.id));
-	}
-
-	@SubscribeMessage('fetch_users')
-	fetchUsers(client: Socket, payload: any): void {
-		console.log("Fetch users!");
-		client.emit('fetch_users', this.getUsersIds());
-	}
-
-	@SubscribeMessage('message')
-	handleMessage(client: Socket, payload: any): void {
-		const user = this.users.find((user) => user.socket.id == payload.to);
-	
-		if (!user)
-			return;
-
-		if (payload.message.length == 0)
-			return;
-
-		user.socket.emit('message', {from: client.id, message: payload.message})
-	}
 }

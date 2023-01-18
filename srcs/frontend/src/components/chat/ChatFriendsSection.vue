@@ -10,9 +10,10 @@ const props = defineProps({
 
 const friends: Ref<string[]> = ref<string[]>([]);
 
-user.socket?.on('fetch_users', async (message) => {
-	const fetchedFriends = await JSON.parse(message);
-	friends.value = [...fetchedFriends].filter((id) => user.socket?.id != id);
+user.socket?.emit('fetch-users');
+
+user.socket?.on('fetch-users', async (fetchedFriends) => {
+	friends.value = fetchedFriends;
 });
 
 function handleClick(e: Event, chatId: string) {

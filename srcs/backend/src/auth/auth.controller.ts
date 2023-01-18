@@ -18,4 +18,10 @@ export class AuthController {
   loginUser(@Request() req) {
     return this.authService.login(req);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('validate')
+  validateToken() {
+	  return { status: "OK", message: "token is valid"};
+  }
 }

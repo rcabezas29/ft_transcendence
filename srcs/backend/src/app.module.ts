@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
+import { GatewayManagerModule } from './gateway-manager/gateway-manager.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { AuthModule } from './auth/auth.module';
       synchronize: true,
     }),
     SeedModule,
+    GatewayManagerModule,
+	ChatModule
   ]
 })
 export class AppModule {}
