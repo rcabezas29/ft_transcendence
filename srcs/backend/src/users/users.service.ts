@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -13,7 +17,18 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    const emailExists = await this.usersRepository.findBy({
+      email: createUserDto.email,
+    });
+    const usernameExists = await this.usersRepository.findBy({
+      username: createUserDto.username,
+    });
+    if (emailExists.length != 0 || usernameExists.length != 0) {
+      throw new BadRequestException();
+    }
+
     const user = await this.usersRepository.save(createUserDto);
+
     const { password, ...result } = user;
     return result;
   }
