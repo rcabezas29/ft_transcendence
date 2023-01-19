@@ -1,27 +1,16 @@
 <script setup lang="ts">
 
-import { defineProps, ref } from 'vue';
-import type { Ref } from 'vue'; 
-import { user } from '../../user';
-
-const props = defineProps({
-	chat: null
-});
+import { type Ref, ref } from 'vue'; 
+import { chatController } from "../../chatController"
 
 const messageInput: Ref<string> = ref<string>("");
 
 function onSubmit(e: Event) {
 	if (messageInput.value.length == 0)
 		return;
-
-	user.socket?.emit("message", { to: props.chat.from, message: messageInput.value });
-	props.chat.messages = [...props.chat.messages, { from: user.socket?.id, message: messageInput.value }]
+	chatController.sendDirectMessage(messageInput.value);
 	messageInput.value = "";
 }
-
-user.socket?.on("message", (payload) => {
-	props.chat.messages = [...props.chat.messages, payload];
-});
 
 </script>
 
@@ -29,9 +18,9 @@ user.socket?.on("message", (payload) => {
 	<div>
 		<div class="chat-messages-container">
 			<div class="chat-container-title">
-				{{ props.chat?.from }}
+				{{ chatController.currentChat!.friend.username }}
 			</div>
-			<div v-for="message in props.chat.messages" class="chat-message-container">
+			<div v-for="message in chatController.currentChat!.messages" class="chat-message-container">
 				<div class="chat-message-username">
 					{{ message.from }}
 				</div>

@@ -1,23 +1,8 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
-import ChatSection from './ChatSection.vue';
-import { ref, defineProps } from "vue";
-import { user } from '../../user';
+import { chatController } from "../../chatController"
 
-const props = defineProps({
-	chat: null
-});
-
-const friends: Ref<string[]> = ref<string[]>([]);
-
-user.socket?.emit('fetch-users');
-
-user.socket?.on('fetch-users', async (fetchedFriends) => {
-	friends.value = fetchedFriends;
-});
-
-function handleClick(e: Event, chatId: string) {
-	props.chat.from = chatId;
+function handleClick(e: Event, friendId: number) {
+	chatController.setCurrentChat(friendId);
 }
 
 </script>
@@ -27,10 +12,48 @@ function handleClick(e: Event, chatId: string) {
 		<div class="chat-divider">
 			Friends
 		</div>
-		<ChatSection :sections="friends" :handleClick="handleClick"/>
+		<div class="chat-section">
+			<div @click="(e: Event) => handleClick(e, friend.id)" v-for="friend in chatController.friends" :key="friend.id" class="chat-card">
+				<div class="chat-card-name">
+					{{ friend.id }}
+				</div>
+				<div class="chat-card-notification chat-card-notification-on">
+
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
 <style scoped>
+	.chat-section {
+		width: 300px;
+	}
 
+	.chat-card {
+		border: 1px solid black;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 30px;
+		padding: 10px;
+	}
+
+	.chat-card-selected {
+		background-color: lightgray;
+	}
+
+	.chat-card-notification {
+		height:10px;
+		width: 10px;
+	}
+
+	.chat-card-notification-on {
+		background-color: red;
+	}
+
+	.chat-divider {
+		margin: 15px 0 5px 0;
+		font-weight: bold;
+	}
 </style>
