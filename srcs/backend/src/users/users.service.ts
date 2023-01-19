@@ -17,20 +17,13 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const emailExists = await this.usersRepository.findBy({
-      email: createUserDto.email,
-    });
-    const usernameExists = await this.usersRepository.findBy({
-      username: createUserDto.username,
-    });
-    if (emailExists.length != 0 || usernameExists.length != 0) {
+    try {
+      const user = await this.usersRepository.save(createUserDto);
+      const { password, ...result } = user;
+      return result;
+    } catch (e) {
       throw new BadRequestException();
     }
-
-    const user = await this.usersRepository.save(createUserDto);
-
-    const { password, ...result } = user;
-    return result;
   }
 
   findAll(): Promise<User[]> {
@@ -54,11 +47,16 @@ export class UsersService {
       id,
       ...updateUserDto,
     };
-    const user = await this.usersRepository.preload(userToUpdate);
-    if (user) {
-      return this.usersRepository.save(user);
+    try {
+      const user = await this.usersRepository.preload(userToUpdate);
+      if (user) {
+        const res = await this.usersRepository.save(user);
+        return res;
+      }
+    } catch (e) {
+      throw new BadRequestException();
     }
-    throw new NotFoundException(`User not found: ${id}`);
+    throw new NotFoundException();
   }
 
   async remove(id: string): Promise<void> {
