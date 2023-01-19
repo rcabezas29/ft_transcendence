@@ -1,6 +1,7 @@
 import { reactive } from 'vue'
 import type { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
+import { chatController } from "./chatController";
 
 class User {
 	public token: string | null = null;
@@ -22,6 +23,7 @@ class User {
 
 	onConnect() {
 		this.socketId = this.socket?.id;
+		chatController.setEventsHandlers();
 	}
 
 	onDisconnect() {
@@ -31,7 +33,6 @@ class User {
 	onAlreadyConnected() {
 		this.alreadyConnected = true;
 	}
-
 
 	async validateToken(token: string): Promise<boolean> {
 		const httpResponse = await fetch("http://localhost:3000/auth/validate", {

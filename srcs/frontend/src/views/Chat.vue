@@ -3,19 +3,7 @@
 import ChatFriendsSection from "../components/chat/ChatFriendsSection.vue";
 import ChatChannelsSection from "../components/chat/ChatChannelsSection.vue";
 import ChatMessages from "@/components/chat/ChatMessages.vue";
-import { reactive } from "vue";
-
-interface Message {
-	from: string,
-	message: string
-}
-
-interface Chat {
-	from: string,
-	messages: Message[]
-}
-
-const chat = reactive<Chat>({from: "", messages: []});
+import { chatController } from "@/chatController";
 
 </script>
 
@@ -24,10 +12,10 @@ const chat = reactive<Chat>({from: "", messages: []});
 
 	<div class="chat-container">
 		<div>
-			<ChatFriendsSection :chat="chat"/>
-			<ChatChannelsSection/>
+			<ChatFriendsSection />
+			<ChatChannelsSection />
 		</div>
-		<ChatMessages v-if="chat.from != ''" :chat="chat"/>
+		<ChatMessages v-if="chatController.hasCurrentChat()" />
 	</div>
 
 </template>

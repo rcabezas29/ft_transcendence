@@ -20,7 +20,6 @@
 
 	const routes = router.getRoutes();
 
-
 </script>
 
 <template>
