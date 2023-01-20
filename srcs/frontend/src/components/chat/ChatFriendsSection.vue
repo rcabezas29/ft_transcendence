@@ -17,9 +17,7 @@ function handleClick(e: Event, friendId: number) {
 				<div class="chat-card-name">
 					{{ friend.id }}
 				</div>
-				<div class="chat-card-notification chat-card-notification-on">
-
-				</div>
+				<div class="chat-card-notification chat-card-notification-on"></div>
 			</div>
 		</div>
 	</div>

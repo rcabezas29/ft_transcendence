@@ -1,17 +1,29 @@
 import { reactive } from 'vue'
 import type { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
+import jwt_decode from "jwt-decode";
 import { chatController } from "./chatController";
+
+interface JwtPayload {
+    id: number;
+}
 
 class User {
 	public token: string | null = null;
 	public socket: Socket | null = null;
 	public socketId: string | undefined;
 	public alreadyConnected: boolean = false;
+	public id: number = -1;
 
 	auth(access_token: string): void {
 		this.token = access_token;
 		localStorage.setItem("token", access_token);
+		try {
+			const decoded: JwtPayload = jwt_decode(this.token);
+			this.id = decoded.id;
+		} catch (error) {
+			console.log(error, 'error from decoding token');
+		}
 
 		if (!this.socket) {
 			this.socket = io("http://localhost:3000/", {auth: {token: access_token}});

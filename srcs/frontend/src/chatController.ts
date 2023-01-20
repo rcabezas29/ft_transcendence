@@ -38,6 +38,7 @@ class ChatController {
 
     onFetchUsers(payload: Friend[]) {
         this.friends = payload;
+        this.friends = this.friends.filter((friend) => friend.id !== user.id);
         this.friends.forEach((friend) => {
             if (this.chats && !this.chats[friend.id])
             {
