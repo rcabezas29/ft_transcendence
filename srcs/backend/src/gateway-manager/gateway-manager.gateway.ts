@@ -41,7 +41,7 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 	}
 
 	handleDisconnect(client: Socket) {
-		this.gatewayManagerService.removeClient(client.id);
+		//this.gatewayManagerService.removeClient(client.id);
 	}
 
 }

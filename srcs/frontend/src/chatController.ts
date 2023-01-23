@@ -1,3 +1,4 @@
+import type { Socket } from "socket.io-client";
 import { reactive } from "vue";
 import { user } from "./user";
 
@@ -32,7 +33,9 @@ class ChatController {
     public currentChat: Chat | null = null;
 
     setEventsHandlers() {
-        user.socket?.on('fetch-users', (payload: Friend[]) => {this.onFetchUsers(payload)});
+        user.socket?.on('connected-friends', (payload: Friend[]) => {this.onFetchUsers(payload)});
+        user.socket?.on('friend-online', (payload: Friend) => {this.onFriendConnected(payload)});
+        user.socket?.on('friend-offline', (payload: Friend) => {this.onFriendDisconnected(payload)});
         user.socket?.on('direct-message', (payload: MessagePayload) => {this.receiveDirectMessage(payload)});
     }
 
@@ -49,6 +52,16 @@ class ChatController {
                 this.chats[friend.id] = newChat;
             }
         })
+    }
+
+    onFriendConnected(payload: Friend) {
+        this.friends.push(payload);
+        console.log(`friend connected: ${payload.username}`)
+    }
+
+    onFriendDisconnected(payload: Friend) {
+        this.friends = this.friends.filter((friend) => friend.id != payload.id);
+        console.log(`friend disconnected: ${payload.username}`)
     }
 
     receiveDirectMessage(payload: MessagePayload) {

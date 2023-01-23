@@ -14,6 +14,7 @@ In the frontend the `ChatController` is in charge of managing all events related
 ## Backend
 
 In the backend the `chat.gateway` and `chat.service` are in charge of managing all the events related to the Chat.
+The `gateway-manager.service` is injected into `chat.gateway`, use it to manage the users that are connected to the server.
 
 ## Event relation between the Frontend and Backend
 
