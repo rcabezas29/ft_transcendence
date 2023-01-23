@@ -1,29 +1,40 @@
-<setup setup lang="ts">
+<script setup lang="ts">
 
-</setup>
+import { type Ref, ref } from 'vue'; 
+import { chatController } from "../../chatController"
+
+const messageInput: Ref<string> = ref<string>("");
+
+function onSubmit(e: Event) {
+	if (messageInput.value.length == 0)
+		return;
+	chatController.sendDirectMessage(messageInput.value);
+	messageInput.value = "";
+}
+
+</script>
 
 <template>
-	<div class="chat-messages-container">
-		<div class="chat-container-title">
-			Chat title
-		</div>
-		<div class="chat-message-container">
-			<div class="chat-message-username">
-				Username
+	<div>
+		<div class="chat-messages-container">
+			<div class="chat-container-title">
+				{{ chatController.currentChat!.friend.username }}
 			</div>
-			<div class="chat-message">
-				Hello how are you
-			</div>
-		</div>
-		<div class="chat-message-container">
-			<div class="chat-message-username">
-				Username
-			</div>
-			<div class="chat-message">
-				Hello how are you
+			<div v-for="message in chatController.currentChat!.messages" class="chat-message-container">
+				<div class="chat-message-username">
+					{{ message.from }}
+				</div>
+				<div class="chat-message">
+					{{ message.message }}
+				</div>
 			</div>
 		</div>
+		<form @submit.prevent="onSubmit" class="chat-message-input">
+			<input type="text" v-model="messageInput"/>
+			<button type="submit" >Send</button>
+		</form>
 	</div>
+	
 </template>
 
 <style scoped>
@@ -45,5 +56,9 @@
 		font-weight: bold;
 		border-bottom: 5px solid black;
 		margin-bottom: 20px;
+	}
+
+	.chat-message-input {
+		margin-left: 10px;
 	}
 </style>

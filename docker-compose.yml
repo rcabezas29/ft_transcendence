@@ -5,6 +5,7 @@ services:
     build:
       context: ./docs
       dockerfile: Dockerfile
+    container_name: docs
     ports:
      - "4000:4000"
     volumes:
@@ -47,6 +48,11 @@ services:
         target: /app
     ports:
       - 5173:5173
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
 
 volumes:
     database_volume:

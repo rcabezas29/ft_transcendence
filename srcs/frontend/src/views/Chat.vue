@@ -1,20 +1,9 @@
 <script setup lang="ts">
 
 import ChatFriendsSection from "../components/chat/ChatFriendsSection.vue";
-import ChatChannelsSection from "../components/chat/ChatFriendsSection.vue";
+import ChatChannelsSection from "../components/chat/ChatChannelsSection.vue";
 import ChatMessages from "@/components/chat/ChatMessages.vue";
-
-import { reactive } from "vue";
-
-interface IUser {
-	user: String
-}
-
-const user = reactive<IUser>({user: ""});
-
-function handleChatSectionClick(e: Event) {
-	
-}
+import { chatController } from "@/chatController";
 
 </script>
 
@@ -23,10 +12,10 @@ function handleChatSectionClick(e: Event) {
 
 	<div class="chat-container">
 		<div>
-			<ChatFriendsSection/>
-			<ChatChannelsSection/>
+			<ChatFriendsSection />
+			<ChatChannelsSection />
 		</div>
-		<ChatMessages v-onclick="handleChatSectionClick" :user="user"/>
+		<ChatMessages v-if="chatController.hasCurrentChat()" />
 	</div>
 
 </template>

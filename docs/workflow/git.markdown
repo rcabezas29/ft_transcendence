@@ -17,6 +17,19 @@ parent: Workflow
 - **fix/{name_of_fixed_part}**: branch created to fix an issue.
 - **refactor/{name_of_refactored_part}**: branch created to [refactor](https://en.wikipedia.org/wiki/Code_refactoring) a part of the project
 
+
+## Workflow
+
+- All the branches must be created from the develop branch.
+	- If you want to create a new feature, create a new branch from develop and name it **feature/{name_of_feature}**
+- All the branches must be merged to the develop branch.
+	- If you want to merge a feature branch to develop, move to develop and merge the feature branch.
+- All the branches must be deleted after the merge. (Not really, but it's a good practice)
+	- If you want to delete a branch, move to develop and delete it.
+<br/><br/>
+
+![](./GitWorkflow.png)
+
 ## Example
 
 You want to implement the register feature.
