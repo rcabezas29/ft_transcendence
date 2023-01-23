@@ -15,7 +15,7 @@ function handleClick(e: Event, friendId: number) {
 		<div class="chat-section">
 			<div @click="(e: Event) => handleClick(e, friend.id)" v-for="friend in chatController.friends" :key="friend.id" class="chat-card">
 				<div class="chat-card-name">
-					{{ friend.id }}
+					{{ friend.username }}
 				</div>
 				<div class="chat-card-notification chat-card-notification-on"></div>
 			</div>

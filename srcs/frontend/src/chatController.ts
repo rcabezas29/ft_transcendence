@@ -56,12 +56,10 @@ class ChatController {
 
     onFriendConnected(payload: Friend) {
         this.friends.push(payload);
-        console.log(`friend connected: ${payload.username}`)
     }
 
     onFriendDisconnected(payload: Friend) {
         this.friends = this.friends.filter((friend) => friend.id != payload.id);
-        console.log(`friend disconnected: ${payload.username}`)
     }
 
     receiveDirectMessage(payload: MessagePayload) {
