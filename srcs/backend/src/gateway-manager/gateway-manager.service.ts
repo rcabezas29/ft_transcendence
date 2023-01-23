@@ -5,6 +5,8 @@ import { GatewayUser } from './interfaces/gateway-user.interface';
 export class GatewayManagerService {
 
 	private users: GatewayUser[] = [];
+	private onNewConnectionCallbacks: Function[] = [];
+	private onDisconnectionCallbacks: Function[] = [];
 
 	getClientByUserId(id: number): GatewayUser {
 		return this.users.find((user) => user.id == id);
@@ -24,6 +26,22 @@ export class GatewayManagerService {
 
 	removeClient(socketId: string): void {
 		this.users = this.users.filter((u) => u.socket.id != socketId);
+	}
+
+	addOnNewConnectionCallback(callback: Function): void {
+		this.onNewConnectionCallbacks.push(callback);
+	}
+
+	addOnDisconnectionCallback(callback: Function): void {
+		this.onDisconnectionCallbacks.push(callback);
+	}
+
+	getOnNewConnectionCallbacks(): Function[] {
+		return this.onNewConnectionCallbacks;
+	}
+
+	getOnDisconnectionCallback(): Function[] {
+		return this.onDisconnectionCallbacks;
 	}
 
 }
