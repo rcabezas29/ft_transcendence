@@ -56,6 +56,8 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 
 	handleDisconnect(client: Socket) {
 		const gatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		if (!gatewayUser)
+			return;
 		const onDisconnectionCallbacks = this.gatewayManagerService.getOnDisconnectionCallback();
 		onDisconnectionCallbacks.forEach((callback) => {
 			callback(gatewayUser);
