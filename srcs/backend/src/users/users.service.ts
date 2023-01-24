@@ -22,7 +22,7 @@ export class UsersService {
       const { password, ...result } = user;
       return result;
     } catch (e) {
-      throw new BadRequestException();
+      throw new BadRequestException('Failed to create user');
     }
   }
 
