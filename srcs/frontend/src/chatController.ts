@@ -1,4 +1,3 @@
-import type { Socket } from "socket.io-client";
 import { reactive } from "vue";
 import { user } from "./user";
 
@@ -23,7 +22,7 @@ interface MessagePayload {
 }
 
 type FriendId = number;
-type ChatMap = { 
+type ChatMap = {
     [id: FriendId]: Chat; 
 }
 
@@ -33,29 +32,21 @@ class ChatController {
     public currentChat: Chat | null = null;
 
     setEventsHandlers() {
-        user.socket?.on('connected-friends', (payload: Friend[]) => {this.onFetchUsers(payload)});
+        user.socket?.on('connected-friends', (payload: Friend[]) => {this.onConnectedFriends(payload)});
         user.socket?.on('friend-online', (payload: Friend) => {this.onFriendConnected(payload)});
         user.socket?.on('friend-offline', (payload: Friend) => {this.onFriendDisconnected(payload)});
         user.socket?.on('direct-message', (payload: MessagePayload) => {this.receiveDirectMessage(payload)});
     }
 
-    onFetchUsers(payload: Friend[]) {
+    onConnectedFriends(payload: Friend[]) {
         this.friends = payload;
         this.friends = this.friends.filter((friend) => friend.id !== user.id);
-        this.friends.forEach((friend) => {
-            if (this.chats && !this.chats[friend.id])
-            {
-                const newChat: Chat = {
-                    friend: friend,
-                    messages: []
-                }
-                this.chats[friend.id] = newChat;
-            }
-        })
+        this.friends.forEach((friend) => { this.appendChatToChatMap(friend) });
     }
 
     onFriendConnected(payload: Friend) {
         this.friends.push(payload);
+        this.appendChatToChatMap(payload);
     }
 
     onFriendDisconnected(payload: Friend) {
@@ -102,6 +93,16 @@ class ChatController {
         return (this.currentChat !== null);
     }
 
+    private appendChatToChatMap(friend: Friend): void {
+        if (this.chats && !this.chats[friend.id])
+        {
+            const newChat: Chat = {
+                friend: friend,
+                messages: []
+            }
+            this.chats[friend.id] = newChat;
+        }
+    }
 }
 
 export const chatController = reactive<ChatController>(new ChatController);

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { type Ref, ref } from 'vue'; 
+import { type Ref, ref, onUpdated } from 'vue'; 
 import { chatController } from "../../chatController"
 
 const messageInput: Ref<string> = ref<string>("");
@@ -11,6 +11,16 @@ function onSubmit(e: Event) {
 	chatController.sendDirectMessage(messageInput.value);
 	messageInput.value = "";
 }
+
+function scrollDownChatMessages() {
+	const elem = document.querySelector(".chat-messages-container");
+	if (elem)
+		elem.scrollTop = elem.scrollHeight;
+}
+
+onUpdated(() => {
+	scrollDownChatMessages();
+})
 
 </script>
 
@@ -42,6 +52,8 @@ function onSubmit(e: Event) {
 		border: 1px solid black;
 		margin-left: 10px;
 		width: 300px;
+		height: 300px;
+		overflow-y: scroll; 
 	}
 
 	.chat-message-container {
