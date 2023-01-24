@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
@@ -8,6 +8,7 @@ import { GatewayManagerModule } from './gateway-manager/gateway-manager.module';
 import { ChatModule } from './chat/chat.module';
 import { FriendsModule } from './friends/friends.module';
 import { Friends } from './friends/entities/friend.entity';
+
 
 @Module({
   imports: [

@@ -7,7 +7,7 @@ import { JwtPayload } from "../interfaces/jwt-payload.interface";
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor() {
         super({
-            secretOrKey: "hola",
+            secretOrKey: process.env.JWT_SECRET || 'default_jwt_secret_value',
             ignoreExpiration: false,
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
         });
