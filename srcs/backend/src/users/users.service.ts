@@ -59,7 +59,7 @@ export class UsersService {
     throw new NotFoundException();
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.usersRepository.delete(id);
   }
 }
