@@ -4,8 +4,15 @@ import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
 import { chatController } from "./chatController";
 
-interface JwtPayload {
+export interface JwtPayload {
     id: number;
+	iat: number;
+	exp: number;
+}
+
+interface FetchedUser {
+	id: number;
+	username: string;
 }
 
 class User {
@@ -14,13 +21,25 @@ class User {
 	public socketId: string | undefined;
 	public alreadyConnected: boolean = false;
 	public id: number = -1;
+	public username: string = '';
 
-	auth(access_token: string): void {
+	async auth(access_token: string): Promise<void> {
 		this.token = access_token;
 		localStorage.setItem("token", access_token);
 		try {
 			const decoded: JwtPayload = jwt_decode(this.token);
 			this.id = decoded.id;
+
+			const fetchUserData = await fetch(`http://localhost:3000/users/${this.id}`, {
+				method: "GET",
+				headers: {
+					"Authorization": `Bearer ${user.token}`
+				}
+			});
+
+			const fetchedUser: FetchedUser = await fetchUserData.json();
+			this.username = fetchedUser.username;
+
 		} catch (error) {
 			console.log(error, 'error from decoding token');
 		}

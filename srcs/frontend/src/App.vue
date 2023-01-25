@@ -1,6 +1,6 @@
 <script setup lang="ts">
 	import "./assets/main.css"
-	import { user } from "./user";
+	import { user, type JwtPayload } from "./user";
 	import router from './router';
 	import { onBeforeMount } from "vue";
 	import AlreadyConnected from './views/AlreadyConnected.vue'
@@ -15,7 +15,7 @@
 		}
 
 		if (validLocalStorageToken)
-			user.auth(validLocalStorageToken);
+			await user.auth(validLocalStorageToken);
 	});
 
 	const routes = router.getRoutes();
@@ -34,7 +34,7 @@
 			<h3>Dev data</h3>
 			
 			<div v-if="user.isLogged()">
-				<h4 >User</h4>
+				<h4 >User: {{ user.username }}</h4>
 				<p>isLogged: {{ user.isLogged() }}</p>
 				<p>token: {{ user.token }}</p>
 				<p>socketId: {{ user.socketId }}</p>
