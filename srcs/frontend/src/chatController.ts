@@ -14,6 +14,7 @@ export interface Friend {
 export interface Chat {
     friend: Friend;
     messages: Message[];
+    notification: boolean;
 }
 
 interface MessagePayload {
@@ -64,6 +65,9 @@ class ChatController {
         const friendChat: Chat | undefined = this.chats[fromUsername.id];
         if (friendChat)
             friendChat.messages.push(newMessage);
+
+        if (friendChat !== this.currentChat)
+            friendChat.notification = true;
     }
 
     sendDirectMessage(message: string) {
@@ -86,7 +90,10 @@ class ChatController {
     setCurrentChat(friendId: number) {
         const chat: Chat | undefined = this.chats[friendId];
         if (chat)
+        {
             this.currentChat = chat;
+            this.currentChat.notification = false;
+        }
     }
 
     hasCurrentChat(): boolean {
@@ -98,7 +105,8 @@ class ChatController {
         {
             const newChat: Chat = {
                 friend: friend,
-                messages: []
+                messages: [],
+                notification: false
             }
             this.chats[friend.id] = newChat;
         }
