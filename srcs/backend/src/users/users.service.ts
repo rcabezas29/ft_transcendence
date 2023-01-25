@@ -7,13 +7,17 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { FriendsService } from 'src/friends/friends.service';
+import { Friends } from 'src/friends/entities/friend.entity';
+import { FriendshipStatus } from 'src/friends/entities/friend.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+	private friendsService: FriendsService
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -30,16 +34,48 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
+  findAllByIds(ids: number[]): Promise<User[]> {
+	  return this.usersRepository.find({
+		  where: {
+			  id: In(ids)
+		  }
+	  })
+  }
+
   findOne(id: number): Promise<User> {
     return this.usersRepository.findOneBy({ id: id });
   }
 
-  findOneByUsername(username: string) {
-    return this.usersRepository.findOneBy({ username: username });
+  async findOneByUsername(username: string): Promise<User> {
+    return await this.usersRepository.findOneBy({ username: username });
   }
 
   findOneByEmail(email: string) {
     return this.usersRepository.findOneBy({ email: email });
+  }
+
+  async findUserFriendsByStatus(id: number, status: FriendshipStatus) {
+	const friendsRelations: Friends[] = await this.friendsService.findUserFriends(id, status);
+	const friendsIds: number[] = friendsRelations.map((friend) => {
+		if (friend.user1Id == id)
+			return friend.user2Id;
+		else
+			return friend.user1Id;
+	});
+	const friends = await this.findAllByIds(friendsIds);
+	return friends;
+  }
+  
+  findUserActiveFriends(id: number) {
+	return this.findUserFriendsByStatus(id, FriendshipStatus.Active);
+  }
+
+  findUserFriendRequests(id: number) {
+	return this.findUserFriendsByStatus(id, FriendshipStatus.Pending);
+  }
+
+  findUserBlockedFriends(id: number) {
+	return this.findUserFriendsByStatus(id, FriendshipStatus.Blocked);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

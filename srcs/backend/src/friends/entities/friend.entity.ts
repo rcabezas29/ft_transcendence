@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum FriendshipStatus {
-  Pending,
-  Active,
-  Block,
+  Pending = 0,
+  Active = 1,
+  Blocked = 2,
 }
 
 @Entity()

@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import { FriendshipStatus } from 'src/friends/entities/friend.entity';
 
 interface SeedUser {
     email: string;
@@ -7,47 +8,90 @@ interface SeedUser {
     //roles: string[];
 }
 
-interface SeedData {
-    users: SeedUser[];
+interface SeedFriend {
+	user1: string;
+	user2: string;
+	status: FriendshipStatus;
 }
 
+interface SeedData {
+    users: SeedUser[];
+	friends: SeedFriend[];
+}
 
 export const initialData: SeedData = {
     users: [
         {
-            email: 'apavel@example.com',
-            username: 'apavel',
+            email: 'user1@example.com',
+            username: 'user1',
             password: '1234',
             //password: bcrypt.hashSync('Abc123', 10),
             //roles: ['admin']
         },
         {
-            email: 'ajuncosa@example.com',
-            username: 'ajuncosa',
+            email: 'user2@example.com',
+            username: 'user2',
             password: '1234',
             //password: bcrypt.hashSync('Abc123', 10),
             //roles: ['admin']
         },
         {
-            email: 'dpuente@example.com',
-            username: 'dpuente',
+            email: 'user3@example.com',
+            username: 'user3',
             password: '1234',
             //password: bcrypt.hashSync('Abc123', 10),
             //roles: ['admin']
         },
         {
-            email: 'rcabezas@example.com',
-            username: 'rcabezas',
+            email: 'user4@example.com',
+            username: 'user4',
             password: '1234',
             //password: bcrypt.hashSync('Abc123', 10),
             //roles: ['admin']
         },
-        {
-            email: 'npinto@example.com',
-            username: 'npinto',
+		{
+            email: 'user5@example.com',
+            username: 'user5',
             password: '1234',
             //password: bcrypt.hashSync('Abc123', 10),
             //roles: ['admin']
         },
     ],
+	friends: [
+		{
+			user1: 'user1',
+			user2: 'user2',
+			status: FriendshipStatus.Active
+		},
+		{
+			user1: 'user1',
+			user2: 'user3',
+			status: FriendshipStatus.Pending
+		},
+		{
+			user1: 'user1',
+			user2: 'user4',
+			status: FriendshipStatus.Blocked
+		},
+		{
+			user1: 'user5',
+			user2: 'user1',
+			status: FriendshipStatus.Active
+		},
+		{
+			user1: 'user2',
+			user2: 'user3',
+			status: FriendshipStatus.Active
+		},
+		{
+			user1: 'user2',
+			user2: 'user4',
+			status: FriendshipStatus.Pending
+		},
+		{
+			user1: 'user5',
+			user2: 'user3',
+			status: FriendshipStatus.Blocked
+		},
+	]
 }

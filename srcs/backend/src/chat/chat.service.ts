@@ -12,8 +12,8 @@ export class ChatService {
         this.gatewayManagerService.addOnDisconnectionCallback((client: GatewayUser) => this.onDisconnection(client));
     }
 
-    onNewConnection(client: GatewayUser) {
-		const friends: GatewayUser[] = this.gatewayManagerService.getAllClients(); // FIXME: coger solo amigos, no allClients
+    async onNewConnection(client: GatewayUser) {
+		const friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(client.id);
 		const friendsPayload: Friend[] = friends.map((user) => {
 			const friend: Friend = {
 				id: user.id,
@@ -28,14 +28,19 @@ export class ChatService {
 		}
 
 		client.socket.emit('connected-friends', friendsPayload);
-		client.socket.broadcast.emit('friend-online', newClientPayload);
+		friends.forEach(friend => {
+			friend.socket.emit('friend-online', newClientPayload);
+		})
 	}
 
-    onDisconnection(client: GatewayUser) {
+    async onDisconnection(client: GatewayUser) {
+		const friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(client.id);
 		const userPayload: Friend = {
 			id: client.id,
 			username: client.username
 		}
-		client.socket.broadcast.emit('friend-offline', userPayload);
+		friends.forEach(friend => {
+			friend.socket.emit('friend-offline', userPayload);
+		})
 	}
 }
