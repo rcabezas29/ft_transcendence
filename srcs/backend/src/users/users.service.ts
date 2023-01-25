@@ -26,7 +26,7 @@ export class UsersService {
       const { password, ...result } = user;
       return result;
     } catch (e) {
-      throw new BadRequestException();
+      throw new BadRequestException('Failed to create user');
     }
   }
 
@@ -95,7 +95,7 @@ export class UsersService {
     throw new NotFoundException();
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.usersRepository.delete(id);
   }
 }
