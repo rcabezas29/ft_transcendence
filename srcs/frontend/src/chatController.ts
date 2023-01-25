@@ -89,8 +89,11 @@ class ChatController {
 
     setCurrentChat(friendId: number) {
         const chat: Chat | undefined = this.chats[friendId];
-        if (chat)
-        {
+        if (!chat)
+            return;
+        if (this.currentChat === chat)
+            this.currentChat = null;
+        else {
             this.currentChat = chat;
             this.currentChat.notification = false;
         }
