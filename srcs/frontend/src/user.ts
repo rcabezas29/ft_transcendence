@@ -3,6 +3,7 @@ import type { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
 import { chatController } from "./chatController";
+import router from './router';
 
 interface JwtPayload {
     id: number;
@@ -79,7 +80,8 @@ class User {
 		localStorage.removeItem("token");
 		this.token = null;
 		this.socket?.disconnect();
-		this.socket = null
+		this.socket = null;
+		router.replace({ "name": "login" });
 	}
 
 }
