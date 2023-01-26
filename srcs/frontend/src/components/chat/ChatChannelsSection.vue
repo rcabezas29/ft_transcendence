@@ -1,10 +1,39 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+import { channelController } from '@/channelController';
+
+function handleClick(e: Event, channel: string) {
+	channelController.setCurrentChat(channel);
+}
+
+const channelNameInput = ref("");
+
+function createChat(e: Event) {
+	channelController.createChannel(channelNameInput.value);
+	channelNameInput.value = "";
+}
+
 </script>
 
 <template>
 	<div>
 		<div class="chat-divider">
 			Channels
+		</div>
+		<div>
+			<form @submit.prevent="createChat">
+				New channel:
+				<input type="text" v-model="channelNameInput">
+				<button>Create</button>
+			</form>
+		</div>
+		<div class="chat-section">
+			<div @click="(e: Event) => handleClick(e, channel)" v-for="channel in channelController.channels" :key="channel" class="chat-card">
+				<div class="chat-card-name">
+					{{ channel }}
+				</div>
+				<div class="chat-card-notification" :class="{'chat-card-notification-on': channelController.chats[channel].notification}"></div>
+			</div>
 		</div>
 	</div>
 </template>

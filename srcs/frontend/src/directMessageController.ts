@@ -13,7 +13,7 @@ type ChatMap = {
     [id: FriendId]: Chat; 
 }
 
-export class DirectMessageController {
+class DirectMessageController {
     public friends: Friend[] = [];
 	public chats: ChatMap = {};
 
@@ -24,22 +24,22 @@ export class DirectMessageController {
         user.socket?.on('direct-message', (payload: MessagePayload) => {this.receiveDirectMessage(payload)});
     }
 
-    onConnectedFriends(payload: Friend[]) {
+    private onConnectedFriends(payload: Friend[]) {
         this.friends = payload;
         this.friends = this.friends.filter((friend) => friend.id !== user.id);
         this.friends.forEach((friend) => { this.appendChatToChatMap(friend) });
     }
 
-    onFriendConnected(payload: Friend) {
+    private onFriendConnected(payload: Friend) {
         this.friends.push(payload);
         this.appendChatToChatMap(payload);
     }
 
-    onFriendDisconnected(payload: Friend) {
+    private onFriendDisconnected(payload: Friend) {
         this.friends = this.friends.filter((friend) => friend.id != payload.id);
     }
 
-    receiveDirectMessage(payload: MessagePayload) {
+    private receiveDirectMessage(payload: MessagePayload) {
         const fromUsername: Friend | undefined = this.friends.find((friend) => payload.friendId === friend.id);
         if (!fromUsername)
             return;

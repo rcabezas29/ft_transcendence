@@ -3,6 +3,7 @@ import type { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
 import { directMessageController } from './directMessageController';
+import { channelController } from './channelController';
 
 export interface JwtPayload {
     id: number;
@@ -55,6 +56,7 @@ class User {
 	onConnect() {
 		this.socketId = this.socket?.id;
 		directMessageController.setEventsHandlers();
+		channelController.setEventsHandlers();
 	}
 
 	onDisconnect() {

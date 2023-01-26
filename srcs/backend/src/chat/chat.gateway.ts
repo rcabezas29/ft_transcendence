@@ -26,7 +26,7 @@ export class ChatGateway {
 
 	@SubscribeMessage("create-channel")
 	createChannel(client: Socket, channelName: string): void {
-		const user = this.gatewayManagerService.getClientBySocketId(client.id);
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		this.channelsService.createChannel(channelName, user);
 	}
 	

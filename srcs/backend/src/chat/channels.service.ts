@@ -5,10 +5,11 @@ import Channel from "./channel.class";
 @Injectable()
 export class ChannelsService {
 	
-	private channels: Channel[];
+	private channels: Channel[] = [];
 
 	createChannel(channelName: string, owner: GatewayUser): void {
 		this.channels.push(new Channel(channelName, owner));
+		owner.socket.emit('channel-created', channelName);
 	}
 
 }
