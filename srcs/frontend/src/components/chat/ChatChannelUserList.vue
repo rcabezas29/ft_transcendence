@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { currentChat } from '@/currentChat';
 import type { ChatUser } from '@/interfaces';
-import { onUpdated, ref, type Ref } from 'vue';
+import { computed } from '@vue/reactivity';
+import { ref, watch, type Ref } from 'vue';
 import { channelController } from '../../channelController'
 
-const userSelected: Ref<ChatUser | undefined> = ref(channelController.currentChannel?.users[0]);
+const userSelected: Ref<ChatUser | null> = ref(null);
 
 function selectUser(user: ChatUser): void {
 	userSelected.value = user;
@@ -13,13 +15,13 @@ function isUserSelected(user: ChatUser): boolean {
 	return (user === userSelected.value);
 }
 
-function getSelectedUserUsername(): string {
-	const user: ChatUser | undefined = channelController.currentChannel?.users.find(user => isUserSelected(user));
-	if (!user)
-		return "";
+watch(currentChat, () => {
+	userSelected.value = null;
+});
 
-	return (userSelected.value!.username);
-}
+const selectedUsername = computed(() => {
+	return (userSelected.value ? userSelected.value.username : "");
+})
 
 </script>
 
@@ -27,7 +29,7 @@ function getSelectedUserUsername(): string {
 	<div>
 		<h3>Channel Users list</h3>
 		<div>
-			User selected: <b><span>{{ getSelectedUserUsername() }}</span></b>
+			User selected: <b><span>{{ selectedUsername }}</span></b>
 			<br/>
 			<input type="text" placeholder="Amount of time"/><button>Mute / Unmute</button>
 			<br/>
@@ -37,7 +39,7 @@ function getSelectedUserUsername(): string {
 			<br/>
 		</div>
 		<div class="users-list">
-			<div v-for="user in channelController.currentChannel?.users" @click="() => selectUser(user)">
+			<div v-for="user in channelController.currentChannel!.users" @click="() => selectUser(user)" :key="user.id">
 				<div class="channel-user-username" :class="{'user-selected': isUserSelected(user)}" >
 					{{ user.username }}
 				</div>

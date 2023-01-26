@@ -36,7 +36,6 @@ class ChannelController {
 				id: 124,
 				username: "otro"
 			}
-		
 		]
 		}
 		this.channels.push(newChannel);

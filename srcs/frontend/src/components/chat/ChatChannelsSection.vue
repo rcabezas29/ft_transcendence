@@ -9,6 +9,8 @@ function handleClick(e: Event, channel: string) {
 const channelNameInput = ref("");
 
 function createChat(e: Event) {
+	if (channelNameInput.value.length == 0)
+		return;
 	channelController.createChannel(channelNameInput.value);
 	channelNameInput.value = "";
 }
