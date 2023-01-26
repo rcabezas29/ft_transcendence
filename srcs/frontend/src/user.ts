@@ -2,7 +2,7 @@ import { reactive } from 'vue'
 import type { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
-import { chatController } from "./chatController";
+import { directMessageController } from './directMessageController';
 
 export interface JwtPayload {
     id: number;
@@ -54,7 +54,7 @@ class User {
 
 	onConnect() {
 		this.socketId = this.socket?.id;
-		chatController.setEventsHandlers();
+		directMessageController.setEventsHandlers();
 	}
 
 	onDisconnect() {

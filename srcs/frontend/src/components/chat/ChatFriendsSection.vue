@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { chatController } from "../../chatController"
+ 
+import { directMessageController } from '../../directMessageController';
 
 function handleClick(e: Event, friendId: number) {
-	chatController.setCurrentChat(friendId);
+	directMessageController.setCurrentChat(friendId);
 }
 
 </script>
@@ -13,11 +14,11 @@ function handleClick(e: Event, friendId: number) {
 			Friends
 		</div>
 		<div class="chat-section">
-			<div @click="(e: Event) => handleClick(e, friend.id)" v-for="friend in chatController.friends" :key="friend.id" class="chat-card">
+			<div @click="(e: Event) => handleClick(e, friend.id)" v-for="friend in directMessageController.friends" :key="friend.id" class="chat-card">
 				<div class="chat-card-name">
 					{{ friend.username }}
 				</div>
-				<div class="chat-card-notification" :class="{'chat-card-notification-on': chatController.chats[friend.id].notification}"></div>
+				<div class="chat-card-notification" :class="{'chat-card-notification-on': directMessageController.chats[friend.id].notification}"></div>
 			</div>
 		</div>
 	</div>

@@ -28,3 +28,7 @@ client.
 - **On direct message**: When a client sends a direct message to a friend, the user sends to the server a `direct-message` event containing the addressee
 friend and the message. When the server receives the event it checks if the client and the addressee are friends. If that is the case the server sends a 
 `direct-message` event to the addressee with the sender and the message.
+
+## Channels
+
+- **channel-create**: Event from client to server to create a channel

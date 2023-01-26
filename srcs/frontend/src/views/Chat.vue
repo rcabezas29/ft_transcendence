@@ -1,9 +1,10 @@
 <script setup lang="ts">
 
+import { currentChat } from '../currentChat';
+
 import ChatFriendsSection from "../components/chat/ChatFriendsSection.vue";
 import ChatChannelsSection from "../components/chat/ChatChannelsSection.vue";
 import ChatMessages from "@/components/chat/ChatMessages.vue";
-import { chatController } from "@/chatController";
 
 </script>
 
@@ -15,7 +16,7 @@ import { chatController } from "@/chatController";
 			<ChatFriendsSection />
 			<ChatChannelsSection />
 		</div>
-		<ChatMessages v-if="chatController.hasCurrentChat()" />
+		<ChatMessages v-if="currentChat"/>
 	</div>
 
 </template>

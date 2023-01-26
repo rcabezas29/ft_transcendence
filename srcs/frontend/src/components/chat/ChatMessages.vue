@@ -1,14 +1,15 @@
 <script setup lang="ts">
 
 import { type Ref, ref, onUpdated } from 'vue'; 
-import { chatController } from "../../chatController"
+import { directMessageController } from '@/directMessageController';
+import { currentChat } from '@/currentChat';
 
 const messageInput: Ref<string> = ref<string>("");
 
 function onSubmit(e: Event) {
 	if (messageInput.value.length == 0)
 		return;
-	chatController.sendDirectMessage(messageInput.value);
+	directMessageController.sendDirectMessage(messageInput.value);
 	messageInput.value = "";
 }
 
@@ -16,6 +17,16 @@ function scrollDownChatMessages() {
 	const elem = document.querySelector(".chat-messages-container");
 	if (elem)
 		elem.scrollTop = elem.scrollHeight;
+}
+
+function getChatName(): string {
+	if (currentChat.value == null)
+		return "";
+
+	if ( typeof currentChat.value.target == "string")
+		return currentChat.value.target;
+
+	return currentChat.value.target.username;
 }
 
 onUpdated(() => {
@@ -28,9 +39,9 @@ onUpdated(() => {
 	<div>
 		<div class="chat-messages-container">
 			<div class="chat-container-title">
-				{{ chatController.currentChat!.friend.username }}
+				{{ getChatName() }}
 			</div>
-			<div v-for="message in chatController.currentChat!.messages" class="chat-message-container">
+			<div v-for="message in currentChat!.messages" class="chat-message-container">
 				<div class="chat-message-username">
 					{{ message.from }}
 				</div>

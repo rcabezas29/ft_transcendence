@@ -1,21 +1,7 @@
 import { reactive } from "vue";
-import { user } from "./user";
-
-export interface Message {
-	from: string;
-	message: string;
-}
-
-export interface Friend {
-    id: number;
-    username: string;
-}
-
-export interface Chat {
-    friend: Friend;
-    messages: Message[];
-    notification: boolean;
-}
+import type { Chat, Friend, Message } from "./interfaces";
+import { user } from './user';
+import { currentChat } from "./currentChat";
 
 interface MessagePayload {
     friendId: FriendId;
@@ -27,12 +13,11 @@ type ChatMap = {
     [id: FriendId]: Chat; 
 }
 
-class ChatController {
+export class DirectMessageController {
     public friends: Friend[] = [];
-    public chats: ChatMap = {};
-    public currentChat: Chat | null = null;
+	public chats: ChatMap = {};
 
-    setEventsHandlers() {
+	setEventsHandlers() {
         user.socket?.on('connected-friends', (payload: Friend[]) => {this.onConnectedFriends(payload)});
         user.socket?.on('friend-online', (payload: Friend) => {this.onFriendConnected(payload)});
         user.socket?.on('friend-offline', (payload: Friend) => {this.onFriendDisconnected(payload)});
@@ -66,12 +51,12 @@ class ChatController {
         if (friendChat)
             friendChat.messages.push(newMessage);
 
-        if (friendChat !== this.currentChat)
+        if (friendChat !== currentChat.value)
             friendChat.notification = true;
     }
 
     sendDirectMessage(message: string) {
-        const toFriendId: FriendId = this.currentChat!.friend.id;
+        const toFriendId: FriendId = (<Friend>currentChat.value!.target).id;
         const payload: MessagePayload = {
             friendId: toFriendId,
             message: message
@@ -87,33 +72,27 @@ class ChatController {
             friendChat.messages.push(newMessage);
     }
 
-    setCurrentChat(friendId: number) {
-        const chat: Chat | undefined = this.chats[friendId];
-        if (!chat)
-            return;
-        if (this.currentChat === chat)
-            this.currentChat = null;
-        else {
-            this.currentChat = chat;
-            this.currentChat.notification = false;
-        }
-    }
-
-    hasCurrentChat(): boolean {
-        return (this.currentChat !== null);
-    }
+	setCurrentChat(friendId: FriendId) {
+		const chat = this.chats[friendId];
+		if (chat === currentChat.value)
+			currentChat.value = null;
+		else {
+			currentChat.value = chat;
+			chat.notification = false;
+		}
+	}
 
     private appendChatToChatMap(friend: Friend): void {
         if (this.chats && !this.chats[friend.id])
         {
             const newChat: Chat = {
-                friend: friend,
+                target: friend,
                 messages: [],
                 notification: false
             }
             this.chats[friend.id] = newChat;
         }
     }
-}
+};
 
-export const chatController = reactive<ChatController>(new ChatController);
+export const directMessageController = reactive<DirectMessageController>(new DirectMessageController());

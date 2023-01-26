@@ -1,14 +1,16 @@
-import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { channel } from 'diagnostics_channel';
 import { Socket } from 'socket.io';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
+import { ChannelsService } from './channels.service';
 import { MessagePayload } from './interfaces/message-payload.interface';
-import { Friend } from './interfaces/friend.interface';
 
 @WebSocketGateway({cors: true})
 export class ChatGateway {
 	constructor(
 		private gatewayManagerService: GatewayManagerService,
+		private channelsService: ChannelsService
 	) {}
 	 
 	@SubscribeMessage("direct-message")
@@ -21,5 +23,12 @@ export class ChatGateway {
 		}
 		toUser.socket.emit('direct-message', payloadToSend);
 	}
+
+	@SubscribeMessage("create-channel")
+	createChannel(client: Socket, channelName: string): void {
+		const user = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.createChannel(channelName, user);
+	}
+	
 
 }

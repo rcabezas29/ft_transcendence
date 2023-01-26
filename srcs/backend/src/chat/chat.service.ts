@@ -5,6 +5,7 @@ import { Friend } from './interfaces/friend.interface';
 
 @Injectable()
 export class ChatService {
+
     constructor(
         private gatewayManagerService: GatewayManagerService
     ) {
