@@ -3,7 +3,7 @@
 import { type Ref, ref, onUpdated } from 'vue'; 
 import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
-import type { ChatUser } from '@/interfaces/friend.interface';
+import type { ChatUser } from '../../interfaces';
 
 const messageInput: Ref<string> = ref<string>("");
 

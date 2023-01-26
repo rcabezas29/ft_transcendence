@@ -29,6 +29,5 @@ export class ChatGateway {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		this.channelsService.createChannel(channelName, user);
 	}
-	
 
 }

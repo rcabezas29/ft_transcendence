@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import type { Chat, Friend, Message } from "./interfaces";
+import type { Chat, ChatUser as Friend, Message } from "./interfaces";
 import { user } from './user';
 import { currentChat } from "./currentChat";
 

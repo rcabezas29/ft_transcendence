@@ -1,4 +1,4 @@
-import type { ChatUser } from "./friend.interface";
+import type { ChatUser } from "./chat-user.interface";
 import type { Message } from "./message.interface";
 
 export interface Chat {
