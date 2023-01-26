@@ -2,7 +2,8 @@
 
 import { type Ref, ref, onUpdated } from 'vue'; 
 import { directMessageController } from '@/directMessageController';
-import { currentChat } from '@/currentChat';
+import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
+import type { ChatUser } from '@/interfaces/friend.interface';
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -20,13 +21,13 @@ function scrollDownChatMessages() {
 }
 
 function getChatName(): string {
-	if (currentChat.value == null)
-		return "";
-
-	if ( typeof currentChat.value.target == "string")
-		return currentChat.value.target;
-
-	return currentChat.value.target.username;
+	if (currentChat.value) {
+		if (chatIsChannel(currentChat.value))
+			return currentChat.value.target as string;
+		else if (chatIsDirectMessage(currentChat.value))
+			return (<ChatUser>currentChat.value.target).username;
+	}
+	return ""
 }
 
 onUpdated(() => {

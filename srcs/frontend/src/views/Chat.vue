@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
-import { currentChat } from '../currentChat';
+import { currentChat, chatIsChannel } from '../currentChat';
 
 import ChatFriendsSection from "../components/chat/ChatFriendsSection.vue";
 import ChatChannelsSection from "../components/chat/ChatChannelsSection.vue";
 import ChatMessages from "@/components/chat/ChatMessages.vue";
+import ChatChannelUserList from '@/components/chat/ChatChannelUserList.vue';
 
 </script>
 
@@ -16,7 +17,10 @@ import ChatMessages from "@/components/chat/ChatMessages.vue";
 			<ChatFriendsSection />
 			<ChatChannelsSection />
 		</div>
-		<ChatMessages v-if="currentChat"/>
+		<div v-if="currentChat" class="chat-messages-container">
+			<ChatMessages />
+			<ChatChannelUserList v-if="chatIsChannel(currentChat)"/>
+		</div>
 	</div>
 
 </template>
@@ -24,6 +28,10 @@ import ChatMessages from "@/components/chat/ChatMessages.vue";
 <style scoped>
 
 	.chat-container {
+		display: flex;
+	}
+
+	.chat-messages-container {
 		display: flex;
 	}
 

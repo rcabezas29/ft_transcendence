@@ -28,11 +28,11 @@ function createChat(e: Event) {
 			</form>
 		</div>
 		<div class="chat-section">
-			<div @click="(e: Event) => handleClick(e, channel)" v-for="channel in channelController.channels" :key="channel" class="chat-card">
+			<div @click="(e: Event) => handleClick(e, channel.name)" v-for="channel in channelController.channels" :key="channel.name" class="chat-card">
 				<div class="chat-card-name">
-					{{ channel }}
+					{{ channel.name }}
 				</div>
-				<div class="chat-card-notification" :class="{'chat-card-notification-on': channelController.chats[channel].notification}"></div>
+				<div class="chat-card-notification" :class="{'chat-card-notification-on': channelController.chats[channel.name].notification}"></div>
 			</div>
 		</div>
 	</div>

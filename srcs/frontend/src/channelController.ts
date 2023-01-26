@@ -1,7 +1,13 @@
 import { reactive } from "vue";
 import { currentChat } from "./currentChat";
 import type { Chat } from "./interfaces";
+import type { ChatUser } from "./interfaces/friend.interface";
 import { user } from "./user";
+
+interface Channel {
+	name: string;
+	users: ChatUser[];
+}
 
 type ChannelName = string;
 type ChannelMap = {
@@ -9,7 +15,7 @@ type ChannelMap = {
 }
 
 class ChannelController {
-	public channels: ChannelName[] = [];
+	public channels: Channel[] = [];
 	public chats: ChannelMap = {};
 
 	setEventsHandlers() {
@@ -21,7 +27,14 @@ class ChannelController {
 	}
 
 	onChannelCreated(name: ChannelName) {
-		this.channels.push(name);
+		const newChannel = {
+			name: name,
+			users: [{
+				id: user.id,
+				username: user.username
+			}]
+		}
+		this.channels.push(newChannel);
 		this.appendChatToChatMap(name);
 	}
 
