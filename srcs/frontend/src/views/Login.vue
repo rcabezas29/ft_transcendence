@@ -1,4 +1,5 @@
 <script setup lang="ts">
+	import router from "../router";
 	import { ref } from "vue"
 	import { user } from "../user";
 
@@ -33,6 +34,7 @@
 		message.value = "Success";
 		messageClass.value = "success-message";
 
+		router.replace({ "name": "home"});
 	}
 	
 </script>

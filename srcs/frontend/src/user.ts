@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
 import { directMessageController } from './directMessageController';
 import { channelController } from './channelController';
+import router from './router';
 
 export interface JwtPayload {
     id: number;
@@ -100,7 +101,8 @@ class User {
 		localStorage.removeItem("token");
 		this.token = null;
 		this.socket?.disconnect();
-		this.socket = null
+		this.socket = null;
+		router.replace({ "name": "login" });
 	}
 
 }
