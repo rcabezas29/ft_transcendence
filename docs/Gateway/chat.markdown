@@ -32,3 +32,5 @@ friend and the message. When the server receives the event it checks if the clie
 ## Channels
 
 - **channel-create**: Event from client to server to create a channel
+- **channel-created**: Event from server to client to notify the creator of a channel that the creation was successful.
+- **new-channel**: Event from server to client when a new channel is created (but the client did not create it), so that the client can include it in their list of `allChannels`.

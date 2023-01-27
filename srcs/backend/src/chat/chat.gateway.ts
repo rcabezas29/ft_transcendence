@@ -1,5 +1,4 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { channel } from 'diagnostics_channel';
 import { Socket } from 'socket.io';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';

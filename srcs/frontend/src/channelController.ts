@@ -10,18 +10,25 @@ type ChannelMap = {
 
 class ChannelController {
 	public channels: Channel[] = [];
+	public allChannels: Channel[] = [];
 	public chats: ChannelMap = {};
 	public currentChannel: Channel | null = null;
 
 	setEventsHandlers() {
-		user.socket?.on("channel-created", (channelName) => this.onChannelCreated(channelName))
+        user.socket?.on('all-channels', (payload: Channel[]) => {this.onAllChannels(payload)});
+		user.socket?.on('channel-created', (channelName: ChannelName) => this.onChannelCreated(channelName))
+		user.socket?.on('new-channel', (channel: Channel) => this.onNewChannel(channel))
 	}
 
 	createChannel(name: ChannelName) {
 		user.socket?.emit('create-channel', name);
 	}
 
-	onChannelCreated(name: ChannelName) {
+	private onAllChannels(payload: Channel[]) {
+		this.allChannels = payload;
+	}
+
+	private onChannelCreated(name: ChannelName) {
 		const newChannel = {
 			name: name,
 			users: [{
@@ -30,12 +37,17 @@ class ChannelController {
 			}],
 			owner: user,
 			admins: [user],
-			bannedUsers: [],
-			mutedUsers: [],
+			//bannedUsers: [],
+			//mutedUsers: [],
 			password: ""
 		}
 		this.channels.push(newChannel);
+		this.allChannels.push(newChannel);
 		this.appendChatToChatMap(name);
+	}
+
+	private onNewChannel(channel: Channel) {
+		this.allChannels.push(channel);
 	}
 
 	setCurrentChat(channelName: ChannelName) {
@@ -60,13 +72,13 @@ class ChannelController {
 		return channel.admins.includes(channelUser);
 	}
 
-	userIsBanned(channel: Channel, channelUser: ChatUser = user): boolean {
-		return channel.bannedUsers.includes(channelUser);
-	}
+	//userIsBanned(channel: Channel, channelUser: ChatUser = user): boolean {
+	//	return channel.bannedUsers.includes(channelUser);
+	//}
 
-	userIsMuted(channel: Channel, channelUser: ChatUser = user): boolean {
-		return channel.mutedUsers.includes(channelUser);
-	}
+	//userIsMuted(channel: Channel, channelUser: ChatUser = user): boolean {
+	//	return channel.mutedUsers.includes(channelUser);
+	//}
 
 	private appendChatToChatMap(channelName: ChannelName): void {
         if (this.chats && !this.chats[channelName])
