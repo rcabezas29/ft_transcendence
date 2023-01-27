@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { channelController } from '@/channelController';
+import type { Channel } from '@/interfaces';
 
 function handleClick(e: Event, channel: string) {
 	channelController.setCurrentChat(channel);
 }
 
 const channelNameInput = ref("");
+
+const channelSelected: Ref<Channel | null> = ref(null);
 
 function createChat(e: Event) {
 	if (channelNameInput.value.length == 0)
@@ -15,12 +18,14 @@ function createChat(e: Event) {
 	channelNameInput.value = "";
 }
 
+
+
 </script>
 
 <template>
 	<div>
 		<div class="chat-divider">
-			Channels
+			My Channels
 		</div>
 		<div>
 			<form @submit.prevent="createChat">
@@ -37,9 +42,23 @@ function createChat(e: Event) {
 				<div class="chat-card-notification" :class="{'chat-card-notification-on': channelController.chats[channel.name].notification}"></div>
 			</div>
 		</div>
+		<div class="chat-divider">
+			All Channels
+		</div>
+		<div class="channels-list">
+			<div v-for="channel in channelController.channels" @click="() => channelSelected = channel" :key="channel.name">
+				<div class="channel-name" :class="{'channel-selected': channelSelected === channel}" >
+					{{ channel.name }}
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
 <style scoped lang="scss">
 	@import "./chatSectionStyles.scss";
+
+	.channel-selected {
+		background-color: grey;
+	}
 </style>

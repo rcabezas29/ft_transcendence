@@ -27,16 +27,7 @@ class ChannelController {
 			users: [{
 				id: user.id,
 				username: user.username
-			},
-			{
-				id: 123,
-				username: "ana"
-			},
-			{
-				id: 124,
-				username: "otro"
-			}
-			],
+			}],
 			owner: user,
 			admins: [user],
 			bannedUsers: [],
