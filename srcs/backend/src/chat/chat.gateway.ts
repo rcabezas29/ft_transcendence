@@ -1,10 +1,10 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { channel } from 'diagnostics_channel';
 import { Socket } from 'socket.io';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
+import Channel from './channel.class';
 import { ChannelsService } from './channels.service';
-import { MessagePayload } from './interfaces/message-payload.interface';
+import { ChannelMessagePayload, MessagePayload } from './interfaces/message-payload.interface';
 
 @WebSocketGateway({cors: true})
 export class ChatGateway {
@@ -29,5 +29,12 @@ export class ChatGateway {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		this.channelsService.createChannel(channelName, user);
 	}
+
+	@SubscribeMessage("channel-message")
+	channelMessage(client: Socket, payload: ChannelMessagePayload): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.channelMessage(user, payload);
+	}
+
 
 }

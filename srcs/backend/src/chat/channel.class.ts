@@ -8,7 +8,7 @@ type UserIdSanctionTimeMap = {
 
 export default class Channel {
 
-	private name: string;
+	public name: string;
 	private users: GatewayUser[] = [];
 	private owner: GatewayUser;
 	private admins: GatewayUser[] = [];
@@ -52,6 +52,10 @@ export default class Channel {
 
 	unmuteUser(): void {
 
+	}
+
+	hasUser(user: GatewayUser): GatewayUser | null {
+		return this.users.find((channelUser) => channelUser == user);
 	}
 
 }

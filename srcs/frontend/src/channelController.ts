@@ -1,6 +1,7 @@
 import { reactive } from "vue";
 import { currentChat } from "./currentChat";
 import type { Chat, Channel, ChatUser } from "./interfaces";
+import type { ChannelMessage, Message } from "./interfaces/message.interface";
 import { user } from "./user";
 
 type ChannelName = string;
@@ -14,7 +15,8 @@ class ChannelController {
 	public currentChannel: Channel | null = null;
 
 	setEventsHandlers() {
-		user.socket?.on("channel-created", (channelName) => this.onChannelCreated(channelName))
+		user.socket?.on("channel-created", (channelName) => this.onChannelCreated(channelName));
+		user.socket?.on("channel-message", (message) => this.onChannelMessage(message));
 	}
 
 	createChannel(name: ChannelName) {
@@ -45,6 +47,15 @@ class ChannelController {
 		}
 		this.channels.push(newChannel);
 		this.appendChatToChatMap(name);
+	}
+
+	onChannelMessage(payload: ChannelMessage) {
+		const chat: Chat = this.chats[payload.channel];
+		const newMessage: Message = {
+			from: payload.from,
+			message: payload.message
+		};
+		chat.messages.push(newMessage);
 	}
 
 	setCurrentChat(channelName: ChannelName) {
