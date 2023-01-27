@@ -10,8 +10,6 @@ interface ChannelPayload {
 	users: ChatUser[];
 	owner: ChatUser;
 	admins: ChatUser[];
-	//bannedUsers: ChatUser[];
-	//mutedUsers: ChatUser[];
 	password: string;
 }
 
@@ -59,8 +57,6 @@ export class ChannelsService {
 			users: channel.users.map((user) => this.chatService.gatewayUserToChatUser(user)),
 			owner: this.chatService.gatewayUserToChatUser(channel.owner),
 			admins: channel.admins.map((user) => this.chatService.gatewayUserToChatUser(user)),
-			//bannedUsers: channel.bannedUsers,
-			//mutedUsers: channel.mutedUsers,
 			password: channel.password
 		};
 		return payload;

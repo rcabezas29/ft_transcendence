@@ -18,8 +18,6 @@ function createChat(e: Event) {
 	channelNameInput.value = "";
 }
 
-
-
 </script>
 
 <template>

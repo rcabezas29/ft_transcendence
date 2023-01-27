@@ -37,8 +37,6 @@ class ChannelController {
 			}],
 			owner: user,
 			admins: [user],
-			//bannedUsers: [],
-			//mutedUsers: [],
 			password: ""
 		}
 		this.channels.push(newChannel);
@@ -71,14 +69,6 @@ class ChannelController {
 	userIsChannelAdmin(channel: Channel, channelUser: ChatUser = user): boolean {
 		return channel.admins.includes(channelUser);
 	}
-
-	//userIsBanned(channel: Channel, channelUser: ChatUser = user): boolean {
-	//	return channel.bannedUsers.includes(channelUser);
-	//}
-
-	//userIsMuted(channel: Channel, channelUser: ChatUser = user): boolean {
-	//	return channel.mutedUsers.includes(channelUser);
-	//}
 
 	private appendChatToChatMap(channelName: ChannelName): void {
         if (this.chats && !this.chats[channelName])
