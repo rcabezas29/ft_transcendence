@@ -5,7 +5,5 @@ export interface Channel {
 	users: ChatUser[];
 	owner: ChatUser;
 	admins: ChatUser[];
-	//bannedUsers: ChatUser[];
-	//mutedUsers: ChatUser[];
 	password: string;
 }

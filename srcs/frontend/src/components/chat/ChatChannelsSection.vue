@@ -18,6 +18,11 @@ function createChat(e: Event) {
 	channelNameInput.value = "";
 }
 
+function joinChannel(): void {
+	if (channelSelected.value)
+		channelController.joinChannel(channelSelected.value.name);
+}
+
 </script>
 
 <template>
@@ -49,6 +54,9 @@ function createChat(e: Event) {
 					{{ channel.name }}
 				</div>
 			</div>
+		</div>
+		<div v-if="channelSelected && !channelController.userIsMemberOfChannel(channelSelected)">
+			<button @click="joinChannel">join channel</button>
 		</div>
 	</div>
 </template>

@@ -16,37 +16,44 @@ class ChannelController {
 
 	setEventsHandlers() {
         user.socket?.on('all-channels', (payload: Channel[]) => {this.onAllChannels(payload)});
-		user.socket?.on('channel-created', (channelName: ChannelName) => this.onChannelCreated(channelName))
-		user.socket?.on('new-channel', (channel: Channel) => this.onNewChannel(channel))
+		user.socket?.on('channel-created', (channel: Channel) => this.onChannelCreated(channel));
+		user.socket?.on('new-channel', (channel: Channel) => this.onNewChannel(channel));
+		user.socket?.on('channel-joined', (channel: Channel) => this.onChannelJoined(channel));
+		// COn eSTO QUIERO AVISAR AL RESTO DE GENTE DE QUE ALGUIEN NUEVO SE HA UNIDO AL CANAL, PERO NO FUNCIONA: 
+		//user.socket?.on('new-user-joined', (channel: Channel) => this.onNewUserJoined(channel));
 	}
 
 	createChannel(name: ChannelName) {
 		user.socket?.emit('create-channel', name);
 	}
 
+	joinChannel(channelName: ChannelName) {
+		user.socket?.emit('join-channel', channelName);
+	}
+
 	private onAllChannels(payload: Channel[]) {
 		this.allChannels = payload;
 	}
 
-	private onChannelCreated(name: ChannelName) {
-		const newChannel = {
-			name: name,
-			users: [{
-				id: user.id,
-				username: user.username
-			}],
-			owner: user,
-			admins: [user],
-			password: ""
-		}
+	private onChannelCreated(newChannel: Channel) {
 		this.channels.push(newChannel);
 		this.allChannels.push(newChannel);
-		this.appendChatToChatMap(name);
+		this.appendChatToChatMap(newChannel.name);
 	}
 
 	private onNewChannel(channel: Channel) {
 		this.allChannels.push(channel);
 	}
+
+	private onChannelJoined(channel: Channel) {
+		this.channels.push(channel);
+		this.appendChatToChatMap(channel.name);
+	}
+
+	//private onNewUserJoined(channel: Channel) {
+	//	const index = this.channels.findIndex(c => c.name == channel.name);
+	//	this.channels[index] = channel;
+	//}
 
 	setCurrentChat(channelName: ChannelName) {
 		const chat = this.chats[channelName];
@@ -68,6 +75,16 @@ class ChannelController {
 
 	userIsChannelAdmin(channel: Channel, channelUser: ChatUser = user): boolean {
 		return channel.admins.includes(channelUser);
+	}
+
+	userIsMemberOfChannel(channel: Channel, channelUser: ChatUser = user): boolean {
+		// POR QUE ESTAS COSAS NO IMPRIMEN LO MISMO????
+		//console.log(this.channels.includes(channel))
+		//console.log(channel.users.includes(channelUser))
+		//console.log(channel.users.find(user => user == channelUser))
+		if (this.channels.includes(channel))
+			return true;
+		return false;
 	}
 
 	private appendChatToChatMap(channelName: ChannelName): void {

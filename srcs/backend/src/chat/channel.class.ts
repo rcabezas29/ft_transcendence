@@ -20,6 +20,7 @@ export default class Channel {
 	constructor(name: string, owner: GatewayUser) {
 		this._name = name;
 		this._owner = owner;
+		this._admins.push(owner);
 		this._users.push(owner);
 	}
 
@@ -55,17 +56,15 @@ export default class Channel {
 
 	}
 
-	//addUser(user: GatewayUser): void {
-	//	this._users.push(user);
-	//}
+	addUser(user: GatewayUser): void {
+		this._users.push(user);
+	}
 
 	removeUser(user: GatewayUser): void {
 		if (this._owner === user && this._users.length > 1)
 			this._owner = this._users[1];
 		this._users = this._users.filter((u) => u != user);
 		this.unsetAdmin(user);
-		//unban
-		//unmute
 	}
 
 	get name(): string {

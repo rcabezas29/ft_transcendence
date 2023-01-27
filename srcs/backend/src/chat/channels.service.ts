@@ -45,10 +45,19 @@ export class ChannelsService {
 		const newChannel: Channel = new Channel(channelName, owner);
 
 		this.channels.push(newChannel);
-		owner.socket.emit('channel-created', channelName);
+		owner.socket.emit('channel-created', this.channelToChannelPayload(newChannel));
 
 		const channelPayload: ChannelPayload = this.channelToChannelPayload(newChannel);
 		owner.socket.broadcast.emit('new-channel', channelPayload);
+	}
+
+	userJoinChannel(user: GatewayUser, channelName: string): void {
+		const channel: Channel = this.channels.find(channel => channel.name === channelName);
+		channel.addUser(user);
+		user.socket.emit('channel-joined', this.channelToChannelPayload(channel));
+
+		// must send to channel members, not broadcast to everyone
+		//user.socket.broadcast.emit('new-user-joined', this.channelToChannelPayload(channel));
 	}
 
 	private channelToChannelPayload(channel: Channel): ChannelPayload {
