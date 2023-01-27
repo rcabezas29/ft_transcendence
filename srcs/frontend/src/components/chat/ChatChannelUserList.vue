@@ -31,12 +31,15 @@ const selectedUsername = computed(() => {
 		<div>
 			User selected: <b><span>{{ selectedUsername }}</span></b>
 			<br/>
-			<input type="text" placeholder="Amount of time"/><button>Mute / Unmute</button>
-			<br/>
-			<input type="text" placeholder="Amount of time"/><button>Ban / Unban</button>
-			<br/>
-			<button>Make / Revert Admin</button>
-			<br/>
+			<div v-if="channelController.userIsChannelAdmin(channelController.currentChannel!)">
+				<input type="text" placeholder="Amount of time"/><button>Mute / Unmute</button>
+			</div>
+			<div v-if="channelController.userIsChannelAdmin(channelController.currentChannel!)">
+				<input type="text" placeholder="Amount of time"/><button>Ban / Unban</button>
+			</div>
+			<div v-if="channelController.userIsChannelOwner(channelController.currentChannel!)">
+				<button >Make / Revert Admin</button>
+			</div>
 		</div>
 		<div class="users-list">
 			<div v-for="user in channelController.currentChannel!.users" @click="() => selectUser(user)" :key="user.id">
@@ -53,6 +56,7 @@ const selectedUsername = computed(() => {
 
 .users-list {
 	border: 1px solid black;
+	margin-top: 20px;
 }
 
 .user-selected {
