@@ -56,8 +56,9 @@ export class ChannelsService {
 		channel.addUser(user);
 		user.socket.emit('channel-joined', this.channelToChannelPayload(channel));
 
-		// must send to channel members, not broadcast to everyone
-		//user.socket.broadcast.emit('new-user-joined', this.channelToChannelPayload(channel));
+		//FIXME: must send to channel members, not broadcast to everyone
+		// should the event using socket.io rooms
+		user.socket.broadcast.emit('new-user-joined', this.channelToChannelPayload(channel));
 	}
 
 	private channelToChannelPayload(channel: Channel): ChannelPayload {

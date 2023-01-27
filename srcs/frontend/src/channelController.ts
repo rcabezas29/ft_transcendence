@@ -20,7 +20,7 @@ class ChannelController {
 		user.socket?.on('new-channel', (channel: Channel) => this.onNewChannel(channel));
 		user.socket?.on('channel-joined', (channel: Channel) => this.onChannelJoined(channel));
 		// COn eSTO QUIERO AVISAR AL RESTO DE GENTE DE QUE ALGUIEN NUEVO SE HA UNIDO AL CANAL, PERO NO FUNCIONA: 
-		//user.socket?.on('new-user-joined', (channel: Channel) => this.onNewUserJoined(channel));
+		user.socket?.on('new-user-joined', (channel: Channel) => this.onNewUserJoined(channel));
 	}
 
 	createChannel(name: ChannelName) {
@@ -50,10 +50,11 @@ class ChannelController {
 		this.appendChatToChatMap(channel.name);
 	}
 
-	//private onNewUserJoined(channel: Channel) {
-	//	const index = this.channels.findIndex(c => c.name == channel.name);
-	//	this.channels[index] = channel;
-	//}
+	private onNewUserJoined(channel: Channel) {
+		const index = this.channels.findIndex(c => c.name == channel.name);
+		this.channels[index] = channel;
+		this.currentChannel = this.channels[index];
+	}
 
 	setCurrentChat(channelName: ChannelName) {
 		const chat = this.chats[channelName];
