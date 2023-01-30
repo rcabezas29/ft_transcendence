@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, type Ref } from 'vue';
+import { ref } from 'vue';
 import { channelController } from '@/channelController';
-import type { Channel } from '@/interfaces';
+import ChatAllChannelsList from './ChatAllChannelsList.vue';
 
 function handleClick(e: Event, channel: string) {
 	channelController.setCurrentChat(channel);
@@ -9,20 +9,12 @@ function handleClick(e: Event, channel: string) {
 
 const channelNameInput = ref("");
 
-const channelSelected: Ref<Channel | null> = ref(null);
-
 function createChat(e: Event) {
 	if (channelNameInput.value.length == 0)
 		return;
 	channelController.createChannel(channelNameInput.value);
 	channelNameInput.value = "";
 }
-
-function joinChannel(): void {
-	if (channelSelected.value)
-		channelController.joinChannel(channelSelected.value.name);
-}
-
 </script>
 
 <template>
@@ -48,23 +40,10 @@ function joinChannel(): void {
 		<div class="chat-divider">
 			All Channels
 		</div>
-		<div class="channels-list">
-			<div v-for="channel in channelController.allChannels" @click="() => channelSelected = channel" :key="channel.name">
-				<div class="channel-name" :class="{'channel-selected': channelSelected === channel}" >
-					{{ channel.name }}
-				</div>
-			</div>
-		</div>
-		<div v-if="channelSelected && !channelController.userIsMemberOfChannel(channelSelected)">
-			<button @click="joinChannel">join channel</button>
-		</div>
+		<ChatAllChannelsList />
 	</div>
 </template>
 
 <style scoped lang="scss">
 	@import "./chatSectionStyles.scss";
-
-	.channel-selected {
-		background-color: grey;
-	}
 </style>

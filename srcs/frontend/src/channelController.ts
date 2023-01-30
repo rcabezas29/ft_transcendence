@@ -12,7 +12,6 @@ class ChannelController {
 	public channels: Channel[] = [];
 	public allChannels: Channel[] = [];
 	public chats: ChannelMap = {};
-	public currentChannel: Channel | null = null;
 
 	setEventsHandlers() {
         user.socket?.on('all-channels', (payload: Channel[]) => {this.onAllChannels(payload)});
@@ -53,23 +52,28 @@ class ChannelController {
 	private onNewUserJoined(channel: Channel) {
 		const index = this.channels.findIndex(c => c.name == channel.name);
 		this.channels[index] = channel;
-		this.currentChannel = this.channels[index];
+		//if (this.chats[channel.name] === currentChat.value)
+		//	currentChat.value = 
 	}
 
 	setCurrentChat(channelName: ChannelName) {
 		const chat = this.chats[channelName];
 		if (chat === currentChat.value)
-		{
 			currentChat.value = null;
-			this.currentChannel = null;
-		}
 		else {
 			currentChat.value = chat;
 			chat.notification = false;
-			this.currentChannel = this.channels.find(channel => channel.name === currentChat.value?.target) as Channel;
 		}
 	}
 
+	findChannelFromChannelName(channelName: ChannelName): Channel | null {
+		const channel = this.channels.find((c) => c.name === channelName);
+		if (channel)
+			return channel;
+		return null;
+	}
+
+	//FIXME: user != ChatUser
 	userIsChannelOwner(channel: Channel, channelUser: ChatUser = user): boolean {
 		return (channel.owner === channelUser);
 	}
@@ -78,12 +82,9 @@ class ChannelController {
 		return channel.admins.includes(channelUser);
 	}
 
-	userIsMemberOfChannel(channel: Channel, channelUser: ChatUser = user): boolean {
-		// POR QUE ESTAS COSAS NO IMPRIMEN LO MISMO????
-		//console.log(this.channels.includes(channel))
-		//console.log(channel.users.includes(channelUser))
-		//console.log(channel.users.find(user => user == channelUser))
-		if (this.channels.includes(channel))
+	userIsMemberOfChannel(channelName: ChannelName, channelUser: ChatUser = {id: user.id, username: user.username}): boolean {
+		const channel = this.findChannelFromChannelName(channelName);
+		if (channel && channel.users.find(u => u.id == channelUser.id))
 			return true;
 		return false;
 	}
