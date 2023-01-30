@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { channelController } from '@/channelController';
 import ChatAllChannelsList from './ChatAllChannelsList.vue';
+import type { Channel } from '@/interfaces';
 
 function handleClick(e: Event, channel: string) {
 	channelController.setCurrentChat(channel);
@@ -15,6 +16,17 @@ function createChat(e: Event) {
 	channelController.createChannel(channelNameInput.value);
 	channelNameInput.value = "";
 }
+
+const channels = computed(() => {
+	const channels: Channel[] = [];
+	for (let channel in channelController.channels)
+	{
+		if (channelController.channels[channel].chat)
+			channels.push(channelController.channels[channel]);
+	}
+	return (channels);
+})
+
 </script>
 
 <template>
@@ -30,11 +42,11 @@ function createChat(e: Event) {
 			</form>
 		</div>
 		<div class="chat-section">
-			<div @click="(e: Event) => handleClick(e, channel.name)" v-for="channel in channelController.channels" :key="channel.name" class="chat-card">
+			<div @click="(e: Event) => handleClick(e, channel.name)" v-for="channel in channels" :key="channel.name" class="chat-card">
 				<div class="chat-card-name">
 					{{ channel.name }}
 				</div>
-				<div class="chat-card-notification" :class="{'chat-card-notification-on': channelController.chats[channel.name].notification}"></div>
+				<div class="chat-card-notification" :class="{'chat-card-notification-on': channel.chat!.notification}"></div>
 			</div>
 		</div>
 		<div class="chat-divider">

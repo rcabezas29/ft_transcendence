@@ -13,7 +13,7 @@ if (channelSelected.value)
 
 <template>
 	<div class="channels-list">
-		<div v-for="channel in channelController.allChannels" @click="() => channelSelected = channel.name" :key="channel.name">
+		<div v-for="channel in channelController.channels" @click="() => channelSelected = channel.name" :key="channel.name">
 			<div class="channel-name" :class="{'channel-selected': channelSelected === channel.name}" >
 				{{ channel.name }}
 			</div>

@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { chatIsChannel, currentChat } from '@/currentChat';
-import type { Channel, ChatUser } from '@/interfaces';
+import type { ChatUser } from '@/interfaces';
 import { computed } from '@vue/reactivity';
 import { ref, watch, type Ref } from 'vue';
 import { channelController } from '../../channelController'
 
 const userSelected: Ref<ChatUser | null> = ref(null);
-
-const currentChannel: Ref<Channel | null> = ref(null);
 
 function selectUser(user: ChatUser): void {
 	userSelected.value = user;
@@ -19,9 +17,7 @@ function isUserSelected(user: ChatUser): boolean {
 
 watch(currentChat, () => {
 	userSelected.value = null;
-	if (currentChat.value && chatIsChannel(currentChat.value))
-		currentChannel.value = channelController.findChannelFromChannelName(currentChat.value.target as string);
-}, {immediate: true});
+});
 
 const selectedUsername = computed(() => {
 	return (userSelected.value ? userSelected.value.username : "");
@@ -30,23 +26,23 @@ const selectedUsername = computed(() => {
 </script>
 
 <template>
-	<div v-if="currentChannel">
+	<div v-if="currentChat && chatIsChannel(currentChat)">
 		<h3>Channel Users list</h3>
 		<div>
 			User selected: <b><span>{{ selectedUsername }}</span></b>
 			<br/>
-			<div v-if="channelController.userIsChannelAdmin(currentChannel)">
+			<div v-if="channelController.userIsChannelAdmin(channelController.channels[currentChat.target as string])">
 				<input type="text" placeholder="Amount of time"/><button>Mute / Unmute</button>
 			</div>
-			<div v-if="channelController.userIsChannelAdmin(currentChannel)">
+			<div v-if="channelController.userIsChannelAdmin(channelController.channels[currentChat.target as string])">
 				<input type="text" placeholder="Amount of time"/><button>Ban / Unban</button>
 			</div>
-			<div v-if="channelController.userIsChannelOwner(currentChannel)">
+			<div v-if="channelController.userIsChannelOwner(channelController.channels[currentChat.target as string])">
 				<button >Make / Revert Admin</button>
 			</div>
 		</div>
 		<div class="users-list">
-			<div v-for="user in currentChannel.users" @click="() => selectUser(user)" :key="user.id">
+			<div v-for="user in channelController.channels[currentChat.target as string].users" @click="() => selectUser(user)" :key="user.id">
 				<div class="channel-user-username" :class="{'user-selected': isUserSelected(user)}" >
 					{{ user.username }}
 				</div>

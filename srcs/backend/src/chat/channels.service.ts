@@ -10,7 +10,7 @@ interface ChannelPayload {
 	users: ChatUser[];
 	owner: ChatUser;
 	admins: ChatUser[];
-	password: string;
+	chat: null;
 }
 
 @Injectable()
@@ -67,7 +67,7 @@ export class ChannelsService {
 			users: channel.users.map((user) => this.chatService.gatewayUserToChatUser(user)),
 			owner: this.chatService.gatewayUserToChatUser(channel.owner),
 			admins: channel.admins.map((user) => this.chatService.gatewayUserToChatUser(user)),
-			password: channel.password
+			chat: null
 		};
 		return payload;
 	}

@@ -5,20 +5,17 @@ import { user } from "./user";
 
 type ChannelName = string;
 type ChannelMap = {
-    [id: ChannelName]: Chat; 
+	[id: ChannelName]: Channel;
 }
 
 class ChannelController {
-	public channels: Channel[] = [];
-	public allChannels: Channel[] = [];
-	public chats: ChannelMap = {};
+	public channels: ChannelMap = {};
 
 	setEventsHandlers() {
         user.socket?.on('all-channels', (payload: Channel[]) => {this.onAllChannels(payload)});
 		user.socket?.on('channel-created', (channel: Channel) => this.onChannelCreated(channel));
 		user.socket?.on('new-channel', (channel: Channel) => this.onNewChannel(channel));
 		user.socket?.on('channel-joined', (channel: Channel) => this.onChannelJoined(channel));
-		// COn eSTO QUIERO AVISAR AL RESTO DE GENTE DE QUE ALGUIEN NUEVO SE HA UNIDO AL CANAL, PERO NO FUNCIONA: 
 		user.socket?.on('new-user-joined', (channel: Channel) => this.onNewUserJoined(channel));
 	}
 
@@ -31,33 +28,33 @@ class ChannelController {
 	}
 
 	private onAllChannels(payload: Channel[]) {
-		this.allChannels = payload;
+		payload.forEach((channel) => {
+			this.channels[channel.name] = channel;
+		});
 	}
 
 	private onChannelCreated(newChannel: Channel) {
-		this.channels.push(newChannel);
-		this.allChannels.push(newChannel);
-		this.appendChatToChatMap(newChannel.name);
+		this.channels[newChannel.name] = newChannel;
+		this.appendChatToMap(newChannel.name);
 	}
 
 	private onNewChannel(channel: Channel) {
-		this.allChannels.push(channel);
+		this.channels[channel.name] = channel;
 	}
 
 	private onChannelJoined(channel: Channel) {
-		this.channels.push(channel);
-		this.appendChatToChatMap(channel.name);
+		this.channels[channel.name] = channel;
+		this.appendChatToMap(channel.name);
 	}
 
 	private onNewUserJoined(channel: Channel) {
-		const index = this.channels.findIndex(c => c.name == channel.name);
-		this.channels[index] = channel;
-		//if (this.chats[channel.name] === currentChat.value)
-		//	currentChat.value = 
+		this.channels[channel.name].users = channel.users;
 	}
 
 	setCurrentChat(channelName: ChannelName) {
-		const chat = this.chats[channelName];
+		const chat = this.channels[channelName].chat;
+		if (!chat)
+			return;
 		if (chat === currentChat.value)
 			currentChat.value = null;
 		else {
@@ -66,38 +63,32 @@ class ChannelController {
 		}
 	}
 
-	findChannelFromChannelName(channelName: ChannelName): Channel | null {
-		const channel = this.channels.find((c) => c.name === channelName);
-		if (channel)
-			return channel;
-		return null;
-	}
-
-	//FIXME: user != ChatUser
-	userIsChannelOwner(channel: Channel, channelUser: ChatUser = user): boolean {
+	userIsChannelOwner(channel: Channel, channelUser: ChatUser = {id: user.id, username: user.username}): boolean {
 		return (channel.owner === channelUser);
 	}
 
-	userIsChannelAdmin(channel: Channel, channelUser: ChatUser = user): boolean {
-		return channel.admins.includes(channelUser);
-	}
-
-	userIsMemberOfChannel(channelName: ChannelName, channelUser: ChatUser = {id: user.id, username: user.username}): boolean {
-		const channel = this.findChannelFromChannelName(channelName);
-		if (channel && channel.users.find(u => u.id == channelUser.id))
+	userIsChannelAdmin(channel: Channel, channelUser: ChatUser = {id: user.id, username: user.username}): boolean {
+		if (channel.admins.find(user => user.id === channelUser.id))
 			return true;
 		return false;
 	}
 
-	private appendChatToChatMap(channelName: ChannelName): void {
-        if (this.chats && !this.chats[channelName])
+	userIsMemberOfChannel(channelName: ChannelName, channelUser: ChatUser = {id: user.id, username: user.username}): boolean {
+		const channel = this.channels[channelName];
+		if (channel && channel.users.find(u => u.id === channelUser.id))
+			return true;
+		return false;
+	}
+
+	private appendChatToMap(channelName: ChannelName): void {
+        if (this.channels && !this.channels[channelName].chat)
         {
             const newChat: Chat = {
                 target: channelName,
                 messages: [],
                 notification: false
             }
-            this.chats[channelName] = newChat;
+            this.channels[channelName].chat = newChat;
         }
     }
 }
