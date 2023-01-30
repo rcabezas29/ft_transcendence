@@ -29,6 +29,7 @@ class ChannelController {
 		user.socket?.on('new-channel', (channel: ChannelPayload) => this.onNewChannel(channel));
 		user.socket?.on('channel-joined', (channelName: ChannelName) => this.onChannelJoined(channelName));
 		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
+		user.socket?.on('removed-channels', (channelNames: ChannelName[]) => this.onRemovedChannels(channelNames));
 	}
 
 	createChannel(name: ChannelName) {
@@ -62,6 +63,14 @@ class ChannelController {
 	private onNewUserJoined(newUserPayload: UserChannelPayload) {
 		const {channelName, user} = newUserPayload;
 		this.channels[channelName].users.push(user);
+	}
+
+	private onRemovedChannels(channelNames: ChannelName[]) {
+		for (let channelName in this.channels)
+		{
+			if (channelNames.find(name => name === this.channels[channelName].name))
+				delete(this.channels[channelName]);
+		}
 	}
 
 	setCurrentChat(channelName: ChannelName) {

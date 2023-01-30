@@ -38,3 +38,4 @@ friend and the message. When the server receives the event it checks if the clie
 - **join-channel**: Event from client to server to join a channel.
 - **channel-joined**: Event from server to client to notify the user that they have joined a channel successfully.
 - **new-user-joined**: Event from server to clients members of a channel, to notify them that a new user has joined the channel.
+- **removed-channels**: Event from server to clients to notify them of deleted channels (e.g. when a client disconnects and they were the only members of a channel, the channel is removed, or when a user deletes a channel)

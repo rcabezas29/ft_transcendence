@@ -37,17 +37,20 @@ export class ChannelsService {
 
 	onDisconnection(client: GatewayUser): void {
 		this.channels.forEach((channel) => channel.removeUser(client));
+		//TODO: enviar evento de user-left-channel a los miembros de cada chat del que era miembro para que se actualicen
 
-		const removedChannels: string[] = this.channels.map(channel => {
+		const removedChannels: string[] = [];
+		this.channels.forEach((channel) => {
 			if (channel.owner == client && channel.users.length < 1)
-				return channel.name;
-		});
-		this.channels = this.channels.filter((channel) => {
-			return (channel.owner != client || channel.users.length >= 1);
+				removedChannels.push(channel.name);
 		});
 
-		//TODO: emit removed channels
-		//client.socket.broadcast.emit('')
+		this.channels = this.channels.filter((channel) => {
+			return (!removedChannels.find(name => name == channel.name));
+		});
+
+		if (removedChannels && removedChannels.length > 0)
+			client.socket.broadcast.emit('removed-channels', removedChannels);
 	}
 
 	createChannel(channelName: string, owner: GatewayUser): void {
