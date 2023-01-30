@@ -19,7 +19,7 @@ if (channelSelected.value)
 			</div>
 		</div>
 	</div>
-	<div class="join-channel-button" v-if="channelSelected && !channelController.userIsMemberOfChannel(channelSelected)">
+	<div class="join-channel-button" v-if="channelSelected && channelController.userIsMemberOfChannel(channelSelected) === false">
 		<button @click="joinChannel">join channel</button>
 	</div>
 </template>

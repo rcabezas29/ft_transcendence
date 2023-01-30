@@ -36,29 +36,9 @@ export class ChannelsService {
 	}
 
 	onDisconnection(client: GatewayUser): void {
-		const removedChannels: string[] = [];
-
 		this.channels.forEach((channel) => {
-			channel.removeUser(client);
-			if (channel.owner == client && channel.users.length < 1)
-				removedChannels.push(channel.name);
-
-			const disconnectedUserPayload: UserChannelPayload = {
-				user: this.chatService.gatewayUserToChatUser(client),
-				channelName: channel.name
-			}
-			//FIXME: must send to channel members, not broadcast to everyone
-			// should the event using socket.io rooms
-			client.socket.broadcast.emit('user-left', disconnectedUserPayload);
+			this.removeUserFromChannel(client, channel);
 		});
-
-		if (removedChannels.length > 0)
-		{
-			this.channels = this.channels.filter((channel) => {
-				return (!removedChannels.find(name => name == channel.name));
-			});
-			client.socket.broadcast.emit('removed-channels', removedChannels);
-		}
 	}
 
 	createChannel(channelName: string, owner: GatewayUser): void {
@@ -89,9 +69,13 @@ export class ChannelsService {
 
 	userLeaveChannel(user: GatewayUser, channelName: string): void {
 		const channel: Channel = this.channels.find(channel => channel.name === channelName);
+		this.removeUserFromChannel(user, channel);
+		if (this.channels.find(c => c.name === channelName))
+			user.socket.emit('channel-left', this.channelToChannelPayload(channel));
+	}
 
+	private removeUserFromChannel(user: GatewayUser, channel: Channel) {
 		channel.removeUser(user);
-		user.socket.emit('channel-left', this.channelToChannelPayload(channel));
 
 		//FIXME: must send to channel members, not broadcast to everyone
 		// should the event using socket.io rooms
@@ -99,10 +83,9 @@ export class ChannelsService {
 
 		if (channel.owner == user && channel.users.length < 1)
 		{
-			this.channels = this.channels.filter((channel) => channel.name === channelName);
-			const removedChannels: string[] = [channelName];
-			user.socket.emit('removed-channels', removedChannels);
-			user.socket.broadcast.emit('removed-channels', removedChannels);
+			this.channels = this.channels.filter((c) => c.name != channel.name);
+			user.socket.emit('deleted-channel', channel.name);
+			user.socket.broadcast.emit('deleted-channel', channel.name);
 		}
 	}
 

@@ -29,7 +29,7 @@ class ChannelController {
 		user.socket?.on('new-channel', (channel: ChannelPayload) => this.onNewChannel(channel));
 		user.socket?.on('channel-joined', (channelName: ChannelName) => this.onChannelJoined(channelName));
 		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
-		user.socket?.on('removed-channels', (channelNames: ChannelName[]) => this.onRemovedChannels(channelNames));
+		user.socket?.on('deleted-channel', (channelName: ChannelName) => this.onDeletedChannel(channelName));
 		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
 		user.socket?.on('user-left', (channel: ChannelPayload) => this.onUserLeft(channel));
 	}
@@ -71,14 +71,10 @@ class ChannelController {
 		this.channels[channelName].users.push(user);
 	}
 
-	private onRemovedChannels(channelNames: ChannelName[]): void {
-		for (let channelName in this.channels)
-		{
-			if (channelNames.find(name => name === this.channels[channelName].name))
-				delete(this.channels[channelName]);
-			if (currentChat.value?.target === channelName)
-				currentChat.value = null;
-		}
+	private onDeletedChannel(channelName: ChannelName): void {
+		delete(this.channels[channelName]);
+		if (currentChat.value?.target === channelName)
+			currentChat.value = null;
 	}
 
 	private onChannelLeft(channel: ChannelPayload): void {
@@ -89,7 +85,6 @@ class ChannelController {
 
 	private onUserLeft(channel: ChannelPayload): void {
 		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
-		console.log(this.channels[channel.name])
 	}
 
 	setCurrentChat(channelName: ChannelName): void {
@@ -114,9 +109,11 @@ class ChannelController {
 		return false;
 	}
 
-	userIsMemberOfChannel(channelName: ChannelName, channelUser: ChatUser = {id: user.id, username: user.username}): boolean {
+	userIsMemberOfChannel(channelName: ChannelName, channelUser: ChatUser = {id: user.id, username: user.username}): boolean | null {
 		const channel = this.channels[channelName];
-		if (channel && channel.users.find(u => u.id === channelUser.id))
+		if (!channel)
+			return null;
+		if (channel.users.find(u => u.id === channelUser.id))
 			return true;
 		return false;
 	}

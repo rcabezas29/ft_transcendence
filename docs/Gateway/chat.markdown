@@ -41,4 +41,4 @@ friend and the message. When the server receives the event it checks if the clie
 - **leave-channel**: Event from client to server to leave a channel.
 - **channel-left**: Event from server to client to notify the user that they have left a channel successfully.
 - **user-left**: Event from server to client to notify members of a channel that a member left the channel.
-- **removed-channels**: Event from server to clients to notify them of deleted channels (e.g. when a client leaves a channel and they were the only member => the channel is removed; or when a user deletes a channel)
+- **deleted-channel**: Event from server to clients to notify them of deleted channels (e.g. when a client leaves a channel and they were the only member => the channel is removed; or when a user deletes a channel)
