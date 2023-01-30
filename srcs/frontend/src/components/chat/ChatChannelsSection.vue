@@ -17,6 +17,10 @@ function createChat(e: Event) {
 	channelNameInput.value = "";
 }
 
+function leaveChannel(e: Event, channel: string): void {
+	channelController.leaveChannel(channel);
+}
+
 const channels = computed(() => {
 	const channels: Channel[] = [];
 	for (let channel in channelController.channels)
@@ -46,6 +50,7 @@ const channels = computed(() => {
 				<div class="chat-card-name">
 					{{ channel.name }}
 				</div>
+				<button @click.stop="(e: Event) => leaveChannel(e, channel.name)">Leave channel</button>
 				<div class="chat-card-notification" :class="{'chat-card-notification-on': channel.chat!.notification}"></div>
 			</div>
 		</div>

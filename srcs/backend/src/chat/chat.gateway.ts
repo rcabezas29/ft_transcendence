@@ -35,4 +35,10 @@ export class ChatGateway {
 		this.channelsService.userJoinChannel(user, channelName);
 	}
 
+	@SubscribeMessage("leave-channel")
+	leaveChannel(client: Socket, channelName: string): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.userLeaveChannel(user, channelName);
+	}
+
 }

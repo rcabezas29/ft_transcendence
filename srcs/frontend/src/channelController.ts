@@ -30,50 +30,69 @@ class ChannelController {
 		user.socket?.on('channel-joined', (channelName: ChannelName) => this.onChannelJoined(channelName));
 		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
 		user.socket?.on('removed-channels', (channelNames: ChannelName[]) => this.onRemovedChannels(channelNames));
+		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
+		user.socket?.on('user-left', (channel: ChannelPayload) => this.onUserLeft(channel));
 	}
 
-	createChannel(name: ChannelName) {
+	createChannel(name: ChannelName): void {
 		user.socket?.emit('create-channel', name);
 	}
 
-	joinChannel(channelName: ChannelName) {
+	joinChannel(channelName: ChannelName): void {
 		user.socket?.emit('join-channel', channelName);
 	}
 
-	private onAllChannels(payload: ChannelPayload[]) {
+	leaveChannel(channelName: ChannelName): void {
+		user.socket?.emit('leave-channel', channelName);
+	}
+
+	private onAllChannels(payload: ChannelPayload[]): void {
 		payload.forEach((channel) => {
 			this.channels[channel.name] = {...channel, chat: null};
 		});
 	}
 
-	private onChannelCreated(newChannel: ChannelPayload) {
+	private onChannelCreated(newChannel: ChannelPayload): void {
 		this.channels[newChannel.name] = {...newChannel, chat: null};
 		this.appendChatToMap(newChannel.name);
 	}
 
-	private onNewChannel(channel: ChannelPayload) {
+	private onNewChannel(channel: ChannelPayload): void {
 		this.channels[channel.name] = {...channel, chat: null};
 	}
 
-	private onChannelJoined(name: ChannelName) {
+	private onChannelJoined(name: ChannelName): void {
 		this.channels[name].users.push({id: user.id, username: user.username});
 		this.appendChatToMap(name);
 	}
 
-	private onNewUserJoined(newUserPayload: UserChannelPayload) {
+	private onNewUserJoined(newUserPayload: UserChannelPayload): void {
 		const {channelName, user} = newUserPayload;
 		this.channels[channelName].users.push(user);
 	}
 
-	private onRemovedChannels(channelNames: ChannelName[]) {
+	private onRemovedChannels(channelNames: ChannelName[]): void {
 		for (let channelName in this.channels)
 		{
 			if (channelNames.find(name => name === this.channels[channelName].name))
 				delete(this.channels[channelName]);
+			if (currentChat.value?.target === channelName)
+				currentChat.value = null;
 		}
 	}
 
-	setCurrentChat(channelName: ChannelName) {
+	private onChannelLeft(channel: ChannelPayload): void {
+		this.channels[channel.name] = {...channel, chat: null};
+		if (currentChat.value?.target === channel.name)
+			currentChat.value = null;
+	}
+
+	private onUserLeft(channel: ChannelPayload): void {
+		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
+		console.log(this.channels[channel.name])
+	}
+
+	setCurrentChat(channelName: ChannelName): void {
 		const chat = this.channels[channelName].chat;
 		if (!chat)
 			return;
