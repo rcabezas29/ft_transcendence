@@ -33,8 +33,8 @@ friend and the message. When the server receives the event it checks if the clie
 
 - **channel-create**: Event from client to server to create a channel
 - **channel-created**: Event from server to client to notify the creator of a channel that the creation was successful.
-- **new-channel**: Event from server to client when a new channel is created (but the client did not create it), so that the client can include it in their list of `allChannels`.
-- **all-channels**: Event from server to client containing an array of all existing channels. Sent to the client when he joins, and sent to everyone whenever a user leaves (in case any channels were deleted, because if a user disconnects and he was the only one remaining in a channel, the channel is removed from the list of channels, so the `allChannels` list must be updated).
+- **new-channel**: Event from server to client when a new channel is created (but the client did not create it), so that the client can include it in their map of `channels`.
+- **all-channels**: Event from server to client containing an array of all existing channels (without a `Chat`). Sent to the client when he joins.
 - **join-channel**: Event from client to server to join a channel.
 - **channel-joined**: Event from server to client to notify the user that they have joined a channel successfully.
 - **new-user-joined**: Event from server to clients members of a channel, to notify them that a new user has joined the channel.

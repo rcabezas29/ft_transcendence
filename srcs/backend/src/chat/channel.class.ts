@@ -62,7 +62,11 @@ export default class Channel {
 
 	removeUser(user: GatewayUser): void {
 		if (this._owner === user && this._users.length > 1)
+		{
 			this._owner = this._users[1];
+			if (!this._admins.find((admin) => admin === this._owner))
+				this._admins.push(this._owner);
+		}
 		this._users = this._users.filter((u) => u != user);
 		this.unsetAdmin(user);
 	}

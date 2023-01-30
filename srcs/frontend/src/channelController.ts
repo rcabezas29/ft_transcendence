@@ -3,6 +3,18 @@ import { currentChat } from "./currentChat";
 import type { Chat, Channel, ChatUser } from "./interfaces";
 import { user } from "./user";
 
+interface ChannelPayload {
+	name: string;
+	users: ChatUser[];
+	owner: ChatUser;
+	admins: ChatUser[];
+}
+
+interface UserChannelPayload {
+	user: ChatUser,
+	channelName: ChannelName
+}
+
 type ChannelName = string;
 type ChannelMap = {
 	[id: ChannelName]: Channel;
@@ -12,11 +24,11 @@ class ChannelController {
 	public channels: ChannelMap = {};
 
 	setEventsHandlers() {
-        user.socket?.on('all-channels', (payload: Channel[]) => {this.onAllChannels(payload)});
-		user.socket?.on('channel-created', (channel: Channel) => this.onChannelCreated(channel));
-		user.socket?.on('new-channel', (channel: Channel) => this.onNewChannel(channel));
-		user.socket?.on('channel-joined', (channel: Channel) => this.onChannelJoined(channel));
-		user.socket?.on('new-user-joined', (channel: Channel) => this.onNewUserJoined(channel));
+        user.socket?.on('all-channels', (payload: ChannelPayload[]) => {this.onAllChannels(payload)});
+		user.socket?.on('channel-created', (channel: ChannelPayload) => this.onChannelCreated(channel));
+		user.socket?.on('new-channel', (channel: ChannelPayload) => this.onNewChannel(channel));
+		user.socket?.on('channel-joined', (channelName: ChannelName) => this.onChannelJoined(channelName));
+		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
 	}
 
 	createChannel(name: ChannelName) {
@@ -27,28 +39,29 @@ class ChannelController {
 		user.socket?.emit('join-channel', channelName);
 	}
 
-	private onAllChannels(payload: Channel[]) {
+	private onAllChannels(payload: ChannelPayload[]) {
 		payload.forEach((channel) => {
-			this.channels[channel.name] = channel;
+			this.channels[channel.name] = {...channel, chat: null};
 		});
 	}
 
-	private onChannelCreated(newChannel: Channel) {
-		this.channels[newChannel.name] = newChannel;
+	private onChannelCreated(newChannel: ChannelPayload) {
+		this.channels[newChannel.name] = {...newChannel, chat: null};
 		this.appendChatToMap(newChannel.name);
 	}
 
-	private onNewChannel(channel: Channel) {
-		this.channels[channel.name] = channel;
+	private onNewChannel(channel: ChannelPayload) {
+		this.channels[channel.name] = {...channel, chat: null};
 	}
 
-	private onChannelJoined(channel: Channel) {
-		this.channels[channel.name] = channel;
-		this.appendChatToMap(channel.name);
+	private onChannelJoined(name: ChannelName) {
+		this.channels[name].users.push({id: user.id, username: user.username});
+		this.appendChatToMap(name);
 	}
 
-	private onNewUserJoined(channel: Channel) {
-		this.channels[channel.name].users = channel.users;
+	private onNewUserJoined(newUserPayload: UserChannelPayload) {
+		const {channelName, user} = newUserPayload;
+		this.channels[channelName].users.push(user);
 	}
 
 	setCurrentChat(channelName: ChannelName) {

@@ -10,7 +10,11 @@ interface ChannelPayload {
 	users: ChatUser[];
 	owner: ChatUser;
 	admins: ChatUser[];
-	chat: null;
+}
+
+interface UserChannelPayload {
+	user: ChatUser,
+	channelName: string
 }
 
 @Injectable()
@@ -26,19 +30,24 @@ export class ChannelsService {
         this.gatewayManagerService.addOnDisconnectionCallback((client: GatewayUser) => this.onDisconnection(client));
     }
 
-    onNewConnection(client: GatewayUser) {
+    onNewConnection(client: GatewayUser): void {
 		const channelsPayload: ChannelPayload[] = this.channels.map(channel => this.channelToChannelPayload(channel));
 		client.socket.emit('all-channels', channelsPayload);
 	}
 
-	onDisconnection(client: GatewayUser) {
+	onDisconnection(client: GatewayUser): void {
 		this.channels.forEach((channel) => channel.removeUser(client));
+
+		const removedChannels: string[] = this.channels.map(channel => {
+			if (channel.owner == client && channel.users.length < 1)
+				return channel.name;
+		});
 		this.channels = this.channels.filter((channel) => {
-			return (channel.owner != client || channel.users.length > 1);
+			return (channel.owner != client || channel.users.length >= 1);
 		});
 
-		const channelsPayload: ChannelPayload[] = this.channels.map(channel => this.channelToChannelPayload(channel));
-		client.socket.broadcast.emit('all-channels', channelsPayload);
+		//TODO: emit removed channels
+		//client.socket.broadcast.emit('')
 	}
 
 	createChannel(channelName: string, owner: GatewayUser): void {
@@ -53,12 +62,18 @@ export class ChannelsService {
 
 	userJoinChannel(user: GatewayUser, channelName: string): void {
 		const channel: Channel = this.channels.find(channel => channel.name === channelName);
+		if (!channel)
+			return;
 		channel.addUser(user);
-		user.socket.emit('channel-joined', this.channelToChannelPayload(channel));
+		user.socket.emit('channel-joined', channelName);
 
+		const newUserPayload: UserChannelPayload = {
+			user: this.chatService.gatewayUserToChatUser(user),
+			channelName: channelName
+		}
 		//FIXME: must send to channel members, not broadcast to everyone
 		// should the event using socket.io rooms
-		user.socket.broadcast.emit('new-user-joined', this.channelToChannelPayload(channel));
+		user.socket.broadcast.emit('new-user-joined', newUserPayload);
 	}
 
 	private channelToChannelPayload(channel: Channel): ChannelPayload {
@@ -67,7 +82,6 @@ export class ChannelsService {
 			users: channel.users.map((user) => this.chatService.gatewayUserToChatUser(user)),
 			owner: this.chatService.gatewayUserToChatUser(channel.owner),
 			admins: channel.admins.map((user) => this.chatService.gatewayUserToChatUser(user)),
-			chat: null
 		};
 		return payload;
 	}
