@@ -3,7 +3,12 @@ import { Socket } from 'socket.io';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { ChannelsService } from './channels.service';
-import { ChannelMessagePayload, DirectMessagePayload, TimeUserChannelPayload, UserChannelPayload } from './interfaces';
+import { ChannelMessagePayload,
+	DirectMessagePayload,
+	PasswordChannelPayload,
+	TimeUserChannelPayload,
+	UserChannelPayload
+} from './interfaces';
 
 @WebSocketGateway({cors: true})
 export class ChatGateway {
@@ -36,9 +41,9 @@ export class ChatGateway {
 	}
 
 	@SubscribeMessage("join-channel")
-	joinChannel(client: Socket, channelName: string): void {
+	joinChannel(client: Socket, payload: PasswordChannelPayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.userJoinChannel(user, channelName);
+		this.channelsService.userJoinChannel(user, payload);
 	}
 
 	@SubscribeMessage("leave-channel")
@@ -73,5 +78,17 @@ export class ChatGateway {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const admin: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
 		this.channelsService.unsetAdmin(user, admin, payload.channelName);
+	}
+
+	@SubscribeMessage("set-password")
+	setPassword(client: Socket, payload: PasswordChannelPayload): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.setPassword(user, payload);
+	}
+
+	@SubscribeMessage("unset-password")
+	unsetPassword(client: Socket, channelName: string): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.unsetPassword(user, channelName);
 	}
 }

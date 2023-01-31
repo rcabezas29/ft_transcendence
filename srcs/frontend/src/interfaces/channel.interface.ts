@@ -7,4 +7,5 @@ export interface Channel {
 	owner: ChatUser;
 	admins: ChatUser[];
 	chat: Chat | null;
+	isPrivate: boolean;
 }

@@ -9,6 +9,7 @@ interface ChannelPayload {
 	users: ChatUser[];
 	owner: ChatUser;
 	admins: ChatUser[];
+	isPrivate: boolean;
 }
 
 interface UserChannelPayload {
@@ -33,6 +34,16 @@ interface ChannelMessagePayload {
 	message: string;
 }
 
+interface PasswordChannelPayload {
+	password: string,
+	channelName: ChannelName
+}
+
+interface PasswordBoolChannelPayload {
+	password: boolean,
+	channelName: ChannelName
+}
+
 type ChannelName = string;
 type ChannelMap = {
 	[id: ChannelName]: Channel;
@@ -54,6 +65,8 @@ class ChannelController {
 		user.socket?.on('user-banned', (payload: TimeUserChannelPayload) => this.onUserBanned(payload));
 		user.socket?.on('user-muted', (payload: TimeUserChannelPayload) => this.onUserMuted(payload));
 		user.socket?.on('admins-updated', (payload: UserArrayChannelPayload) => this.onAdminsUpdated(payload));
+		user.socket?.on('password-updated', (payload: PasswordBoolChannelPayload) => this.onPasswordUpdated(payload));
+		user.socket?.on('wrong-password', (channelName: ChannelName) => this.onWrongPassword(channelName));
 	}
 
 	createChannel(name: ChannelName): void {
@@ -62,10 +75,14 @@ class ChannelController {
 		user.socket?.emit('create-channel', name);
 	}
 
-	joinChannel(channelName: ChannelName): void {
+	joinChannel(channelName: ChannelName, password: string): void {
 		if (this.userIsMemberOfChannel(channelName))
 			return;
-		user.socket?.emit('join-channel', channelName);
+		if (this.channels[channelName].isPrivate && password.length === 0)
+			return this.alertError(`please enter a password to join private channel ${channelName}'`);
+			
+		const payload: PasswordChannelPayload = { password, channelName };
+		user.socket?.emit('join-channel', payload);
 	}
 
 	leaveChannel(channelName: ChannelName): void {
@@ -156,6 +173,24 @@ class ChannelController {
 		user.socket?.emit('unset-admin', payload);
 	}
 
+	setPassword(password: string, channelName: ChannelName): void {
+		if (!this.userIsChannelOwner(this.channels[channelName]))
+			return this.alertError('you are not allowed to manage this channel\'s password');
+		
+		if (password.length === 0)
+			return this.alertError(`please enter a password for channel '${channelName}'`);
+
+		const payload: PasswordChannelPayload = { password, channelName };
+		user.socket?.emit('set-password', payload);
+	}
+
+	unsetPassword(channelName: ChannelName): void {
+		if (!this.userIsChannelOwner(this.channels[channelName]))
+			return this.alertError('you are not allowed to manage this channel\'s password');
+
+		user.socket?.emit('unset-password', channelName);
+	}
+
 	private onAllChannels(payload: ChannelPayload[]): void {
 		payload.forEach((channel) => {
 			this.channels[channel.name] = {...channel, chat: null};
@@ -211,6 +246,14 @@ class ChannelController {
 
 	private onAdminsUpdated(payload: UserArrayChannelPayload): void {
 		this.channels[payload.channelName].admins = payload.users;
+	}
+
+	private onPasswordUpdated(payload: PasswordBoolChannelPayload): void {
+		this.channels[payload.channelName].isPrivate = payload.password;
+	}
+
+	private onWrongPassword(channelName: ChannelName): void {
+		return this.alertError(`oops! wrong password for private channel '${channelName}'. Try again`);
 	}
 
 	setCurrentChat(channelName: ChannelName): void {

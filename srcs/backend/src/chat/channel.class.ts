@@ -42,12 +42,12 @@ export default class Channel {
 			this._admins = this._admins.filter((user) => user != admin);
 	}
 
-	setPassword(): void {
-
+	setPassword(password: string): void {
+		this._password = password;
 	}
 
 	unsetPassword(): void {
-
+		this._password = null;
 	}
 
 	banUser(user: GatewayUser, banTime: AmountOfSeconds): void {

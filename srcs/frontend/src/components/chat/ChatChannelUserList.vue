@@ -81,8 +81,12 @@ function toggleAdmin(): void {
 		</div>
 		<div class="users-list">
 			<div v-for="user in channelController.channels[currentChat.target as string].users" @click="() => selectUser(user)" :key="user.id">
-				<div class="channel-user-username" :class="{'user-selected': isUserSelected(user)}" >
-					{{ user.username }}
+				<div class="channel-user-card" :class="{'user-selected': isUserSelected(user)}">
+					<div class="channel-user-username">
+						{{ user.username }}
+					</div>
+					<div v-if="channelController.userIsChannelOwner(currentChannel, user)" class="user-role">(owner)</div>
+					<div v-else-if="channelController.userIsChannelAdmin(currentChannel, user)" class="user-role">(admin)</div>
 				</div>
 			</div>
 		</div>
@@ -94,6 +98,15 @@ function toggleAdmin(): void {
 .users-list {
 	border: 1px solid black;
 	margin-top: 20px;
+}
+
+.channel-user-card {
+	display: flex;
+	justify-content: space-between;
+}
+
+.user-role {
+	color: #d6d6d6;
 }
 
 .user-selected {

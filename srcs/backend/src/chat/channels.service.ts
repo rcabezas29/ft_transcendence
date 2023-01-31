@@ -1,15 +1,23 @@
 import { Injectable } from "@nestjs/common";
 import { GatewayManagerService } from "src/gateway-manager/gateway-manager.service";
 import { GatewayUser } from "src/gateway-manager/interfaces/gateway-user.interface";
-import Channel from "./channel.class";
-import { ChannelMessagePayload, ChatUser, TimeUserChannelPayload, UserArrayChannelPayload, UserChannelPayload } from "./interfaces";
 import { ChatService } from "./chat.service";
+import Channel from "./channel.class";
+import { ChannelMessagePayload,
+	ChatUser,
+	PasswordBoolChannelPayload,
+	PasswordChannelPayload,
+	TimeUserChannelPayload,
+	UserArrayChannelPayload,
+	UserChannelPayload
+} from "./interfaces";
 
 interface ChannelPayload {
 	name: string;
 	users: ChatUser[];
 	owner: ChatUser;
 	admins: ChatUser[];
+	isPrivate: boolean;
 }
 
 @Injectable()
@@ -58,35 +66,41 @@ export class ChannelsService {
 		owner.socket.broadcast.emit('new-channel', channelPayload);
 	}
 
-	userJoinChannel(user: GatewayUser, channelName: string): void {
-		const channel: Channel = this.getChannelbyName(channelName);
+	userJoinChannel(user: GatewayUser, payload: PasswordChannelPayload): void {
+		const channel: Channel = this.getChannelbyName(payload.channelName);
 		if (!channel)
 			return;
+
+		if (channel.password != null && payload.password !== channel.password)
+		{
+			user.socket.emit('wrong-password', payload.channelName);
+			return;
+		}
 
 		if (user.id in channel.bannedUsers)
 		{
 			const remainingTime: number = channel.checkRemainingUserBanTime(user);
-			const payload: TimeUserChannelPayload = {
+			const clientPayload: TimeUserChannelPayload = {
 				user: {id: user.id, username: user.username},
 				time: remainingTime,
-				channelName: channelName
+				channelName: payload.channelName
 			}
 			if (remainingTime > 0)
 			{
-				user.socket.emit('user-banned', payload);
+				user.socket.emit('user-banned', clientPayload);
 				return;
 			}
 		}
 
 		channel.addUser(user);
-		user.socket.join(channelName);
-		user.socket.emit('channel-joined', channelName);
+		user.socket.join(payload.channelName);
+		user.socket.emit('channel-joined', payload.channelName);
 
 		const newUserPayload: UserChannelPayload = {
 			user: this.chatService.gatewayUserToChatUser(user),
-			channelName: channelName
+			channelName: payload.channelName
 		}
-		user.socket.to(channelName).emit('new-user-joined', newUserPayload);
+		user.socket.to(payload.channelName).emit('new-user-joined', newUserPayload);
 	}
 
 	userLeaveChannel(user: GatewayUser, channelName: string): void {
@@ -186,6 +200,44 @@ export class ChannelsService {
 		user.socket.emit('admins-updated', payload);
 	}
 
+	setPassword(user: GatewayUser, payload: PasswordChannelPayload): void {
+		const channel: Channel = this.getChannelbyName(payload.channelName);
+		if (!channel)
+			return;
+		if (user != channel.owner || !channel.hasUser(user))
+			return;
+		
+		// TODO: encriptar password
+		// TODO: queremos poner alguna comprobacion de seguridad a la password?
+		channel.setPassword(payload.password);
+
+		const clientPayload: PasswordBoolChannelPayload = {
+			password: true,
+			channelName: channel.name
+		}
+		// FIXME: server emit
+		user.socket.broadcast.emit('password-updated', clientPayload);
+		user.socket.emit('password-updated', clientPayload);
+	}
+
+	unsetPassword(user: GatewayUser, channelName: string): void {
+		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel)
+			return;
+		if (user != channel.owner || !channel.hasUser(user))
+			return;
+
+		channel.unsetPassword();
+
+		const clientPayload: PasswordBoolChannelPayload = {
+			password: false,
+			channelName: channelName
+		}
+		// FIXME: server emit
+		user.socket.broadcast.emit('password-updated', clientPayload);
+		user.socket.emit('password-updated', clientPayload);
+	}
+
 	private removeUserFromChannel(user: GatewayUser, channel: Channel): void {
 		if (this.deleteChannelIfWillBeEmpty(user, channel) === false)
 		{
@@ -212,6 +264,7 @@ export class ChannelsService {
 			users: channel.users.map((user) => this.chatService.gatewayUserToChatUser(user)),
 			owner: this.chatService.gatewayUserToChatUser(channel.owner),
 			admins: channel.admins.map((user) => this.chatService.gatewayUserToChatUser(user)),
+			isPrivate: channel.password === null ? false : true
 		};
 		return payload;
 	}

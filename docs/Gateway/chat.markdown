@@ -49,3 +49,7 @@ friend and the message. When the server receives the event it checks if the clie
 - **user-muted**: Event from server to client when a user attempts to write a message on a channel but they have been previously muted. Within this event's payload, the client also gets the amount of time remaining for the mute to be lifted.
 - **set-admin / unset-admin**: Events from client to server to set/unset a user as channel admin.
 - **admins-updated**: Event from server to client to notify all clients that a channel's admin has been set/unset.
+- **set-password**: Event from client to server to set/change a channel's password.
+- **unset-password**: Event from client to server to unset a channel's password.
+- **password-updated**: Event from server to clients to notify everyone that a channel's password has been set/changed/unset. `true` if set, `false` if unset (so client can know whether the channel is password-protected or not)
+- **wrong-password**: Event from server to client when a client attempts to join a password-protected channel using an incorrect password.
