@@ -124,7 +124,7 @@ class ChannelController {
 	}
 
 	userIsChannelOwner(channel: Channel, channelUser: ChatUser = {id: user.id, username: user.username}): boolean {
-		return (channel.owner === channelUser);
+		return (channel.owner.id === channelUser.id);
 	}
 
 	userIsChannelAdmin(channel: Channel, channelUser: ChatUser = {id: user.id, username: user.username}): boolean {
