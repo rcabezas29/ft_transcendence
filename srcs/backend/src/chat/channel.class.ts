@@ -33,15 +33,11 @@ export default class Channel {
 	}
 
 	setAdmin(admin: GatewayUser): void {
-		if (!this.hasUser(admin))
-			return;
-		if (!this.userIsAdmin(admin))
+		if (this.hasUser(admin) && !this.userIsAdmin(admin))
 			this._admins.push(admin);
 	}
 
 	unsetAdmin(admin: GatewayUser): void {
-		if (!this.hasUser(admin))
-			return;
 		if (this.userIsAdmin(admin))
 			this._admins = this._admins.filter((user) => user != admin);
 	}
@@ -63,8 +59,6 @@ export default class Channel {
 	}
 
 	unbanUser(user: GatewayUser): void {
-		if (!this.hasUser(user))
-			return;
 		delete(this._bannedUsers[user.id]);
 	}
 
@@ -77,8 +71,6 @@ export default class Channel {
 	}
 
 	unmuteUser(user: GatewayUser): void {
-		if (!this.hasUser(user))
-			return;
 		delete(this._mutedUsers[user.id]);
 	}
 
