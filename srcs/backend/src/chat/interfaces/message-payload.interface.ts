@@ -1,4 +1,4 @@
-export interface MessagePayload {
+export interface DirectMessagePayload {
     friendId: number;
     message: string;
 }

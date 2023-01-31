@@ -3,7 +3,7 @@ import { Socket } from 'socket.io';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { ChannelsService } from './channels.service';
-import { ChannelMessagePayload, MessagePayload } from './interfaces/message-payload.interface';
+import { ChannelMessagePayload, DirectMessagePayload } from './interfaces/message-payload.interface';
 
 @WebSocketGateway({cors: true})
 export class ChatGateway {
@@ -13,10 +13,10 @@ export class ChatGateway {
 	) {}
 	 
 	@SubscribeMessage("direct-message")
-	directMessage(client: Socket, receivedPayload: MessagePayload) {
+	directMessage(client: Socket, receivedPayload: DirectMessagePayload): void {
 		const fromUser: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const toUser: GatewayUser = this.gatewayManagerService.getClientByUserId(receivedPayload.friendId);
-		const payloadToSend: MessagePayload = {
+		const payloadToSend: DirectMessagePayload = {
 			friendId: fromUser.id,
    			message: receivedPayload.message
 		}
@@ -25,8 +25,8 @@ export class ChatGateway {
 
 	@SubscribeMessage("channel-message")
 	channelMessage(client: Socket, payload: ChannelMessagePayload): void {
-		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.channelMessage(user, payload);
+		const fromUser: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.channelMessage(fromUser, payload);
 	}
 
 	@SubscribeMessage("create-channel")

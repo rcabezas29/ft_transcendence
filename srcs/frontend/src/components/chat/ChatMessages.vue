@@ -1,16 +1,19 @@
 <script setup lang="ts">
-
 import { type Ref, ref, onUpdated } from 'vue'; 
 import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
 import type { ChatUser } from '../../interfaces';
+import { channelController } from '@/channelController';
 
 const messageInput: Ref<string> = ref<string>("");
 
 function onSubmit(e: Event) {
-	if (messageInput.value.length == 0)
+	if (messageInput.value.length == 0 || !currentChat.value)
 		return;
-	directMessageController.sendDirectMessage(messageInput.value);
+	if (chatIsDirectMessage(currentChat.value))
+		directMessageController.sendDirectMessage(messageInput.value);
+	else if (chatIsChannel(currentChat.value))
+		channelController.sendChannelMessage(messageInput.value);
 	messageInput.value = "";
 }
 

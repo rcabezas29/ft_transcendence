@@ -31,23 +31,23 @@ export class ChannelsService {
         this.gatewayManagerService.addOnDisconnectionCallback((client: GatewayUser) => this.onDisconnection(client));
 	}
 
-	getChannel(channelName: string) {
-		return this.channels.find((channel) => channel.name == channelName);
+	getChannelbyName(channelName: string): Channel | null {
+		const channel: Channel | undefined = this.channels.find((channel) => channel.name === channelName);
+		if (channel)
+			return channel;
+		return null;
 	}
 
-	channelMessage(user: GatewayUser, payload: ChannelMessagePayload) {
-		const channel: Channel = this.getChannel(payload.channel);
+	channelMessage(fromUser: GatewayUser, payload: ChannelMessagePayload) {
+		const channel: Channel = this.getChannelbyName(payload.channel);
+		if (!channel.hasUser(fromUser))
+			return ;
 
 		//TODO: Check if user is muted
 		//if muted, notify the user
 
-		const channelHasUser = channel.hasUser(user);
-		if (!channelHasUser)
-			return ;
-
-		payload.from = user.username;
-		
-		user.socket.to(payload.channel).emit("channel-message", payload)
+		payload.from = fromUser.username;
+		fromUser.socket.to(payload.channel).emit("channel-message", payload);
 	}
 
     onNewConnection(client: GatewayUser): void {
@@ -67,17 +67,18 @@ export class ChannelsService {
 		this.channels.push(newChannel);
 		owner.socket.emit('channel-created', this.channelToChannelPayload(newChannel));
 
-		//owner.socket.join(channelName);
+		owner.socket.join(channelName);
 
 		const channelPayload: ChannelPayload = this.channelToChannelPayload(newChannel);
 		owner.socket.broadcast.emit('new-channel', channelPayload);
 	}
 
 	userJoinChannel(user: GatewayUser, channelName: string): void {
-		const channel: Channel = this.channels.find(channel => channel.name === channelName);
+		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
 			return;
 		channel.addUser(user);
+		user.socket.join(channelName);
 		user.socket.emit('channel-joined', channelName);
 
 		const newUserPayload: UserChannelPayload = {
@@ -90,10 +91,12 @@ export class ChannelsService {
 	}
 
 	userLeaveChannel(user: GatewayUser, channelName: string): void {
-		const channel: Channel = this.channels.find(channel => channel.name === channelName);
+		const channel: Channel = this.getChannelbyName(channelName);
 		this.removeUserFromChannel(user, channel);
-		if (this.channels.find(c => c.name === channelName))
+		if (this.getChannelbyName(channelName)) // check in case the channel was removed too
 			user.socket.emit('channel-left', this.channelToChannelPayload(channel));
+
+		user.socket.leave(channelName);
 	}
 
 	private removeUserFromChannel(user: GatewayUser, channel: Channel) {

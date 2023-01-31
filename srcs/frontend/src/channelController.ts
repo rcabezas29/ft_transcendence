@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 import { currentChat } from "./currentChat";
 import type { Chat, Channel, ChatUser } from "./interfaces";
-import type { ChannelMessage, Message } from "./interfaces/message.interface";
+import type { Message } from "./interfaces/message.interface";
 import { user } from "./user";
 
 interface ChannelPayload {
@@ -14,6 +14,12 @@ interface ChannelPayload {
 interface UserChannelPayload {
 	user: ChatUser,
 	channelName: ChannelName
+}
+
+interface ChannelMessagePayload {
+	channel: string;
+	from: string;
+	message: string;
 }
 
 type ChannelName = string;
@@ -33,7 +39,7 @@ class ChannelController {
 		user.socket?.on('deleted-channel', (channelName: ChannelName) => this.onDeletedChannel(channelName));
 		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
 		user.socket?.on('user-left', (channel: ChannelPayload) => this.onUserLeft(channel));
-		//user.socket?.on("channel-message", (message) => this.onChannelMessage(message));
+		user.socket?.on('channel-message', (message: ChannelMessagePayload) => this.receiveChannelMessage(message));
 	}
 
 	createChannel(name: ChannelName): void {
@@ -47,6 +53,27 @@ class ChannelController {
 	leaveChannel(channelName: ChannelName): void {
 		user.socket?.emit('leave-channel', channelName);
 	}
+
+	sendChannelMessage(message: string): void {
+        const toChannel: ChannelName = (<ChannelName>currentChat.value!.target);
+        const payload: ChannelMessagePayload = {
+            channel: toChannel,
+			from: user.username,
+			message: message
+        };
+        user.socket?.emit('channel-message', payload);
+
+        const newMessage: Message = {
+            from: "you",
+            message: message
+        }
+		const channel = this.channels[toChannel];
+		if (!channel)
+			return;
+        const channelChat: Chat | null = this.channels[toChannel].chat;
+        if (channelChat)
+			channelChat.messages.push(newMessage);
+    }
 
 	private onAllChannels(payload: ChannelPayload[]): void {
 		payload.forEach((channel) => {
@@ -89,14 +116,23 @@ class ChannelController {
 		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
 	}
 
-	/*private onChannelMessage(payload: ChannelMessage) {
-		const chat: Chat = this.chats[payload.channel];
+	private receiveChannelMessage(payload: ChannelMessagePayload): void {
+		console.log("getting message!")
 		const newMessage: Message = {
 			from: payload.from,
 			message: payload.message
 		};
-		chat.messages.push(newMessage);
-	}*/
+		const channel = this.channels[payload.channel];
+		if (!channel)
+			return;
+		const chat: Chat | null = this.channels[payload.channel].chat;
+        if (chat)
+		{
+			chat.messages.push(newMessage);
+			if (chat !== currentChat.value)
+           		chat.notification = true;
+		}
+	}
 
 	setCurrentChat(channelName: ChannelName): void {
 		const chat = this.channels[channelName].chat;

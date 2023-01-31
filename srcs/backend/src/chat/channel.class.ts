@@ -54,8 +54,10 @@ export default class Channel {
 
 	}
 
-	hasUser(user: GatewayUser): GatewayUser | null {
-		return this._users.find((channelUser) => channelUser == user);
+	hasUser(user: GatewayUser): boolean {
+		if (this._users.find((channelUser) => channelUser == user))
+			return true;
+		return false;
 	}
 
 	addUser(user: GatewayUser): void {
