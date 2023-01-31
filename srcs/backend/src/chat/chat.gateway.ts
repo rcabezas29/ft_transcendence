@@ -3,7 +3,7 @@ import { Socket } from 'socket.io';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { ChannelsService } from './channels.service';
-import { ChannelMessagePayload, DirectMessagePayload } from './interfaces/message-payload.interface';
+import { ChannelMessagePayload, DirectMessagePayload, TimeUserChannelPayload } from './interfaces';
 
 @WebSocketGateway({cors: true})
 export class ChatGateway {
@@ -45,6 +45,13 @@ export class ChatGateway {
 	leaveChannel(client: Socket, channelName: string): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		this.channelsService.userLeaveChannel(user, channelName);
+	}
+
+	@SubscribeMessage("ban-user")
+	banUser(client: Socket, payload: TimeUserChannelPayload): void {
+		const banner: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		const banned: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
+		this.channelsService.banUser(banner, banned, payload.channelName, payload.time);
 	}
 
 }

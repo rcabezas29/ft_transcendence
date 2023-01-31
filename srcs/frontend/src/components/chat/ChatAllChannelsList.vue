@@ -25,9 +25,6 @@ if (channelSelected.value)
 </template>
 
 <style scoped lang="scss">
-	.channels-list {
-		margin-bottom: 30px;
-	}
 	.channel-selected {
 		background-color: grey;
 	}

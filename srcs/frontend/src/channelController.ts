@@ -16,6 +16,12 @@ interface UserChannelPayload {
 	channelName: ChannelName
 }
 
+interface TimeUserChannelPayload {
+	user: ChatUser,
+	time: number,
+	channelName: ChannelName
+}
+
 interface ChannelMessagePayload {
 	channel: string;
 	from: string;
@@ -40,6 +46,7 @@ class ChannelController {
 		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
 		user.socket?.on('user-left', (channel: ChannelPayload) => this.onUserLeft(channel));
 		user.socket?.on('channel-message', (message: ChannelMessagePayload) => this.receiveChannelMessage(message));
+		user.socket?.on('user-banned', (payload: TimeUserChannelPayload) => this.onUserBanned(payload));
 	}
 
 	createChannel(name: ChannelName): void {
@@ -47,6 +54,8 @@ class ChannelController {
 	}
 
 	joinChannel(channelName: ChannelName): void {
+		if (this.userIsMemberOfChannel(channelName))
+			return;
 		user.socket?.emit('join-channel', channelName);
 	}
 
@@ -65,6 +74,26 @@ class ChannelController {
 
 		this.addMessageToChannelChat(toChannel, "you", payload.message);
     }
+
+	banUser(bannedUser: ChatUser, channelName: ChannelName, time: string): void {
+		const banTime: number = +time;
+		if (banTime === 0 || isNaN(banTime))
+		{
+			alert('please insert a valid number (ban time)');
+			return;
+		}
+		if (bannedUser.id == user.id)
+		{
+			alert('you cannot ban yourself!');
+			return;
+		}
+		const payload: TimeUserChannelPayload = {
+			user: bannedUser,
+			time: banTime,
+			channelName: channelName
+		}
+		user.socket?.emit('ban-user', payload);
+	}
 
 	private onAllChannels(payload: ChannelPayload[]): void {
 		payload.forEach((channel) => {
@@ -109,6 +138,10 @@ class ChannelController {
 
 	private receiveChannelMessage(payload: ChannelMessagePayload): void {
 		this.addMessageToChannelChat(payload.channel, payload.from, payload.message);
+	}
+
+	private onUserBanned(payload: TimeUserChannelPayload): void {
+		alert(`oops! you are banned from '${payload.channelName}'. Remaining ban time: ${payload.time} seconds`);
 	}
 
 	setCurrentChat(channelName: ChannelName): void {

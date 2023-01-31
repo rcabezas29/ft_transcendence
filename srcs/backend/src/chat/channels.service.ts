@@ -2,20 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { GatewayManagerService } from "src/gateway-manager/gateway-manager.service";
 import { GatewayUser } from "src/gateway-manager/interfaces/gateway-user.interface";
 import Channel from "./channel.class";
-import { ChannelMessagePayload } from "./interfaces/message-payload.interface";
+import { ChannelMessagePayload, ChatUser, TimeUserChannelPayload, UserChannelPayload } from "./interfaces";
 import { ChatService } from "./chat.service";
-import { ChatUser } from "./interfaces/friend.interface";
 
 interface ChannelPayload {
 	name: string;
 	users: ChatUser[];
 	owner: ChatUser;
 	admins: ChatUser[];
-}
-
-interface UserChannelPayload {
-	user: ChatUser,
-	channelName: string
 }
 
 @Injectable()
@@ -40,7 +34,7 @@ export class ChannelsService {
 
 	channelMessage(fromUser: GatewayUser, payload: ChannelMessagePayload) {
 		const channel: Channel = this.getChannelbyName(payload.channel);
-		if (!channel.hasUser(fromUser))
+		if (!channel || !channel.hasUser(fromUser))
 			return ;
 
 		//TODO: Check if user is muted
@@ -77,6 +71,22 @@ export class ChannelsService {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
 			return;
+
+		if (user.id in channel.bannedUsers)
+		{
+			const remainingTime: number = channel.checkRemainingUserBanTime(user);
+			const payload: TimeUserChannelPayload = {
+				user: {id: user.id, username: user.username},
+				time: remainingTime,
+				channelName: channelName
+			}
+			if (remainingTime > 0)
+			{
+				user.socket.emit('user-banned', payload);
+				return;
+			}
+		}
+
 		channel.addUser(user);
 		user.socket.join(channelName);
 		user.socket.emit('channel-joined', channelName);
@@ -90,6 +100,9 @@ export class ChannelsService {
 
 	userLeaveChannel(user: GatewayUser, channelName: string): void {
 		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel || !channel.hasUser(user))
+			return;
+
 		this.removeUserFromChannel(user, channel);
 		if (this.getChannelbyName(channelName)) // check in case the channel was removed too
 			user.socket.emit('channel-left', this.channelToChannelPayload(channel));
@@ -97,7 +110,21 @@ export class ChannelsService {
 		user.socket.leave(channelName);
 	}
 
-	private removeUserFromChannel(user: GatewayUser, channel: Channel) {
+	banUser(bannerUser: GatewayUser, bannedUser: GatewayUser, channelName: string, time: number): void {
+		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel)
+			return;
+		if (!channel.userIsAdmin(bannerUser) || !channel.hasUser(bannerUser) || !channel.hasUser(bannedUser))
+			return;
+
+		channel.banUser(bannedUser, time);
+		this.removeUserFromChannel(bannedUser, channel);
+		bannedUser.socket.emit('channel-left', this.channelToChannelPayload(channel));
+	}
+
+	// TODO: podria devolver boolean segun si lo ha borrado (true) o si ha eliminado el canal (false) por ejemplo y mejorar userLeaveChannel
+	// TODO: incluso meter el evento en la clase channel, y solo sacar la comrpobacion de borrar canales
+	private removeUserFromChannel(user: GatewayUser, channel: Channel): void {
 		channel.removeUser(user);
 		user.socket.to(channel.name).emit('user-left', this.channelToChannelPayload(channel));
 

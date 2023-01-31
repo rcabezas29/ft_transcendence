@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
-import { ChatUser } from './interfaces/friend.interface';
+import { ChatUser } from './interfaces';
 
 @Injectable()
 export class ChatService {

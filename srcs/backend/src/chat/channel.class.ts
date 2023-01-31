@@ -1,9 +1,12 @@
 import { GatewayUser } from "src/gateway-manager/interfaces/gateway-user.interface";
 
 type UserId = number;
+
 type AmountOfSeconds = number;
-type UserIdSanctionTimeMap = {
-    [id: UserId]: AmountOfSeconds; 
+
+type DateSanctionLifts = Date;
+type UserIdSanctionMap = {
+    [id: UserId]: DateSanctionLifts; 
 }
 
 export default class Channel {
@@ -11,8 +14,8 @@ export default class Channel {
 	private _users: GatewayUser[] = [];
 	private _owner: GatewayUser;
 	private _admins: GatewayUser[] = [];
-	private _bannedUsers: UserIdSanctionTimeMap[] = [];
-	private _mutedUsers: UserIdSanctionTimeMap[] = [];
+	private _bannedUsers: UserIdSanctionMap = {};
+	private _mutedUsers: UserIdSanctionMap = {};
 	private _password: string = null;
 
 	constructor(name: string, owner: GatewayUser) {
@@ -38,12 +41,14 @@ export default class Channel {
 
 	}
 
-	banUser(): void {
-
+	banUser(user: GatewayUser, banTime: AmountOfSeconds): void {
+		const nowTime = new Date().getTime();
+		const endTime = nowTime + (banTime * 1000);
+		this._bannedUsers[user.id] = new Date(endTime);
 	}
 
-	unbanUser(): void {
-
+	unbanUser(user: GatewayUser): void {
+		delete(this._bannedUsers[user.id]);
 	}
 
 	muteUser(): void {
@@ -75,6 +80,28 @@ export default class Channel {
 		this.unsetAdmin(user);
 	}
 
+	userIsAdmin(user: GatewayUser): boolean {
+		if (this._admins.find((u) => u == user))
+			return true;
+		return false;
+	}
+
+	checkRemainingUserBanTime(user: GatewayUser): number {
+		if (user.id in this._bannedUsers)
+		{
+			const endTime = this._bannedUsers[user.id].getTime();
+			const nowTime = new Date().getTime();
+			const remaining = endTime - nowTime;
+			if (remaining <= 0)
+			{
+				this.unbanUser(user);
+				return 0;
+			}
+			return Math.ceil(remaining / 1000);
+		}
+		return 0;
+	}
+
 	get name(): string {
 		return this._name;
 	}
@@ -91,11 +118,11 @@ export default class Channel {
 		return this._admins;
 	}
 
-	get bannedUsers(): UserIdSanctionTimeMap[] {
+	get bannedUsers(): UserIdSanctionMap {
 		return this._bannedUsers;
 	}
 
-	get mutedUsers(): UserIdSanctionTimeMap[] {
+	get mutedUsers(): UserIdSanctionMap {
 		return this._mutedUsers;
 	}
 
