@@ -49,7 +49,10 @@ function muteUser(): void {
 function toggleAdmin(): void {
 	if (!userSelected.value)
 		return;
-	console.log("making/removing admin")
+	if (!channelController.userIsChannelAdmin(currentChannel.value, userSelected.value))
+		channelController.makeChannelAdmin(userSelected.value, currentChannel.value.name);
+	else
+		channelController.removeChannelAdmin(userSelected.value, currentChannel.value.name);
 }
 
 </script>

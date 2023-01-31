@@ -3,7 +3,7 @@ import { Socket } from 'socket.io';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { ChannelsService } from './channels.service';
-import { ChannelMessagePayload, DirectMessagePayload, TimeUserChannelPayload } from './interfaces';
+import { ChannelMessagePayload, DirectMessagePayload, TimeUserChannelPayload, UserChannelPayload } from './interfaces';
 
 @WebSocketGateway({cors: true})
 export class ChatGateway {
@@ -59,5 +59,19 @@ export class ChatGateway {
 		const muter: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const muted: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
 		this.channelsService.muteUser(muter, muted, payload.channelName, payload.time);
+	}
+
+	@SubscribeMessage("set-admin")
+	setAdmin(client: Socket, payload: UserChannelPayload): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		const newAdmin: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
+		this.channelsService.setAdmin(user, newAdmin, payload.channelName);
+	}
+
+	@SubscribeMessage("unset-admin")
+	unsetAdmin(client: Socket, payload: UserChannelPayload): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		const admin: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
+		this.channelsService.unsetAdmin(user, admin, payload.channelName);
 	}
 }

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { GatewayManagerService } from "src/gateway-manager/gateway-manager.service";
 import { GatewayUser } from "src/gateway-manager/interfaces/gateway-user.interface";
 import Channel from "./channel.class";
-import { ChannelMessagePayload, ChatUser, TimeUserChannelPayload, UserChannelPayload } from "./interfaces";
+import { ChannelMessagePayload, ChatUser, TimeUserChannelPayload, UserArrayChannelPayload, UserChannelPayload } from "./interfaces";
 import { ChatService } from "./chat.service";
 
 interface ChannelPayload {
@@ -144,6 +144,45 @@ export class ChannelsService {
 		channel.muteUser(mutedUser, time);
 	}
 
+	setAdmin(user: GatewayUser, newAdmin: GatewayUser, channelName: string): void {
+		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel)
+			return;
+		if (user != channel.owner || !channel.hasUser(user) || !channel.hasUser(newAdmin))
+			return;
+
+		channel.setAdmin(newAdmin);
+
+		const admins: ChatUser[] = channel.admins.map((admin) => this.chatService.gatewayUserToChatUser(admin));
+		const payload: UserArrayChannelPayload = {
+			users: admins,
+			channelName
+		};
+
+		// FIXME: server emit
+		user.socket.broadcast.emit('admins-updated', payload);
+		user.socket.emit('admins-updated', payload);
+	}
+
+	unsetAdmin(user: GatewayUser, admin: GatewayUser, channelName: string): void {
+		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel)
+			return;
+		if (user != channel.owner || !channel.hasUser(user) || !channel.hasUser(admin))
+			return;
+		
+		channel.unsetAdmin(admin);
+
+		const admins: ChatUser[] = channel.admins.map((admin) => this.chatService.gatewayUserToChatUser(admin));
+		const payload: UserArrayChannelPayload = {
+			users: admins,
+			channelName
+		};
+		// FIXME: server emit
+		user.socket.broadcast.emit('admins-updated', payload);
+		user.socket.emit('admins-updated', payload);
+	}
+
 	private removeUserFromChannel(user: GatewayUser, channel: Channel): void {
 		if (this.deleteChannelIfWillBeEmpty(user, channel) === false)
 		{
@@ -156,6 +195,7 @@ export class ChannelsService {
 		if (channel.owner == user && channel.users.length == 1)
 		{
 			this.channels = this.channels.filter((c) => c.name != channel.name);
+			// FIXME: server emit
 			user.socket.emit('deleted-channel', channel.name);
 			user.socket.broadcast.emit('deleted-channel', channel.name);
 			return true;

@@ -25,12 +25,25 @@ export default class Channel {
 		this._users.push(owner);
 	}
 
+	setOwner(owner: GatewayUser): void {
+		if (!this.hasUser(owner))
+			return;
+		this._owner = owner;
+		this.setAdmin(owner);
+	}
+
 	setAdmin(admin: GatewayUser): void {
-		this._admins.push(admin);
+		if (!this.hasUser(admin))
+			return;
+		if (!this.userIsAdmin(admin))
+			this._admins.push(admin);
 	}
 
 	unsetAdmin(admin: GatewayUser): void {
-		this._admins = this._admins.filter((user) => user != admin);
+		if (!this.hasUser(admin))
+			return;
+		if (this.userIsAdmin(admin))
+			this._admins = this._admins.filter((user) => user != admin);
 	}
 
 	setPassword(): void {
@@ -42,29 +55,31 @@ export default class Channel {
 	}
 
 	banUser(user: GatewayUser, banTime: AmountOfSeconds): void {
+		if (!this.hasUser(user))
+			return;
 		const nowTime = new Date().getTime();
 		const endTime = nowTime + (banTime * 1000);
 		this._bannedUsers[user.id] = new Date(endTime);
 	}
 
 	unbanUser(user: GatewayUser): void {
+		if (!this.hasUser(user))
+			return;
 		delete(this._bannedUsers[user.id]);
 	}
 
 	muteUser(user: GatewayUser, muteTime: AmountOfSeconds): void {
+		if (!this.hasUser(user))
+			return;
 		const nowTime = new Date().getTime();
 		const endTime = nowTime + (muteTime * 1000);
 		this._mutedUsers[user.id] = new Date(endTime);
 	}
 
 	unmuteUser(user: GatewayUser): void {
+		if (!this.hasUser(user))
+			return;
 		delete(this._mutedUsers[user.id]);
-	}
-
-	hasUser(user: GatewayUser): boolean {
-		if (this._users.find((channelUser) => channelUser == user))
-			return true;
-		return false;
 	}
 
 	addUser(user: GatewayUser): void {
@@ -73,13 +88,15 @@ export default class Channel {
 
 	removeUser(user: GatewayUser): void {
 		if (this._owner === user && this._users.length > 1)
-		{
-			this._owner = this._users[1];
-			if (!this._admins.find((admin) => admin === this._owner))
-				this._admins.push(this._owner);
-		}
+			this.setOwner(this._users[1]);
 		this._users = this._users.filter((u) => u != user);
 		this.unsetAdmin(user);
+	}
+
+	hasUser(user: GatewayUser): boolean {
+		if (this._users.find((channelUser) => channelUser == user))
+			return true;
+		return false;
 	}
 
 	userIsAdmin(user: GatewayUser): boolean {

@@ -47,3 +47,5 @@ friend and the message. When the server receives the event it checks if the clie
 - **user-banned**: Event from server to client when a user attempts to join a channel but they have been previously banned from it. Within this event's payload, the client also gets the amount of time remaining for the ban to be lifted.
 - **mute-user**: Event from client to server to mute user.
 - **user-muted**: Event from server to client when a user attempts to write a message on a channel but they have been previously muted. Within this event's payload, the client also gets the amount of time remaining for the mute to be lifted.
+- **set-admin / unset-admin**: Events from client to server to set/unset a user as channel admin.
+- **admins-updated**: Event from server to client to notify all clients that a channel's admin has been set/unset.

@@ -16,6 +16,11 @@ interface UserChannelPayload {
 	channelName: ChannelName
 }
 
+interface UserArrayChannelPayload {
+	users: ChatUser[],
+	channelName: string
+}
+
 interface TimeUserChannelPayload {
 	user: ChatUser,
 	time: number,
@@ -48,6 +53,7 @@ class ChannelController {
 		user.socket?.on('channel-message', (message: ChannelMessagePayload) => this.receiveChannelMessage(message));
 		user.socket?.on('user-banned', (payload: TimeUserChannelPayload) => this.onUserBanned(payload));
 		user.socket?.on('user-muted', (payload: TimeUserChannelPayload) => this.onUserMuted(payload));
+		user.socket?.on('admins-updated', (payload: UserArrayChannelPayload) => this.onAdminsUpdated(payload));
 	}
 
 	createChannel(name: ChannelName): void {
@@ -77,6 +83,12 @@ class ChannelController {
     }
 
 	banUser(bannedUser: ChatUser, channelName: ChannelName, time: string): void {
+		if (!this.userIsChannelAdmin(this.channels[channelName]))
+		{
+			alert('you are not allowed to ban users');
+			return;
+		}
+
 		const banTime: number = +time;
 		if (banTime === 0 || isNaN(banTime))
 		{
@@ -97,6 +109,12 @@ class ChannelController {
 	}
 
 	muteUser(mutedUser: ChatUser, channelName: ChannelName, time: string): void {
+		if (!this.userIsChannelAdmin(this.channels[channelName]))
+		{
+			alert('you are not allowed to mute users');
+			return;
+		}
+
 		const muteTime: number = +time;
 		if (muteTime === 0 || isNaN(muteTime))
 		{
@@ -114,6 +132,40 @@ class ChannelController {
 			channelName: channelName
 		}
 		user.socket?.emit('mute-user', payload);
+	}
+
+	makeChannelAdmin(newAdmin: ChatUser, channelName: ChannelName) {
+		if (this.userIsChannelAdmin(this.channels[channelName], newAdmin))
+			return;
+
+		if (!this.userIsChannelOwner(this.channels[channelName]))
+		{
+			alert('you are not allowed to manage channel administrators');
+			return;
+		}
+
+		const payload: UserChannelPayload = { user: newAdmin, channelName };
+		user.socket?.emit('set-admin', payload);
+	}
+
+	removeChannelAdmin(admin: ChatUser, channelName: ChannelName) {
+		if (!this.userIsChannelAdmin(this.channels[channelName], admin))
+			return;
+
+		if (this.userIsChannelOwner(this.channels[channelName], admin))
+		{
+			alert('you cannot unset admin for the channel owner!');
+			return;
+		}
+
+		if (!this.userIsChannelOwner(this.channels[channelName]))
+		{
+			alert('you are not allowed to manage channel administrators');
+			return;
+		}
+		const payload: UserChannelPayload = { user: admin, channelName };
+		user.socket?.emit('unset-admin', payload);
+
 	}
 
 	private onAllChannels(payload: ChannelPayload[]): void {
@@ -167,6 +219,10 @@ class ChannelController {
 
 	private onUserMuted(payload: TimeUserChannelPayload): void {
 		alert(`oops! you are muted from '${payload.channelName}'. Your message has not been sent. Remaining mute time: ${payload.time} seconds`);
+	}
+
+	private onAdminsUpdated(payload: UserArrayChannelPayload): void {
+		this.channels[payload.channelName].admins = payload.users;
 	}
 
 	setCurrentChat(channelName: ChannelName): void {
