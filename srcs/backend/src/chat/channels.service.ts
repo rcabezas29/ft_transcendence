@@ -144,18 +144,23 @@ export class ChannelsService {
 		channel.muteUser(mutedUser, time);
 	}
 
-	// TODO: podria devolver boolean segun si lo ha borrado (true) o si ha eliminado el canal (false) por ejemplo y mejorar userLeaveChannel
-	// TODO: incluso meter el evento en la clase channel, y solo sacar la comrpobacion de borrar canales
 	private removeUserFromChannel(user: GatewayUser, channel: Channel): void {
-		channel.removeUser(user);
-		user.socket.to(channel.name).emit('user-left', this.channelToChannelPayload(channel));
+		if (this.deleteChannelIfWillBeEmpty(user, channel) === false)
+		{
+			channel.removeUser(user);
+			user.socket.to(channel.name).emit('user-left', this.channelToChannelPayload(channel));
+		}
+	}
 
-		if (channel.owner == user && channel.users.length < 1)
+	private deleteChannelIfWillBeEmpty(user: GatewayUser, channel: Channel): boolean {
+		if (channel.owner == user && channel.users.length == 1)
 		{
 			this.channels = this.channels.filter((c) => c.name != channel.name);
 			user.socket.emit('deleted-channel', channel.name);
 			user.socket.broadcast.emit('deleted-channel', channel.name);
+			return true;
 		}
+		return false;
 	}
 
 	private channelToChannelPayload(channel: Channel): ChannelPayload {
