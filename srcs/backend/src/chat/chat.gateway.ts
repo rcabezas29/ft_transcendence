@@ -54,4 +54,10 @@ export class ChatGateway {
 		this.channelsService.banUser(banner, banned, payload.channelName, payload.time);
 	}
 
+	@SubscribeMessage("mute-user")
+	muteUser(client: Socket, payload: TimeUserChannelPayload): void {
+		const muter: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		const muted: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
+		this.channelsService.muteUser(muter, muted, payload.channelName, payload.time);
+	}
 }

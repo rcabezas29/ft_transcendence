@@ -47,6 +47,7 @@ class ChannelController {
 		user.socket?.on('user-left', (channel: ChannelPayload) => this.onUserLeft(channel));
 		user.socket?.on('channel-message', (message: ChannelMessagePayload) => this.receiveChannelMessage(message));
 		user.socket?.on('user-banned', (payload: TimeUserChannelPayload) => this.onUserBanned(payload));
+		user.socket?.on('user-muted', (payload: TimeUserChannelPayload) => this.onUserMuted(payload));
 	}
 
 	createChannel(name: ChannelName): void {
@@ -93,6 +94,26 @@ class ChannelController {
 			channelName: channelName
 		}
 		user.socket?.emit('ban-user', payload);
+	}
+
+	muteUser(mutedUser: ChatUser, channelName: ChannelName, time: string): void {
+		const muteTime: number = +time;
+		if (muteTime === 0 || isNaN(muteTime))
+		{
+			alert('please insert a valid number (mute time)');
+			return;
+		}
+		if (mutedUser.id == user.id)
+		{
+			alert('you cannot mute yourself!');
+			return;
+		}
+		const payload: TimeUserChannelPayload = {
+			user: mutedUser,
+			time: muteTime,
+			channelName: channelName
+		}
+		user.socket?.emit('mute-user', payload);
 	}
 
 	private onAllChannels(payload: ChannelPayload[]): void {
@@ -142,6 +163,10 @@ class ChannelController {
 
 	private onUserBanned(payload: TimeUserChannelPayload): void {
 		alert(`oops! you are banned from '${payload.channelName}'. Remaining ban time: ${payload.time} seconds`);
+	}
+
+	private onUserMuted(payload: TimeUserChannelPayload): void {
+		alert(`oops! you are muted from '${payload.channelName}'. Your message has not been sent. Remaining mute time: ${payload.time} seconds`);
 	}
 
 	setCurrentChat(channelName: ChannelName): void {

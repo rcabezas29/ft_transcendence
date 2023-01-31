@@ -38,14 +38,15 @@ function banUser(): void {
 	amountOfBanTime.value = "";
 }
 
-function muteUser( ): void {
+function muteUser(): void {
 	if (!userSelected.value)
 		return;
-	console.log("muting")
+	
+	channelController.muteUser(userSelected.value, currentChannel.value.name, amountOfMuteTime.value);
 	amountOfMuteTime.value = "";
 }
 
-function toggleAdmin( ): void {
+function toggleAdmin(): void {
 	if (!userSelected.value)
 		return;
 	console.log("making/removing admin")
@@ -61,13 +62,13 @@ function toggleAdmin( ): void {
 			<br/>
 			<div v-if="channelController.userIsChannelAdmin(currentChannel)">
 				<form @submit.prevent="muteUser">
-					<input type="text" placeholder="Amount of time" v-model="amountOfMuteTime">
-					<button>Mute / Unmute</button>
+					<input type="text" placeholder="Amount of time in seconds" v-model="amountOfMuteTime">
+					<button>Mute</button>
 				</form>
 			</div>
 			<div v-if="channelController.userIsChannelAdmin(currentChannel)">
 				<form @submit.prevent="banUser">
-					<input type="text" placeholder="Amount of time" v-model="amountOfBanTime">
+					<input type="text" placeholder="Amount of time in seconds" v-model="amountOfBanTime">
 					<button>Ban</button>
 				</form>
 			</div>

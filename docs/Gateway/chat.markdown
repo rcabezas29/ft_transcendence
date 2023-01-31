@@ -43,5 +43,7 @@ friend and the message. When the server receives the event it checks if the clie
 - **user-left**: Event from server to client to notify members of a channel that a member left the channel.
 - **deleted-channel**: Event from server to clients to notify them of deleted channels (e.g. when a client leaves a channel and they were the only member => the channel is removed; or when a user deletes a channel)
 - **channel-message**: Event from client to server (to send message) or from server to client (to receive message)
-- **ban-user**: Event from client to server to ban user. The user is kicked out from the channel and added to the `banned_users` map of that channel. When a user is banned successfully, the server sends a `user-left` event to members of the channel.
-- **user-banned**: Event from server to client when a user tries to join a channel but they have been previously banned from it.
+- **ban-user**: Event from client to server to ban user. The user is kicked out from the channel and added to the `bannedUsers` map of that channel. When a user is banned successfully, the server sends a `user-left` event to members of the channel.
+- **user-banned**: Event from server to client when a user attempts to join a channel but they have been previously banned from it. Within this event's payload, the client also gets the amount of time remaining for the ban to be lifted.
+- **mute-user**: Event from client to server to mute user.
+- **user-muted**: Event from server to client when a user attempts to write a message on a channel but they have been previously muted. Within this event's payload, the client also gets the amount of time remaining for the mute to be lifted.

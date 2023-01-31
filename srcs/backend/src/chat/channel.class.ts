@@ -51,12 +51,14 @@ export default class Channel {
 		delete(this._bannedUsers[user.id]);
 	}
 
-	muteUser(): void {
-
+	muteUser(user: GatewayUser, muteTime: AmountOfSeconds): void {
+		const nowTime = new Date().getTime();
+		const endTime = nowTime + (muteTime * 1000);
+		this._mutedUsers[user.id] = new Date(endTime);
 	}
 
-	unmuteUser(): void {
-
+	unmuteUser(user: GatewayUser): void {
+		delete(this._mutedUsers[user.id]);
 	}
 
 	hasUser(user: GatewayUser): boolean {
@@ -95,6 +97,22 @@ export default class Channel {
 			if (remaining <= 0)
 			{
 				this.unbanUser(user);
+				return 0;
+			}
+			return Math.ceil(remaining / 1000);
+		}
+		return 0;
+	}
+
+	checkRemainingUserMuteTime(user: GatewayUser): number {
+		if (user.id in this._mutedUsers)
+		{
+			const endTime = this._mutedUsers[user.id].getTime();
+			const nowTime = new Date().getTime();
+			const remaining = endTime - nowTime;
+			if (remaining <= 0)
+			{
+				this.unmuteUser(user);
 				return 0;
 			}
 			return Math.ceil(remaining / 1000);

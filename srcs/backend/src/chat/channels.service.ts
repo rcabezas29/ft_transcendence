@@ -37,8 +37,20 @@ export class ChannelsService {
 		if (!channel || !channel.hasUser(fromUser))
 			return ;
 
-		//TODO: Check if user is muted
-		//if muted, notify the user
+		if (fromUser.id in channel.mutedUsers)
+		{
+			const remainingTime: number = channel.checkRemainingUserMuteTime(fromUser);
+			const payload: TimeUserChannelPayload = {
+				user: {id: fromUser.id, username: fromUser.username},
+				time: remainingTime,
+				channelName: channel.name
+			}
+			if (remainingTime > 0)
+			{
+				fromUser.socket.emit('user-muted', payload);
+				return;
+			}
+		}
 
 		payload.from = fromUser.username;
 		fromUser.socket.to(payload.channel).emit("channel-message", payload);
@@ -120,6 +132,16 @@ export class ChannelsService {
 		channel.banUser(bannedUser, time);
 		this.removeUserFromChannel(bannedUser, channel);
 		bannedUser.socket.emit('channel-left', this.channelToChannelPayload(channel));
+	}
+
+	muteUser(muterUser: GatewayUser, mutedUser: GatewayUser, channelName: string, time: number): void {
+		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel)
+			return;
+		if (!channel.userIsAdmin(muterUser) || !channel.hasUser(muterUser) || !channel.hasUser(mutedUser))
+			return;
+
+		channel.muteUser(mutedUser, time);
 	}
 
 	// TODO: podria devolver boolean segun si lo ha borrado (true) o si ha eliminado el canal (false) por ejemplo y mejorar userLeaveChannel
