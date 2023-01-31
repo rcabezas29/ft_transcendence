@@ -2,7 +2,6 @@ import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
-import Channel from './channel.class';
 import { ChannelsService } from './channels.service';
 import { ChannelMessagePayload, MessagePayload } from './interfaces/message-payload.interface';
 
@@ -24,17 +23,28 @@ export class ChatGateway {
 		toUser.socket.emit('direct-message', payloadToSend);
 	}
 
-	@SubscribeMessage("create-channel")
-	createChannel(client: Socket, channelName: string): void {
-		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.createChannel(channelName, user);
-	}
-
 	@SubscribeMessage("channel-message")
 	channelMessage(client: Socket, payload: ChannelMessagePayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		this.channelsService.channelMessage(user, payload);
 	}
 
+	@SubscribeMessage("create-channel")
+	createChannel(client: Socket, channelName: string): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.createChannel(channelName, user);
+	}
+
+	@SubscribeMessage("join-channel")
+	joinChannel(client: Socket, channelName: string): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.userJoinChannel(user, channelName);
+	}
+
+	@SubscribeMessage("leave-channel")
+	leaveChannel(client: Socket, channelName: string): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.userLeaveChannel(user, channelName);
+	}
 
 }
