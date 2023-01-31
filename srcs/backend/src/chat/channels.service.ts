@@ -85,9 +85,7 @@ export class ChannelsService {
 			user: this.chatService.gatewayUserToChatUser(user),
 			channelName: channelName
 		}
-		//FIXME: must send to channel members, not broadcast to everyone
-		// should the event using socket.io rooms
-		user.socket.broadcast.emit('new-user-joined', newUserPayload);
+		user.socket.to(channelName).emit('new-user-joined', newUserPayload);
 	}
 
 	userLeaveChannel(user: GatewayUser, channelName: string): void {
@@ -101,10 +99,7 @@ export class ChannelsService {
 
 	private removeUserFromChannel(user: GatewayUser, channel: Channel) {
 		channel.removeUser(user);
-
-		//FIXME: must send to channel members, not broadcast to everyone
-		// should the event using socket.io rooms
-		user.socket.broadcast.emit('user-left', this.channelToChannelPayload(channel));
+		user.socket.to(channel.name).emit('user-left', this.channelToChannelPayload(channel));
 
 		if (channel.owner == user && channel.users.length < 1)
 		{

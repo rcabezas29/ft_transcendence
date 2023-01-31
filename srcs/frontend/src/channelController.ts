@@ -63,16 +63,7 @@ class ChannelController {
         };
         user.socket?.emit('channel-message', payload);
 
-        const newMessage: Message = {
-            from: "you",
-            message: message
-        }
-		const channel = this.channels[toChannel];
-		if (!channel)
-			return;
-        const channelChat: Chat | null = this.channels[toChannel].chat;
-        if (channelChat)
-			channelChat.messages.push(newMessage);
+		this.addMessageToChannelChat(toChannel, "you", payload.message);
     }
 
 	private onAllChannels(payload: ChannelPayload[]): void {
@@ -117,21 +108,7 @@ class ChannelController {
 	}
 
 	private receiveChannelMessage(payload: ChannelMessagePayload): void {
-		console.log("getting message!")
-		const newMessage: Message = {
-			from: payload.from,
-			message: payload.message
-		};
-		const channel = this.channels[payload.channel];
-		if (!channel)
-			return;
-		const chat: Chat | null = this.channels[payload.channel].chat;
-        if (chat)
-		{
-			chat.messages.push(newMessage);
-			if (chat !== currentChat.value)
-           		chat.notification = true;
-		}
+		this.addMessageToChannelChat(payload.channel, payload.from, payload.message);
 	}
 
 	setCurrentChat(channelName: ChannelName): void {
@@ -163,6 +140,25 @@ class ChannelController {
 		if (channel.users.find(u => u.id === channelUser.id))
 			return true;
 		return false;
+	}
+
+	private addMessageToChannelChat(channelName: ChannelName, fromUser: string, message: string): void {
+		const channel = this.channels[channelName];
+		if (!channel)
+			return;
+
+		const newMessage: Message = {
+            from: fromUser,
+            message: message
+        }
+
+        const chat: Chat | null = channel.chat;
+        if (chat)
+		{
+			chat.messages.push(newMessage);
+			if (chat !== currentChat.value)
+				chat.notification = true;
+		}
 	}
 
 	private appendChatToMap(channelName: ChannelName): void {
