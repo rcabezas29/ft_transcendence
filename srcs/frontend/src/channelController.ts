@@ -57,6 +57,8 @@ class ChannelController {
 	}
 
 	createChannel(name: ChannelName): void {
+		if (name in this.channels)
+			return this.alertError('channel name already in use. Choose a different one');
 		user.socket?.emit('create-channel', name);
 	}
 

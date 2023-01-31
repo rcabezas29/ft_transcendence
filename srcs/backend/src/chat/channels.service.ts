@@ -24,38 +24,7 @@ export class ChannelsService {
         this.gatewayManagerService.addOnNewConnectionCallback((client: GatewayUser) => this.onNewConnection(client));
         this.gatewayManagerService.addOnDisconnectionCallback((client: GatewayUser) => this.onDisconnection(client));
 	}
-
-	getChannelbyName(channelName: string): Channel | null {
-		const channel: Channel | undefined = this.channels.find((channel) => channel.name === channelName);
-		if (channel)
-			return channel;
-		return null;
-	}
-
-	channelMessage(fromUser: GatewayUser, payload: ChannelMessagePayload) {
-		const channel: Channel = this.getChannelbyName(payload.channel);
-		if (!channel || !channel.hasUser(fromUser))
-			return ;
-
-		if (fromUser.id in channel.mutedUsers)
-		{
-			const remainingTime: number = channel.checkRemainingUserMuteTime(fromUser);
-			const payload: TimeUserChannelPayload = {
-				user: {id: fromUser.id, username: fromUser.username},
-				time: remainingTime,
-				channelName: channel.name
-			}
-			if (remainingTime > 0)
-			{
-				fromUser.socket.emit('user-muted', payload);
-				return;
-			}
-		}
-
-		payload.from = fromUser.username;
-		fromUser.socket.to(payload.channel).emit("channel-message", payload);
-	}
-
+	
     onNewConnection(client: GatewayUser): void {
 		const channelsPayload: ChannelPayload[] = this.channels.map(channel => this.channelToChannelPayload(channel));
 		client.socket.emit('all-channels', channelsPayload);
@@ -67,7 +36,17 @@ export class ChannelsService {
 		});
 	}
 
+	getChannelbyName(channelName: string): Channel | null {
+		const channel: Channel | undefined = this.channels.find((channel) => channel.name === channelName);
+		if (channel)
+			return channel;
+		return null;
+	}
+
 	createChannel(channelName: string, owner: GatewayUser): void {
+		if (this.getChannelbyName(channelName))
+			return;
+
 		const newChannel: Channel = new Channel(channelName, owner);
 
 		this.channels.push(newChannel);
@@ -120,6 +99,30 @@ export class ChannelsService {
 			user.socket.emit('channel-left', this.channelToChannelPayload(channel));
 
 		user.socket.leave(channelName);
+	}
+
+	channelMessage(fromUser: GatewayUser, payload: ChannelMessagePayload) {
+		const channel: Channel = this.getChannelbyName(payload.channel);
+		if (!channel || !channel.hasUser(fromUser))
+			return ;
+
+		if (fromUser.id in channel.mutedUsers)
+		{
+			const remainingTime: number = channel.checkRemainingUserMuteTime(fromUser);
+			const payload: TimeUserChannelPayload = {
+				user: {id: fromUser.id, username: fromUser.username},
+				time: remainingTime,
+				channelName: channel.name
+			}
+			if (remainingTime > 0)
+			{
+				fromUser.socket.emit('user-muted', payload);
+				return;
+			}
+		}
+
+		payload.from = fromUser.username;
+		fromUser.socket.to(payload.channel).emit("channel-message", payload);
 	}
 
 	banUser(bannerUser: GatewayUser, bannedUser: GatewayUser, channelName: string, time: number): void {
