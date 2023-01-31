@@ -8,6 +8,8 @@ import { GatewayManagerModule } from './gateway-manager/gateway-manager.module';
 import { ChatModule } from './chat/chat.module';
 import { FriendsModule } from './friends/friends.module';
 import { Friends } from './friends/entities/friend.entity';
+import { GameModule } from './game/game.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 @Module({
@@ -24,10 +26,12 @@ import { Friends } from './friends/entities/friend.entity';
       entities: [User, Friends],
       synchronize: true,
     }),
+	ScheduleModule.forRoot(),
     SeedModule,
     GatewayManagerModule,
     ChatModule,
     FriendsModule,
+    GameModule,
   ],
 })
 export class AppModule {}

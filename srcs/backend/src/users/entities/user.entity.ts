@@ -18,4 +18,7 @@ export class User {
 
   @Column()
   readonly password: string;
+
+  @Column({ default: 1000})
+  elo: number;
 }
