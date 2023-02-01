@@ -1,4 +1,4 @@
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { GatewayManagerService } from './gateway-manager.service';
 import type { Socket, Server } from 'socket.io'
 import { GatewayUser } from './interfaces/gateway-user.interface';
@@ -8,12 +8,14 @@ import { User } from 'src/users/entities/user.entity';
 
 @WebSocketGateway({cors: true})
 export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisconnect {
-
 	constructor(
 		private gatewayManagerService: GatewayManagerService,
 		private jwtService: JwtService,
 		private usersService: UsersService
 	) { }
+
+	@WebSocketServer()
+	server: Server;
 
 	async handleConnection(client: Socket, ...args: any[]) {
 		const clientToken = client.handshake.auth.token;
@@ -60,7 +62,7 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 			return;
 		const onDisconnectionCallbacks = this.gatewayManagerService.getOnDisconnectionCallback();
 		onDisconnectionCallbacks.forEach((callback) => {
-			callback(gatewayUser);
+			callback(gatewayUser, this.server);
 		});
 		this.gatewayManagerService.removeClient(client.id);
 	}
