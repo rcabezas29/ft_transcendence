@@ -19,7 +19,7 @@ class GameController {
 		user.socket?.on("game-found", (adversaryName: string) => { this.gameFound(adversaryName) });
 		user.socket?.on("start-game", () => { this.startGame() });
 		user.socket?.on("end-game", () => { this.endGame() });
-		user.socket?.on("game", (gamePayload) => { this.game(gamePayload) });
+		user.socket?.on("update-game", (gamePayload) => { this.updateGame(gamePayload) });
 	}
 
 	searchGame() {
@@ -38,9 +38,10 @@ class GameController {
 
 	endGame() {
 		this.state = GameState.End;
+		this.gameState = 0;
 	}
 
-	game(gamePayload: Date) {
+	updateGame(gamePayload: Date) {
 		this.gameState = new Date(gamePayload).getTime();
 	}
 
