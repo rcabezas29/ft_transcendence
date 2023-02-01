@@ -54,17 +54,24 @@ class User {
 		}
 	}
 
-	onConnect() {
+	async loginWithIntra(): Promise<void> {
+		const httpResponse = await fetch("http://localhost:3000/auth/login_intra");
+
+		console.log(httpResponse.json())
+		console.log(httpResponse.headers)
+	}
+
+	onConnect(): void {
 		this.socketId = this.socket?.id;
 		directMessageController.setEventsHandlers();
 		channelController.setEventsHandlers();
 	}
 
-	onDisconnect() {
+	onDisconnect(): void {
 		this.socketId = undefined;
 	}
 
-	onAlreadyConnected() {
+	onAlreadyConnected(): void {
 		this.alreadyConnected = true;
 	}
 

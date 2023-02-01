@@ -11,7 +11,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async create( createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
@@ -34,6 +34,14 @@ export class AuthService {
   private getJwtToken(payload: JwtPayload) {
     const access_token = this.jwtService.sign(payload);
     return access_token;
+  }
+
+  loginWithIntra() {
+    console.log('redirecting to api.intra.42.fr/oauth/authorize...')
+    return {
+      url: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-7d0fc8017a077516cab222b32f73b2e5cdcfe98ef91fb32da63ea4944f4a0900&redirect_uri=http%3A%2F%2Flocalhost%3A5173%2Fauth%2Foauth_callback&response_type=code',
+      statusCode: 302
+    }
   }
 
 }
