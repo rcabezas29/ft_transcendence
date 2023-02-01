@@ -11,6 +11,8 @@ import { ChannelMessagePayload,
 	UserArrayChannelPayload,
 	UserChannelPayload
 } from "./interfaces";
+import { Server } from 'socket.io';
+
 
 interface ChannelPayload {
 	name: string;
@@ -30,7 +32,7 @@ export class ChannelsService {
         private gatewayManagerService: GatewayManagerService
     ) {
         this.gatewayManagerService.addOnNewConnectionCallback((client: GatewayUser) => this.onNewConnection(client));
-        this.gatewayManagerService.addOnDisconnectionCallback((client: GatewayUser) => this.onDisconnection(client));
+        this.gatewayManagerService.addOnDisconnectionCallback((client: GatewayUser, server: Server) => this.onDisconnection(client, server));
 	}
 	
     onNewConnection(client: GatewayUser): void {
@@ -38,9 +40,10 @@ export class ChannelsService {
 		client.socket.emit('all-channels', channelsPayload);
 	}
 
-	onDisconnection(client: GatewayUser): void {
+	onDisconnection(client: GatewayUser, server: Server): void {
 		this.channels.forEach((channel) => {
-			this.removeUserFromChannel(client, channel);
+			if (this.deleteChannelIfWillBeEmpty(client, channel, server) === false)
+				this.removeUserFromChannel(client, channel);
 		});
 	}
 
@@ -103,19 +106,18 @@ export class ChannelsService {
 		user.socket.to(payload.channelName).emit('new-user-joined', newUserPayload);
 	}
 
-	userLeaveChannel(user: GatewayUser, channelName: string): void {
+	userLeaveChannel(user: GatewayUser, channelName: string, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel || !channel.hasUser(user))
 			return;
 
-		this.removeUserFromChannel(user, channel);
-		if (this.getChannelbyName(channelName)) // check in case the channel was removed too
-			user.socket.emit('channel-left', this.channelToChannelPayload(channel));
+		if (this.deleteChannelIfWillBeEmpty(user, channel, server) === false)
+			this.removeUserFromChannel(user, channel);
 
 		user.socket.leave(channelName);
 	}
 
-	channelMessage(fromUser: GatewayUser, payload: ChannelMessagePayload) {
+	channelMessage(fromUser: GatewayUser, payload: ChannelMessagePayload): void {
 		const channel: Channel = this.getChannelbyName(payload.channel);
 		if (!channel || !channel.hasUser(fromUser))
 			return ;
@@ -139,7 +141,7 @@ export class ChannelsService {
 		fromUser.socket.to(payload.channel).emit("channel-message", payload);
 	}
 
-	banUser(bannerUser: GatewayUser, bannedUser: GatewayUser, channelName: string, time: number): void {
+	banUser(bannerUser: GatewayUser, bannedUser: GatewayUser, channelName: string, time: number, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
 			return;
@@ -147,8 +149,11 @@ export class ChannelsService {
 			return;
 
 		channel.banUser(bannedUser, time);
-		this.removeUserFromChannel(bannedUser, channel);
-		bannedUser.socket.emit('channel-left', this.channelToChannelPayload(channel));
+
+		if (this.deleteChannelIfWillBeEmpty(bannedUser, channel, server) === false)
+			this.removeUserFromChannel(bannedUser, channel);
+		
+		bannedUser.socket.leave(channelName);
 	}
 
 	muteUser(muterUser: GatewayUser, mutedUser: GatewayUser, channelName: string, time: number): void {
@@ -161,7 +166,7 @@ export class ChannelsService {
 		channel.muteUser(mutedUser, time);
 	}
 
-	setAdmin(user: GatewayUser, newAdmin: GatewayUser, channelName: string): void {
+	setAdmin(user: GatewayUser, newAdmin: GatewayUser, channelName: string, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
 			return;
@@ -175,13 +180,10 @@ export class ChannelsService {
 			users: admins,
 			channelName
 		};
-
-		// FIXME: server emit
-		user.socket.broadcast.emit('admins-updated', payload);
-		user.socket.emit('admins-updated', payload);
+		server.emit('admins-updated', payload);
 	}
 
-	unsetAdmin(user: GatewayUser, admin: GatewayUser, channelName: string): void {
+	unsetAdmin(user: GatewayUser, admin: GatewayUser, channelName: string, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
 			return;
@@ -195,12 +197,10 @@ export class ChannelsService {
 			users: admins,
 			channelName
 		};
-		// FIXME: server emit
-		user.socket.broadcast.emit('admins-updated', payload);
-		user.socket.emit('admins-updated', payload);
+		server.emit('admins-updated', payload);
 	}
 
-	setPassword(user: GatewayUser, payload: PasswordChannelPayload): void {
+	setPassword(user: GatewayUser, payload: PasswordChannelPayload, server: Server): void {
 		const channel: Channel = this.getChannelbyName(payload.channelName);
 		if (!channel)
 			return;
@@ -215,12 +215,10 @@ export class ChannelsService {
 			password: true,
 			channelName: channel.name
 		}
-		// FIXME: server emit
-		user.socket.broadcast.emit('password-updated', clientPayload);
-		user.socket.emit('password-updated', clientPayload);
+		server.emit('password-updated', clientPayload)
 	}
 
-	unsetPassword(user: GatewayUser, channelName: string): void {
+	unsetPassword(user: GatewayUser, channelName: string, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
 			return;
@@ -233,26 +231,20 @@ export class ChannelsService {
 			password: false,
 			channelName: channelName
 		}
-		// FIXME: server emit
-		user.socket.broadcast.emit('password-updated', clientPayload);
-		user.socket.emit('password-updated', clientPayload);
+		server.emit('password-updated', clientPayload)
 	}
 
 	private removeUserFromChannel(user: GatewayUser, channel: Channel): void {
-		if (this.deleteChannelIfWillBeEmpty(user, channel) === false)
-		{
-			channel.removeUser(user);
-			user.socket.to(channel.name).emit('user-left', this.channelToChannelPayload(channel));
-		}
+		channel.removeUser(user);
+		user.socket.emit('channel-left', this.channelToChannelPayload(channel));
+		user.socket.to(channel.name).emit('user-left', this.channelToChannelPayload(channel));
 	}
 
-	private deleteChannelIfWillBeEmpty(user: GatewayUser, channel: Channel): boolean {
+	private deleteChannelIfWillBeEmpty(user: GatewayUser, channel: Channel, server: Server): boolean {
 		if (channel.owner == user && channel.users.length == 1)
 		{
 			this.channels = this.channels.filter((c) => c.name != channel.name);
-			// FIXME: server emit
-			user.socket.emit('deleted-channel', channel.name);
-			user.socket.broadcast.emit('deleted-channel', channel.name);
+			server.emit('deleted-channel', channel.name)
 			return true;
 		}
 		return false;

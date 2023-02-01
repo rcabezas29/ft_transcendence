@@ -7,6 +7,6 @@ import { UsersModule } from 'src/users/users.module';
 @Module({
 	imports: [AuthModule, UsersModule], 
 	providers: [GatewayManagerService, GatewayManagerGateway],
-	exports: [GatewayManagerService]
+	exports: [GatewayManagerService, GatewayManagerGateway]
 })
 export class GatewayManagerModule {}

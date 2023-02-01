@@ -187,6 +187,8 @@ class ChannelController {
 	unsetPassword(channelName: ChannelName): void {
 		if (!this.userIsChannelOwner(this.channels[channelName]))
 			return this.alertError('you are not allowed to manage this channel\'s password');
+		if (this.channels[channelName].isPrivate === false)
+			return;
 
 		user.socket?.emit('unset-password', channelName);
 	}
