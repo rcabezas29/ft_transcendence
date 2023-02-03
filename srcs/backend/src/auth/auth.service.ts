@@ -45,8 +45,19 @@ export class AuthService {
 		  throw new UnauthorizedException(response);
 
     const userEmail = response.email;
-
-    return {codigo: "ok!!!"}
+    const username = response.login;
+    let userId: number;
+    
+    const foundUser = await this.usersService.findOneByEmail(userEmail);
+    if (!foundUser) {
+      let createdUser = await this.usersService.createWithoutPassword(userEmail, username);
+      userId = createdUser.id;
+    }
+    else
+      userId = foundUser.id;
+    const jwtPayload: JwtPayload = { id: userId };
+    const jwtToken = this.getJwtToken(jwtPayload);
+    return { access_token: jwtToken };
   }
 
   private getJwtToken(payload: JwtPayload) {

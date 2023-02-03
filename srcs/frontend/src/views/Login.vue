@@ -29,7 +29,7 @@
 			message.value = response.message;
 			return;
 		}
-			
+
 		user.auth(response.access_token);
 		message.value = "Success";
 		messageClass.value = "success-message";
@@ -40,7 +40,7 @@
 	function loginWithIntra() {
 		user.loginWithIntra();
 	}
-	
+
 </script>
 
 <template>

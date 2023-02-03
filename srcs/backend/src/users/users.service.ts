@@ -21,8 +21,20 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    // TODO: comprobar que el username que han elegido no coincide con el de NADIE de la intra
     try {
       const user = await this.usersRepository.save(createUserDto);
+      const { password, ...result } = user;
+      return result;
+    } catch (e) {
+      throw new BadRequestException('Failed to create user');
+    }
+  }
+
+  async createWithoutPassword(email: string, username: string) {
+    const newUser = { email, username, password: "" };
+    try {
+      const user = await this.usersRepository.save(newUser);
       const { password, ...result } = user;
       return result;
     } catch (e) {
@@ -50,8 +62,8 @@ export class UsersService {
     return await this.usersRepository.findOneBy({ username: username });
   }
 
-  findOneByEmail(email: string) {
-    return this.usersRepository.findOneBy({ email: email });
+  async findOneByEmail(email: string) {
+    return await this.usersRepository.findOneBy({ email: email });
   }
 
   async findUserFriendsByStatus(id: number, status: FriendshipStatus) {

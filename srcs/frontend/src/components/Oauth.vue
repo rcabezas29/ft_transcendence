@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import router from '@/router';
+import { user } from '@/user';
 import { onBeforeMount, ref } from 'vue';
 
-const message = ref("");
-const messageClass = ref("error-message");
+const username = ref("");
+const errorMessage = ref("");
 
 onBeforeMount(async () => {
 	const params = new URLSearchParams(window.location.search);
@@ -20,27 +22,31 @@ onBeforeMount(async () => {
 
 	if (httpResponse.status != 200)
 	{
-		message.value = response;
+		errorMessage.value = response;
 		return;
 	}
-		
-	message.value = "success!"
-	messageClass.value = "success-message"
+	user.auth(response.access_token);
+	//router.replace({ "name": "home"});
 });
+
+function handleSubmit() {
+	
+}
 	
 </script>
 
 <template>
 	oauth component!
-	<div :class="messageClass">{{ message }}</div>
+	<div class="error-message">{{ errorMessage }}</div>
+	<form @submit.prevent="handleSubmit">
+		<label>welcome! please enter a username: </label>
+		<input type="text" v-model="username"/>
+		<button>Register</button>
+	</form>
 </template>
 
 <style scoped>
 	.error-message {
 		color: red;
-	}
-
-	.success-message {
-		color: green;
 	}
 </style>
