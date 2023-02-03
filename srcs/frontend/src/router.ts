@@ -3,6 +3,7 @@ import Login from './views/Login.vue';
 import Chat from './views/Chat.vue';
 import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
+import Oauth from './components/Oauth.vue';
 import { authenticationGuard, loggedUserGuard } from './guards/index';
 import { createRouter, createWebHistory } from "vue-router";
 
@@ -23,6 +24,11 @@ const routes = [
 		path: '/register',
 		component: Register,
 		beforeEnter: loggedUserGuard
+	},
+	{
+		name: 'oauth',
+		path: '/oauth',
+		component: Oauth,
 	},
 	{
 		name: 'home',

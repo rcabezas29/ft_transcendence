@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -31,17 +31,50 @@ export class AuthService {
     };
   }
 
+  async loginWithIntra(code: string, state: string) {
+    if (state != process.env.STATE_STRING)
+      throw new UnauthorizedException('state strings do not match');
+
+    const intraToken = await this.getIntraToken(code);
+    
+    const httpResponse = await fetch("https://api.intra.42.fr/v2/me", {
+      headers: {"Authorization": `Bearer ${intraToken}`}
+    });
+    const response = await httpResponse.json();
+    if (httpResponse.status != 200)
+		  throw new UnauthorizedException(response);
+
+    const userEmail = response.email;
+
+    return {codigo: "ok!!!"}
+  }
+
   private getJwtToken(payload: JwtPayload) {
     const access_token = this.jwtService.sign(payload);
     return access_token;
   }
 
-  loginWithIntra() {
-    console.log('redirecting to api.intra.42.fr/oauth/authorize...')
-    return {
-      url: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-7d0fc8017a077516cab222b32f73b2e5cdcfe98ef91fb32da63ea4944f4a0900&redirect_uri=http%3A%2F%2Flocalhost%3A5173%2Fauth%2Foauth_callback&response_type=code',
-      statusCode: 302
-    }
-  }
+  private async getIntraToken(code: string) {
+    const postBody = {
+      grant_type: 'authorization_code',
+      client_id: process.env.INTRA_API_UID,
+      client_secret: process.env.INTRA_API_SECRET,
+      code: code,
+      redirect_uri: 'http://localhost:5173/oauth',
+      state: process.env.STATE_STRING
+    };
 
+    const httpResponse = await fetch('https://api.intra.42.fr/oauth/token', {
+      method: "POST",
+      body: JSON.stringify(postBody),
+      headers: {"content-type": "application/json"}
+    });
+    const response = await httpResponse.json();
+
+    if (httpResponse.status != 200)
+		  throw new UnauthorizedException(response);
+
+    const token = response.access_token;
+    return token;
+  }
 }

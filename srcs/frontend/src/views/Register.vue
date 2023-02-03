@@ -36,6 +36,10 @@
 		messageClass.value = "success-message";
 
 	}
+
+	function loginWithIntra() {
+		user.loginWithIntra();
+	}
 	
 </script>
 
@@ -54,6 +58,9 @@
 		<br/>
 		<button>Register</button>
 	</form>
+	<div class="login-42-button">
+		<button @click="loginWithIntra">Or login with 42</button>
+	</div>
 </template>
 
 <style scoped>
@@ -63,5 +70,13 @@
 
 	.success-message {
 		color: green;
+	}
+
+	.login-42-button {
+		margin-top: 10px;
+	}
+
+	.login-42-button > button {
+		background-color: #44dacb;
 	}
 </style>

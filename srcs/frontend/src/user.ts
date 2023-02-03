@@ -55,10 +55,12 @@ class User {
 	}
 
 	async loginWithIntra(): Promise<void> {
-		const httpResponse = await fetch("http://localhost:3000/auth/login_intra");
-
-		console.log(httpResponse.json())
-		console.log(httpResponse.headers)
+		const authorizeURL: string = import.meta.env.VITE_INTRA_API_AUTHORIZE_URL;
+		const stateString: string = import.meta.env.VITE_STATE_STRING;
+		if (authorizeURL)
+			window.location.href = `${authorizeURL as string}&scope=public&state=${stateString}`;
+		else
+			console.log("INTRA_API_AUTHORIZE_URL environment variable unset");
 	}
 
 	onConnect(): void {
@@ -111,7 +113,6 @@ class User {
 		this.socket = null;
 		router.replace({ "name": "login" });
 	}
-
 }
 
 export const user = reactive<User>(new User);

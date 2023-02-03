@@ -1,10 +1,9 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Redirect, Header } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Query } from '@nestjs/common';
 import { Request } from 'express';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard, LocalAuthGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
@@ -27,16 +26,8 @@ export class AuthController {
 	  return { status: "OK", message: "token is valid"};
   }
 
-  @Get('login_intra')
-  @Header('Access-Control-Allow-Origin', '*')
-  @Redirect()
-  loginWithIntra() {
-    return this.authService.loginWithIntra();
+  @Get('oauth')
+  loginWithIntra(@Query('code') code: string, @Query('state') state: string) {
+    return this.authService.loginWithIntra(code, state);
   }
-
-  @Get('oauth_callback')
-  oauthCallback(){
-    return {estaOk: "todo ok"}
-  }
-
 }

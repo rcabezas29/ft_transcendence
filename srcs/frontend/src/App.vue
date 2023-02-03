@@ -1,12 +1,12 @@
 <script setup lang="ts">
 	import "./assets/main.css"
-	import { user, type JwtPayload } from "./user";
+	import { user } from "./user";
 	import router from './router';
 	import { onBeforeMount } from "vue";
 	import AlreadyConnected from './views/AlreadyConnected.vue'
 
 	onBeforeMount(async () => {
-		const validLocalStorageToken = await user.checkLocalStorage();
+		/*const validLocalStorageToken = await user.checkLocalStorage();
 
 		if (!validLocalStorageToken) {
 			user.logout();
@@ -15,7 +15,7 @@
 		}
 
 		if (validLocalStorageToken)
-			await user.auth(validLocalStorageToken);
+			await user.auth(validLocalStorageToken);*/
 	});
 
 	const routes = router.getRoutes();
