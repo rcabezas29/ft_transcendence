@@ -26,6 +26,9 @@ class User {
 	public username: string = '';
 
 	async auth(access_token: string): Promise<void> {
+		if (this.token && this.token === access_token)
+			return;
+
 		this.token = access_token;
 		localStorage.setItem("token", access_token);
 		try {
@@ -102,16 +105,15 @@ class User {
 		return localStorageToken;
 	}
 
-	isLogged(): boolean {	
+	isLogged(): boolean {
 		return this.token != null;
 	}
-	
+
 	logout(): void {
 		localStorage.removeItem("token");
 		this.token = null;
 		this.socket?.disconnect();
 		this.socket = null;
-		router.replace({ "name": "login" });
 	}
 }
 

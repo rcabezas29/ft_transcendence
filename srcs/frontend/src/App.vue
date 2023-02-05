@@ -2,23 +2,14 @@
 	import "./assets/main.css"
 	import { user } from "./user";
 	import router from './router';
-	import { onBeforeMount } from "vue";
 	import AlreadyConnected from './views/AlreadyConnected.vue'
 
-	onBeforeMount(async () => {
-		/*const validLocalStorageToken = await user.checkLocalStorage();
-
-		if (!validLocalStorageToken) {
-			user.logout();
-			router.replace({"name": "login"});
-			return;
-		}
-
-		if (validLocalStorageToken)
-			await user.auth(validLocalStorageToken);*/
-	});
-
 	const routes = router.getRoutes();
+
+	function logoutUser(): void {
+		user.logout();
+		router.replace({ "name": "login" });
+	}
 
 </script>
 
@@ -46,7 +37,7 @@
 					<router-link :to="route.path">{{ route.name }}</router-link>
 				</div>
 			</div>
-			<button @click="user.logout" v-if="user.isLogged()">Logout</button>
+			<button @click="logoutUser" v-if="user.isLogged()">Logout</button>
 		</div>
 
 		<router-view/>

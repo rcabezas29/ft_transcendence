@@ -26,23 +26,15 @@ onBeforeMount(async () => {
 		return;
 	}
 	user.auth(response.access_token);
-	//router.replace({ "name": "home"});
+	router.replace({ "name": "home"});
 });
 
-function handleSubmit() {
-	
-}
-	
 </script>
 
 <template>
 	oauth component!
 	<div class="error-message">{{ errorMessage }}</div>
-	<form @submit.prevent="handleSubmit">
-		<label>welcome! please enter a username: </label>
-		<input type="text" v-model="username"/>
-		<button>Register</button>
-	</form>
+	please wait while you're being logged in, you will be redirected in a few moments...
 </template>
 
 <style scoped>

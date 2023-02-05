@@ -5,7 +5,8 @@ import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
 import Oauth from './components/Oauth.vue';
 import { authenticationGuard, loggedUserGuard } from './guards/index';
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, useRoute } from "vue-router";
+import { user } from './user';
 
 const routes = [
 	{
@@ -49,5 +50,19 @@ const router = createRouter({
 	routes,
 });
 
+router.beforeEach(async (to, from) => {
+	if (user.token) {
+		const validToken = await user.validateToken(user.token);
+		if (!validToken)
+			user.logout();
+		return;
+	}
+
+	const validLocalStorageToken = await user.checkLocalStorage();
+	if (!validLocalStorageToken)
+		user.logout();
+	else
+		await user.auth(validLocalStorageToken);
+});
 
 export default router;

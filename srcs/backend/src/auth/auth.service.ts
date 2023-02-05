@@ -47,7 +47,7 @@ export class AuthService {
     const userEmail = response.email;
     const username = response.login;
     let userId: number;
-    
+
     const foundUser = await this.usersService.findOneByEmail(userEmail);
     if (!foundUser) {
       let createdUser = await this.usersService.createWithoutPassword(userEmail, username);
@@ -57,6 +57,7 @@ export class AuthService {
       userId = foundUser.id;
     const jwtPayload: JwtPayload = { id: userId };
     const jwtToken = this.getJwtToken(jwtPayload);
+    
     return { access_token: jwtToken };
   }
 
