@@ -24,5 +24,6 @@ against cross-site request forgery attacks.
 * as the value of the first variable, you should write the long url that you can find in
 your [app's page](https://profile.intra.42.fr/oauth/applications) (it looks like this but longer:
 `https://api.intra.42.fr/oauth/authorize/your_formatted_url`).
+* as the value of the second variable, you should write the exact same string you put into the other `.env`'s `STATE_STRING` variable.
 * (if necessary, do not forget to bring down the docker-compose container and bring it back up)
 

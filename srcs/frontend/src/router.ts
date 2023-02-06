@@ -30,6 +30,7 @@ const routes = [
 		name: 'oauth',
 		path: '/oauth',
 		component: Oauth,
+		beforeEnter: loggedUserGuard
 	},
 	{
 		name: 'home',
