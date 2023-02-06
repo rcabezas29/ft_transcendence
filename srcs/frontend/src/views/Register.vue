@@ -1,4 +1,5 @@
 <script setup lang="ts">
+	import router from "@/router";
 	import { ref } from "vue"
 	import { user } from "../user";
 
@@ -9,32 +10,26 @@
 	const messageClass = ref("error-message");
 
 	async function handleSubmit(e: Event) {
-
-		const createUser = {
-			username: username.value,
-			email: email.value,
-			password: password.value
-		};
-
-		const httpResponse = await fetch("http://localhost:3000/auth/register", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(createUser)
-		});
-
-		const response = await httpResponse.json();
-		
-		if (httpResponse.status != 201) {
+		const { registeredSuccessfully, response } = await user.register(username.value, email.value, password.value);
+	
+		if (!registeredSuccessfully) {
 			message.value = response.message;
 			return;
 		}
-			
-		user.auth(response.access_token);
+
+		const loginRet = await user.login(email.value, password.value);
+		if (!loginRet.loggedSuccessfully)
+		{
+			message.value = loginRet.response.message;
+			return;
+		}
+
+		const accessToken = loginRet.response.access_token;
+
+		user.auth(accessToken);
 		message.value = "Success";
 		messageClass.value = "success-message";
-
+		router.replace({ "name": "home"});
 	}
 
 	function loginWithIntra() {

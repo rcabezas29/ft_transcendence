@@ -4,7 +4,6 @@ import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
 import { directMessageController } from './directMessageController';
 import { channelController } from './channelController';
-import router from './router';
 import { gameController } from './gameController';
 
 export interface JwtPayload {
@@ -48,6 +47,7 @@ class User {
 
 		} catch (error) {
 			console.log(error, 'error from decoding token');
+			return ;
 		}
 
 		if (!this.socket) {
@@ -56,6 +56,47 @@ class User {
 			this.socket.on("disconnect", () => { this.onDisconnect(); });
 			this.socket.on("alreadyConnected", () => { this.onAlreadyConnected(); });
 		}
+	}
+
+	async register(username: string, email: string, password: string) {
+		const createUser = { username, email, password };
+
+		const httpResponse = await fetch("http://localhost:3000/auth/register", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(createUser)
+		});
+
+		const response = await httpResponse.json();
+
+		let registeredSuccessfully = true;
+	
+		if (httpResponse.status != 201) {
+			registeredSuccessfully = false
+		}
+		return { registeredSuccessfully, response }
+	}
+
+	async login(email: string, password: string) {
+		const loginUser = { email, password };
+
+		const httpResponse = await fetch("http://localhost:3000/auth/login", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(loginUser)
+		});
+
+		const response = await httpResponse.json();
+		let loggedSuccessfully = true;
+		
+		if (httpResponse.status != 201) {
+			loggedSuccessfully = false;
+		}
+		return { loggedSuccessfully, response }
 	}
 
 	async loginWithIntra(): Promise<void> {

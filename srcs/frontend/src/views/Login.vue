@@ -9,23 +9,9 @@
 	const messageClass = ref("error-message");
 
 	async function handleSubmit(e: Event) {
-
-		const loginUser = {
-			email: email.value,
-			password: password.value
-		};
-
-		const httpResponse = await fetch("http://localhost:3000/auth/login", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify(loginUser)
-		});
-
-		const response = await httpResponse.json();
-		
-		if (httpResponse.status != 201) {
+		const { loggedSuccessfully, response } = await user.login(email.value, password.value);
+		if (!loggedSuccessfully)
+		{
 			message.value = response.message;
 			return;
 		}
