@@ -11,17 +11,22 @@ import { In, Repository } from 'typeorm';
 import { FriendsService } from 'src/friends/friends.service';
 import { Friends } from 'src/friends/entities/friend.entity';
 import { FriendshipStatus } from 'src/friends/entities/friend.entity';
+import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-	private friendsService: FriendsService
+	  private friendsService: FriendsService,
+    private intraAuthService: IntraAuthService
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    // TODO: comprobar que el username que han elegido no coincide con el de NADIE de la intra
+    const usernameExists = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
+    if (usernameExists)
+      throw new BadRequestException('Username already in use. Please choose a different one.');
+
     try {
       const user = await this.usersRepository.save(createUserDto);
       const { password, ...result } = user;

@@ -8,10 +8,11 @@ import { GatewayManagerModule } from './gateway-manager/gateway-manager.module';
 import { ChatModule } from './chat/chat.module';
 import { FriendsModule } from './friends/friends.module';
 import { Friends } from './friends/entities/friend.entity';
-
+import { IntraAuthModule } from './intra-auth/intra-auth.module';
 
 @Module({
   imports: [
+    IntraAuthModule,
     AuthModule,
     UsersModule,
     TypeOrmModule.forRoot({
