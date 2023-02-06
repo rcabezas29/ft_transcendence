@@ -5,4 +5,5 @@ export interface GatewayUser {
 	username: string,
 	socket: Socket,
 	token: string,
+	elo?: number,
 }
