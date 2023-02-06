@@ -18,6 +18,8 @@ The `gateway-manager.service` is injected into `chat.gateway`, use it to manage 
 
 ## Event relation between the Frontend and Backend
 
+### Direct messages
+
 - **On client connection to the server**: the server sends to the connected client a `connected-friends` event with an array of connected friends.
 Any friend of the connected client who was already online when the new client connected will receive `friend-online` event from the server with the
 newly connected client.
@@ -29,27 +31,46 @@ client.
 friend and the message. When the server receives the event it checks if the client and the addressee are friends. If that is the case the server sends a 
 `direct-message` event to the addressee with the sender and the message.
 
-## Channels
+### Channels
 
-- **channel-create**: Event from client to server to create a channel
-- **channel-created**: Event from server to client to notify the creator of a channel that the creation was successful.
-- **new-channel**: Event from server to client when a new channel is created (but the client did not create it), so that the client can include it in their map of `channels`.
-- **all-channels**: Event from server to client containing an array of all existing channels (without a `Chat`). Sent to the client when he joins.
-- **join-channel**: Event from client to server to join a channel.
-- **channel-joined**: Event from server to client to notify the user that they have joined a channel successfully.
-- **new-user-joined**: Event from server to clients members of a channel, to notify them that a new user has joined the channel.
-- **leave-channel**: Event from client to server to leave a channel.
-- **channel-left**: Event from server to client to notify the user that they have left a channel successfully.
-- **user-left**: Event from server to client to notify members of a channel that a member left the channel.
-- **deleted-channel**: Event from server to clients to notify them of deleted channels (e.g. when a client leaves a channel and they were the only member => the channel is removed; or when a user deletes a channel)
-- **channel-message**: Event from client to server (to send message) or from server to client (to receive message)
-- **ban-user**: Event from client to server to ban user. The user is kicked out from the channel and added to the `bannedUsers` map of that channel. When a user is banned successfully, the server sends a `user-left` event to members of the channel.
-- **user-banned**: Event from server to client when a user attempts to join a channel but they have been previously banned from it. Within this event's payload, the client also gets the amount of time remaining for the ban to be lifted.
-- **mute-user**: Event from client to server to mute user.
-- **user-muted**: Event from server to client when a user attempts to write a message on a channel but they have been previously muted. Within this event's payload, the client also gets the amount of time remaining for the mute to be lifted.
-- **set-admin / unset-admin**: Events from client to server to set/unset a user as channel admin.
-- **admins-updated**: Event from server to client to notify all clients that a channel's admin has been set/unset.
-- **set-password**: Event from client to server to set/change a channel's password.
-- **unset-password**: Event from client to server to unset a channel's password.
-- **password-updated**: Event from server to clients to notify everyone that a channel's password has been set/changed/unset. `true` if set, `false` if unset (so client can know whether the channel is password-protected or not)
-- **wrong-password**: Event from server to client when a client attempts to join a password-protected channel using an incorrect password.
+- **On client connection to the server**: the server sends to the connected client an `all-channels` event,
+containing an array of all existing channels (without a `Chat`).
+- **On channel creation**: the client sends a `channel-create` event to the server, and the server sends
+back a `channel-created` event to notify the creator of the channel that the creation was successful. The
+creator becomes the channel owner. The server also sends a `new-channel` event to all other clients
+(except the creator), so that they can include the newly-created channel in their map of `channels`.
+- **Join channel**: the client sends a `join-channel` event to the server to join a channel. The server
+sends back a `channel-joined` event to notify the user that they have joined the channel successfully. The
+server also sends a `new-user-joined` event to the other clients members of the channel, to notify them that a new
+user has joined the channel.
+- **Leave channel**: the client sends a `leave-channel` event to the server to leave a channel. If the user was
+the channel owner, the next user in the channel's `users` array becomes the owner. If the user was
+the last member of the channel, the channel is deleted. Otherwise, the server sends back a `channel-left`
+event to notify the user that they have left the channel successfully. The server also sends a
+`user-left` event to tell the other members of the channel that the user left the channel. 
+- **On channel deletion**: the server sends a `deleted-channel` event to the clients to notify them of deleted
+channels.
+- **On channel message**: when a client sends a message to a channel,  the client sends to the server a
+`channel-message` event containing the name of the channel, the username of the sender and the message. 
+The server checks if the client is muted and, if that is not the case, sends a `channel-message` event to
+the room of that channel.
+- **On user ban**: the client sends a `ban-user` event to the server to ban a user. The user is kicked out
+from the channel and added to the `bannedUsers` map of that channel. When a user is banned successfully,
+the server sends a `user-left` event to members of the channel. Only channel admins can
+ban other users. If a client attempts to join a channel but they have been previously banned from it,
+the server will send a `user-banned` event to the client. Within this
+event's payload, the client also gets the amount of time remaining for the ban to be lifted.
+- **On user mute**: the client sends a `mute-user` to the server to mute a user. Only channel admins can
+mute other users. When a client attempts to write a message on a channel but they have been
+previously muted, the server will send a `user-muted` event to the client. Within this event's
+payload, the client also gets the amount of time remaining for the mute to be lifted.
+- **On admin set/unset**: the client sends a `set-admin` or `unset-admin` to the server in order to set or unset
+a user as channel admin. Then, the server sends a `admins-updated` event to notify all clients that a channel's
+admin has been set/unset. Only channel owners can set/unset admins.
+- **Passwords**: the client sends a `set-password` to the server to set/change a channel's password.
+The client sends an `unset-password` event to the server to unset a channel's password (i.e. make it public again).
+Only channel owners can manage a channel's password. When a channel's password has been
+set/changed/unset successfully, the server sends a `password-updated` event to all
+clients, its payload contains a bool `password` property which is `true` if the password is set, or `false` if unset
+(so client can know whether the channel is password-protected or not). If a client attemps to join a
+password-protected channel using an incorrect password, the server will send a `wrong-password` event to the client.
