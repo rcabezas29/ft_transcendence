@@ -53,6 +53,21 @@ services:
     restart: always
     ports:
       - 8080:8080
+  pixelizer:
+    build:
+      context: ./requirements/pixelizer
+      dockerfile: Dockerfile
+    container_name: pixelizer
+    tty: true
+    restart: always
+    volumes:
+      - type: bind
+        source: ./srcs/pixelizer
+        target: /app
+    ports:
+      - 3001:3001
+    environment:
+      - WORK_PATH=/app
 
 volumes:
     database_volume:
