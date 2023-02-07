@@ -1,4 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { createWriteStream, writeFile, WriteFileOptions, WriteStream } from 'fs';
+import { join } from 'path';
+import { pipeline, Readable, Stream } from 'stream';
 
 @Injectable()
 export class IntraAuthService {
@@ -58,8 +61,9 @@ export class IntraAuthService {
     
         const userEmail = response.email;
         const username = response.login;
+		const userImageURL = response.image.link;
         
-        return { email: userEmail, username };
+        return { email: userEmail, username, userImageURL };
     }
 
     private async authorizeIntraApp(): Promise<void> {
@@ -80,4 +84,32 @@ export class IntraAuthService {
        
         this._appIntraToken = response.access_token;
     }
+
+	async downloadIntraImage(username: string, userImageURL: string) {
+
+		const httpResponse = await fetch(userImageURL, {
+            headers: {"Authorization": `Bearer ${this._appIntraToken}`}
+        });
+
+		if (httpResponse.status != 200)
+			return null;
+
+		//const buffer = await httpResponse.arrayBuffer();
+		//console.log(buffer)
+		//const blob = await httpResponse.blob();
+		const text = await httpResponse.text();
+		
+		const savePath = join(process.cwd(), "intra-images", username);
+		const writeStream: WriteStream = createWriteStream(savePath);
+
+		writeStream.write(text)
+		//	
+		//writeStream.end();
+
+		return writeStream.path;
+	}
+
+	pixelizeUserImage() {
+
+	}
 }

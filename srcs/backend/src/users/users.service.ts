@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  StreamableFile,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,6 +13,9 @@ import { FriendsService } from 'src/friends/friends.service';
 import { Friends } from 'src/friends/entities/friend.entity';
 import { FriendshipStatus } from 'src/friends/entities/friend.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+
 
 @Injectable()
 export class UsersService {
@@ -114,5 +118,16 @@ export class UsersService {
 
   async remove(id: number): Promise<void> {
     await this.usersRepository.delete(id);
+  }
+
+  async getAvatar(username: string): Promise<StreamableFile> {
+	const user: User = await this.findOneByUsername(username);
+	if (!user)
+		throw new NotFoundException("Avatar not found");
+
+	const userAvatar: string = user.avatar;
+	const avatars_path = join(process.cwd(), "avatars");
+	const file = createReadStream(join(avatars_path, userAvatar));
+   	return new StreamableFile(file);
   }
 }

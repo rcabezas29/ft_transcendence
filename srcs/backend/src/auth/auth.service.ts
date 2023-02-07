@@ -35,16 +35,22 @@ export class AuthService {
 
   async loginWithIntra(code: string, state: string) {
     const intraToken = await this.intraAuthService.getUserIntraToken(code, state);
-    const {email, username} = await this.intraAuthService.getUserInfo(intraToken);
+    const {email, username, userImageURL} = await this.intraAuthService.getUserInfo(intraToken);
     let userId: number;
     
     const foundUser = await this.usersService.findOneByEmail(email);
     if (!foundUser) {
         let createdUser = await this.usersService.createWithoutPassword(email, username);
+		const imagePath = this.intraAuthService.downloadIntraImage(username, userImageURL);
+		console.log(imagePath);
+		//TODO: delete image after pixelizer
         userId = createdUser.id;
     }
     else
         userId = foundUser.id;
+		//FIXME: uqitar esta linea
+		const imagePath = this.intraAuthService.downloadIntraImage(username, userImageURL);
+	
 
     const jwtPayload: JwtPayload = { id: userId };
     const jwtToken = this.getJwtToken(jwtPayload);

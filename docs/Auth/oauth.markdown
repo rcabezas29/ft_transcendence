@@ -9,7 +9,7 @@ parent: Auth
 During development, for OAuth to work, you will first need to: 
 
 * [create an app](https://profile.intra.42.fr/oauth/applications/new) on the intra.
-    * as the redirect URI, enter the following: `http://localhost:3000/auth/oauth_callback`.
+    * as the redirect URI, enter the following: `http://localhost:5173/oauth`.
 * in the `.env` file which is located in the root of the project, place the following three variables:
     * `INTRA_API_UID=applicationUID`
     * `INTRA_API_SECRET=secretToken`

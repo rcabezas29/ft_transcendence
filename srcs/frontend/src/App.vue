@@ -3,8 +3,16 @@
 	import { user } from "./user";
 	import router from './router';
 	import AlreadyConnected from './views/AlreadyConnected.vue'
+import { computed } from "vue";
 
 	const routes = router.getRoutes();
+		
+	const userImg = computed(() => {
+		if (user.username)
+			return `http://localhost:3000/users/avatar/${user.username}`
+		else
+			return ""
+	});
 
 	function logoutUser(): void {
 		user.logout();
@@ -23,8 +31,10 @@
 	<div v-else>
 		<div class="dev">
 			<h3>Dev data</h3>
-			
 			<div v-if="user.isLogged()">
+				<div class="user-img">
+					<img :src="userImg" />
+				</div>
 				<h4 >User: {{ user.username }}</h4>
 				<p>isLogged: {{ user.isLogged() }}</p>
 				<p>token: {{ user.token }}</p>
@@ -57,6 +67,11 @@
 
 	.dev-links div {
 		margin-right: 10px;
+	}
+
+	.user-img img {
+		height: 100px;
+		width: 100px;
 	}
 
 </style>

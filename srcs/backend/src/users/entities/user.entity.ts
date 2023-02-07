@@ -13,7 +13,7 @@ export class User {
   @Column()
   readonly email: string;
 
-  @Column({ nullable: true })
+  @Column({ default: "default_avatar.png" })
   avatar: string;
 
   @Column()
