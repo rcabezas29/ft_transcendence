@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { createWriteStream, writeFile, WriteFileOptions, WriteStream } from 'fs';
 import { join } from 'path';
-import { pipeline, Readable, Stream } from 'stream';
+import * as fs from 'fs';
 
 @Injectable()
 export class IntraAuthService {
@@ -84,32 +84,60 @@ export class IntraAuthService {
        
         this._appIntraToken = response.access_token;
     }
-
-	async downloadIntraImage(username: string, userImageURL: string) {
-
-		const httpResponse = await fetch(userImageURL, {
-            headers: {"Authorization": `Bearer ${this._appIntraToken}`}
-        });
+	
+	async downlaodFile(savePath: string, url: string, headers: HeadersInit = {}): Promise<string | null> {
+		const httpResponse = await fetch(url, {
+			headers: headers
+		});
 
 		if (httpResponse.status != 200)
 			return null;
 
-		//const buffer = await httpResponse.arrayBuffer();
-		//console.log(buffer)
-		//const blob = await httpResponse.blob();
-		const text = await httpResponse.text();
-		
-		const savePath = join(process.cwd(), "intra-images", username);
-		const writeStream: WriteStream = createWriteStream(savePath);
+		const fileName = httpResponse.url.split('/').pop();
+		const fileContents = await httpResponse.arrayBuffer();
+		const newSavePath = join(savePath, fileName);
 
-		writeStream.write(text)
-		//	
-		//writeStream.end();
+		fs.writeFileSync(newSavePath, Buffer.from(fileContents));
 
-		return writeStream.path;
+		return newSavePath;
 	}
 
-	pixelizeUserImage() {
+	deleteFile(filePath: string) {
+		fs.unlinkSync(filePath);
+	}
 
+	getFileNameFromPath(path: string): string {
+		return path.split('/').pop();
+	}
+
+	async downloadIntraImage(userImageURL: string) {
+		const savePath = join(process.cwd(), "intra-images");
+		const downloadedFilePath = await this.downlaodFile(
+			savePath,
+			userImageURL, 
+			{"Authorization": `Bearer ${this._appIntraToken}`}
+		);
+
+		return downloadedFilePath;
+	}
+
+	async pixelizeUserImage(imagePath: string, username: string): Promise<string> {
+		const file = fs.readFileSync(imagePath);
+		const formData: FormData = new FormData();
+		formData.append("file", new Blob([file]), "file");
+
+		let httpResponse = await fetch("http://pixelizer:3001/pixelizer", {
+			method: "POST",
+			body: formData
+		})
+
+		console.log(httpResponse.status);
+		if (httpResponse.status != 200)
+			return null;
+
+		const fileContents = await httpResponse.arrayBuffer();
+		const savePath = join(process.cwd(), "avatars", `${username}.jpg`);
+		fs.writeFileSync(savePath, Buffer.from(fileContents));
+		return savePath;
 	}
 }

@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
@@ -41,16 +42,18 @@ export class AuthService {
     const foundUser = await this.usersService.findOneByEmail(email);
     if (!foundUser) {
         let createdUser = await this.usersService.createWithoutPassword(email, username);
-		const imagePath = this.intraAuthService.downloadIntraImage(username, userImageURL);
-		console.log(imagePath);
-		//TODO: delete image after pixelizer
         userId = createdUser.id;
+
+		const imagePath = await this.intraAuthService.downloadIntraImage(userImageURL);
+		const pixelizedImagePath = await this.intraAuthService.pixelizeUserImage(imagePath, username);
+		this.intraAuthService.deleteFile(imagePath);
+		const updateUserDto: UpdateUserDto = {
+			avatar: this.intraAuthService.getFileNameFromPath(pixelizedImagePath)
+		}
+		this.usersService.update(userId, updateUserDto);
     }
     else
         userId = foundUser.id;
-		//FIXME: uqitar esta linea
-		const imagePath = this.intraAuthService.downloadIntraImage(username, userImageURL);
-	
 
     const jwtPayload: JwtPayload = { id: userId };
     const jwtToken = this.getJwtToken(jwtPayload);

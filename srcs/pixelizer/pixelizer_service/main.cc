@@ -8,7 +8,15 @@ int main()
            std::function<void(const HttpResponsePtr &)> &&callback) {
             MultiPartParser fileUpload;
 
-            if (fileUpload.parse(req) != 0 || fileUpload.getFiles().size() != 1)
+			if (fileUpload.parse(req) != 0) {
+				auto resp = HttpResponse::newHttpResponse();
+				resp->setBody("Error parsing the request");
+                resp->setStatusCode(k400BadRequest);
+                callback(resp);
+                return;
+			}
+			
+            if (fileUpload.getFiles().size() != 1)
             {
 				LOG_INFO << fileUpload.getFiles().size(); 
                 auto resp = HttpResponse::newHttpResponse();
@@ -17,6 +25,8 @@ int main()
                 callback(resp);
                 return;
             }
+			
+
             auto &file = fileUpload.getFiles()[0];
 			file.saveAs("image");
 			int sys_call = system("./pixelizer ./uploads/image");
