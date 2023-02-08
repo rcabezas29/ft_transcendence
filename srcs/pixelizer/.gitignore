@@ -1,2 +1,4 @@
 build/uploads/
-build/uploads/tmp
+build/pixelizer_service
+tmp/
+test.jpg
