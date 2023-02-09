@@ -38,7 +38,7 @@ int main()
 				return ;
 			}
 
-			auto resp = HttpResponse::newFileResponse("../test.jpg");
+			auto resp = HttpResponse::newFileResponse("./test.jpg");
             callback(resp);
         },
         {Post});
