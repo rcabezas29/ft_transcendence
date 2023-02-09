@@ -18,13 +18,13 @@ onBeforeMount(async () => {
 	searchParams.append('state', state);
 
 	const httpResponse = await fetch('http://localhost:3000/auth/oauth?' + searchParams);
-	const response = await httpResponse.json();
-
 	if (httpResponse.status != 200)
 	{
 		router.replace({ "name": "login" })
 		return;
 	}
+	const response = await httpResponse.json();
+
 	user.auth(response.access_token);
 	router.replace({ "name": "home"});
 });

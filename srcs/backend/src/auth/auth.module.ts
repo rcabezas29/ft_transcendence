@@ -6,12 +6,14 @@ import { JwtStrategy, LocalStrategy } from './strategies';
 import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from '../users/users.module';
 import { IntraAuthModule } from 'src/intra-auth/intra-auth.module';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy],
   imports: [
     IntraAuthModule,
+    FilesModule,
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({

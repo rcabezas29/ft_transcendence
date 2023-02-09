@@ -11,6 +11,7 @@ import { Friends } from './friends/entities/friend.entity';
 import { IntraAuthModule } from './intra-auth/intra-auth.module';
 import { GameModule } from './game/game.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FilesModule } from './files/files.module';
 
 
 @Module({
@@ -34,6 +35,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ChatModule,
     FriendsModule,
     GameModule,
+    FilesModule,
   ],
 })
 export class AppModule {}

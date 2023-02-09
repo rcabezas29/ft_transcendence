@@ -1,13 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { createWriteStream, writeFile, WriteFileOptions, WriteStream } from 'fs';
 import { join } from 'path';
-import * as fs from 'fs';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class IntraAuthService {
     private _appIntraToken: string;
 
-    constructor() {
+    constructor(
+        private readonly filesService: FilesService
+    ) {
         this.authorizeIntraApp();
     }
 
@@ -42,10 +43,11 @@ export class IntraAuthService {
         body: JSON.stringify(postBody),
         headers: {"content-type": "application/json"}
         });
-        const response = await httpResponse.json();
 
         if (httpResponse.status != 200)
-            throw new UnauthorizedException(response);
+            throw new UnauthorizedException("error while getting user's intra token");
+        
+        const response = await httpResponse.json();
 
         const token = response.access_token;
         return token;
@@ -55,9 +57,10 @@ export class IntraAuthService {
         const httpResponse = await fetch("https://api.intra.42.fr/v2/me", {
             headers: {"Authorization": `Bearer ${token}`}
         });
-        const response = await httpResponse.json();
         if (httpResponse.status != 200)
-            throw new UnauthorizedException(response);
+            throw new UnauthorizedException("error while getting user's info from the intra");
+        
+        const response = await httpResponse.json();
     
         const userEmail = response.email;
         const username = response.login;
@@ -78,41 +81,17 @@ export class IntraAuthService {
             body: JSON.stringify(postBody),
             headers: {"content-type": "application/json"}
         });
-        const response = await httpResponse.json();
         if (httpResponse.status != 200)
-		    throw new UnauthorizedException(response);
+		    throw new UnauthorizedException("error in client credentials flow while authorizing intra app");
+    
+        const response = await httpResponse.json();        
        
         this._appIntraToken = response.access_token;
     }
-	
-	async downlaodFile(savePath: string, url: string, headers: HeadersInit = {}): Promise<string | null> {
-		const httpResponse = await fetch(url, {
-			headers: headers
-		});
-
-		if (httpResponse.status != 200)
-			return null;
-
-		const fileName = httpResponse.url.split('/').pop();
-		const fileContents = await httpResponse.arrayBuffer();
-		const newSavePath = join(savePath, fileName);
-
-		fs.writeFileSync(newSavePath, Buffer.from(fileContents));
-
-		return newSavePath;
-	}
-
-	deleteFile(filePath: string) {
-		fs.unlinkSync(filePath);
-	}
-
-	getFileNameFromPath(path: string): string {
-		return path.split('/').pop();
-	}
 
 	async downloadIntraImage(userImageURL: string) {
 		const savePath = join(process.cwd(), "intra-images");
-		const downloadedFilePath = await this.downlaodFile(
+		const downloadedFilePath = await this.filesService.downlaodFile(
 			savePath,
 			userImageURL, 
 			{"Authorization": `Bearer ${this._appIntraToken}`}
@@ -121,23 +100,4 @@ export class IntraAuthService {
 		return downloadedFilePath;
 	}
 
-	async pixelizeUserImage(imagePath: string, username: string): Promise<string> {
-		const file = fs.readFileSync(imagePath);
-		const formData: FormData = new FormData();
-		formData.append("file", new Blob([file]), "file");
-
-		let httpResponse = await fetch("http://pixelizer:3001/pixelizer", {
-			method: "POST",
-			body: formData
-		})
-
-		console.log(httpResponse.status);
-		if (httpResponse.status != 200)
-			return null;
-
-		const fileContents = await httpResponse.arrayBuffer();
-		const savePath = join(process.cwd(), "avatars", `${username}.jpg`);
-		fs.writeFileSync(savePath, Buffer.from(fileContents));
-		return savePath;
-	}
 }

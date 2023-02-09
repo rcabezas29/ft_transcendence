@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { FilesService } from 'src/files/files.service';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -9,9 +10,10 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
-    private intraAuthService: IntraAuthService
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly intraAuthService: IntraAuthService,
+    private readonly filesService: FilesService
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -41,16 +43,9 @@ export class AuthService {
     
     const foundUser = await this.usersService.findOneByEmail(email);
     if (!foundUser) {
-        let createdUser = await this.usersService.createWithoutPassword(email, username);
-        userId = createdUser.id;
-
-		const imagePath = await this.intraAuthService.downloadIntraImage(userImageURL);
-		const pixelizedImagePath = await this.intraAuthService.pixelizeUserImage(imagePath, username);
-		this.intraAuthService.deleteFile(imagePath);
-		const updateUserDto: UpdateUserDto = {
-			avatar: this.intraAuthService.getFileNameFromPath(pixelizedImagePath)
-		}
-		this.usersService.update(userId, updateUserDto);
+      let createdUser = await this.usersService.createWithoutPassword(email, username);
+      userId = createdUser.id;
+      await this.updateUserAvatarWithPixelizedIntraImage(userImageURL, username, userId);
     }
     else
         userId = foundUser.id;
@@ -64,5 +59,22 @@ export class AuthService {
   private getJwtToken(payload: JwtPayload) {
     const access_token = this.jwtService.sign(payload);
     return access_token;
+  }
+
+  private async updateUserAvatarWithPixelizedIntraImage(userImageURL: string, username: string, userId: number) {
+    const imagePath = await this.intraAuthService.downloadIntraImage(userImageURL);
+    if (!imagePath)
+      return;
+
+    const pixelizedImagePath = await this.filesService.pixelizeUserImage(imagePath, username);
+    this.filesService.deleteFile(imagePath);
+    console.log('pixelized', pixelizedImagePath)
+    if (!pixelizedImagePath)
+      return;
+
+    const updateUserDto: UpdateUserDto = {
+      avatar: this.filesService.getFileNameFromPath(pixelizedImagePath)
+    }
+    this.usersService.update(userId, updateUserDto);
   }
 }
