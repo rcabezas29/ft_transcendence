@@ -44,7 +44,7 @@ Expected body:
 {
 	"user1Id": 16,
 	"user2Id": 19,
-	"status": 0
+	"status": 0 // optional; default 0
 }
 ```
 
