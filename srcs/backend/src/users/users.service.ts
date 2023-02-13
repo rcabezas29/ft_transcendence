@@ -76,7 +76,7 @@ export class UsersService {
     }
 
     async findUserFriendsByStatus(id: number, status: FriendshipStatus) {
-        const friendsRelations: Friends[] = await this.friendsService.findUserFriendsByStatus(id, status);
+        const friendsRelations: Friends[] = await this.friendsService.findUserFriends(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
                 return friend.user2Id;

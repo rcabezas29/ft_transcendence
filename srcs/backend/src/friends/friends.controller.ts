@@ -37,13 +37,13 @@ export class FriendsController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserFriendGuard)
   update(@Param('id', ParseIntPipe) id: number, @Body() updateFriendDto: UpdateFriendDto) {
     return this.friendsService.update(id, updateFriendDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserFriendGuard)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.friendsService.remove(id);
   }

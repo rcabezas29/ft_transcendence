@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateFriendDto } from './create-friend.dto';
+import { IsNumber, IsOptional, Max, Min } from "class-validator";
+import { FriendshipStatus } from "../entities/friend.entity";
 
-export class UpdateFriendDto extends PartialType(CreateFriendDto) {}
+export class UpdateFriendDto {
+    @IsNumber()
+    @Min(0)
+    @Max(2)
+    @IsOptional()
+    status?: FriendshipStatus;
+}
