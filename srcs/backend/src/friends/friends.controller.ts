@@ -31,7 +31,7 @@ export class FriendsController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, UserFriendGuard)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.friendsService.findOne(id);
   }
