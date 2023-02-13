@@ -17,6 +17,8 @@ export class FriendsService {
     ) { }
 
     async create(createFriendsDto: CreateFriendDto) {
+        if (await this.usersAreFriends(createFriendsDto.user1Id, createFriendsDto.user2Id))
+            throw new BadRequestException('Users are already friends');
         return await this.friendsRepository.save(createFriendsDto);
     }
 
@@ -49,11 +51,32 @@ export class FriendsService {
         this.friendsRepository.delete(id);
     }
 
-    findUserFriends(id: number, status: number) {
+    async usersAreFriends(user1Id: number, user2Id: number): Promise<boolean> {
+        const friendship: Friends[] = await this.friendsRepository.find({
+            where: [
+                { user1Id: user1Id, user2Id: user2Id },
+                { user1Id: user2Id, user2Id: user1Id }
+            ]
+        })
+        if (friendship.length == 0)
+            return false;
+        return true;
+    }
+
+    findUserFriends(userId: number): Promise<Friends[]> {
         return this.friendsRepository.find({
             where: [
-                { user1Id: id, status: status },
-                { user2Id: id, status: status },
+                { user1Id: userId },
+                { user2Id: userId }
+            ]
+        })
+    }
+
+    findUserFriendsByStatus(userId: number, status: number): Promise<Friends[]> {
+        return this.friendsRepository.find({
+            where: [
+                { user1Id: userId, status: status },
+                { user2Id: userId, status: status },
             ]
         });
     }

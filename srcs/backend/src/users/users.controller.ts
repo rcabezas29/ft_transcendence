@@ -57,6 +57,6 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get("avatar/:user")
   getAvatar(@Param("user") username: string) {
-	return this.usersService.getAvatar(username);
+	  return this.usersService.getAvatar(username);
   }
 }
