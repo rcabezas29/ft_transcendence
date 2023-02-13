@@ -1,4 +1,4 @@
-import { IsNumber } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class CreateFriendDto {
   @IsNumber()
@@ -6,4 +6,8 @@ export class CreateFriendDto {
 
   @IsNumber()
   user2Id: number;
+
+  @IsNumber()
+  @IsOptional()
+  status?: number;
 }
