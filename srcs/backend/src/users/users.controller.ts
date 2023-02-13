@@ -36,6 +36,7 @@ export class UsersController {
     return req.user;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(id);
@@ -47,11 +48,13 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get("avatar/:user")
   getAvatar(@Param("user") username: string) {
 	return this.usersService.getAvatar(username);
