@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Buffer } from 'node:buffer'
 import * as fs from 'fs';
 import { join } from 'path';
 
@@ -22,7 +23,8 @@ export class FilesService {
 	}
 
 	deleteFile(filePath: string) {
-		fs.unlinkSync(filePath);
+		if (!filePath)
+			fs.unlinkSync(filePath);
 	}
 
 	getFileNameFromPath(path: string): string {
@@ -40,7 +42,6 @@ export class FilesService {
 			method: "POST",
 			body: formData
 		})
-		console.log(httpResponse.status)
 
 		if (httpResponse.status != 200)
 			return null;

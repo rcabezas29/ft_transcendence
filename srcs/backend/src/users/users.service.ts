@@ -111,7 +111,7 @@ export class UsersService {
         return res;
       }
     } catch (e) {
-      throw new BadRequestException();
+      throw new BadRequestException('Failed to update user');
     }
     throw new NotFoundException();
   }

@@ -9,13 +9,12 @@ import {
   UseGuards,
   Req,
   ParseIntPipe,
-  StreamableFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
+import { JwtAuthGuard, UserGuard } from 'src/auth/guards';
 
 @Controller('users')
 export class UsersController {
@@ -42,6 +41,7 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard, UserGuard)
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
