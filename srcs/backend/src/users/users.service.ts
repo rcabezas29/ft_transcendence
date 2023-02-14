@@ -16,7 +16,6 @@ import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 
-
 @Injectable()
 export class UsersService {
     constructor(
@@ -25,7 +24,7 @@ export class UsersService {
         private friendsService: FriendsService,
         private intraAuthService: IntraAuthService
     ) {}
-        
+
     async create(createUserDto: CreateUserDto) {
         const usernameExists = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
         if (usernameExists)
@@ -39,7 +38,7 @@ export class UsersService {
             throw new BadRequestException('Failed to create user');
         }
     }
-    
+
     async createWithoutPassword(email: string, username: string) {
         const newUser = { email, username, password: "" };
         try {
@@ -50,11 +49,11 @@ export class UsersService {
             throw new BadRequestException('Failed to create user');
         }
     }
-    
+
     findAll(): Promise<User[]> {
         return this.usersRepository.find();
     }
-    
+
     findAllByIds(ids: number[]): Promise<User[]> {
         return this.usersRepository.find({
             where: {
@@ -62,7 +61,7 @@ export class UsersService {
             }
         })
     }
-    
+
     findOne(id: number): Promise<User> {
         return this.usersRepository.findOneBy({ id: id });
     }
@@ -75,7 +74,7 @@ export class UsersService {
         return await this.usersRepository.findOneBy({ email: email });
     }
 
-    async findUserFriendsByStatus(id: number, status: FriendshipStatus) {
+    async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
         const friendsRelations: Friends[] = await this.friendsService.findUserFriends(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
@@ -115,11 +114,11 @@ export class UsersService {
         }
         throw new NotFoundException();
     }
-    
+
     async remove(id: number): Promise<void> {
         await this.usersRepository.delete(id);
     }
-    
+
     async getAvatar(username: string): Promise<StreamableFile> {
         const user: User = await this.findOneByUsername(username);
         if (!user)

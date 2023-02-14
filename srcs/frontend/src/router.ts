@@ -5,8 +5,9 @@ import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
 import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
+import Friends from './components/Friends.vue'
 import { authenticationGuard, loggedUserGuard } from './guards/index';
-import { createRouter, createWebHistory, useRoute } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import { user } from './user';
 
 const routes = [
@@ -49,6 +50,12 @@ const routes = [
 		name: 'game',
 		path: '/game',
 		component: Game,
+		beforeEnter: authenticationGuard
+	},
+	{
+		name: 'friends',
+		path: '/friends',
+		component: Friends,
 		beforeEnter: authenticationGuard
 	},
 ];
