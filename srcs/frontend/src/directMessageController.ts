@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import type { Chat, ChatUser as Friend, Message } from "./interfaces";
+import type { Chat, ChatUser, Message } from "./interfaces";
 import { user } from './user';
 import { currentChat } from "./currentChat";
 
@@ -14,33 +14,33 @@ type ChatMap = {
 }
 
 class DirectMessageController {
-    public friends: Friend[] = [];
+    public friends: ChatUser[] = [];
 	public chats: ChatMap = {};
 
 	setEventsHandlers() {
-        user.socket?.on('connected-friends', (payload: Friend[]) => {this.onConnectedFriends(payload)});
-        user.socket?.on('friend-online', (payload: Friend) => {this.onFriendConnected(payload)});
-        user.socket?.on('friend-offline', (payload: Friend) => {this.onFriendDisconnected(payload)});
+        user.socket?.on('connected-friends', (payload: ChatUser[]) => {this.onConnectedFriends(payload)});
+        user.socket?.on('friend-online', (payload: ChatUser) => {this.onFriendConnected(payload)});
+        user.socket?.on('friend-offline', (payload: ChatUser) => {this.onFriendDisconnected(payload)});
         user.socket?.on('direct-message', (payload: MessagePayload) => {this.receiveDirectMessage(payload)});
     }
 
-    private onConnectedFriends(payload: Friend[]) {
+    private onConnectedFriends(payload: ChatUser[]) {
         this.friends = payload;
         this.friends = this.friends.filter((friend) => friend.id !== user.id);
         this.friends.forEach((friend) => { this.appendChatToChatMap(friend) });
     }
 
-    private onFriendConnected(payload: Friend) {
+    private onFriendConnected(payload: ChatUser) {
         this.friends.push(payload);
         this.appendChatToChatMap(payload);
     }
 
-    private onFriendDisconnected(payload: Friend) {
+    private onFriendDisconnected(payload: ChatUser) {
         this.friends = this.friends.filter((friend) => friend.id != payload.id);
     }
 
     private receiveDirectMessage(payload: MessagePayload) {
-        const fromUsername: Friend | undefined = this.friends.find((friend) => payload.friendId === friend.id);
+        const fromUsername: ChatUser | undefined = this.friends.find((friend) => payload.friendId === friend.id);
         if (!fromUsername)
             return;
         const newMessage: Message = {
@@ -56,7 +56,7 @@ class DirectMessageController {
     }
 
     sendDirectMessage(message: string) {
-        const toFriendId: FriendId = (<Friend>currentChat.value!.target).id;
+        const toFriendId: FriendId = (<ChatUser>currentChat.value!.target).id;
         const payload: MessagePayload = {
             friendId: toFriendId,
             message: message
@@ -82,7 +82,7 @@ class DirectMessageController {
 		}
 	}
 
-    private appendChatToChatMap(friend: Friend): void {
+    private appendChatToChatMap(friend: ChatUser): void {
         if (this.chats && !this.chats[friend.id])
         {
             const newChat: Chat = {

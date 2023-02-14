@@ -30,6 +30,18 @@ export class FriendsService {
         return this.friendsRepository.findOneBy({ id: id });
     }
 
+    async findByFriendshipUsers(user1Id: number, user2Id: number) {
+        const friendship: Friends[] = await this.friendsRepository.find({
+            where: [
+                { user1Id: user1Id, user2Id: user2Id },
+                { user1Id: user2Id, user2Id: user1Id }
+            ]
+        });
+        if (friendship.length > 0)
+            return friendship[0];
+        return null;
+    }
+
     async update(id: number, updateFriendDto: UpdateFriendDto) {
         const friendsToUpdate = {
             id,
@@ -52,13 +64,8 @@ export class FriendsService {
     }
 
     async usersAreFriends(user1Id: number, user2Id: number): Promise<boolean> {
-        const friendship: Friends[] = await this.friendsRepository.find({
-            where: [
-                { user1Id: user1Id, user2Id: user2Id },
-                { user1Id: user2Id, user2Id: user1Id }
-            ]
-        })
-        if (friendship.length == 0)
+        const friendship: Friends = await this.findByFriendshipUsers(user1Id, user2Id);
+        if (!friendship)
             return false;
         return true;
     }
@@ -71,5 +78,4 @@ export class FriendsService {
             ]
         });
     }
-
 }

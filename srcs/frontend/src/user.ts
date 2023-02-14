@@ -5,6 +5,7 @@ import jwt_decode from "jwt-decode";
 import { directMessageController } from './directMessageController';
 import { channelController } from './channelController';
 import { gameController } from './gameController';
+import { friendsController } from './friendsController';
 
 export interface JwtPayload {
     id: number;
@@ -113,6 +114,7 @@ class User {
 		directMessageController.setEventsHandlers();
 		channelController.setEventsHandlers();
 		gameController.setEventHandlers();
+		friendsController.setEventHandlers();
 	}
 
 	onDisconnect(): void {
