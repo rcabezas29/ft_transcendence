@@ -13,7 +13,8 @@ class GameController {
 
 	public adversaryName: string = "";
 	public state: GameState = GameState.None;
-	public gameState: number = 0;
+	public timestamp: number = 0;
+	public gameRenderer : null | GameRenderer = null;
 
 	setEventHandlers(): void {
 		user.socket?.on("game-found", (adversaryName: string) => { this.gameFound(adversaryName) });
@@ -28,7 +29,7 @@ class GameController {
 	}
 
 	gameFound(adversaryName: string) {
-		this.adversaryName = adversaryName;
+		this.adversaryName = adversaryName + "_matchmaking";
 		this.state = GameState.Ready;
 	}
 
@@ -38,13 +39,45 @@ class GameController {
 
 	endGame() {
 		this.state = GameState.End;
-		this.gameState = 0;
+		this.timestamp = 0;
 	}
 
-	updateGame(gamePayload: Date) {
-		this.gameState = new Date(gamePayload).getTime();
+	updateGame(gamePayload: any) {
+		this.timestamp = new Date(gamePayload.moment).getTime();
+		this.gameRenderer!.drawFrame(gamePayload);
 	}
 
+	initCanvas(canvasContext : CanvasRenderingContext2D) {
+		this.gameRenderer = new GameRenderer(canvasContext);
+	}
 }
+
+class GameRenderer {
+	canvas : CanvasRenderingContext2D;
+
+	constructor(canvas : CanvasRenderingContext2D) {
+		this.canvas = canvas;
+	}
+
+	clearCanvas() {
+		this.canvas.fillStyle = 'black';
+		this.canvas.fillRect(0, 0, 400, 200);
+	}
+
+	drawFrame(payload : any) {
+		this.clearCanvas();
+
+		let ball : any = payload.ball;
+		let	paddles : any = payload.paddles;
+		this.canvas.fillStyle = 'white';
+		this.canvas.fillText(`${payload.score[0]} - ${payload.score[1]}`, 200, 20);
+		this.canvas.fillRect(ball.hitBox.position.x, ball.hitBox.position.y, 5, 5);
+		paddles.forEach( (paddle : any) => {
+			this.canvas.fillRect(paddle.hitBox.position.x, paddle.hitBox.position.y, paddle.hitBox.bounds.x, paddle.hitBox.bounds.y);
+		});
+
+	}
+}
+
 
 export const gameController = reactive<GameController>(new GameController());

@@ -1,11 +1,17 @@
 <script setup lang="ts">
 
 import { gameController } from '@/gameController';
+import { onMounted, ref } from 'vue';
+
+const canvasRef = ref<HTMLCanvasElement>();
 
 function findGame() {
 	gameController.searchGame();
 }
 
+onMounted(() => {
+	gameController.initCanvas(canvasRef.value!.getContext('2d')!);
+});
 </script>
 
 <template>
@@ -14,10 +20,15 @@ function findGame() {
 
 	Status: <span>{{ gameController.state }}</span>
 	
-	Game: <span>{{ gameController.gameState }}</span>
+	Time: <span>{{ gameController.timestamp }}</span>
+
+	<canvas ref="canvasRef" class="pong-board" height="200" width="400" ></canvas>
 
 </template>
 
 <style scoped>
-
+.pong-board {
+	display: block;
+	background-color: black;
+}
 </style>
