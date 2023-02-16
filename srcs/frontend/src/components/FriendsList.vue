@@ -3,8 +3,13 @@ import { onMounted, ref } from "vue";
 import { friendsController, FriendStatus } from '@/friendsController';
 import { user } from "@/user";
 
+interface UserInfo {
+    id: number,
+    username: string
+}
+
 const input = ref<string>("");
-const users = ref<string[]>([]);
+const users = ref<UserInfo[]>([]);
 
 function isOnline(friend: any): boolean {
     return friend.status === FriendStatus.online;
@@ -14,7 +19,7 @@ function isGaming(friend: any): boolean {
     return friend.status === FriendStatus.gaming;
 }
 
-async function fetchUsers(): Promise<string[]> {
+async function fetchUsers(): Promise<UserInfo[]> {
     const httpResponse = await fetch(`http://localhost:3000/users`, {
         method: "GET",
         headers: {
@@ -26,13 +31,15 @@ async function fetchUsers(): Promise<string[]> {
 
     const response = await httpResponse.json();
 
-    return response.map((user: any) => user.username);
+    return response.map((u: any) => {
+        return {id: u.id, username: u.username};
+    });
 }
 
 function filteredList() {
     if (input.value.length > 0) {
         return users.value.filter((user) =>
-            user.toLowerCase().includes(input.value.toLowerCase())
+            user.username.toLowerCase().includes(input.value.toLowerCase())
         );
     }
     return [];
@@ -41,6 +48,10 @@ function filteredList() {
 onMounted(async () => {
     users.value = await fetchUsers();
 })
+
+function sendFriendRequest(userId: number) {
+    friendsController.sendFriendRequest(userId);
+}
 
 </script>
 
@@ -73,8 +84,9 @@ onMounted(async () => {
         <div class="users-search">
             <h2>Find your people</h2>
             <input type="text" v-model="input" placeholder="Search users..." />
-            <div class="user-item" v-for="user in filteredList()" :key="user">
-                <p>{{ user }}</p>
+            <div class="user-item" v-for="user in filteredList()" :key="user.id">
+                <span>{{ user.username }}</span>
+                <button @click="() => sendFriendRequest(user.id)" v-if="!friendsController.userIsFriend(user.id) && !friendsController.userIsPending(user.id)">Send friend request</button>
             </div>
             <div class="item-error" v-if="input && filteredList().length === 0">
                 <p>No users found!</p>

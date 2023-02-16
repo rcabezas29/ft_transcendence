@@ -24,7 +24,6 @@ interface FriendPayload {
 }
 
 interface Friend {
-    //friendshipId: number;
     userId: FriendId;
     username: string;
     status: FriendStatus;
@@ -67,6 +66,43 @@ class FriendsController {
         const friend = this.friendIdToChatUser(payload);
         if (friend)
             directMessageController.onFriendDisconnected(friend);
+    }
+
+    userIsFriend(userId: number): boolean {
+        if (this.activeFriends.find(user => user.userId == userId))
+            return true;
+        return false;
+    }
+
+    userIsPending(userId: number): boolean {
+        if (this.friendRequests.find(user => user.userId == userId))
+            return true;
+        return false;
+    }
+
+    async sendFriendRequest(userId: number) {
+        const friendRequestBody = { 
+            user1Id: user.id,
+            user2Id: userId,
+            status: FriendshipStatus.Pending
+        };
+
+        console.log(friendRequestBody)
+
+        const httpResponse = await fetch(`http://localhost:3000/friends`, {
+            method: "POST",
+            headers: {
+				"Authorization": `Bearer ${user.token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(friendRequestBody)
+        });
+
+        if (httpResponse.status != 200)
+            console.log("could not send friend request");
+
+        const response = await httpResponse.json();
+        console.log("POST RESPONSE", response, "STATUS: ", httpResponse.status)
     }
 
     private async fetchFriends() {

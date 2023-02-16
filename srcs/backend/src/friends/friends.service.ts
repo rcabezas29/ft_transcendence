@@ -41,7 +41,7 @@ export class FriendsService {
             return friendship[0];
         return null;
     }
-
+/*
     async update(id: number, updateFriendDto: UpdateFriendDto) {
         const friendsToUpdate = {
             id,
@@ -58,7 +58,28 @@ export class FriendsService {
         }
         throw new NotFoundException();
     }
-
+*/
+/*
+    async updateByFriendId(friendId: number, userId: number, updateFriendDto: UpdateFriendDto) {
+        const friendshipToUpdate = this.findByFriendshipUsers(userId, friendId);
+        if (!friendshipToUpdate)
+            throw new NotFoundException('Users are not friends');
+        const friendsToUpdate = {
+            id,
+            ...updateFriendDto,
+        };
+        try {
+            const friends = await this.friendsRepository.preload(friendsToUpdate);
+            if (friends) {
+                const res = await this.friendsRepository.save(friends);
+                return res;
+            }
+        } catch (e) {
+            throw new BadRequestException();
+        }
+        throw new NotFoundException();
+    }
+*/
     remove(id: number) {
         this.friendsRepository.delete(id);
     }
