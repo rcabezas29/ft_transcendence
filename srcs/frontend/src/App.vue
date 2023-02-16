@@ -3,15 +3,15 @@
 	import { user } from "./user";
 	import router from './router';
 	import AlreadyConnected from './views/AlreadyConnected.vue'
-import { computed } from "vue";
+	import { computed } from "vue";
 
 	const routes = router.getRoutes();
 		
 	const userImg = computed(() => {
 		if (user.username)
-			return `http://localhost:3000/users/avatar/${user.username}`
+			return `http://localhost:3000/users/avatar/${user.username}`;
 		else
-			return ""
+			return "";
 	});
 
 	function logoutUser(): void {

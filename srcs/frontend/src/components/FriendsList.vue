@@ -1,6 +1,10 @@
 <script setup lang="ts">
-
+import { onMounted, ref } from "vue";
 import { friendsController, FriendStatus } from '@/friendsController';
+import { user } from "@/user";
+
+const input = ref<string>("");
+const users = ref<string[]>([]);
 
 function isOnline(friend: any): boolean {
     return friend.status === FriendStatus.online;
@@ -9,6 +13,34 @@ function isOnline(friend: any): boolean {
 function isGaming(friend: any): boolean {
     return friend.status === FriendStatus.gaming;
 }
+
+async function fetchUsers(): Promise<string[]> {
+    const httpResponse = await fetch(`http://localhost:3000/users`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        }
+    });
+    if (httpResponse.status != 200)
+        console.log("error fetching friends");
+
+    const response = await httpResponse.json();
+
+    return response.map((user: any) => user.username);
+}
+
+function filteredList() {
+    if (input.value.length > 0) {
+        return users.value.filter((user) =>
+            user.toLowerCase().includes(input.value.toLowerCase())
+        );
+    }
+    return [];
+}
+
+onMounted(async () => {
+    users.value = await fetchUsers();
+})
 
 </script>
 
@@ -38,7 +70,18 @@ function isGaming(friend: any): boolean {
                 <button>Deny</button>
             </div>
         </div>
+        <div class="users-search">
+            <h2>Find your people</h2>
+            <input type="text" v-model="input" placeholder="Search users..." />
+            <div class="user-item" v-for="user in filteredList()" :key="user">
+                <p>{{ user }}</p>
+            </div>
+            <div class="item-error" v-if="input && filteredList().length === 0">
+                <p>No users found!</p>
+            </div>
+        </div>
     </div>
+    
 </template>
 
 <style scoped>
