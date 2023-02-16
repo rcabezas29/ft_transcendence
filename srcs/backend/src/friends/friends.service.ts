@@ -70,7 +70,7 @@ export class FriendsService {
         return true;
     }
 
-    findUserFriends(userId: number, status: number): Promise<Friends[]> {
+    findUserFriendships(userId: number, status: number): Promise<Friends[]> {
         return this.friendsRepository.find({
             where: [
                 { user1Id: userId, status: status },

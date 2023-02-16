@@ -2,10 +2,22 @@ import { reactive } from "vue";
 import type { ChatUser } from "./interfaces";
 import { user } from './user';
 
+enum FriendshipStatus {
+    Pending = 0,
+    Active = 1,
+    Blocked = 2,
+}
+
 enum FriendStatus {
     offline = 0,
     online = 1,
     gaming = 2
+}
+
+interface FriendPayload {
+    userId: number;
+    username: string;
+    friendshipStatus: FriendshipStatus;
 }
 
 interface Friend {
@@ -39,9 +51,7 @@ class FriendsController {
     }
 
     async onConnectedFriends(payload: ChatUser[]) {
-        await friendsController.fetchActiveFriends();
-        await friendsController.fetchBlockedFriends();
-        await friendsController.fetchFriendRequests();
+        await friendsController.fetchFriends();
         payload.forEach(friend => this.setFriendOnline(friend.id));
     }
 
@@ -53,8 +63,8 @@ class FriendsController {
         this.setFriendOffline(payload.id);
     }
 
-    async fetchActiveFriends() {
-        const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/active-friends`, {
+    async fetchFriends() {
+        const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friends`, {
             method: "GET",
             headers: {
 				"Authorization": `Bearer ${user.token}`
@@ -64,50 +74,26 @@ class FriendsController {
             console.log("error fetching friends");
 
         const response = await httpResponse.json();
-        this.activeFriends = response.map((friend: any): Friend => {
-            return {
-                userId: friend.id,
-                username: friend.username,
-                status: FriendStatus.offline
-        }})
+
+        this.activeFriends = response
+                .filter((friend: FriendPayload) => friend.friendshipStatus === FriendshipStatus.Active)
+                .map((friend: FriendPayload) => this.friendPayloadToFriend(friend));
+
+        this.blockedFriends = response
+                .filter((friend: FriendPayload) => friend.friendshipStatus === FriendshipStatus.Blocked)
+                .map((friend: FriendPayload) => this.friendPayloadToFriend(friend));
+
+        this.friendRequests = response
+                .filter((friend: FriendPayload) => friend.friendshipStatus === FriendshipStatus.Pending)
+                .map((friend: FriendPayload) => this.friendPayloadToFriend(friend));
     }
 
-    async fetchBlockedFriends() {
-        const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/blocked-friends`, {
-            method: "GET",
-            headers: {
-				"Authorization": `Bearer ${user.token}`
-            }
-        });
-        if (httpResponse.status != 200)
-            console.log("error fetching friends");
-
-        const response = await httpResponse.json();
-        this.blockedFriends = response.map((friend: any): Friend => {
-            return {
-                userId: friend.id,
-                username: friend.username,
-                status: FriendStatus.offline
-        }})
-    }
-
-    async fetchFriendRequests() {
-        const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friend-requests`, {
-            method: "GET",
-            headers: {
-				"Authorization": `Bearer ${user.token}`
-            }
-        });
-        if (httpResponse.status != 200)
-            console.log("error fetching friends");
-
-        const response = await httpResponse.json();
-        this.friendRequests = response.map((friend: any): Friend => {
-            return {
-                userId: friend.id,
-                username: friend.username,
-                status: FriendStatus.offline
-        }})
+    private friendPayloadToFriend(friendPayload: FriendPayload): Friend {
+        return {
+            userId: friendPayload.userId,
+            username: friendPayload.username,
+            status: FriendStatus.offline
+        };
     }
 };
 

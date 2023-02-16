@@ -60,20 +60,8 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id/active-friends')
-  getActiveFriends(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findUserActiveFriends(id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get(':id/friend-requests')
-  getPendingFriends(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findUserFriendRequests(id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get(':id/blocked-friends')
-  getBlockedFriends(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findUserBlockedFriends(id);
+  @Get(':id/friends')
+  getFriends(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.getAllUserFriends(id);
   }
 }

@@ -15,6 +15,7 @@ import { FriendshipStatus } from 'src/friends/entities/friend.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
+import { UserFriend } from './interfaces/user-friend.interface';
 
 @Injectable()
 export class UsersService {
@@ -75,7 +76,7 @@ export class UsersService {
     }
 
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        const friendsRelations: Friends[] = await this.friendsService.findUserFriends(id, status);
+        const friendsRelations: Friends[] = await this.friendsService.findUserFriendships(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
                 return friend.user2Id;
@@ -96,6 +97,24 @@ export class UsersService {
 
     findUserBlockedFriends(id: number) {
         return this.findUserFriendsByStatus(id, FriendshipStatus.Blocked);
+    }
+
+    async getAllUserFriends(id: number): Promise<UserFriend[]> {
+        const activeFriendsUsers: User[] = await this.findUserActiveFriends(id);
+        const blockedFriendsUsers: User[] = await this.findUserBlockedFriends(id);
+        const friendRequestsUsers: User[] = await this.findUserFriendRequests(id);
+
+        const activeFriends: UserFriend[] = activeFriendsUsers
+                .map(friend => this.userToUserFriend(friend, FriendshipStatus.Active));
+
+        const blockedFriends: UserFriend[] = blockedFriendsUsers
+                .map(friend => this.userToUserFriend(friend, FriendshipStatus.Blocked));
+
+        const pendingFriends: UserFriend[] = friendRequestsUsers
+                .map(friend => this.userToUserFriend(friend, FriendshipStatus.Pending));
+
+        const allUserFriends: UserFriend[] = activeFriends.concat(blockedFriends, pendingFriends);
+        return allUserFriends;
     }
 
     async update(id: number, updateUserDto: UpdateUserDto) {
@@ -128,5 +147,13 @@ export class UsersService {
         const avatars_path = join(process.cwd(), "avatars");
         const file = createReadStream(join(avatars_path, userAvatar));
         return new StreamableFile(file);
+    }
+    
+    private userToUserFriend(user: User, friendshipStatus: FriendshipStatus): UserFriend {
+        return {
+            userId: user.id,
+            username: user.username,
+            friendshipStatus: friendshipStatus
+        }
     }
 }

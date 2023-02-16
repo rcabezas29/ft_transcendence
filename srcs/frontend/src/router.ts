@@ -5,7 +5,7 @@ import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
 import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
-import Friends from './components/Friends.vue'
+import FriendsList from './components/FriendsList.vue'
 import { authenticationGuard, loggedUserGuard } from './guards/index';
 import { createRouter, createWebHistory } from "vue-router";
 import { user } from './user';
@@ -55,7 +55,7 @@ const routes = [
 	{
 		name: 'friends',
 		path: '/friends',
-		component: Friends,
+		component: FriendsList,
 		beforeEnter: authenticationGuard
 	},
 ];
