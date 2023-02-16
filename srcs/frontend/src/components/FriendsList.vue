@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { friendsController } from '@/friendsController';
-import { onBeforeMount } from 'vue';
 
-onBeforeMount(async () => {
-    //await friendsController.fetchActiveFriends()
-    //await friendsController.fetchBlockedFriends()
-    //await friendsController.fetchFriendRequests()
-})
+import { friendsController, FriendStatus } from '@/friendsController';
+
+function isOnline(friend: any): boolean {
+    return friend.status === FriendStatus.online;
+}
+
+function isGaming(friend: any): boolean {
+    return friend.status === FriendStatus.gaming;
+}
 
 </script>
 
@@ -15,8 +17,9 @@ onBeforeMount(async () => {
     <div class="all-friends">
         <div class="friends-subsection">
             <h2>Active friends</h2>
-            <div v-for="friend in friendsController.activeFriends" :key="friend.userId">
+            <div class="active-friend" v-for="friend in friendsController.activeFriends" :key="friend.userId">
                 <span>{{ friend.username }} ({{ friend.status }})</span>
+				<div class="friend-status" :class="{'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
                 <button>Block</button>
             </div>
         </div>
@@ -42,5 +45,24 @@ onBeforeMount(async () => {
     .all-friends {
         display: flex;
         justify-content: space-around;
+    }
+
+    .active-friend {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .friend-status {
+        height:10px;
+        width: 10px;
+    }
+
+    .friend-status-online {
+        background-color: #07d807;
+    }
+
+    .friend-status-gaming {
+        background-color: #8807d8;
     }
 </style>

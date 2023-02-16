@@ -1,4 +1,5 @@
 import { reactive } from "vue";
+import { directMessageController } from "./directMessageController";
 import type { ChatUser } from "./interfaces";
 import { user } from './user';
 
@@ -8,21 +9,23 @@ enum FriendshipStatus {
     Blocked = 2,
 }
 
-enum FriendStatus {
+export enum FriendStatus {
     offline = 0,
     online = 1,
     gaming = 2
 }
 
+type FriendId = number;
+
 interface FriendPayload {
-    userId: number;
+    userId: FriendId;
     username: string;
     friendshipStatus: FriendshipStatus;
 }
 
 interface Friend {
     //friendshipId: number;
-    userId: number;
+    userId: FriendId;
     username: string;
     status: FriendStatus;
 }
@@ -33,37 +36,40 @@ class FriendsController {
     public friendRequests: Friend[] = [];
 
     setEventHandlers() {
-        user.socket?.on('connected-friends', (payload: ChatUser[]) => {this.onConnectedFriends(payload)});
-        user.socket?.on('friend-online', (payload: ChatUser) => {this.onFriendConnected(payload)});
-        user.socket?.on('friend-offline', (payload: ChatUser) => {this.onFriendDisconnected(payload)});
+        user.socket?.on('connected-friends', (payload: FriendId[]) => {this.onConnectedFriends(payload)});
+        user.socket?.on('friend-online', (payload: FriendId) => {this.onFriendConnected(payload)});
+        user.socket?.on('friend-offline', (payload: FriendId) => {this.onFriendDisconnected(payload)});
     }
 
-    private setFriendOnline(friendId: number) {
-        const friend = this.activeFriends.find((u) => u.userId === friendId);
+    async onConnectedFriends(payload: FriendId[]) {
+        await this.fetchFriends();
+        payload.forEach(friend => this.setFriendOnline(friend));
+
+        const friends: ChatUser[] = this.activeFriends
+                .filter(friend => friend.status === FriendStatus.online)
+                .map(friend => {
+                    return {id: friend.userId, username: friend.username};
+                });
+        directMessageController.onConnectedFriends(friends);
+    }
+
+    onFriendConnected(payload: FriendId) {
+        this.setFriendOnline(payload);
+
+        const friend = this.friendIdToChatUser(payload);
         if (friend)
-            friend.status = FriendStatus.online;
+            directMessageController.onFriendConnected(friend);
     }
 
-    private setFriendOffline(friendId: number) {
-        const friend = this.activeFriends.find((u) => u.userId === friendId);
+    onFriendDisconnected(payload: FriendId) {
+        this.setFriendOffline(payload);
+
+        const friend = this.friendIdToChatUser(payload);
         if (friend)
-            friend.status = FriendStatus.offline;
+            directMessageController.onFriendDisconnected(friend);
     }
 
-    async onConnectedFriends(payload: ChatUser[]) {
-        await friendsController.fetchFriends();
-        payload.forEach(friend => this.setFriendOnline(friend.id));
-    }
-
-    onFriendConnected(payload: ChatUser) {
-        this.setFriendOnline(payload.id);
-    }
-
-    onFriendDisconnected(payload: ChatUser) {
-        this.setFriendOffline(payload.id);
-    }
-
-    async fetchFriends() {
+    private async fetchFriends() {
         const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friends`, {
             method: "GET",
             headers: {
@@ -88,12 +94,35 @@ class FriendsController {
                 .map((friend: FriendPayload) => this.friendPayloadToFriend(friend));
     }
 
+    private setFriendOnline(friendId: FriendId) {
+        const friend = this.activeFriends.find((u) => u.userId === friendId);
+        if (friend)
+            friend.status = FriendStatus.online;
+    }
+
+    private setFriendOffline(friendId: FriendId) {
+        const friend = this.activeFriends.find((u) => u.userId === friendId);
+        if (friend)
+            friend.status = FriendStatus.offline;
+    }
+
     private friendPayloadToFriend(friendPayload: FriendPayload): Friend {
         return {
             userId: friendPayload.userId,
             username: friendPayload.username,
             status: FriendStatus.offline
         };
+    }
+
+    private friendIdToChatUser(friendId: FriendId): ChatUser | null {
+        const friend = this.activeFriends.find(friend => friend.userId === friendId);
+        if (friend) {
+            return {
+                id: friend.userId,
+                username: friend.username
+            }
+        }
+        return null;
     }
 };
 

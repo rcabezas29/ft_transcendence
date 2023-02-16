@@ -18,24 +18,20 @@ class DirectMessageController {
 	public chats: ChatMap = {};
 
 	setEventsHandlers() {
-        user.socket?.on('connected-friends', (payload: ChatUser[]) => {this.onConnectedFriends(payload)});
-        user.socket?.on('friend-online', (payload: ChatUser) => {this.onFriendConnected(payload)});
-        user.socket?.on('friend-offline', (payload: ChatUser) => {this.onFriendDisconnected(payload)});
         user.socket?.on('direct-message', (payload: MessagePayload) => {this.receiveDirectMessage(payload)});
     }
 
-    private onConnectedFriends(payload: ChatUser[]) {
+    onConnectedFriends(payload: ChatUser[]) {
         this.friends = payload;
-        this.friends = this.friends.filter((friend) => friend.id !== user.id);
         this.friends.forEach((friend) => { this.appendChatToChatMap(friend) });
     }
 
-    private onFriendConnected(payload: ChatUser) {
+    onFriendConnected(payload: ChatUser) {
         this.friends.push(payload);
         this.appendChatToChatMap(payload);
     }
 
-    private onFriendDisconnected(payload: ChatUser) {
+    onFriendDisconnected(payload: ChatUser) {
         this.friends = this.friends.filter((friend) => friend.id != payload.id);
     }
 
