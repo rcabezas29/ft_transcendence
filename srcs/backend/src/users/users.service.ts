@@ -76,7 +76,7 @@ export class UsersService {
     }
 
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        const friendsRelations: Friends[] = await this.friendsService.findUserFriendships(id, status);
+        const friendsRelations: Friends[] = await this.friendsService.findUserFriendshipsByStatus(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
                 return friend.user2Id;
@@ -99,21 +99,21 @@ export class UsersService {
         return this.findUserFriendsByStatus(id, FriendshipStatus.Blocked);
     }
 
-    async getAllUserFriends(id: number): Promise<UserFriend[]> {
-        const activeFriendsUsers: User[] = await this.findUserActiveFriends(id);
-        const blockedFriendsUsers: User[] = await this.findUserBlockedFriends(id);
-        const friendRequestsUsers: User[] = await this.findUserFriendRequests(id);
+    async getAllUserFriends(userId: number): Promise<UserFriend[]> {
+        const friendsRelations: Friends[] = await this.friendsService.findAllUserFriendships(userId);
 
-        const activeFriends: UserFriend[] = activeFriendsUsers
-                .map(friend => this.userToUserFriend(friend, FriendshipStatus.Active));
+        const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations.map(async (friendship: Friends): Promise<UserFriend> => {
+            const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
+            const friend = await this.findOne(friendId);
+            return {
+                userId: friendId,
+                username: friend.username,
+                friendshipId: friendship.id,
+                friendshipStatus: friendship.status
+            };
+        });
 
-        const blockedFriends: UserFriend[] = blockedFriendsUsers
-                .map(friend => this.userToUserFriend(friend, FriendshipStatus.Blocked));
-
-        const pendingFriends: UserFriend[] = friendRequestsUsers
-                .map(friend => this.userToUserFriend(friend, FriendshipStatus.Pending));
-
-        const allUserFriends: UserFriend[] = activeFriends.concat(blockedFriends, pendingFriends);
+        const allUserFriends: UserFriend[] = await Promise.all(allUserFriendsPromises);
         return allUserFriends;
     }
 
@@ -147,13 +147,5 @@ export class UsersService {
         const avatars_path = join(process.cwd(), "avatars");
         const file = createReadStream(join(avatars_path, userAvatar));
         return new StreamableFile(file);
-    }
-    
-    private userToUserFriend(user: User, friendshipStatus: FriendshipStatus): UserFriend {
-        return {
-            userId: user.id,
-            username: user.username,
-            friendshipStatus: friendshipStatus
-        }
     }
 }

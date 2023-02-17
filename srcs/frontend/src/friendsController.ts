@@ -20,12 +20,14 @@ type FriendId = number;
 interface FriendPayload {
     userId: FriendId;
     username: string;
+    friendshipId: number;
     friendshipStatus: FriendshipStatus;
 }
 
 interface Friend {
     userId: FriendId;
     username: string;
+    friendshipId: number;
     friendshipStatus: FriendshipStatus;
     status: FriendStatus;
 }
@@ -122,14 +124,41 @@ class FriendsController {
             console.log("could not send friend request");
             return;
         }
+        const response = await httpResponse.json();
 
-        const newFriend: Friend = { //TODO: guardar friendshipID?
+        const newFriend: Friend = {
             userId: userId,
             username: username,
+            friendshipId: response.id,
             friendshipStatus: FriendshipStatus.Pending,
             status: FriendStatus.offline, //FIXME: probablemente necesite checkear el status de este usuario xq si no no se actualizara si ya estaba online
         }
         this.friends.push(newFriend);
+    }
+
+    async acceptFriendRequest(userId: number) {
+        const friend = this.findFriendByFriendId(userId);
+        if (!friend)
+            return;
+
+        const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
+            method: "PATCH",
+            headers: {
+				"Authorization": `Bearer ${user.token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                status: FriendshipStatus.Active
+            })
+        });
+
+        if (httpResponse.status != 200)
+        {
+            console.log("could not send friend request");
+            return;
+        }
+
+        friend.friendshipStatus = FriendshipStatus.Active;
     }
 
     private async fetchFriends() {
