@@ -6,6 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -19,10 +20,18 @@ export class AuthService {
     async create(createUserDto: CreateUserDto) {
         return this.usersService.create(createUserDto);
     }
+
+    async hashPassword(password: string): Promise<string> {
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hash = await bcrypt.hash(password, salt);
+        return hash;
+      }
     
     async validateUser(email: string, pass: string): Promise<any> {
         const user = await this.usersService.findOneByEmail(email);
-        if (user && user.password === pass) {
+        const pass_check = await bcrypt.compare(pass, user.password)
+        if (user && pass_check) {
             const { password, ...result } = user;
             return result;
         }
