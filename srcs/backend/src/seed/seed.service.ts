@@ -14,6 +14,7 @@ export class SeedService {
         
         @InjectRepository(Friendship)
         private readonly friendsRepository: Repository<Friendship>,
+        
         private userService: UsersService
     ) {}
     

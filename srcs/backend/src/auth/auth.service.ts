@@ -15,23 +15,21 @@ export class AuthService {
         private readonly jwtService: JwtService,
         private readonly intraAuthService: IntraAuthService,
         private readonly filesService: FilesService
-        ) {}
+    ) {}
     
     async create(createUserDto: CreateUserDto) {
+        const newpass = await this.hashPassword(createUserDto.password);
+        createUserDto.password = newpass;
         return this.usersService.create(createUserDto);
     }
-
-    async hashPassword(password: string): Promise<string> {
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hash = await bcrypt.hash(password, salt);
-        return hash;
-      }
     
     async validateUser(email: string, pass: string): Promise<any> {
         const user = await this.usersService.findOneByEmail(email);
+        if (!user)
+            return null;
+
         const pass_check = await bcrypt.compare(pass, user.password)
-        if (user && pass_check) {
+        if (pass_check) {
             const { password, ...result } = user;
             return result;
         }
@@ -63,6 +61,13 @@ export class AuthService {
         const jwtToken = this.getJwtToken(jwtPayload);
         
         return { access_token: jwtToken };
+    }
+
+    private async hashPassword(password: string): Promise<string> {
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hash = await bcrypt.hash(password, salt);
+        return hash;
     }
     
     private getJwtToken(payload: JwtPayload) {

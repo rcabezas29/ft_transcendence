@@ -11,8 +11,6 @@ export class AuthController {
 
   @Post('register')
   async createUser(@Body() createUserDto: CreateUserDto) {
-    const newpass = await this.authService.hashPassword(createUserDto.password);
-    createUserDto.password = newpass;
     return this.authService.create(createUserDto);
   }
 
