@@ -35,6 +35,26 @@ Returns one user
 }
 ```
 
+### GET /users/avatar/:username
+
+Returns a user's avatar
+
+### GET /users/:id/friends
+
+Returns a user's friends in the `UserFriend[]` format:
+
+```json
+{
+	"userId": 2,
+	"username": "user2",
+	"friendshipId": 20,
+	"friendshipStatus": 1,
+},
+{
+  ...
+}
+```
+
 ### POST /users
 
 Creates new user and returns the created user
@@ -56,9 +76,10 @@ Updates a user
 Expected body:
 ```json
 {
-	"username": "apavel",
-	"avatar": "photo.jpg",
-	"password": "*********"
+	"username?": "apavel",
+	"avatar?": "photo.jpg",
+	"elo?": "1000",
+	"password?": "*********"
 }
 ```
 

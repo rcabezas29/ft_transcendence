@@ -1,10 +1,10 @@
 ---
 layout: default
-title: Friends 
+title: Friendships
 parent: API 
 ---
 
-## Friends
+## Friendships
 
 ### GET /friends
 
@@ -24,7 +24,7 @@ Returns all friendships
 
 ### GET /friends/:id
 
-Returns one friendship between two users
+Returns one friendship between two users by friendship id.
 
 ```json
 {
@@ -37,29 +37,29 @@ Returns one friendship between two users
 
 ### POST /friends
 
-Creates new friendship relationship and returns the created friend
+Creates new friendship relationship and returns the created friendship
 
 Expected body:
 ```json
 {
 	"user1Id": 16,
 	"user2Id": 19,
-	"status": 0 // optional; default 0
+	"status?": 0 // optional; default = 0
 }
 ```
 
 ### PATCH /friends/:id
 
-Updates a friendship's status
+Updates a friendship's status by friendship id.
 
 
 Expected body:
 ```json
 {
-	"status": 0
+	"status?": 0
 }
 ```
 
 ### DELETE /friends/:id
 
-Deletes a friend
+Deletes a friendship by friendship id.
