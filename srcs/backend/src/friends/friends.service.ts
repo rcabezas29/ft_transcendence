@@ -17,8 +17,11 @@ export class FriendsService {
     ) { }
 
     async create(createFriendsDto: CreateFriendDto) {
+        if (createFriendsDto.user1Id === createFriendsDto.user2Id)
+            throw new BadRequestException('Users cannot friend themselves');
         if (await this.usersAreFriends(createFriendsDto.user1Id, createFriendsDto.user2Id))
             throw new BadRequestException('Users are already friends');
+        
         return await this.friendsRepository.save(createFriendsDto);
     }
 

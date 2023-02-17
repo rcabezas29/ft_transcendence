@@ -24,7 +24,6 @@ export class FriendsController {
   @Post()
   @UseGuards(JwtAuthGuard/*, UserFriendGuard*/)
   create(@Body() createFriendDto: CreateFriendDto) {
-    console.log(createFriendDto)
     return this.friendsService.create(createFriendDto);
   }
 
