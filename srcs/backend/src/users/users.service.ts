@@ -10,8 +10,8 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { FriendsService } from 'src/friends/friends.service';
-import { Friends } from 'src/friends/entities/friend.entity';
-import { FriendshipStatus } from 'src/friends/entities/friend.entity';
+import { Friendship } from 'src/friends/entities/friendship.entity';
+import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -76,7 +76,7 @@ export class UsersService {
     }
 
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        const friendsRelations: Friends[] = await this.friendsService.findUserFriendshipsByStatus(id, status);
+        const friendsRelations: Friendship[] = await this.friendsService.findUserFriendshipsByStatus(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
                 return friend.user2Id;
@@ -100,18 +100,19 @@ export class UsersService {
     }
 
     async getAllUserFriends(userId: number): Promise<UserFriend[]> {
-        const friendsRelations: Friends[] = await this.friendsService.findAllUserFriendships(userId);
+        const friendsRelations: Friendship[] = await this.friendsService.findAllUserFriendships(userId);
 
-        const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations.map(async (friendship: Friends): Promise<UserFriend> => {
-            const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
-            const friend = await this.findOne(friendId);
-            return {
-                userId: friendId,
-                username: friend.username,
-                friendshipId: friendship.id,
-                friendshipStatus: friendship.status
-            };
-        });
+        const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations
+                .map(async (friendship: Friendship): Promise<UserFriend> => {
+                    const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
+                    const friend = await this.findOne(friendId);
+                    return {
+                        userId: friendId,
+                        username: friend.username,
+                        friendshipId: friendship.id,
+                        friendshipStatus: friendship.status
+                    };
+                });
 
         const allUserFriends: UserFriend[] = await Promise.all(allUserFriendsPromises);
         return allUserFriends;

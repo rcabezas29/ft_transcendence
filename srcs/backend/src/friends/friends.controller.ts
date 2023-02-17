@@ -8,14 +8,11 @@ import {
   Delete,
   UseGuards,
   ParseIntPipe,
-  Req,
 } from '@nestjs/common';
 import { FriendsService } from './friends.service';
-import { CreateFriendDto } from './dto/create-friend.dto';
-import { UpdateFriendDto } from './dto/update-friend.dto';
-import { Request } from 'express';
+import { CreateFriendshipDto } from './dto/create-friendship.dto';
+import { UpdateFriendshipDto } from './dto/update-friendship.dto';
 import { JwtAuthGuard, UserFriendGuard } from 'src/auth/guards';
-import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
 
 @Controller('friends')
 export class FriendsController {
@@ -23,8 +20,8 @@ export class FriendsController {
 
   @Post()
   @UseGuards(JwtAuthGuard/*, UserFriendGuard*/)
-  create(@Body() createFriendDto: CreateFriendDto) {
-    return this.friendsService.create(createFriendDto);
+  create(@Body() createFriendshipDto: CreateFriendshipDto) {
+    return this.friendsService.create(createFriendshipDto);
   }
 
   @Get()
@@ -41,8 +38,8 @@ export class FriendsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard/*, UserFriendGuard*/)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateFriendDto: UpdateFriendDto) {
-    return this.friendsService.update(id, updateFriendDto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateFriendshipDto: UpdateFriendshipDto) {
+    return this.friendsService.update(id, updateFriendshipDto);
   }
 
   @Delete(':id')

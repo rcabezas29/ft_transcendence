@@ -1,4 +1,4 @@
-import { FriendshipStatus } from "src/friends/entities/friend.entity";
+import { FriendshipStatus } from "src/friends/entities/friendship.entity";
 
 export interface UserFriend {
 	userId: number,

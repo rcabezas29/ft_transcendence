@@ -1,7 +1,7 @@
 import { IsNumber, IsOptional, Max, Min } from "class-validator";
-import { FriendshipStatus } from "../entities/friend.entity";
+import { FriendshipStatus } from "../entities/friendship.entity";
 
-export class UpdateFriendDto {
+export class UpdateFriendshipDto {
     @IsNumber()
     @Min(0)
     @Max(2)

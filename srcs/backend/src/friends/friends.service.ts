@@ -5,55 +5,44 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateFriendDto } from './dto/create-friend.dto';
-import { UpdateFriendDto } from './dto/update-friend.dto';
-import { Friends } from './entities/friend.entity';
+import { CreateFriendshipDto } from './dto/create-friendship.dto';
+import { UpdateFriendshipDto } from './dto/update-friendship.dto';
+import { Friendship } from './entities/friendship.entity';
 
 @Injectable()
 export class FriendsService {
     constructor(
-        @InjectRepository(Friends)
-        private friendsRepository: Repository<Friends>,
+        @InjectRepository(Friendship)
+        private friendshipsRepository: Repository<Friendship>,
     ) { }
 
-    async create(createFriendsDto: CreateFriendDto) {
-        if (createFriendsDto.user1Id === createFriendsDto.user2Id)
+    async create(createFriendshipDto: CreateFriendshipDto) {
+        if (createFriendshipDto.user1Id === createFriendshipDto.user2Id)
             throw new BadRequestException('Users cannot friend themselves');
-        if (await this.usersAreFriends(createFriendsDto.user1Id, createFriendsDto.user2Id))
+
+        if (await this.usersAreFriends(createFriendshipDto.user1Id, createFriendshipDto.user2Id))
             throw new BadRequestException('Users are already friends');
         
-        return await this.friendsRepository.save(createFriendsDto);
+        return await this.friendshipsRepository.save(createFriendshipDto);
     }
 
     findAll() {
-        return this.friendsRepository.find();
+        return this.friendshipsRepository.find();
     }
 
     findOne(id: number) {
-        return this.friendsRepository.findOneBy({ id: id });
+        return this.friendshipsRepository.findOneBy({ id: id });
     }
 
-    async findByFriendshipUsers(user1Id: number, user2Id: number) {
-        const friendship: Friends[] = await this.friendsRepository.find({
-            where: [
-                { user1Id: user1Id, user2Id: user2Id },
-                { user1Id: user2Id, user2Id: user1Id }
-            ]
-        });
-        if (friendship.length > 0)
-            return friendship[0];
-        return null;
-    }
-
-    async update(id: number, updateFriendDto: UpdateFriendDto) {
+    async update(id: number, updateFriendshipDto: UpdateFriendshipDto) {
         const friendsToUpdate = {
             id,
-            ...updateFriendDto,
+            ...updateFriendshipDto,
         };
         try {
-            const friends = await this.friendsRepository.preload(friendsToUpdate);
-            if (friends) {
-                const res = await this.friendsRepository.save(friends);
+            const friendships = await this.friendshipsRepository.preload(friendsToUpdate);
+            if (friendships) {
+                const res = await this.friendshipsRepository.save(friendships);
                 return res;
             }
         } catch (e) {
@@ -63,18 +52,18 @@ export class FriendsService {
     }
 
     remove(id: number) {
-        this.friendsRepository.delete(id);
+        this.friendshipsRepository.delete(id);
     }
 
     async usersAreFriends(user1Id: number, user2Id: number): Promise<boolean> {
-        const friendship: Friends = await this.findByFriendshipUsers(user1Id, user2Id);
+        const friendship: Friendship = await this.findByFriendshipUsers(user1Id, user2Id);
         if (!friendship)
             return false;
         return true;
     }
 
-    findUserFriendshipsByStatus(userId: number, status: number): Promise<Friends[]> {
-        return this.friendsRepository.find({
+    findUserFriendshipsByStatus(userId: number, status: number): Promise<Friendship[]> {
+        return this.friendshipsRepository.find({
             where: [
                 { user1Id: userId, status: status },
                 { user2Id: userId, status: status },
@@ -82,12 +71,24 @@ export class FriendsService {
         });
     }
 
-    findAllUserFriendships(userId: number): Promise<Friends[]> {
-        return this.friendsRepository.find({
+    findAllUserFriendships(userId: number): Promise<Friendship[]> {
+        return this.friendshipsRepository.find({
             where: [
                 { user1Id: userId },
                 { user2Id: userId },
             ]
         });
+    }
+
+    async findByFriendshipUsers(user1Id: number, user2Id: number) {
+        const friendship: Friendship[] = await this.friendshipsRepository.find({
+            where: [
+                { user1Id: user1Id, user2Id: user2Id },
+                { user1Id: user2Id, user2Id: user1Id }
+            ]
+        });
+        if (friendship.length > 0)
+            return friendship[0];
+        return null;
     }
 }
