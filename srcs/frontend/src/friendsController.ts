@@ -135,7 +135,7 @@ class FriendsController {
 
         if (httpResponse.status != 201)
         {
-            console.log("could not send friend request");
+            console.log("error while sending friend request");
             return;
         }
         const response = await httpResponse.json();
@@ -168,7 +168,7 @@ class FriendsController {
 
         if (httpResponse.status != 200)
         {
-            console.log("could not accept friend request");
+            console.log("error while accepting friend request");
             return;
         }
 
@@ -176,25 +176,16 @@ class FriendsController {
     }
 
     async denyFriendRequest(userId: number) {
-        const friend = this.friends[userId];
-        if (!friend)
-             return;
- 
-         const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
-             method: "DELETE",
-             headers: {
-                 "Authorization": `Bearer ${user.token}`,
-             },
-         });
- 
-         if (httpResponse.status != 200)
-         {
-             console.log("could not deny friend request");
-             return;
-         }
+        const deleted = await this.deleteFriend(userId);
+        if (!deleted)
+            console.log("error while denying friend request");
+    }
 
-         delete this.friends[userId];
-     }
+    async unfriendUser(userId: number) {
+        const deleted = await this.deleteFriend(userId);
+        if (!deleted)
+            console.log("error while unfriending user");
+    }
 
     private async fetchFriends() {
         const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friends`, {
@@ -233,7 +224,25 @@ class FriendsController {
         if (!friend)
             return;
         friend.status = FriendStatus.offline;
-        
+    }
+
+    private async deleteFriend(friendId: FriendId): Promise<boolean> {
+        const friend = this.friends[friendId];
+        if (!friend)
+             return false;
+
+        const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${user.token}`,
+            },
+        });
+
+        if (httpResponse.status != 200)
+            return false;
+
+        delete this.friends[friendId];
+        return true;
     }
 
     private friendIdToChatUser(friendId: FriendId): ChatUser | null {

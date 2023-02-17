@@ -5,7 +5,7 @@ import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
 import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
-import FriendsList from './components/FriendsList.vue'
+import FriendsList from './components/friends/FriendsList.vue'
 import { authenticationGuard, loggedUserGuard } from './guards/index';
 import { createRouter, createWebHistory } from "vue-router";
 import { user } from './user';

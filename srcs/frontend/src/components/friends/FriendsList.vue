@@ -1,15 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed } from "vue";
 import { friendsController, FriendStatus } from '@/friendsController';
-import { user } from "@/user";
-
-interface UserInfo {
-    id: number,
-    username: string
-}
-
-const input = ref<string>("");
-const users = ref<UserInfo[]>([]);
+import FriendSearchBar from "./FriendSearchBar.vue";
 
 function isOnline(friend: any): boolean {
     return friend.status === FriendStatus.online;
@@ -18,43 +10,6 @@ function isOnline(friend: any): boolean {
 function isGaming(friend: any): boolean {
     return friend.status === FriendStatus.gaming;
 }
-
-async function fetchUsers(): Promise<UserInfo[]> {
-    const httpResponse = await fetch(`http://localhost:3000/users`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${user.token}`
-        }
-    });
-    if (httpResponse.status != 200)
-    {
-        console.log("error fetching friends");
-        return [];
-    }
-
-    const response = await httpResponse.json();
-
-    return response.map((u: any) => {
-        return {id: u.id, username: u.username};
-    });
-}
-
-function filteredList() {
-    if (input.value.length > 0) {
-        return users.value.filter((u) =>
-            u.username.toLowerCase().includes(input.value.toLowerCase())
-        );
-    }
-    return [];
-}
-
-function userIsFriendable(userId: number): boolean {
-    return (userId != user.id && !friendsController.userIsActiveFriend(userId) && !friendsController.userIsPending(userId))
-}
-
-onMounted(async () => {
-    users.value = await fetchUsers();
-})
 
 const activeFriends = computed(() => {
     return friendsController.getActiveFriends();
@@ -79,6 +34,7 @@ const friendRequests = computed(() => {
                 <span>{{ friend.username }} ({{ friend.status }})</span>
 				<div class="friend-status" :class="{'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
                 <button>Block</button>
+                <button @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
             </div>
         </div>
         <div class="friends-subsection">
@@ -96,17 +52,7 @@ const friendRequests = computed(() => {
                 <button @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>
             </div>
         </div>
-        <div class="users-search">
-            <h2>Find your people</h2>
-            <input type="text" v-model="input" placeholder="Search users..." />
-            <div class="user-item" v-for="u in filteredList()" :key="u.id">
-                <span>{{ u.username }}</span>
-                <button @click="() => friendsController.sendFriendRequest(u.id, u.username)" v-if="userIsFriendable(u.id)">Send friend request</button>
-            </div>
-            <div class="item-error" v-if="input && filteredList().length === 0">
-                <p>No users found!</p>
-            </div>
-        </div>
+        <FriendSearchBar/>
     </div>
     
 </template>
