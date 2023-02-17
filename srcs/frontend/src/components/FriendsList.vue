@@ -93,7 +93,7 @@ const friendRequests = computed(() => {
             <div v-for="friend in friendRequests" :key="friend.userId">
                 <span>{{ friend.username }}</span>
                 <button @click="() => friendsController.acceptFriendRequest(friend.userId)">Accept</button>
-                <button>Deny</button>
+                <button @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>
             </div>
         </div>
         <div class="users-search">

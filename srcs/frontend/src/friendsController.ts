@@ -145,7 +145,7 @@ class FriendsController {
             username: username,
             friendshipId: response.id,
             friendshipStatus: FriendshipStatus.Pending,
-            status: FriendStatus.offline, //FIXME: probablemente necesite checkear el status de este usuario xq si no no se actualizara si ya estaba online
+            status: FriendStatus.offline,
         }
         this.friends[userId] = newFriend;
     }
@@ -168,12 +168,33 @@ class FriendsController {
 
         if (httpResponse.status != 200)
         {
-            console.log("could not send friend request");
+            console.log("could not accept friend request");
             return;
         }
 
         friend.friendshipStatus = FriendshipStatus.Active;
     }
+
+    async denyFriendRequest(userId: number) {
+        const friend = this.friends[userId];
+        if (!friend)
+             return;
+ 
+         const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
+             method: "DELETE",
+             headers: {
+                 "Authorization": `Bearer ${user.token}`,
+             },
+         });
+ 
+         if (httpResponse.status != 200)
+         {
+             console.log("could not deny friend request");
+             return;
+         }
+
+         delete this.friends[userId];
+     }
 
     private async fetchFriends() {
         const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friends`, {
