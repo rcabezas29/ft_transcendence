@@ -32,8 +32,12 @@ interface Friend {
     status: FriendStatus;
 }
 
+type FriendMap = {
+    [id: FriendId]: Friend;
+}
+
 class FriendsController {
-    public friends: Friend[] = [];
+    public friends: FriendMap = {};
 
     setEventHandlers() {
         user.socket?.on('connected-friends', (payload: FriendId[]) => {this.onConnectedFriends(payload)});
@@ -45,11 +49,9 @@ class FriendsController {
         await this.fetchFriends();
         payload.forEach(friendId => this.setFriendOnline(friendId));
 
-        const chatOnlineFriends: ChatUser[] = this.friends
-                .filter(friend => {
-                    return friend.friendshipStatus === FriendshipStatus.Active
-                    && friend.status === FriendStatus.online;
-                })
+        const activeFriends = this.getActiveFriends();
+        const chatOnlineFriends: ChatUser[] = activeFriends
+                .filter(friend => friend.status === FriendStatus.online)
                 .map(friend => {
                     return {id: friend.userId, username: friend.username};
                 });
@@ -73,33 +75,45 @@ class FriendsController {
     }
 
     userIsActiveFriend(userId: number): boolean {
-        if (this.friends.find(u => u.userId == userId && u.friendshipStatus == FriendshipStatus.Active))
-            return true;
-        return false;
+        const friend = this.friends[userId];
+        if (!friend)
+            return false;
+        return friend.friendshipStatus === FriendshipStatus.Active;
     }
 
     userIsPending(userId: number): boolean {
-        if (this.friends.find(u => u.userId == userId && u.friendshipStatus == FriendshipStatus.Pending))
-            return true;
-        return false;
+        const friend = this.friends[userId];
+        if (!friend)
+            return false;
+        return friend.friendshipStatus === FriendshipStatus.Pending;
     }
 
     userIsBlocked(userId: number): boolean {
-        if (this.friends.find(u => u.userId == userId && u.friendshipStatus == FriendshipStatus.Blocked))
-            return true;
-        return false;
+        const friend = this.friends[userId];
+        if (!friend)
+            return false;
+        return friend.friendshipStatus === FriendshipStatus.Blocked;
+    }
+
+    getFriendsByFriendshipStatus(friendshipStatus: FriendshipStatus): Friend[] {
+        const friends: Friend[] = [];
+        for (let friend in this.friends) {
+            if (this.friends[friend].friendshipStatus === friendshipStatus)
+                friends.push(this.friends[friend]);
+        }
+        return friends;
     }
 
     getActiveFriends(): Friend[] {
-        return this.friends.filter(friend => friend.friendshipStatus === FriendshipStatus.Active);
+        return this.getFriendsByFriendshipStatus(FriendshipStatus.Active);
     }
 
     getBlockedFriends(): Friend[] {
-        return this.friends.filter(friend => friend.friendshipStatus === FriendshipStatus.Blocked);
+        return this.getFriendsByFriendshipStatus(FriendshipStatus.Blocked);
     }
 
     getFriendRequests(): Friend[] {
-        return this.friends.filter(friend => friend.friendshipStatus === FriendshipStatus.Pending);
+        return this.getFriendsByFriendshipStatus(FriendshipStatus.Pending);
     }
 
     async sendFriendRequest(userId: number, username: string) {
@@ -133,12 +147,12 @@ class FriendsController {
             friendshipStatus: FriendshipStatus.Pending,
             status: FriendStatus.offline, //FIXME: probablemente necesite checkear el status de este usuario xq si no no se actualizara si ya estaba online
         }
-        this.friends.push(newFriend);
+        this.friends[userId] = newFriend;
     }
 
     async acceptFriendRequest(userId: number) {
-        const friend = this.findFriendByFriendId(userId);
-        if (!friend)
+       const friend = this.friends[userId];
+       if (!friend)
             return;
 
         const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
@@ -176,37 +190,39 @@ class FriendsController {
 
         const response = await httpResponse.json();
 
-        this.friends = response.map((friendPayload: FriendPayload) => {
+        const friends: Friend[] = response.map((friendPayload: FriendPayload) => {
             const friend: Friend = { ...friendPayload, status: FriendStatus.offline };
             return friend;
+        });
+
+        friends.forEach((friend) => {
+            this.friends[friend.userId] = friend;
         });
     }
 
     private setFriendOnline(friendId: FriendId) {
-        const friend = this.findFriendByFriendId(friendId);
-        if (friend)
-            friend.status = FriendStatus.online;
+        const friend = this.friends[friendId];
+        if (!friend)
+            return;
+        friend.status = FriendStatus.online;
     }
 
     private setFriendOffline(friendId: FriendId) {
-       const friend = this.findFriendByFriendId(friendId);
-       if (friend)
-            friend.status = FriendStatus.offline;
+        const friend = this.friends[friendId];
+        if (!friend)
+            return;
+        friend.status = FriendStatus.offline;
+        
     }
 
     private friendIdToChatUser(friendId: FriendId): ChatUser | null {
-        const friend = this.findFriendByFriendId(friendId);
-        if (friend) {
-            return {
-                id: friend.userId,
-                username: friend.username
-            }
+        const friend = this.friends[friendId];
+        if (!friend)
+            return null;
+        return {
+            id: this.friends[friendId].userId,
+            username: this.friends[friendId].username
         }
-        return null;
-    }
-
-    private findFriendByFriendId(friendId: FriendId): Friend | undefined {
-        return this.friends.find((u) => u.userId === friendId);
     }
 };
 
