@@ -6,7 +6,7 @@ parent: API
 
 ## Friendships
 
-### GET /friends
+### GET /friendships
 
 Returns all friendships
 
@@ -22,7 +22,7 @@ Returns all friendships
 }
 ```
 
-### GET /friends/:id
+### GET /friendships/:id
 
 Returns one friendship between two users by friendship id.
 
@@ -35,7 +35,7 @@ Returns one friendship between two users by friendship id.
 }
 ```
 
-### POST /friends
+### POST /friendships
 
 Creates new friendship relationship and returns the created friendship
 
@@ -48,7 +48,7 @@ Expected body:
 }
 ```
 
-### PATCH /friends/:id
+### PATCH /friendships/:id
 
 Updates a friendship's status by friendship id.
 
@@ -60,7 +60,7 @@ Expected body:
 }
 ```
 
-### PATCH /friends/:id/accept-request
+### PATCH /friendships/:id/accept-request
 
 Accepts a friend request (i.e. sets the friendship's status to 1).
 
@@ -68,13 +68,13 @@ No expected body.
 
 Returns the updated friendship.
 
-### DELETE /friends/:id/deny-request
+### DELETE /friendships/:id/deny-request
 
 Denies a friend request (i.e. removes the friendship). The difference with a simple `DELETE /frieds/:id`
 is that the `deny-request` one includes some extra logic.
 
 No expected body.
 
-### DELETE /friends/:id
+### DELETE /friendships/:id
 
 Deletes a friendship by friendship id.
