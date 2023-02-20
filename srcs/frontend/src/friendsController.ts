@@ -15,6 +15,11 @@ export enum FriendStatus {
     gaming = 2
 }
 
+enum FriendRequestDirection {
+    Sender = 0,
+    Receiver = 1
+}
+
 type FriendId = number;
 
 interface FriendPayload {
@@ -151,9 +156,19 @@ class FriendsController {
     }
 
     async acceptFriendRequest(userId: number) {
-       const friend = this.friends[userId];
-       if (!friend)
+        const friend = this.friends[userId];
+        if (!friend)
             return;
+
+        const friendReqDirection: FriendRequestDirection | null = await this.checkFriendRequestDirection(friend.friendshipId);
+        if (friendReqDirection === null) {
+            console.log("error while determining friend request direction")
+            return;
+        }
+        if (friendReqDirection === FriendRequestDirection.Sender) {
+            console.log("cannot accept your own friend request")
+            return;
+        }
 
         const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
             method: "PATCH",
@@ -166,8 +181,7 @@ class FriendsController {
             })
         });
 
-        if (httpResponse.status != 200)
-        {
+        if (httpResponse.status != 200) {
             console.log("error while accepting friend request");
             return;
         }
@@ -243,6 +257,25 @@ class FriendsController {
 
         delete this.friends[friendId];
         return true;
+    }
+
+    private async checkFriendRequestDirection(friendshipId: number): Promise<FriendRequestDirection | null> {
+        const httpResponse = await fetch(`http://localhost:3000/friends/${friendshipId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${user.token}`,
+            },
+        });
+        if (httpResponse.status != 200)
+            return null;
+
+        const response = await httpResponse.json();
+        if (response.user1Id === user.id)
+            return FriendRequestDirection.Sender;
+        else if (response.user2Id === user.id)
+            return FriendRequestDirection.Receiver;
+        
+        return null;
     }
 
     private friendIdToChatUser(friendId: FriendId): ChatUser | null {
