@@ -8,24 +8,26 @@ parent: Gateway
 
 ## Frontend
 
-In the frontend the `ChatController` is in charge of managing all events related to the Chat.
+In the frontend the `directMessageConntroller` is in charge of managing all events related to the Chat Direct Messages,
+and the `channelController` manages all events related to the Chat Channels.
 
 
 ## Backend
 
-In the backend the `chat.gateway` and `chat.service` are in charge of managing all the events related to the Chat.
+In the backend the `chat.gateway` and `chat.service` and `channels.service` are in charge of managing all the events
+related to the Chat.
+
 The `gateway-manager.service` is injected into `chat.gateway`, use it to manage the users that are connected to the server.
+
+The `gateway-manager.gateway` is injected into `chat.gateway`, use it to access the server instance.
 
 ## Event relation between the Frontend and Backend
 
 ### Direct messages
 
-- **On client connection to the server**: the server sends to the connected client a `connected-friends` event with an array of connected friends.
-Any friend of the connected client who was already online when the new client connected will receive `friend-online` event from the server with the
-newly connected client.
-
-- **On client disconnection from the server**: the server sends to all the friends of the disconnected user a `friend-offline` event with the disconnected
-client.
+- **On client connection and disconnection to the server**: when the client gets a `connected-friends`, `friend-online` or a `friend-offline` event, it is managed through the `friendsController`, which at the same time calls some relevant connection
+and disconnection functions in the `directMessageController` in order to add/remove the newly connected/disconnected
+friends and chats.
 
 - **On direct message**: When a client sends a direct message to a friend, the user sends to the server a `direct-message` event containing the addressee
 friend and the message. When the server receives the event it checks if the client and the addressee are friends. If that is the case the server sends a 
