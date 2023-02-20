@@ -4,9 +4,10 @@ import type { ChatUser } from "./interfaces";
 import { user } from './user';
 
 enum FriendshipStatus {
-    Pending = 0,
-    Active = 1,
-    Blocked = 2,
+    RequestSent = 0,
+    RequestReceived = 1,
+    Active = 2,
+    Blocked = 3,
 }
 
 export enum FriendStatus {
@@ -85,7 +86,8 @@ class FriendsController {
         const friend = this.friends[userId];
         if (!friend)
             return false;
-        return friend.friendshipStatus === FriendshipStatus.Pending;
+        return (friend.friendshipStatus === FriendshipStatus.RequestReceived
+                || friend.friendshipStatus === FriendshipStatus.RequestSent);
     }
 
     userIsBlocked(userId: number): boolean {
@@ -112,8 +114,12 @@ class FriendsController {
         return this.getFriendsByFriendshipStatus(FriendshipStatus.Blocked);
     }
 
-    getFriendRequests(): Friend[] {
-        return this.getFriendsByFriendshipStatus(FriendshipStatus.Pending);
+    getSentFriendRequests(): Friend[] {
+        return this.getFriendsByFriendshipStatus(FriendshipStatus.RequestSent);
+    }
+
+    getReceivedFriendRequests(): Friend[] {
+        return this.getFriendsByFriendshipStatus(FriendshipStatus.RequestReceived);
     }
 
     async sendFriendRequest(userId: number, username: string) {
@@ -129,7 +135,6 @@ class FriendsController {
             body: JSON.stringify({
                 user1Id: user.id,
                 user2Id: userId,
-                status: FriendshipStatus.Pending
             })
         });
 
@@ -144,7 +149,7 @@ class FriendsController {
             userId: userId,
             username: username,
             friendshipId: response.id,
-            friendshipStatus: FriendshipStatus.Pending,
+            friendshipStatus: FriendshipStatus.RequestSent,
             status: FriendStatus.offline,
         }
         this.friends[userId] = newFriend;

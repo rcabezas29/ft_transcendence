@@ -15,7 +15,7 @@ import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
-import { UserFriend } from './interfaces/user-friend.interface';
+import { FrontendFriendshipStatus, UserFriend } from './interfaces/user-friend.interface';
 
 @Injectable()
 export class UsersService {
@@ -106,11 +106,12 @@ export class UsersService {
                 .map(async (friendship: Friendship): Promise<UserFriend> => {
                     const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
                     const friend = await this.findOne(friendId);
+                    const friendshipStatus =  this.friendshipStatusToFrontendFriendshipStatus(friendship, userId);
                     return {
                         userId: friendId,
                         username: friend.username,
                         friendshipId: friendship.id,
-                        friendshipStatus: friendship.status
+                        friendshipStatus: friendshipStatus
                     };
                 });
 
@@ -148,5 +149,19 @@ export class UsersService {
         const avatars_path = join(process.cwd(), "avatars");
         const file = createReadStream(join(avatars_path, userAvatar));
         return new StreamableFile(file);
+    }
+
+    private friendshipStatusToFrontendFriendshipStatus(friendship: Friendship, userId: number): FrontendFriendshipStatus {
+        const friendshipStatus: FriendshipStatus = friendship.status;
+        let frontStatus: FrontendFriendshipStatus;
+
+        if (friendshipStatus === FriendshipStatus.Pending)
+            frontStatus = userId === friendship.user1Id ? FrontendFriendshipStatus.RequestSent : FrontendFriendshipStatus.RequestReceived;
+        else if (friendshipStatus === FriendshipStatus.Active) 
+            frontStatus = FrontendFriendshipStatus.Active;
+        else if (friendshipStatus === FriendshipStatus.Blocked) 
+            frontStatus = FrontendFriendshipStatus.Blocked;
+
+        return frontStatus;
     }
 }

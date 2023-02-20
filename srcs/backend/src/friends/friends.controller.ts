@@ -25,13 +25,13 @@ export class FriendsController {
   create(@Body() createFriendshipDto: CreateFriendshipDto, @Req() req: Request) {
     return this.friendsService.create(createFriendshipDto, req.user);
   }
-
+/*
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll() {
     return this.friendsService.findAll();
   }
-/*
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id', ParseIntPipe) id: number) {
