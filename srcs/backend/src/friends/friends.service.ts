@@ -8,7 +8,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateFriendshipDto } from './dto/create-friendship.dto';
 import { UpdateFriendshipDto } from './dto/update-friendship.dto';
-import { Friendship } from './entities/friendship.entity';
+import { Friendship, FriendshipStatus } from './entities/friendship.entity';
+
+enum FriendRequestDirection {
+    Sender = 0,
+    Receiver = 1
+}
 
 @Injectable()
 export class FriendsService {
@@ -55,6 +60,27 @@ export class FriendsService {
         throw new NotFoundException();
     }
 
+    async handleFriendRequest(id: number, requestUser, action: string) {
+        const friendship: Friendship = await this.findOneById(id);
+        if (!friendship)
+            throw new NotFoundException();
+
+        if (friendship.status != FriendshipStatus.Pending)
+            throw new BadRequestException('Friendship is not pending');
+
+        const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, id);
+        if (friendReqDirection === FriendRequestDirection.Sender)
+            throw new BadRequestException('User cannot handle their own friend request');
+        else if (friendReqDirection === FriendRequestDirection.Receiver) {
+            if (action === 'accept')
+                return this.update(id, { status: FriendshipStatus.Active });
+            else if (action === 'deny')
+                return this.remove(id);
+        }
+
+        throw new BadRequestException();
+    }
+
     remove(id: number) {
         this.friendshipsRepository.delete(id);
     }
@@ -93,6 +119,18 @@ export class FriendsService {
         });
         if (friendship.length > 0)
             return friendship[0];
+        return null;
+    }
+
+    private async checkFriendRequestDirection(userId: number, friendshipId: number): Promise<FriendRequestDirection> {
+        const friendship: Friendship = await this.findOneById(friendshipId);
+        if (!friendship)
+            return null;
+
+        if (userId === friendship.user1Id)
+            return FriendRequestDirection.Sender;
+        else if (userId === friendship.user2Id)
+            return FriendRequestDirection.Receiver;
         return null;
     }
 }

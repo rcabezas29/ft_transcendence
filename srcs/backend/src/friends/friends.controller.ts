@@ -44,6 +44,18 @@ export class FriendsController {
     return this.friendsService.update(id, updateFriendshipDto);
   }
 
+  @Patch(':id/accept-request')
+  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
+  acceptFriendRequest(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    return this.friendsService.handleFriendRequest(id, req.user, 'accept');
+  }
+
+  @Patch(':id/deny-request')
+  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
+  denyFriendRequest(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    return this.friendsService.handleFriendRequest(id, req.user, 'deny');
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   remove(@Param('id', ParseIntPipe) id: number) {
