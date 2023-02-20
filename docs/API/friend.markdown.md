@@ -60,6 +60,21 @@ Expected body:
 }
 ```
 
+### PATCH /friends/:id/accept-request
+
+Accepts a friend request (i.e. sets the friendship's status to 1).
+
+No expected body.
+
+Returns the updated friendship.
+
+### DELETE /friends/:id/deny-request
+
+Denies a friend request (i.e. removes the friendship). The difference with a simple `DELETE /frieds/:id`
+is that the `deny-request` one includes some extra logic.
+
+No expected body.
+
 ### DELETE /friends/:id
 
 Deletes a friendship by friendship id.
