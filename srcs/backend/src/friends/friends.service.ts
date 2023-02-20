@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Injectable,
     NotFoundException,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,7 +17,10 @@ export class FriendsService {
         private friendshipsRepository: Repository<Friendship>,
     ) { }
 
-    async create(createFriendshipDto: CreateFriendshipDto) {
+    async create(createFriendshipDto: CreateFriendshipDto, requestUser) {
+        if (createFriendshipDto.user1Id != requestUser.id && createFriendshipDto.user2Id != requestUser.id)
+            throw new UnauthorizedException('Users can only create friendships for themselves');
+
         if (createFriendshipDto.user1Id === createFriendshipDto.user2Id)
             throw new BadRequestException('Users cannot friend themselves');
 
@@ -30,7 +34,7 @@ export class FriendsService {
         return this.friendshipsRepository.find();
     }
 
-    findOne(id: number) {
+    findOneById(id: number) {
         return this.friendshipsRepository.findOneBy({ id: id });
     }
 
@@ -40,9 +44,9 @@ export class FriendsService {
             ...updateFriendshipDto,
         };
         try {
-            const friendships = await this.friendshipsRepository.preload(friendsToUpdate);
-            if (friendships) {
-                const res = await this.friendshipsRepository.save(friendships);
+            const friendship = await this.friendshipsRepository.preload(friendsToUpdate);
+            if (friendship) {
+                const res = await this.friendshipsRepository.save(friendship);
                 return res;
             }
         } catch (e) {
