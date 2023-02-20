@@ -126,7 +126,7 @@ class FriendsController {
         if (!userId || !username)
             return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friends`, {
+        const httpResponse = await fetch(`http://localhost:3000/friendships`, {
             method: "POST",
             headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -160,7 +160,7 @@ class FriendsController {
         if (!friend)
             return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}/accept-request`, {
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/accept-request`, {
             method: "PATCH",
             headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -180,7 +180,7 @@ class FriendsController {
         if (!friend)
             return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}/deny-request`, {
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/deny-request`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${user.token}`,
@@ -200,7 +200,7 @@ class FriendsController {
         if (!friend)
              return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${user.token}`,
