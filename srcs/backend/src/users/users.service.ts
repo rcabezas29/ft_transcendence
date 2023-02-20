@@ -9,7 +9,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { FriendsService } from 'src/friends/friends.service';
+import { FriendshipsService } from 'src/friends/friendships.service';
 import { Friendship } from 'src/friends/entities/friendship.entity';
 import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
@@ -22,7 +22,7 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
-        private friendsService: FriendsService,
+        private friendshipsService: FriendshipsService,
         private intraAuthService: IntraAuthService
     ) {}
 
@@ -76,7 +76,7 @@ export class UsersService {
     }
 
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        const friendsRelations: Friendship[] = await this.friendsService.findUserFriendshipsByStatus(id, status);
+        const friendsRelations: Friendship[] = await this.friendshipsService.findUserFriendshipsByStatus(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
                 return friend.user2Id;
@@ -100,7 +100,7 @@ export class UsersService {
     }
 
     async getAllUserFriends(userId: number): Promise<UserFriend[]> {
-        const friendsRelations: Friendship[] = await this.friendsService.findAllUserFriendships(userId);
+        const friendsRelations: Friendship[] = await this.friendshipsService.findAllUserFriendships(userId);
 
         const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations
                 .map(async (friendship: Friendship): Promise<UserFriend> => {

@@ -16,7 +16,7 @@ enum FriendRequestDirection {
 }
 
 @Injectable()
-export class FriendsService {
+export class FriendshipsService {
     constructor(
         @InjectRepository(Friendship)
         private friendshipsRepository: Repository<Friendship>,

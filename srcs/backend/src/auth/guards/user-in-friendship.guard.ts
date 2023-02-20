@@ -1,11 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { Observable } from "rxjs";
 import { Friendship } from "src/friends/entities/friendship.entity";
-import { FriendsService } from "src/friends/friends.service";
+import { FriendshipsService } from "src/friends/friendships.service";
 
 @Injectable()
 export class UserInFriendshipGuard implements CanActivate {
-    constructor(private readonly friendsService: FriendsService) {}
+    constructor(private readonly friendshipsService: FriendshipsService) {}
     
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         const request = context.switchToHttp().getRequest();
@@ -19,7 +19,7 @@ export class UserInFriendshipGuard implements CanActivate {
     }
 
     private async checkIfUserInFriendship(userId: number, friendshipId: number): Promise<boolean> {
-        const friendship: Friendship = await this.friendsService.findOneById(friendshipId);
+        const friendship: Friendship = await this.friendshipsService.findOneById(friendshipId);
         if (!friendship)
             throw new NotFoundException();
 
