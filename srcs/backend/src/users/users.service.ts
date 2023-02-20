@@ -1,5 +1,7 @@
 import {
     BadRequestException,
+    forwardRef,
+    Inject,
     Injectable,
     NotFoundException,
     StreamableFile,
@@ -22,7 +24,10 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+
+        @Inject(forwardRef(() => FriendshipsService))
         private friendshipsService: FriendshipsService,
+        
         private intraAuthService: IntraAuthService
     ) {}
 
@@ -63,7 +68,7 @@ export class UsersService {
         })
     }
 
-    findOne(id: number): Promise<User> {
+    findOneById(id: number): Promise<User> {
         return this.usersRepository.findOneBy({ id: id });
     }
 
@@ -105,7 +110,7 @@ export class UsersService {
         const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations
                 .map(async (friendship: Friendship): Promise<UserFriend> => {
                     const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
-                    const friend = await this.findOne(friendId);
+                    const friend = await this.findOneById(friendId);
                     const friendshipStatus =  this.friendshipStatusToFrontendFriendshipStatus(friendship, userId);
                     return {
                         userId: friendId,

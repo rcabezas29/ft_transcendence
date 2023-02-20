@@ -1,10 +1,13 @@
 import {
     BadRequestException,
+    forwardRef,
+    Inject,
     Injectable,
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreateFriendshipDto } from './dto/create-friendship.dto';
 import { UpdateFriendshipDto } from './dto/update-friendship.dto';
@@ -20,9 +23,16 @@ export class FriendshipsService {
     constructor(
         @InjectRepository(Friendship)
         private friendshipsRepository: Repository<Friendship>,
+
+        @Inject(forwardRef(() => UsersService))
+        private usersService: UsersService
     ) { }
 
     async create(createFriendshipDto: CreateFriendshipDto, requestUser) {
+        if (!await this.usersService.findOneById(createFriendshipDto.user1Id)
+            || !await this.usersService.findOneById(createFriendshipDto.user2Id))
+            throw new BadRequestException('One or more of the friendship users do not exist');
+
         if (createFriendshipDto.user1Id != requestUser.id && createFriendshipDto.user2Id != requestUser.id)
             throw new UnauthorizedException('Users can only create friendships for themselves');
 

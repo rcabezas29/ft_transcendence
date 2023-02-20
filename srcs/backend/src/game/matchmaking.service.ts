@@ -17,7 +17,7 @@ export class MatchmakingService {
 
 	async searchGame(requestor: GatewayUser) {
 		console.log("User: ", requestor.id, "- searchGame");
-		const user: User = await this.usersService.findOne(requestor.id);
+		const user: User = await this.usersService.findOneById(requestor.id);
 		requestor.elo = user.elo;
 		this.usersQueue.push(requestor);
 	}
