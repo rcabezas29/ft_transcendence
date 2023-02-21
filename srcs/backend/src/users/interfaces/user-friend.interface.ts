@@ -1,13 +1,8 @@
-export enum FrontendFriendshipStatus {
-	RequestSent = 0,
-    RequestReceived = 1,
-    Active = 2,
-    Blocked = 3,
-}
+import { FriendshipStatus } from "src/friends/entities/friendship.entity";
 
 export interface UserFriend {
 	userId: number,
 	username: string,
     friendshipId: number;
-	friendshipStatus: FrontendFriendshipStatus
+	friendshipStatus: FriendshipStatus
 }

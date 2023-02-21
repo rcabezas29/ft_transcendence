@@ -4,16 +4,20 @@ import type { ChatUser } from "./interfaces";
 import { user } from './user';
 
 enum FriendshipStatus {
-    RequestSent = 0,
-    RequestReceived = 1,
-    Active = 2,
-    Blocked = 3,
+    Pending = 0,
+    Active = 1,
+    Blocked = 2,
 }
 
 export enum FriendStatus {
     offline = 0,
     online = 1,
     gaming = 2
+}
+
+enum FriendRequestDirection {
+    Sender = 0,
+    Receiver = 1
 }
 
 type FriendId = number;
@@ -25,7 +29,7 @@ interface FriendPayload {
     friendshipStatus: FriendshipStatus;
 }
 
-interface Friend {
+export interface Friend {
     userId: FriendId;
     username: string;
     friendshipId: number;
@@ -86,8 +90,7 @@ class FriendsController {
         const friend = this.friends[userId];
         if (!friend)
             return false;
-        return (friend.friendshipStatus === FriendshipStatus.RequestReceived
-                || friend.friendshipStatus === FriendshipStatus.RequestSent);
+        return friend.friendshipStatus === FriendshipStatus.Pending;
     }
 
     userIsBlocked(userId: number): boolean {
@@ -114,12 +117,26 @@ class FriendsController {
         return this.getFriendsByFriendshipStatus(FriendshipStatus.Blocked);
     }
 
-    getSentFriendRequests(): Friend[] {
-        return this.getFriendsByFriendshipStatus(FriendshipStatus.RequestSent);
+    async getSentFriendRequests(): Promise<Friend[]> {
+        const pendingReqs: Friend[] = this.getFriendsByFriendshipStatus(FriendshipStatus.Pending);
+        const sentFriendReqs: Friend[] = [];
+        for (let friend of pendingReqs) {
+            const direction = await this.checkFriendshipDirection(friend.friendshipId);
+            if (direction === FriendRequestDirection.Sender)
+                sentFriendReqs.push(friend);
+        }
+        return sentFriendReqs;
     }
 
-    getReceivedFriendRequests(): Friend[] {
-        return this.getFriendsByFriendshipStatus(FriendshipStatus.RequestReceived);
+    async getReceivedFriendRequests(): Promise<Friend[]> {
+        const pendingReqs: Friend[] = this.getFriendsByFriendshipStatus(FriendshipStatus.Pending);
+        const receivedFriendReqs: Friend[] = [];
+        for (let friend of pendingReqs) {
+            const direction = await this.checkFriendshipDirection(friend.friendshipId);
+            if (direction === FriendRequestDirection.Receiver)
+                receivedFriendReqs.push(friend);
+        }
+        return receivedFriendReqs;
     }
 
     async sendFriendRequest(userId: number, username: string) {
@@ -149,7 +166,7 @@ class FriendsController {
             userId: userId,
             username: username,
             friendshipId: response.id,
-            friendshipStatus: FriendshipStatus.RequestSent,
+            friendshipStatus: FriendshipStatus.Pending,
             status: FriendStatus.offline,
         }
         this.friends[userId] = newFriend;
@@ -252,6 +269,22 @@ class FriendsController {
         if (!friend)
             return;
         friend.status = FriendStatus.offline;
+    }
+
+    private async checkFriendshipDirection(friendshipId: number): Promise<FriendRequestDirection | null> {
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friendshipId}/request-direction`, {
+            method: "GET",
+            headers: {
+				"Authorization": `Bearer ${user.token}`
+            }
+        });
+        if (httpResponse.status != 200)
+        {
+            console.log("error getting friend request direction");
+            return null;
+        }
+        const response: FriendRequestDirection = await httpResponse.json();
+        return response;
     }
 
     private friendIdToChatUser(friendId: FriendId): ChatUser | null {

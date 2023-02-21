@@ -17,7 +17,7 @@ import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
-import { FrontendFriendshipStatus, UserFriend } from './interfaces/user-friend.interface';
+import { UserFriend } from './interfaces/user-friend.interface';
 
 @Injectable()
 export class UsersService {
@@ -111,12 +111,12 @@ export class UsersService {
                 .map(async (friendship: Friendship): Promise<UserFriend> => {
                     const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
                     const friend = await this.findOneById(friendId);
-                    const friendshipStatus =  this.friendshipStatusToFrontendFriendshipStatus(friendship, userId);
+                    //const friendshipStatus =  this.friendshipStatusToFrontendFriendshipStatus(friendship, userId);
                     return {
                         userId: friendId,
                         username: friend.username,
                         friendshipId: friendship.id,
-                        friendshipStatus: friendshipStatus
+                        friendshipStatus: friendship.status
                     };
                 });
 
@@ -155,7 +155,7 @@ export class UsersService {
         const file = createReadStream(join(avatars_path, userAvatar));
         return new StreamableFile(file);
     }
-
+/*
     private friendshipStatusToFrontendFriendshipStatus(friendship: Friendship, userId: number): FrontendFriendshipStatus {
         const friendshipStatus: FriendshipStatus = friendship.status;
         let frontStatus: FrontendFriendshipStatus;
@@ -168,5 +168,5 @@ export class UsersService {
             frontStatus = FrontendFriendshipStatus.Blocked;
 
         return frontStatus;
-    }
+    }*/
 }

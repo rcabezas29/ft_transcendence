@@ -13,7 +13,7 @@ import { CreateFriendshipDto } from './dto/create-friendship.dto';
 import { UpdateFriendshipDto } from './dto/update-friendship.dto';
 import { Friendship, FriendshipStatus } from './entities/friendship.entity';
 
-enum FriendRequestDirection {
+export enum FriendRequestDirection {
     Sender = 0,
     Receiver = 1
 }
@@ -130,6 +130,11 @@ export class FriendshipsService {
         if (friendship.length > 0)
             return friendship[0];
         return null;
+    }
+
+    async getFriendRequestDirection(id: number, requestUser) {
+        const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, id);
+        return friendReqDirection;
     }
 
     private async checkFriendRequestDirection(userId: number, friendshipId: number): Promise<FriendRequestDirection> {

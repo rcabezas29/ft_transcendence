@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { friendsController, FriendStatus } from '@/friendsController';
+import { computed, onBeforeMount, onMounted, ref, watch } from "vue";
+import { type Friend, friendsController, FriendStatus } from '@/friendsController';
 import FriendSearchBar from "./FriendSearchBar.vue";
 
 function isOnline(friend: any): boolean {
@@ -19,12 +19,23 @@ const blockedFriends = computed(() => {
     return friendsController.getBlockedFriends();
 })
 
-const sentFriendRequests = computed(() => {
-    return friendsController.getSentFriendRequests();
-})
+const sentFriendRequests = ref<Friend[]>([]);
+const receivedFriendRequests = ref<Friend[]>([]);
 
-const receivedFriendRequests = computed(() => {
-    return friendsController.getReceivedFriendRequests();
+friendsController.getSentFriendRequests().then((value) => {
+    sentFriendRequests.value = value;
+});
+friendsController.getReceivedFriendRequests().then((value) => {
+    receivedFriendRequests.value = value;
+});
+
+watch(friendsController, () => {
+    friendsController.getSentFriendRequests().then((value) => {
+        sentFriendRequests.value = value;
+    });
+    friendsController.getReceivedFriendRequests().then((value) => {
+        receivedFriendRequests.value = value;
+    });
 })
 
 </script>

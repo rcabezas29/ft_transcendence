@@ -44,6 +44,13 @@ export class FriendshipsController {
     return this.friendshipsService.update(id, updateFriendshipDto);
   }
 */
+
+  @Get(':id/request-direction')
+  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
+  getFriendRequestDirection(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    return this.friendshipsService.getFriendRequestDirection(id, req.user);
+  }
+
   @Patch(':id/accept-request')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   acceptFriendRequest(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
