@@ -111,7 +111,6 @@ export class UsersService {
                 .map(async (friendship: Friendship): Promise<UserFriend> => {
                     const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
                     const friend = await this.findOneById(friendId);
-                    //const friendshipStatus =  this.friendshipStatusToFrontendFriendshipStatus(friendship, userId);
                     return {
                         userId: friendId,
                         username: friend.username,
@@ -155,18 +154,4 @@ export class UsersService {
         const file = createReadStream(join(avatars_path, userAvatar));
         return new StreamableFile(file);
     }
-/*
-    private friendshipStatusToFrontendFriendshipStatus(friendship: Friendship, userId: number): FrontendFriendshipStatus {
-        const friendshipStatus: FriendshipStatus = friendship.status;
-        let frontStatus: FrontendFriendshipStatus;
-
-        if (friendshipStatus === FriendshipStatus.Pending)
-            frontStatus = userId === friendship.user1Id ? FrontendFriendshipStatus.RequestSent : FrontendFriendshipStatus.RequestReceived;
-        else if (friendshipStatus === FriendshipStatus.Active) 
-            frontStatus = FrontendFriendshipStatus.Active;
-        else if (friendshipStatus === FriendshipStatus.Blocked) 
-            frontStatus = FrontendFriendshipStatus.Blocked;
-
-        return frontStatus;
-    }*/
 }

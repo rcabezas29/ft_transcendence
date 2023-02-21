@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
 import FriendSearchBar from "./FriendSearchBar.vue";
 
@@ -21,7 +21,6 @@ const blockedFriends = computed(() => {
 
 const sentFriendRequests = ref<Friend[]>([]);
 const receivedFriendRequests = ref<Friend[]>([]);
-
 friendsController.getSentFriendRequests().then((value) => {
     sentFriendRequests.value = value;
 });

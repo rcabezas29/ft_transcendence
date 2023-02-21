@@ -134,12 +134,16 @@ export class FriendshipsService {
 
     async getFriendRequestDirection(id: number, requestUser) {
         const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, id);
+        if (!friendReqDirection)
+            throw new BadRequestException('Friendship does not exist or is not a friend request');
         return friendReqDirection;
     }
 
     private async checkFriendRequestDirection(userId: number, friendshipId: number): Promise<FriendRequestDirection> {
         const friendship: Friendship = await this.findOneById(friendshipId);
         if (!friendship)
+            return null;
+        if (friendship.status !== FriendshipStatus.Pending)
             return null;
 
         if (userId === friendship.user1Id)
