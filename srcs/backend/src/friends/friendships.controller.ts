@@ -51,6 +51,18 @@ export class FriendshipsController {
     return this.friendshipsService.getFriendRequestDirection(id, req.user);
   }
 
+  @Patch(':id/block')
+  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
+  blockFriend(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    return this.friendshipsService.blockFriend(id, req.user);
+  }
+
+  @Patch(':id/unblock')
+  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
+  unblockFriend(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    return this.friendshipsService.unblockFriend(id, req.user);
+  }
+
   @Patch(':id/accept-request')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   acceptFriendRequest(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {

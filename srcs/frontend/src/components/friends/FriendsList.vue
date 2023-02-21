@@ -47,7 +47,7 @@ watch(friendsController, () => {
             <div class="active-friend" v-for="friend in activeFriends" :key="friend.userId">
                 <span>{{ friend.username }} ({{ friend.status }})</span>
 				<div class="friend-status" :class="{'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
-                <button>Block</button>
+                <button @click="() => friendsController.blockUser(friend.userId)">Block</button>
                 <button @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
             </div>
         </div>
@@ -55,7 +55,7 @@ watch(friendsController, () => {
             <h2>Blocked friends</h2>
             <div v-for="friend in blockedFriends" :key="friend.userId">
                 <span>{{ friend.username }}</span>
-                <button>Unblock</button>
+                <button @click="() => friendsController.unblockUser(friend.userId)">Unblock</button>
             </div>
         </div>
         <div class="friends-subsection">

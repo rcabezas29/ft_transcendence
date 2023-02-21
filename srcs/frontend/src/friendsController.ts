@@ -232,6 +232,46 @@ class FriendsController {
         delete this.friends[userId];
     }
 
+    async blockUser(userId: number) {
+        const friend = this.friends[userId];
+        if (!friend)
+            return;
+    
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/block`, {
+            method: "PATCH",
+            headers: {
+                "Authorization": `Bearer ${user.token}`,
+            },
+        });
+
+        if (httpResponse.status != 200) {
+            console.log("error while blocking user");
+            return;
+        }
+
+        friend.friendshipStatus = FriendshipStatus.Blocked;
+    }
+
+    async unblockUser(userId: number) {
+        const friend = this.friends[userId];
+        if (!friend)
+            return;
+    
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/unblock`, {
+            method: "PATCH",
+            headers: {
+                "Authorization": `Bearer ${user.token}`,
+            },
+        });
+
+        if (httpResponse.status != 200) {
+            console.log("error while unblocking user");
+            return;
+        }
+
+        friend.friendshipStatus = FriendshipStatus.Active;
+    }
+
     private async fetchFriends() {
         const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friends`, {
             method: "GET",

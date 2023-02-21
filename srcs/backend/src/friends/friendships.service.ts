@@ -7,6 +7,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BlockedFriendshipsService } from 'src/blocked-friendships/blocked-friendships.service';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreateFriendshipDto } from './dto/create-friendship.dto';
@@ -25,7 +26,9 @@ export class FriendshipsService {
         private friendshipsRepository: Repository<Friendship>,
 
         @Inject(forwardRef(() => UsersService))
-        private usersService: UsersService
+        private usersService: UsersService,
+
+        private blockedFriendshipsService: BlockedFriendshipsService
     ) { }
 
     async create(createFriendshipDto: CreateFriendshipDto, requestUser) {
@@ -41,8 +44,13 @@ export class FriendshipsService {
 
         if (await this.usersAreFriends(createFriendshipDto.user1Id, createFriendshipDto.user2Id))
             throw new BadRequestException('Users are already friends');
+
+        const newFriendship = await this.friendshipsRepository.save(createFriendshipDto);
+
+        if (createFriendshipDto.status === FriendshipStatus.Blocked)
+            this.createBlockedFriendship(requestUser.id, newFriendship.user1Id, newFriendship.user2Id, newFriendship.id);
         
-        return await this.friendshipsRepository.save(createFriendshipDto);
+        return newFriendship;
     }
 
     findAll() {
@@ -53,7 +61,7 @@ export class FriendshipsService {
         return this.friendshipsRepository.findOneBy({ id: id });
     }
 
-    async update(id: number, updateFriendshipDto: UpdateFriendshipDto) {
+    async update(id: number, updateFriendshipDto: UpdateFriendshipDto, userId: number) {
         const friendsToUpdate = {
             id,
             ...updateFriendshipDto,
@@ -62,6 +70,8 @@ export class FriendshipsService {
             const friendship = await this.friendshipsRepository.preload(friendsToUpdate);
             if (friendship) {
                 const res = await this.friendshipsRepository.save(friendship);
+                if (res.status === FriendshipStatus.Blocked)
+                    this.createBlockedFriendship(userId, res.user1Id, res.user2Id, id);
                 return res;
             }
         } catch (e) {
@@ -83,7 +93,7 @@ export class FriendshipsService {
             throw new BadRequestException('User cannot handle their own friend request');
         else if (friendReqDirection === FriendRequestDirection.Receiver) {
             if (action === 'accept')
-                return this.update(id, { status: FriendshipStatus.Active });
+                return this.update(id, { status: FriendshipStatus.Active }, requestUser.id);
             else if (action === 'deny')
                 return this.remove(id);
         }
@@ -93,6 +103,16 @@ export class FriendshipsService {
 
     remove(id: number) {
         this.friendshipsRepository.delete(id);
+        this.blockedFriendshipsService.removeByFriendshipId(id);
+    }
+
+    async blockFriend(id: number, requestUser) {
+        return this.update(id, { status: FriendshipStatus.Blocked }, requestUser.id);
+    }
+
+    async unblockFriend(id: number, requestUser) {
+        this.blockedFriendshipsService.removeByFriendshipId(id);
+        return this.update(id, { status: FriendshipStatus.Active }, requestUser.id);
     }
 
     async usersAreFriends(user1Id: number, user2Id: number): Promise<boolean> {
@@ -151,5 +171,13 @@ export class FriendshipsService {
         else if (userId === friendship.user2Id)
             return FriendRequestDirection.Receiver;
         return null;
+    }
+
+    private createBlockedFriendship(userId: number, newUser1Id: number, newUser2Id: number, friendshipId: number) {
+        return this.blockedFriendshipsService.create({
+            userId: userId == newUser1Id ? newUser1Id : newUser2Id,
+            blockedUserId: userId == newUser1Id ? newUser2Id : newUser1Id,
+            friendshipId: friendshipId
+        });
     }
 }
