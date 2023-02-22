@@ -5,10 +5,14 @@ import { Server } from 'socket.io'
 import { table } from 'console';
 import { emit } from 'process';
 
+const FPS = 60;
+const FRAME_TIME = (1 / FPS);
 
-const FPS = (1 / 60) * 1000;
+const PADDLE_SPEED = 200 // in px per second;
+const INITIAL_BALL_SPEED = 5 // in px per second;
 
-type Move = (playerIndex : number) => void;
+type Move = (playerIndex: number, deltaTime : number) => void;
+type gameAction = { move : Move,  input : boolean};
 
 enum Moves {
 	Up,
@@ -87,9 +91,6 @@ class HitBox {
 
 		return pointCount;
 	}
-	//here is a function that calculates how many points are there within an object.
-	// if there's 4 points contains returns true, else it returns false
-	// if there are 0 points overlaps returns false, otherwise it returns true
 }
 
 class GameObject {
@@ -103,7 +104,7 @@ class GameObject {
 		this.speed = speed;
 	}
 
-	updatePosition() {
+	updatePosition(deltaTime : number) {
 		this.hitBox.position = addVec2(this.hitBox.position, multConstToVec2(this.speed, this.direction));
 	}
 }
@@ -118,7 +119,7 @@ class Paddle extends GameObject {
 		let width : number = orientation.x ? 1 : length;
 		let height: number = orientation.y ? 1 : length;
 
-		super(position, orientation, new Vector2(width, height), 0);
+		super(position, orientation, new Vector2(width, height), PADDLE_SPEED);
 
 		let angleDifference : number = (Math.PI / 6);
 		if (orientation.x)
@@ -126,7 +127,7 @@ class Paddle extends GameObject {
 		else
 			angleDifference *= orientation.y;
 		//fix transposition
-		let transposedOrientation : Vector2 = new Vector2(- Math.abs(orientation.y), -Math.abs(orientation.x));
+		let transposedOrientation : Vector2 = new Vector2(-Math.abs(orientation.y), -Math.abs(orientation.x));
 		this.bounceDirections[0] = rotateVec2(transposedOrientation, angleDifference);
 		for (let i: number = 1; i  < 3; ++i) {
 			this.bounceDirections.push(rotateVec2(this.bounceDirections[i - 1], angleDifference));
@@ -140,18 +141,19 @@ class Paddle extends GameObject {
 		this.sectionLength = length / this.bounceDirections.length;
 	}
 
-	moveUp() {
+	moveUp(deltaTime : number) {
+		console.log(`delta ${deltaTime}`);
 		let newPosition : Vector2 = new Vector2(
 			this.hitBox.position.x,
-			this.hitBox.position.y - 5
+			this.hitBox.position.y - (this.speed * (deltaTime))
 		);
 		this.move(newPosition);
 	}
 
-	moveDown() {
+	moveDown(deltaTime : number) {
 		let newPosition : Vector2 = new Vector2(
 			this.hitBox.position.x,
-			this.hitBox.position.y + 5
+			this.hitBox.position.y + (this.speed * (deltaTime))
 		);
 		this.move(newPosition);
 	}
@@ -210,6 +212,7 @@ class Table {
 class Game {
 	name: string;
 	players: GatewayUser[] = [];
+	playerActions: gameAction[][] = [];
 	viwers: GatewayUser[] = [];
 	status: GameStatus;
 	startDate: Date;
@@ -232,12 +235,24 @@ class Game {
 		this.table = new Table();
 		this.score = [0, 0];
 
-		this.movements.push((playerIndex: number) => {
-			this.paddles[playerIndex].moveUp();
+		this.movements.push((playerIndex: number, deltaTime : number) => {
+			this.paddles[playerIndex].moveUp(deltaTime);
 		});
-		this.movements.push((playerIndex: number) => {
-			this.paddles[playerIndex].moveDown();
+		this.movements.push((playerIndex: number, deltaTime : number) => {
+			this.paddles[playerIndex].moveDown(deltaTime);
 		});
+
+		this.playerActions.push
+		([
+			{move : this.movements[0], input : false},
+			{move : this.movements[1], input : false},
+		]);
+
+		this.playerActions.push
+		([
+			{move : this.movements[0], input : false},
+			{move : this.movements[1], input : false},
+		]);
 
 		for (let i in this.players) {
 			this.players[i].socket.join(this.name);
@@ -249,22 +264,70 @@ class Game {
 
 	start() {
 
-		this.ball = new GameObject(new Vector2(200, 100), new Vector2(0, 0), new Vector2(5, 5), 1);
+		this.ball = new GameObject(new Vector2(200, 100), new Vector2(0, 0), new Vector2(5, 5), INITIAL_BALL_SPEED);
 		this.serveBall(Math.floor((Math.random() * 2)));
 		this.instancePaddles();
 		this.status = GameStatus.Playing;
 		this.server.to(this.name).emit("start-game");
-		this.players.forEach((player, index) => {
-				player.socket.on("disconnect", () => {
-					//award the game to the player that has not disconnected
-					this.end();	
-				});
-				player.socket.on("move", (move : number) => {
-					this.movements[move](index);
-				});
+		this.players.forEach((player, playerIndex) => {
+			player.socket.on("disconnect", () => {
+				//award the game to the player that has not disconnected
+				this.end();	
+			});
+			player.socket.on("move", (movementIndex : number, pressed : boolean) => {
+				this.playerActions[playerIndex][movementIndex].input = pressed;
+			});
 		});
 		
-		this.gameInterval = setInterval(() => { this.gameLoop() }, FPS);
+		this.gameInterval = setInterval(() => { this.gameLoop() }, FRAME_TIME * 1000);
+	}
+
+	gameLoop() {
+		const now = new Date();
+
+		if ((now.getTime() - this.startDate.getTime()) >= 200 * 1000) {
+			this.end();
+		}
+		this.updateObjects(now);
+		const payload = {
+			paddles : this.paddles,
+			score : this.score,
+			ball : this.ball,
+			currentTime : now,
+		}
+		this.server.to(this.name).emit("update-game", payload);
+	}
+
+	private previousFrameTime_ : number;
+
+	updateObjects(now : Date) {
+		//deltaTime is in seconds !
+		let deltaTime : number = (now.getTime() - this.previousFrameTime_) / 1000;
+		this.previousFrameTime_ = now.getTime();
+
+		for (let playerIndex : number = 0; playerIndex < this.playerActions.length; ++playerIndex) {
+			for (let moveIndex : number = 0; moveIndex < 2; ++moveIndex) {
+				if (this.playerActions[playerIndex][moveIndex].input === true) {
+					this.playerActions[playerIndex][moveIndex].move(playerIndex, deltaTime);
+				}
+			}
+		}
+		this.paddles.forEach((paddle) => {
+			if (paddle.hitBox.overlaps(this.ball.hitBox)) {
+				this.ball.direction = paddle.bounceBall(this.ball);
+			}
+		})
+		this.table.walls.forEach((wall) => {
+			if (wall.overlaps(this.ball.hitBox)) {
+				this.ball.direction = this.table.reflect(this.ball.direction, wall.orientation);
+			}
+		});
+		this.table.goals.forEach((goal, index) => {
+			if (goal.overlaps(this.ball.hitBox)) {
+				this.computeGoal(index);
+			}
+		});
+		this.ball.updatePosition(deltaTime);
 	}
 
 	instancePaddles() {
@@ -281,41 +344,6 @@ class Game {
 			20,
 			this.table.area
 		);
-	}
-
-	gameLoop() {
-		const moment = new Date();
-
-		if ((moment.getTime() - this.startDate.getTime()) >= 200 * 1000) {
-			this.end();
-		}
-		this.updateObjects();
-		const payload = {
-			paddles : this.paddles,
-			score : this.score,
-			ball : this.ball,
-			moment : moment,
-		}
-		this.server.to(this.name).emit("update-game", payload);
-	}
-
-	updateObjects() {
-		this.paddles.forEach((paddle, index) => {
-			if (paddle.hitBox.overlaps(this.ball.hitBox)) {
-				this.ball.direction = paddle.bounceBall(this.ball);
-			}
-		})
-		this.table.walls.forEach((wall) => {
-			if (wall.overlaps(this.ball.hitBox)) {
-				this.ball.direction = this.table.reflect(this.ball.direction, wall.orientation);
-			}
-		});
-		this.table.goals.forEach((goal, index) => {
-			if (goal.overlaps(this.ball.hitBox)) {
-				this.computeGoal(index);
-			}
-		});
-		this.ball.updatePosition();
 	}
 
 	computeGoal(receiver : number) {

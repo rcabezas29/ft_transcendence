@@ -23,12 +23,12 @@ const MappedKeys : string [] = [
 let gameActions : any = {
 }
 
-function up() {
-	user.socket?.emit("move", Moves.Up);
+function up(pressed : boolean) {
+	user.socket?.emit("move", Moves.Up, pressed);
 }
 
-function down() {
-	user.socket?.emit("move", Moves.Down);
+function down(pressed : boolean) {
+	user.socket?.emit("move", Moves.Down, pressed);
 }
 
 class GameController {
@@ -62,10 +62,15 @@ class GameController {
 		window.addEventListener('keydown', e => {
 			if (MappedKeys.includes(e.key)) {
 				e.preventDefault();
-				gameActions[e.key]();
+				gameActions[e.key](true);
 			}
 		})
-	
+		window.addEventListener('keyup', e => {
+			if (MappedKeys.includes(e.key)) {
+				e.preventDefault();
+				gameActions[e.key](false);
+			}
+		})
 	}
 
 	endGame() {
@@ -74,7 +79,7 @@ class GameController {
 	}
 
 	updateGame(gamePayload: any) {
-		this.timestamp = new Date(gamePayload.moment).getTime();
+		this.timestamp = new Date(gamePayload.currentTime).getTime();
 		this.gameRenderer!.drawFrame(gamePayload);
 	}
 
