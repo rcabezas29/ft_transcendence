@@ -32,9 +32,14 @@ export class UsersService {
     ) {}
 
     async create(createUserDto: CreateUserDto) {
-        const usernameExists = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
-        if (usernameExists)
+        const usernameExistsInIntra = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
+        const usernameExists = await this.findOneByUsername(createUserDto.username);
+        if (usernameExistsInIntra || usernameExists)
             throw new BadRequestException('Username already in use. Please choose a different one.');
+
+        const emailExists = await this.findOneByEmail(createUserDto.email)
+        if (emailExists)
+            throw new BadRequestException('Email address already in use. Please log in instead or choose a different one.');
         
         try {
             const user = await this.usersRepository.save(createUserDto);
