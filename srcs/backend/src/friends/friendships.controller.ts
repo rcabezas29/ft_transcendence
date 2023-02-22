@@ -13,7 +13,6 @@ import {
 import { Request } from 'express';
 import { FriendshipsService } from './friendships.service';
 import { CreateFriendshipDto } from './dto/create-friendship.dto';
-import { UpdateFriendshipDto } from './dto/update-friendship.dto';
 import { JwtAuthGuard, UserInFriendshipGuard } from 'src/auth/guards';
 
 @Controller('friendships')
@@ -25,25 +24,6 @@ export class FriendshipsController {
   create(@Body() createFriendshipDto: CreateFriendshipDto, @Req() req: Request) {
     return this.friendshipsService.create(createFriendshipDto, req.user);
   }
-/*
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.friendshipsService.findAll();
-  }
-
-  @Get(':id')
-  @UseGuards(JwtAuthGuard)
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.friendshipsService.findOneById(id);
-  }
-
-  @Patch(':id')
-  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateFriendshipDto: UpdateFriendshipDto) {
-    return this.friendshipsService.update(id, updateFriendshipDto);
-  }
-*/
 
   @Get(':id/request-direction')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)

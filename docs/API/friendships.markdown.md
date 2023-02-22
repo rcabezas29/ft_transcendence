@@ -6,32 +6,16 @@ parent: API
 
 ## Friendships
 
-### GET /friendships
+### POST /friendships
 
-Returns all friendships
+Creates new friendship relationship and returns the created friendship
 
+Expected body:
 ```json
 {
-	"id": 1,
 	"user1Id": 16,
 	"user2Id": 19,
-	"status": 0
-},
-{
-  ...
-}
-```
-
-### GET /friendships/:id
-
-Returns one friendship between two users by friendship id.
-
-```json
-{
-	"id": 1,
-	"user1Id": 16,
-	"user2Id": 19,
-	"status": 0
+	"status?": 0 // optional; default = 0
 }
 ```
 
@@ -50,31 +34,6 @@ Returns a `BlockDirection` that indicates whether the user is the blocker or the
 
 The `BlockDirection` is an enum, with value `0` if the user is the `blocker`, and `1` if the user
 is `blocked`. This is determined by the `userId` and `blockedUserId` columns in the `blocked_friendship` table in the database.
-
-### POST /friendships
-
-Creates new friendship relationship and returns the created friendship
-
-Expected body:
-```json
-{
-	"user1Id": 16,
-	"user2Id": 19,
-	"status?": 0 // optional; default = 0
-}
-```
-
-### PATCH /friendships/:id
-
-Updates a friendship's status by friendship id.
-
-
-Expected body:
-```json
-{
-	"status?": 0
-}
-```
 
 ### PATCH /friendships/:id/block
 
