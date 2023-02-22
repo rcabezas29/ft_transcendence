@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Friendship } from 'src/friends/entities/friendship.entity';
+import { BlockedFriendship } from 'src/blocked-friendships/entities/blocked-friendship.entity';
+import { Friendship, FriendshipStatus } from 'src/friends/entities/friendship.entity';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity'
@@ -13,7 +14,10 @@ export class SeedService {
         private readonly userRepository: Repository<User>,
         
         @InjectRepository(Friendship)
-        private readonly friendsRepository: Repository<Friendship>,
+        private readonly friendshipsRepository: Repository<Friendship>,
+
+        @InjectRepository(BlockedFriendship)
+        private readonly blockedFriendshipsRepository: Repository<BlockedFriendship>,
         
         private userService: UsersService
     ) {}
@@ -21,15 +25,17 @@ export class SeedService {
     async runSeed() {
         await this.deleteTables();
         await this.insertUsers();
-        await this.insertFriends();
+        await this.insertFriendships();
         return `seed executed`;
     }
     
     private async deleteTables() {
         const queryBuilderUser = this.userRepository.createQueryBuilder();
         await queryBuilderUser.delete().where({}).execute();
-        const queryBuilderFriends = this.friendsRepository.createQueryBuilder();
+        const queryBuilderFriends = this.friendshipsRepository.createQueryBuilder();
         await queryBuilderFriends.delete().where({}).execute();
+        const queryBuilderBlocked = this.blockedFriendshipsRepository.createQueryBuilder();
+        await queryBuilderBlocked.delete().where({}).execute();
     }
     
     private async insertUsers() {
@@ -43,17 +49,31 @@ export class SeedService {
         await this.userRepository.save(users);
     }
     
-    private async insertFriends() {
-        const seedFriends = initialData.friends;
-        const friends: Friendship[] = [];
+    private async insertFriendships() {
+        const seedFriendships = initialData.friendships;
+        const friendships: Friendship[] = [];
         
-        for (const seedFriend of seedFriends) {
-            const user1: User = await this.userService.findOneByUsername(seedFriend.user1);
-            const user2: User = await this.userService.findOneByUsername(seedFriend.user2);
-            const friend = this.friendsRepository.create({user1Id: user1.id, user2Id: user2.id, status: seedFriend.status});
-            friends.push(friend);
+        for (const seedFriendship of seedFriendships) {
+            const user1: User = await this.userService.findOneByUsername(seedFriendship.user1);
+            const user2: User = await this.userService.findOneByUsername(seedFriendship.user2);
+            const friendship = this.friendshipsRepository.create({user1Id: user1.id, user2Id: user2.id, status: seedFriendship.status});
+            friendships.push(friendship);
         }
-        await this.friendsRepository.save(friends);
+        await this.friendshipsRepository.save(friendships);
+
+        await this.insertBlockedFriendships(friendships);
+    }
+
+    private async insertBlockedFriendships(friendships: Friendship[]) {
+        friendships.forEach(async (friendship) => {
+            if (friendship.status === FriendshipStatus.Blocked) {
+                await this.blockedFriendshipsRepository.save({
+                    userId: friendship.user1Id,
+                    blockedUserId: friendship.user2Id,
+                    friendshipId: friendship.id
+                });
+            }
+        })
     }
 }
     

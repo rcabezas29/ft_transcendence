@@ -8,6 +8,6 @@ import { BlockedFriendship } from './entities/blocked-friendship.entity';
   imports: [
     TypeOrmModule.forFeature([BlockedFriendship]),
   ],
-  exports: [BlockedFriendshipsService]
+  exports: [BlockedFriendshipsService, TypeOrmModule]
 })
 export class BlockedFriendshipsModule {}
