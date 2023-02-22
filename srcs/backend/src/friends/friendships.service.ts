@@ -7,7 +7,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BlockedFriendshipsService } from 'src/blocked-friendships/blocked-friendships.service';
+import { BlockDirection, BlockedFriendshipsService } from 'src/blocked-friendships/blocked-friendships.service';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreateFriendshipDto } from './dto/create-friendship.dto';
@@ -157,6 +157,13 @@ export class FriendshipsService {
         if (friendReqDirection === null)
             throw new BadRequestException('Friendship does not exist or is not a friend request');
         return friendReqDirection;
+    }
+
+    async getBlockDirection(id: number, requestUser) {
+        const blockDirection: BlockDirection = await this.blockedFriendshipsService.checkBlockDirection(requestUser.id, id);
+        if (blockDirection === null)
+            throw new BadRequestException('Friendship does not exist or is not blocked');
+        return blockDirection;
     }
 
     private async checkFriendRequestDirection(userId: number, friendshipId: number): Promise<FriendRequestDirection> {

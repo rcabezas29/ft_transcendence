@@ -51,11 +51,11 @@ export class FriendshipsController {
     return this.friendshipsService.getFriendRequestDirection(id, req.user);
   }
 
-  /*@Get(':id/block-direction')
+  @Get(':id/block-direction')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   getBlockDirection(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     return this.friendshipsService.getBlockDirection(id, req.user);
-  }*/
+  }
 
   @Patch(':id/block')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)

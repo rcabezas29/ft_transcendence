@@ -4,6 +4,11 @@ import { Repository } from 'typeorm';
 import { CreateBlockedFriendshipDto } from './dto/create-blocked-friendship.dto';
 import { BlockedFriendship } from './entities/blocked-friendship.entity';
 
+export enum BlockDirection {
+    Blocker = 0,
+    Blocked = 1
+}
+
 @Injectable()
 export class BlockedFriendshipsService {
     constructor(
@@ -40,6 +45,19 @@ export class BlockedFriendshipsService {
         const block: BlockedFriendship = await this.blockedFriendshipsRepository
                     .findOneBy({ userId: userId, blockedUserId: blockedUserId });
         return block;
+    }
+
+    async checkBlockDirection(userId: number, friendshipId: number): Promise<BlockDirection> {
+        const block: BlockedFriendship = await this.findByFriendshipId(friendshipId);
+        if (!block)
+            return null;
+
+        if (userId === block.userId)
+            return BlockDirection.Blocker;
+        else if (userId === block.blockedUserId)
+            return BlockDirection.Blocked;
+        
+        return null;
     }
 /*
     findAll() {

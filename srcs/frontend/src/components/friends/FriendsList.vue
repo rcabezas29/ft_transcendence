@@ -15,12 +15,13 @@ const activeFriends = computed(() => {
     return friendsController.getActiveFriends();
 })
 
-const blockedFriends = computed(() => {
-    return friendsController.getBlockedFriends();
-})
-
+const blockedFriends = ref<Friend[]>([]);
 const sentFriendRequests = ref<Friend[]>([]);
 const receivedFriendRequests = ref<Friend[]>([]);
+
+friendsController.getBlockedFriends().then((value) => {
+    blockedFriends.value = value;
+});
 friendsController.getSentFriendRequests().then((value) => {
     sentFriendRequests.value = value;
 });
@@ -29,6 +30,9 @@ friendsController.getReceivedFriendRequests().then((value) => {
 });
 
 watch(friendsController, () => {
+    friendsController.getBlockedFriends().then((value) => {
+        blockedFriends.value = value;
+    });
     friendsController.getSentFriendRequests().then((value) => {
         sentFriendRequests.value = value;
     });
