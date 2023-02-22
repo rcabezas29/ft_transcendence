@@ -9,6 +9,28 @@ enum GameState {
 	End = "End"
 }
 
+enum Moves {
+	Up,
+	Down,
+}
+
+//hardcoded for now
+const MappedKeys : string [] = [
+	'ArrowUp',
+	'ArrowDown',
+]
+
+let gameActions : any = {
+}
+
+function up() {
+	user.socket?.emit("move", Moves.Up);
+}
+
+function down() {
+	user.socket?.emit("move", Moves.Down);
+}
+
 class GameController {
 
 	public adversaryName: string = "";
@@ -35,6 +57,15 @@ class GameController {
 
 	startGame() {
 		this.state = GameState.Playing;
+		gameActions[MappedKeys[Moves.Up]] = up;
+		gameActions[MappedKeys[Moves.Down]] = down;
+		window.addEventListener('keydown', e => {
+			if (MappedKeys.includes(e.key)) {
+				e.preventDefault();
+				gameActions[e.key]();
+			}
+		})
+	
 	}
 
 	endGame() {
@@ -71,7 +102,7 @@ class GameRenderer {
 		let	paddles : any = payload.paddles;
 		this.canvas.fillStyle = 'white';
 		this.canvas.fillText(`${payload.score[0]} - ${payload.score[1]}`, 200, 20);
-		this.canvas.fillRect(ball.hitBox.position.x, ball.hitBox.position.y, 5, 5);
+		this.canvas.fillRect(ball.hitBox.position.x, ball.hitBox.position.y, ball.hitBox.bounds.x, ball.hitBox.bounds.y);
 		paddles.forEach( (paddle : any) => {
 			this.canvas.fillRect(paddle.hitBox.position.x, paddle.hitBox.position.y, paddle.hitBox.bounds.x, paddle.hitBox.bounds.y);
 		});

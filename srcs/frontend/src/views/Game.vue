@@ -9,6 +9,11 @@ function findGame() {
 	gameController.searchGame();
 }
 
+function test(e : Event) {
+	e.preventDefault();
+	console.log("UP");
+}
+
 onMounted(() => {
 	gameController.initCanvas(canvasRef.value!.getContext('2d')!);
 });
@@ -22,7 +27,8 @@ onMounted(() => {
 	
 	Time: <span>{{ gameController.timestamp }}</span>
 
-	<canvas ref="canvasRef" class="pong-board" height="200" width="400" ></canvas>
+	<canvas ref="canvasRef" class="pong-board" height="200" width="400" >
+	</canvas>
 
 </template>
 
