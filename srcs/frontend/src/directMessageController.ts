@@ -32,6 +32,8 @@ class DirectMessageController {
     }
 
     onFriendDisconnected(payload: FriendId) {
+        if (currentChat.value && (<ChatUser>currentChat.value.target).id === payload)
+			currentChat.value = null;
         this.friends = this.friends.filter((friend) => friend.id != payload);
     }
 
