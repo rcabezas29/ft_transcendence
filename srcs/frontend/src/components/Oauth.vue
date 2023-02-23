@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import router from '@/router';
 import { user } from '@/user';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount } from 'vue';
 
 onBeforeMount(async () => {
 	const params = new URLSearchParams(window.location.search);

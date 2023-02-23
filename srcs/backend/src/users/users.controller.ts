@@ -25,6 +25,7 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -57,5 +58,11 @@ export class UsersController {
   @Get("avatar/:user")
   getAvatar(@Param("user") username: string) {
 	  return this.usersService.getAvatar(username);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/friends')
+  getFriends(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.getAllUserFriends(id);
   }
 }

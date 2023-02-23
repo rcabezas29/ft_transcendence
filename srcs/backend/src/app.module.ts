@@ -7,7 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { GatewayManagerModule } from './gateway-manager/gateway-manager.module';
 import { ChatModule } from './chat/chat.module';
 import { FriendsModule } from './friends/friends.module';
-import { Friends } from './friends/entities/friend.entity';
+import { Friendship } from './friends/entities/friendship.entity';
 import { IntraAuthModule } from './intra-auth/intra-auth.module';
 import { GameModule } from './game/game.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -26,7 +26,7 @@ import { FilesModule } from './files/files.module';
       username: 'postgres',
       password: process.env.POSTGRES_PASSWORD,
       database: 'postgres',
-      entities: [User, Friends],
+      entities: [User, Friendship],
       synchronize: true,
     }),
 	ScheduleModule.forRoot(),

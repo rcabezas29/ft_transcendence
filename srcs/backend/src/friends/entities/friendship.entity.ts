@@ -7,7 +7,7 @@ export enum FriendshipStatus {
 }
 
 @Entity()
-export class Friends {
+export class Friendship {
   @PrimaryGeneratedColumn()
   id: number;
 

@@ -6,7 +6,7 @@ parent: User
 
 # Friends
 
-The friends are relationships between multiple users. They are in the `friends` table and are defined as:
+The friends are relationships between multiple users. They are in the `friendship` table and are defined as:
 
 | id  | user1Id | user2Id | status  |
 |-----|---------|---------|---------|
@@ -19,5 +19,5 @@ The friends are relationships between multiple users. They are in the `friends` 
 
 The friendship between two users has multiple status:
 - **0**: pending
-- **1**: active (frienship was accepted)
+- **1**: active (friendship was accepted)
 - **2**: blocked

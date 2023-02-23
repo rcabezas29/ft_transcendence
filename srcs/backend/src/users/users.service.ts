@@ -10,12 +10,12 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { FriendsService } from 'src/friends/friends.service';
-import { Friends } from 'src/friends/entities/friend.entity';
-import { FriendshipStatus } from 'src/friends/entities/friend.entity';
+import { Friendship } from 'src/friends/entities/friendship.entity';
+import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
-
+import { UserFriend } from './interfaces/user-friend.interface';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +25,7 @@ export class UsersService {
         private friendsService: FriendsService,
         private intraAuthService: IntraAuthService
     ) {}
-        
+
     async create(createUserDto: CreateUserDto) {
         const usernameExists = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
         if (usernameExists)
@@ -39,7 +39,7 @@ export class UsersService {
             throw new BadRequestException('Failed to create user');
         }
     }
-    
+
     async createWithoutPassword(email: string, username: string) {
         const newUser = { email, username, password: "" };
         try {
@@ -50,11 +50,11 @@ export class UsersService {
             throw new BadRequestException('Failed to create user');
         }
     }
-    
+
     findAll(): Promise<User[]> {
         return this.usersRepository.find();
     }
-    
+
     findAllByIds(ids: number[]): Promise<User[]> {
         return this.usersRepository.find({
             where: {
@@ -62,7 +62,7 @@ export class UsersService {
             }
         })
     }
-    
+
     findOne(id: number): Promise<User> {
         return this.usersRepository.findOneBy({ id: id });
     }
@@ -75,8 +75,8 @@ export class UsersService {
         return await this.usersRepository.findOneBy({ email: email });
     }
 
-    async findUserFriendsByStatus(id: number, status: FriendshipStatus) {
-        const friendsRelations: Friends[] = await this.friendsService.findUserFriends(id, status);
+    async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
+        const friendsRelations: Friendship[] = await this.friendsService.findUserFriendshipsByStatus(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
                 return friend.user2Id;
@@ -99,6 +99,25 @@ export class UsersService {
         return this.findUserFriendsByStatus(id, FriendshipStatus.Blocked);
     }
 
+    async getAllUserFriends(userId: number): Promise<UserFriend[]> {
+        const friendsRelations: Friendship[] = await this.friendsService.findAllUserFriendships(userId);
+
+        const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations
+                .map(async (friendship: Friendship): Promise<UserFriend> => {
+                    const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
+                    const friend = await this.findOne(friendId);
+                    return {
+                        userId: friendId,
+                        username: friend.username,
+                        friendshipId: friendship.id,
+                        friendshipStatus: friendship.status
+                    };
+                });
+
+        const allUserFriends: UserFriend[] = await Promise.all(allUserFriendsPromises);
+        return allUserFriends;
+    }
+
     async update(id: number, updateUserDto: UpdateUserDto) {
         const userToUpdate = {
             id,
@@ -115,11 +134,11 @@ export class UsersService {
         }
         throw new NotFoundException();
     }
-    
+
     async remove(id: number): Promise<void> {
         await this.usersRepository.delete(id);
     }
-    
+
     async getAvatar(username: string): Promise<StreamableFile> {
         const user: User = await this.findOneByUsername(username);
         if (!user)

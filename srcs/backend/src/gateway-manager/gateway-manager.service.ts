@@ -11,8 +11,11 @@ export class GatewayManagerService {
 	private onDisconnectionCallbacks: Function[] = [];
 
 	constructor(
-		private usersService: UsersService
-	) { }
+		private usersService: UsersService,
+	) {
+		this.addOnNewConnectionCallback((client: GatewayUser) => this.onNewConnection(client));
+        this.addOnDisconnectionCallback((client: GatewayUser) => this.onDisconnection(client));
+	}
 
 	getClientByUserId(id: number): GatewayUser {
 		return this.users.find((user) => user.id == id);
@@ -60,6 +63,24 @@ export class GatewayManagerService {
 
 	getOnDisconnectionCallback(): Function[] {
 		return this.onDisconnectionCallbacks;
+	}
+
+	async onNewConnection(client: GatewayUser) {
+		const friends: GatewayUser[] = await this.getAllUserConnectedFriends(client.id);
+		const friendsPayload: number[] = friends.map((user) => user.id);
+
+		client.socket.emit('connected-friends', friendsPayload);
+		friends.forEach(friend => {
+			friend.socket.emit('friend-online', client.id);
+		})
+	}
+
+    async onDisconnection(client: GatewayUser) {
+		const friends: GatewayUser[] = await this.getAllUserConnectedFriends(client.id);
+
+		friends.forEach(friend => {
+			friend.socket.emit('friend-offline', client.id);
+		})
 	}
 
 }

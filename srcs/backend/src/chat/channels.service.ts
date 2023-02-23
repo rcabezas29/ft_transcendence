@@ -207,8 +207,6 @@ export class ChannelsService {
 		if (user != channel.owner || !channel.hasUser(user))
 			return;
 		
-		// TODO: encriptar password
-		// TODO: queremos poner alguna comprobacion de seguridad a la password?
 		channel.setPassword(payload.password);
 
 		const clientPayload: PasswordBoolChannelPayload = {

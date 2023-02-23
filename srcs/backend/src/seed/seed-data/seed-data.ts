@@ -1,12 +1,11 @@
 import * as bcrypt from 'bcrypt';
-import { FriendshipStatus } from 'src/friends/entities/friend.entity';
+import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
 
 interface SeedUser {
     email: string;
     username: string;
     password: string;
 	avatar: string;
-    //roles: string[];
 }
 
 interface SeedFriend {
@@ -25,42 +24,32 @@ export const initialData: SeedData = {
         {
             email: 'user1@example.com',
             username: 'user1',
-            password: '1234',
-			avatar: "default_avatar.png"
-            //password: bcrypt.hashSync('Abc123', 10),
-            //roles: ['admin']
+			avatar: "default_avatar.png",
+            password: bcrypt.hashSync('1234', 10),
         },
         {
             email: 'user2@example.com',
             username: 'user2',
-            password: '1234',
-			avatar: "default_avatar.png"
-            //password: bcrypt.hashSync('Abc123', 10),
-            //roles: ['admin']
+			avatar: "default_avatar.png",
+            password: bcrypt.hashSync('1234', 10),
         },
         {
             email: 'user3@example.com',
             username: 'user3',
-            password: '1234',
-			avatar: "default_avatar.png"
-            //password: bcrypt.hashSync('Abc123', 10),
-            //roles: ['admin']
+			avatar: "default_avatar.png",
+            password: bcrypt.hashSync('1234', 10),
         },
         {
             email: 'user4@example.com',
             username: 'user4',
-            password: '1234',
-			avatar: "default_avatar.png"
-            //password: bcrypt.hashSync('Abc123', 10),
-            //roles: ['admin']
+			avatar: "default_avatar.png",
+            password: bcrypt.hashSync('1234', 10),
         },
 		{
             email: 'user5@example.com',
             username: 'user5',
-            password: '1234',
-			avatar: "default_avatar.png"
-            //password: bcrypt.hashSync('Abc123', 10),
-            //roles: ['admin']
+			avatar: "default_avatar.png",
+            password: bcrypt.hashSync('1234', 10),
         },
     ],
 	friends: [

@@ -10,8 +10,8 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { FriendsService } from './friends.service';
-import { CreateFriendDto } from './dto/create-friend.dto';
-import { UpdateFriendDto } from './dto/update-friend.dto';
+import { CreateFriendshipDto } from './dto/create-friendship.dto';
+import { UpdateFriendshipDto } from './dto/update-friendship.dto';
 import { JwtAuthGuard, UserFriendGuard } from 'src/auth/guards';
 
 @Controller('friends')
@@ -19,9 +19,9 @@ export class FriendsController {
   constructor(private readonly friendsService: FriendsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, UserFriendGuard)
-  create(@Body() createFriendDto: CreateFriendDto) {
-    return this.friendsService.create(createFriendDto);
+  @UseGuards(JwtAuthGuard/*, UserFriendGuard*/)
+  create(@Body() createFriendshipDto: CreateFriendshipDto) {
+    return this.friendsService.create(createFriendshipDto);
   }
 
   @Get()
@@ -37,13 +37,13 @@ export class FriendsController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, UserFriendGuard)
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateFriendDto: UpdateFriendDto) {
-    return this.friendsService.update(id, updateFriendDto);
+  @UseGuards(JwtAuthGuard/*, UserFriendGuard*/)
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateFriendshipDto: UpdateFriendshipDto) {
+    return this.friendsService.update(id, updateFriendshipDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, UserFriendGuard)
+  @UseGuards(JwtAuthGuard /*, UserFriendGuard*/)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.friendsService.remove(id);
   }

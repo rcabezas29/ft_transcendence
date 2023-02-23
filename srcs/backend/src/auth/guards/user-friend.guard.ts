@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Observable } from "rxjs";
-import { Friends } from "src/friends/entities/friend.entity";
+import { Friendship } from "src/friends/entities/friendship.entity";
 import { FriendsService } from "src/friends/friends.service";
 
 @Injectable()
@@ -24,7 +24,7 @@ export class UserFriendGuard implements CanActivate {
     }
 
     private async checkIfUserInFriendship(userId: number, friendshipId: number): Promise<boolean> {
-        const friendship: Friends = await this.friendsService.findOne(friendshipId);
+        const friendship: Friendship = await this.friendsService.findOne(friendshipId);
         if (!friendship)
             return false;
 
