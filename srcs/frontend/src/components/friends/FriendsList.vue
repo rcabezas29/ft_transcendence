@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { friendsController, FriendStatus } from '@/friendsController';
+import { computed, ref, watch } from "vue";
+import { type Friend, friendsController, FriendStatus } from '@/friendsController';
 import FriendSearchBar from "./FriendSearchBar.vue";
 
 function isOnline(friend: any): boolean {
@@ -15,12 +15,30 @@ const activeFriends = computed(() => {
     return friendsController.getActiveFriends();
 })
 
-const blockedFriends = computed(() => {
-    return friendsController.getBlockedFriends();
-})
+const blockedFriends = ref<Friend[]>([]);
+const sentFriendRequests = ref<Friend[]>([]);
+const receivedFriendRequests = ref<Friend[]>([]);
 
-const friendRequests = computed(() => {
-    return friendsController.getFriendRequests();
+friendsController.getBlockedFriends().then((value) => {
+    blockedFriends.value = value;
+});
+friendsController.getSentFriendRequests().then((value) => {
+    sentFriendRequests.value = value;
+});
+friendsController.getReceivedFriendRequests().then((value) => {
+    receivedFriendRequests.value = value;
+});
+
+watch(friendsController, () => {
+    friendsController.getBlockedFriends().then((value) => {
+        blockedFriends.value = value;
+    });
+    friendsController.getSentFriendRequests().then((value) => {
+        sentFriendRequests.value = value;
+    });
+    friendsController.getReceivedFriendRequests().then((value) => {
+        receivedFriendRequests.value = value;
+    });
 })
 
 </script>
@@ -33,7 +51,7 @@ const friendRequests = computed(() => {
             <div class="active-friend" v-for="friend in activeFriends" :key="friend.userId">
                 <span>{{ friend.username }} ({{ friend.status }})</span>
 				<div class="friend-status" :class="{'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
-                <button>Block</button>
+                <button @click="() => friendsController.blockUser(friend.userId)">Block</button>
                 <button @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
             </div>
         </div>
@@ -41,12 +59,18 @@ const friendRequests = computed(() => {
             <h2>Blocked friends</h2>
             <div v-for="friend in blockedFriends" :key="friend.userId">
                 <span>{{ friend.username }}</span>
-                <button>Unblock</button>
+                <button @click="() => friendsController.unblockUser(friend.userId)">Unblock</button>
             </div>
         </div>
         <div class="friends-subsection">
             <h2>Friend requests</h2>
-            <div v-for="friend in friendRequests" :key="friend.userId">
+            <h3>Sent requests</h3>
+            <div v-for="friend in sentFriendRequests" :key="friend.userId">
+                <span>{{ friend.username }}</span>
+                <button @click="() => friendsController.unfriendUser(friend.userId)">Cancel</button>
+            </div>
+            <h3>Received requests</h3>
+            <div v-for="friend in receivedFriendRequests" :key="friend.userId">
                 <span>{{ friend.username }}</span>
                 <button @click="() => friendsController.acceptFriendRequest(friend.userId)">Accept</button>
                 <button @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>

@@ -1,5 +1,7 @@
 import {
     BadRequestException,
+    forwardRef,
+    Inject,
     Injectable,
     NotFoundException,
     StreamableFile,
@@ -9,7 +11,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { FriendsService } from 'src/friends/friends.service';
+import { FriendshipsService } from 'src/friends/friendships.service';
 import { Friendship } from 'src/friends/entities/friendship.entity';
 import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
@@ -22,14 +24,22 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
-        private friendsService: FriendsService,
+
+        @Inject(forwardRef(() => FriendshipsService))
+        private friendshipsService: FriendshipsService,
+        
         private intraAuthService: IntraAuthService
     ) {}
 
     async create(createUserDto: CreateUserDto) {
-        const usernameExists = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
-        if (usernameExists)
+        const usernameExistsInIntra = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
+        const usernameExists = await this.findOneByUsername(createUserDto.username);
+        if (usernameExistsInIntra || usernameExists)
             throw new BadRequestException('Username already in use. Please choose a different one.');
+
+        const emailExists = await this.findOneByEmail(createUserDto.email)
+        if (emailExists)
+            throw new BadRequestException('Email address already in use. Please log in instead or choose a different one.');
         
         try {
             const user = await this.usersRepository.save(createUserDto);
@@ -63,7 +73,7 @@ export class UsersService {
         })
     }
 
-    findOne(id: number): Promise<User> {
+    findOneById(id: number): Promise<User> {
         return this.usersRepository.findOneBy({ id: id });
     }
 
@@ -76,7 +86,7 @@ export class UsersService {
     }
 
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        const friendsRelations: Friendship[] = await this.friendsService.findUserFriendshipsByStatus(id, status);
+        const friendsRelations: Friendship[] = await this.friendshipsService.findUserFriendshipsByStatus(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
                 return friend.user2Id;
@@ -100,12 +110,12 @@ export class UsersService {
     }
 
     async getAllUserFriends(userId: number): Promise<UserFriend[]> {
-        const friendsRelations: Friendship[] = await this.friendsService.findAllUserFriendships(userId);
+        const friendsRelations: Friendship[] = await this.friendshipsService.findAllUserFriendships(userId);
 
         const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations
                 .map(async (friendship: Friendship): Promise<UserFriend> => {
                     const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
-                    const friend = await this.findOne(friendId);
+                    const friend = await this.findOneById(friendId);
                     return {
                         userId: friendId,
                         username: friend.username,

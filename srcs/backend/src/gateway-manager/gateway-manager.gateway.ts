@@ -29,7 +29,7 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 			return;
 		}
 
-		const user: User = await this.usersService.findOne(validToken.id);
+		const user: User = await this.usersService.findOneById(validToken.id);
 		if (!user) {
 			client.disconnect();
 			return;

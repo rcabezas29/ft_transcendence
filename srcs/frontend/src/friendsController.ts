@@ -15,6 +15,16 @@ export enum FriendStatus {
     gaming = 2
 }
 
+enum FriendRequestDirection {
+    Sender = 0,
+    Receiver = 1
+}
+
+enum BlockDirection {
+    Blocker = 0,
+    Blocked = 1
+}
+
 type FriendId = number;
 
 interface FriendPayload {
@@ -24,7 +34,7 @@ interface FriendPayload {
     friendshipStatus: FriendshipStatus;
 }
 
-interface Friend {
+export interface Friend {
     userId: FriendId;
     username: string;
     friendshipId: number;
@@ -108,19 +118,45 @@ class FriendsController {
         return this.getFriendsByFriendshipStatus(FriendshipStatus.Active);
     }
 
-    getBlockedFriends(): Friend[] {
-        return this.getFriendsByFriendshipStatus(FriendshipStatus.Blocked);
+    /* gets only the friends this user has blocked, but excludes the ones who have blocked the user */
+    async getBlockedFriends(): Promise<Friend[]> {
+        const allBlockedFriends: Friend[] = this.getFriendsByFriendshipStatus(FriendshipStatus.Blocked);
+        const myBlockedFriends: Friend[] = [];
+        for (let friend of allBlockedFriends) {
+            const direction = await this.checkBlockDirection(friend.friendshipId);
+            if (direction === BlockDirection.Blocker)
+                myBlockedFriends.push(friend);
+        }
+        return myBlockedFriends;
     }
 
-    getFriendRequests(): Friend[] {
-        return this.getFriendsByFriendshipStatus(FriendshipStatus.Pending);
+    async getSentFriendRequests(): Promise<Friend[]> {
+        const pendingReqs: Friend[] = this.getFriendsByFriendshipStatus(FriendshipStatus.Pending);
+        const sentFriendReqs: Friend[] = [];
+        for (let friend of pendingReqs) {
+            const direction = await this.checkFriendRequestDirection(friend.friendshipId);
+            if (direction === FriendRequestDirection.Sender)
+                sentFriendReqs.push(friend);
+        }
+        return sentFriendReqs;
+    }
+
+    async getReceivedFriendRequests(): Promise<Friend[]> {
+        const pendingReqs: Friend[] = this.getFriendsByFriendshipStatus(FriendshipStatus.Pending);
+        const receivedFriendReqs: Friend[] = [];
+        for (let friend of pendingReqs) {
+            const direction = await this.checkFriendRequestDirection(friend.friendshipId);
+            if (direction === FriendRequestDirection.Receiver)
+                receivedFriendReqs.push(friend);
+        }
+        return receivedFriendReqs;
     }
 
     async sendFriendRequest(userId: number, username: string) {
         if (!userId || !username)
             return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friends`, {
+        const httpResponse = await fetch(`http://localhost:3000/friendships`, {
             method: "POST",
             headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -129,7 +165,6 @@ class FriendsController {
             body: JSON.stringify({
                 user1Id: user.id,
                 user2Id: userId,
-                status: FriendshipStatus.Pending
             })
         });
 
@@ -151,23 +186,18 @@ class FriendsController {
     }
 
     async acceptFriendRequest(userId: number) {
-       const friend = this.friends[userId];
-       if (!friend)
+        const friend = this.friends[userId];
+        if (!friend)
             return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/accept-request`, {
             method: "PATCH",
             headers: {
 				"Authorization": `Bearer ${user.token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                status: FriendshipStatus.Active
-            })
+            }
         });
 
-        if (httpResponse.status != 200)
-        {
+        if (httpResponse.status != 200) {
             console.log("error while accepting friend request");
             return;
         }
@@ -176,15 +206,83 @@ class FriendsController {
     }
 
     async denyFriendRequest(userId: number) {
-        const deleted = await this.deleteFriend(userId);
-        if (!deleted)
+        const friend = this.friends[userId];
+        if (!friend)
+            return;
+
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/deny-request`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${user.token}`,
+            }
+        });
+
+        if (httpResponse.status != 200) {
             console.log("error while denying friend request");
+            return;
+        }
+
+        delete this.friends[userId];
     }
 
     async unfriendUser(userId: number) {
-        const deleted = await this.deleteFriend(userId);
-        if (!deleted)
+        const friend = this.friends[userId];
+        if (!friend)
+             return;
+
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${user.token}`,
+            },
+        });
+
+        if (httpResponse.status != 200) {
             console.log("error while unfriending user");
+            return;
+        }
+
+        delete this.friends[userId];
+    }
+
+    async blockUser(userId: number) {
+        const friend = this.friends[userId];
+        if (!friend)
+            return;
+    
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/block`, {
+            method: "PATCH",
+            headers: {
+                "Authorization": `Bearer ${user.token}`,
+            },
+        });
+
+        if (httpResponse.status != 200) {
+            console.log("error while blocking user");
+            return;
+        }
+
+        friend.friendshipStatus = FriendshipStatus.Blocked;
+    }
+
+    async unblockUser(userId: number) {
+        const friend = this.friends[userId];
+        if (!friend)
+            return;
+    
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/unblock`, {
+            method: "PATCH",
+            headers: {
+                "Authorization": `Bearer ${user.token}`,
+            },
+        });
+
+        if (httpResponse.status != 200) {
+            console.log("error while unblocking user");
+            return;
+        }
+
+        friend.friendshipStatus = FriendshipStatus.Active;
     }
 
     private async fetchFriends() {
@@ -226,23 +324,34 @@ class FriendsController {
         friend.status = FriendStatus.offline;
     }
 
-    private async deleteFriend(friendId: FriendId): Promise<boolean> {
-        const friend = this.friends[friendId];
-        if (!friend)
-             return false;
-
-        const httpResponse = await fetch(`http://localhost:3000/friends/${friend.friendshipId}`, {
-            method: "DELETE",
+    private async checkFriendRequestDirection(friendshipId: number): Promise<FriendRequestDirection | null> {
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friendshipId}/request-direction`, {
+            method: "GET",
             headers: {
-                "Authorization": `Bearer ${user.token}`,
-            },
+                "Authorization": `Bearer ${user.token}`
+            }
         });
+        if (httpResponse.status != 200) {
+            console.log("error getting friend request direction");
+            return null;
+        }
+        const response: FriendRequestDirection = await httpResponse.json();
+        return response;
+    }
 
-        if (httpResponse.status != 200)
-            return false;
-
-        delete this.friends[friendId];
-        return true;
+    private async checkBlockDirection(friendshipId: number): Promise<BlockDirection | null> {
+        const httpResponse = await fetch(`http://localhost:3000/friendships/${friendshipId}/block-direction`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${user.token}`
+            }
+        });
+        if (httpResponse.status != 200) {
+            console.log("error getting block direction");
+            return null;
+        }
+        const response: BlockDirection = await httpResponse.json();
+        return response;
     }
 
     private friendIdToChatUser(friendId: FriendId): ChatUser | null {

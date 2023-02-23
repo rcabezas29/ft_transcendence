@@ -8,7 +8,7 @@ interface SeedUser {
 	avatar: string;
 }
 
-interface SeedFriend {
+interface SeedFriendship {
 	user1: string;
 	user2: string;
 	status: FriendshipStatus;
@@ -16,7 +16,7 @@ interface SeedFriend {
 
 interface SeedData {
     users: SeedUser[];
-	friends: SeedFriend[];
+	friendships: SeedFriendship[];
 }
 
 export const initialData: SeedData = {
@@ -52,7 +52,7 @@ export const initialData: SeedData = {
             password: bcrypt.hashSync('1234', 10),
         },
     ],
-	friends: [
+	friendships: [
 		{
 			user1: 'user1',
 			user2: 'user2',

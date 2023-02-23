@@ -41,7 +41,11 @@ function filteredList() {
 }
 
 function userIsFriendable(userId: number): boolean {
-    return (userId != user.id && !friendsController.userIsActiveFriend(userId) && !friendsController.userIsPending(userId))
+    return (userId != user.id
+        && !friendsController.userIsActiveFriend(userId)
+        && !friendsController.userIsPending(userId)
+        && !friendsController.userIsBlocked(userId)
+    );
 }
 
 onMounted(async () => {

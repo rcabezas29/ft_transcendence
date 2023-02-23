@@ -6,12 +6,14 @@ import { SeedModule } from './seed/seed.module';
 import { AuthModule } from './auth/auth.module';
 import { GatewayManagerModule } from './gateway-manager/gateway-manager.module';
 import { ChatModule } from './chat/chat.module';
-import { FriendsModule } from './friends/friends.module';
+import { FriendshipsModule } from './friends/friendships.module';
 import { Friendship } from './friends/entities/friendship.entity';
 import { IntraAuthModule } from './intra-auth/intra-auth.module';
 import { GameModule } from './game/game.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { FilesModule } from './files/files.module';
+import { BlockedFriendship } from './blocked-friendships/entities/blocked-friendship.entity';
+import { BlockedFriendshipsModule } from './blocked-friendships/blocked-friendships.module';
 
 
 @Module({
@@ -26,16 +28,17 @@ import { FilesModule } from './files/files.module';
       username: 'postgres',
       password: process.env.POSTGRES_PASSWORD,
       database: 'postgres',
-      entities: [User, Friendship],
+      entities: [User, Friendship, BlockedFriendship],
       synchronize: true,
     }),
 	ScheduleModule.forRoot(),
     SeedModule,
     GatewayManagerModule,
     ChatModule,
-    FriendsModule,
+    FriendshipsModule,
     GameModule,
     FilesModule,
+    BlockedFriendshipsModule,
   ],
 })
 export class AppModule {}
