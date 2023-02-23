@@ -179,6 +179,17 @@ export class FriendshipsService {
         if (gatewayUser2)
             gatewayUser2.socket.emit('friendship-status-change', user2Payload);
 
+     /*   if (gatewayUser1 && gatewayUser2) {
+            if (friendshipStatus === FriendshipStatus.Active){
+                gatewayUser2.socket.emit('friend-online', gatewayUser1.id);
+                gatewayUser1.socket.emit('friend-online', gatewayUser2.id);
+            }
+            else {
+                gatewayUser2.socket.emit('friend-offline', gatewayUser1.id);
+                gatewayUser1.socket.emit('friend-offline', gatewayUser2.id);
+            }
+        }
+*/
     }
 
     private notifyUsersOfDeletedFriendship(user1Id: number, user2Id: number) {

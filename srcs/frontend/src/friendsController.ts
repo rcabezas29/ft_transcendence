@@ -99,6 +99,14 @@ class FriendsController {
         if (!friend)
             return;
         friend.friendshipStatus = payload.status;
+
+        if (friend.friendshipStatus === FriendshipStatus.Active) {
+            const chatUser = this.friendIdToChatUser(friend.userId);
+            if (chatUser)
+                directMessageController.onFriendConnected(chatUser);
+        }
+        else
+            directMessageController.onFriendDisconnected(friend.userId);
     }
 
     onFriendshipDeleted(payload: FriendId) {
