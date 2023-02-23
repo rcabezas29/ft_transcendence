@@ -29,7 +29,7 @@ int main()
 
             auto &file = fileUpload.getFiles()[0];
 			file.saveAs("image");
-			int sys_call = system("./pixelizer ./uploads/image");
+			int sys_call = system("./pixelizer ./uploads/image -m 1 -b -65 -c -10");
 
 			if (sys_call < 0) {
 				auto resp = HttpResponse::newHttpResponse();

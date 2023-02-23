@@ -27,9 +27,9 @@ export class MatchmakingService {
 		if (this.usersQueue.length < 2)
 			return;
 		const user1 = this.usersQueue[0];
-		this.usersQueue.splice(0, 1);
+		this.usersQueue.splice(0, 1); // <-- shift/unshift?
 		const user2 = this.findAdversaryFor(user1);
-		const user2Index = this.usersQueue.findIndex((user) => user.id == user2.id);
+		const user2Index = this.usersQueue.findIndex((user) => user.id === user2.id);
 		this.usersQueue.splice(user2Index, 1);
 		this.gameService.createGame(user1, user2);
 	}
