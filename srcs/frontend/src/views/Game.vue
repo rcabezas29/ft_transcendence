@@ -1,40 +1,32 @@
 <script setup lang="ts">
-
-import { gameController } from '@/gameController';
-import { onMounted, ref } from 'vue';
+import { gameController } from "@/gameController";
+import { onMounted, ref } from "vue";
 
 const canvasRef = ref<HTMLCanvasElement>();
 
 function findGame() {
-	gameController.searchGame();
-}
-
-function test(e : Event) {
-	e.preventDefault();
-	console.log("UP");
+  gameController.searchGame();
 }
 
 onMounted(() => {
-	gameController.initCanvas(canvasRef.value!.getContext('2d')!);
+  gameController.initCanvas(canvasRef.value!.getContext("2d")!);
 });
 </script>
 
 <template>
-	<h2>Game</h2>
-	<button @click="findGame">Find game</button>
+  <h2>Game</h2>
+  <button @click="findGame">Find game</button>
 
-	Status: <span>{{ gameController.state }}</span>
-	
-	Time: <span>{{ gameController.timestamp }}</span>
+  Status: <span>{{ gameController.state }}</span>
 
-	<canvas ref="canvasRef" class="pong-board" height="200" width="400" >
-	</canvas>
+  Time: <span>{{ gameController.timestamp }}</span>
 
+  <canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
 </template>
 
 <style scoped>
 .pong-board {
-	display: block;
-	background-color: black;
+  display: block;
+  background-color: black;
 }
 </style>
