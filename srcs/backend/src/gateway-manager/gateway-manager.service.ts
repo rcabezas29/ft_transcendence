@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
+import { UserFriend } from 'src/users/interfaces/user-friend.interface';
 import { UsersService } from 'src/users/users.service';
 import { GatewayUser } from './interfaces/gateway-user.interface';
 
@@ -31,8 +32,8 @@ export class GatewayManagerService {
 	}
 
 	async getAllUserConnectedFriends(id: number): Promise<GatewayUser[]> {
-		const friends: User[] = await this.usersService.findUserActiveFriends(id);
-		const friendsIds: number[] = friends.map((friend) => friend.id);
+		const friends: UserFriend[] = await this.usersService.getAllUserFriends(id);
+		const friendsIds: number[] = friends.map((friend) => friend.userId);
 		const userFriends: GatewayUser[] = this.users.filter((user) => {
 			const friendId: number = friendsIds.find((id) => id == user.id);
 			if (friendId)

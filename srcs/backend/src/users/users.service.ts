@@ -80,15 +80,8 @@ export class UsersService {
     async findOneByEmail(email: string) {
         return await this.usersRepository.findOneBy({ email: email });
     }
-
+/*
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        /*const friendsRelations: Friendship[] = await this.findUserFriendshipsByStatus(id, status);
-        const friendsIds: number[] = friendsRelations.map((friend) => {
-            if (friend.user1Id == id)
-                return friend.user2Id;
-            else
-                return friend.user1Id;
-        });*/
         const friendsIds = await this.userFriendshipsService.findUserFriendsIdsByStatus(id, status);
         const friends = await this.findAllByIds(friendsIds);
         return friends;
@@ -105,7 +98,7 @@ export class UsersService {
     findUserBlockedFriends(id: number) {
         return this.findUserFriendsByStatus(id, FriendshipStatus.Blocked);
     }
-
+*/
     async getAllUserFriends(userId: number): Promise<UserFriend[]> {
         const friendsRelations: Friendship[] = await this.userFriendshipsService.findAllUserFriendships(userId);
 

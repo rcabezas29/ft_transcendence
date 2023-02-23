@@ -154,6 +154,11 @@ export class FriendshipsService {
             gatewayUser1.socket.emit('new-friendship', user1Payload);
         if (gatewayUser2)
             gatewayUser2.socket.emit('new-friendship', user2Payload);
+
+        if (gatewayUser1 && gatewayUser2) {
+            gatewayUser2.socket.emit('friend-online', gatewayUser1.id);
+            gatewayUser1.socket.emit('friend-online', gatewayUser2.id);
+        }
     }
 
     private notifyUsersOfChangeInFriendshipStatus(user1Id: number, user2Id: number, friendshipStatus: FriendshipStatus) {
