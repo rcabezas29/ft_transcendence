@@ -19,7 +19,8 @@ export class MatchmakingService {
 		console.log("User: ", requestor.id, "- searchGame");
 		const user: User = await this.usersService.findOneById(requestor.id);
 		requestor.elo = user.elo;
-		this.usersQueue.push(requestor);
+		if (!this.usersQueue.find((user) => user.id === requestor.id))
+			this.usersQueue.push(requestor);
 	}
 
 	@Cron(CronExpression.EVERY_5_SECONDS)
