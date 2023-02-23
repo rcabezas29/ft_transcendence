@@ -86,10 +86,7 @@ class FriendsController {
 
     onFriendDisconnected(payload: FriendId) {
         this.setFriendOffline(payload);
-
-        const friend = this.friendIdToChatUser(payload);
-        if (friend)
-            directMessageController.onFriendDisconnected(friend);
+        directMessageController.onFriendDisconnected(payload);
     }
 
     onNewFriendship(payload: FriendPayload) {
@@ -105,6 +102,8 @@ class FriendsController {
     }
 
     onFriendshipDeleted(payload: FriendId) {
+        directMessageController.onFriendDisconnected(payload);
+
         const friend = this.friends[payload];
         if (!friend)
             return;

@@ -31,8 +31,8 @@ class DirectMessageController {
         this.appendChatToChatMap(payload);
     }
 
-    onFriendDisconnected(payload: ChatUser) {
-        this.friends = this.friends.filter((friend) => friend.id != payload.id);
+    onFriendDisconnected(payload: FriendId) {
+        this.friends = this.friends.filter((friend) => friend.id != payload);
     }
 
     private receiveDirectMessage(payload: MessagePayload) {
