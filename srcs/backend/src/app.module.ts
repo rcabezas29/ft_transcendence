@@ -14,6 +14,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { FilesModule } from './files/files.module';
 import { BlockedFriendship } from './blocked-friendships/entities/blocked-friendship.entity';
 import { BlockedFriendshipsModule } from './blocked-friendships/blocked-friendships.module';
+import { UserFriendshipsModule } from './user-friendships/user-friendships.module';
 
 
 @Module({
@@ -39,6 +40,7 @@ import { BlockedFriendshipsModule } from './blocked-friendships/blocked-friendsh
     GameModule,
     FilesModule,
     BlockedFriendshipsModule,
+    UserFriendshipsModule,
   ],
 })
 export class AppModule {}

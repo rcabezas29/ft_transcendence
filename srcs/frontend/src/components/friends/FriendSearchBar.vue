@@ -60,7 +60,7 @@ onMounted(async () => {
 		<input type="text" v-model="input" placeholder="Search users..." />
 		<div class="user-item" v-for="u in filteredList()" :key="u.id">
 			<span>{{ u.username }}</span>
-			<button @click="() => friendsController.sendFriendRequest(u.id, u.username)" v-if="userIsFriendable(u.id)">Send friend request</button>
+			<button @click="() => friendsController.sendFriendRequest(u.id)" v-if="userIsFriendable(u.id)">Send friend request</button>
 		</div>
 		<div class="item-error" v-if="input && filteredList().length === 0">
 			<p>No users found!</p>

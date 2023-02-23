@@ -34,6 +34,11 @@ interface FriendPayload {
     friendshipStatus: FriendshipStatus;
 }
 
+interface FriendshipStatusPayload {
+    status: FriendshipStatus;
+    friendId: number;
+}
+
 export interface Friend {
     userId: FriendId;
     username: string;
@@ -53,6 +58,9 @@ class FriendsController {
         user.socket?.on('connected-friends', (payload: FriendId[]) => {this.onConnectedFriends(payload)});
         user.socket?.on('friend-online', (payload: FriendId) => {this.onFriendConnected(payload)});
         user.socket?.on('friend-offline', (payload: FriendId) => {this.onFriendDisconnected(payload)});
+        user.socket?.on('new-friendship', (payload: FriendPayload) => {this.onNewFriendship(payload)});
+        user.socket?.on('friendship-status-change', (payload: FriendshipStatusPayload) => {this.onFriendshipStatusChange(payload)});
+        user.socket?.on('friendship-deleted', (payload: FriendId) => {this.onFriendshipDeleted(payload)});
     }
 
     async onConnectedFriends(payload: FriendId[]) {
@@ -82,6 +90,25 @@ class FriendsController {
         const friend = this.friendIdToChatUser(payload);
         if (friend)
             directMessageController.onFriendDisconnected(friend);
+    }
+
+    onNewFriendship(payload: FriendPayload) {
+        const newFriend: Friend = { ...payload, status: FriendStatus.offline };
+        this.friends[payload.userId] = newFriend;
+    }
+
+    onFriendshipStatusChange(payload: FriendshipStatusPayload) {
+        const friend = this.friends[payload.friendId];
+        if (!friend)
+            return;
+        friend.friendshipStatus = payload.status;
+    }
+
+    onFriendshipDeleted(payload: FriendId) {
+        const friend = this.friends[payload];
+        if (!friend)
+            return;
+        delete this.friends[payload];
     }
 
     userIsActiveFriend(userId: number): boolean {
@@ -152,8 +179,8 @@ class FriendsController {
         return receivedFriendReqs;
     }
 
-    async sendFriendRequest(userId: number, username: string) {
-        if (!userId || !username)
+    async sendFriendRequest(userId: number) {
+        if (!userId)
             return;
 
         const httpResponse = await fetch(`http://localhost:3000/friendships`, {
@@ -168,21 +195,10 @@ class FriendsController {
             })
         });
 
-        if (httpResponse.status != 201)
-        {
+        if (httpResponse.status != 201) {
             console.log("error while sending friend request");
             return;
         }
-        const response = await httpResponse.json();
-
-        const newFriend: Friend = {
-            userId: userId,
-            username: username,
-            friendshipId: response.id,
-            friendshipStatus: FriendshipStatus.Pending,
-            status: FriendStatus.offline,
-        }
-        this.friends[userId] = newFriend;
     }
 
     async acceptFriendRequest(userId: number) {
@@ -201,8 +217,6 @@ class FriendsController {
             console.log("error while accepting friend request");
             return;
         }
-
-        friend.friendshipStatus = FriendshipStatus.Active;
     }
 
     async denyFriendRequest(userId: number) {
@@ -221,8 +235,6 @@ class FriendsController {
             console.log("error while denying friend request");
             return;
         }
-
-        delete this.friends[userId];
     }
 
     async unfriendUser(userId: number) {
@@ -241,8 +253,6 @@ class FriendsController {
             console.log("error while unfriending user");
             return;
         }
-
-        delete this.friends[userId];
     }
 
     async blockUser(userId: number) {
@@ -261,8 +271,6 @@ class FriendsController {
             console.log("error while blocking user");
             return;
         }
-
-        friend.friendshipStatus = FriendshipStatus.Blocked;
     }
 
     async unblockUser(userId: number) {
@@ -281,8 +289,6 @@ class FriendsController {
             console.log("error while unblocking user");
             return;
         }
-
-        friend.friendshipStatus = FriendshipStatus.Active;
     }
 
     private async fetchFriends() {

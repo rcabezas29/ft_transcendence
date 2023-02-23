@@ -1,19 +1,20 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { FriendshipsService } from './friendships.service';
 import { FriendshipsController } from './friendships.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Friendship } from './entities/friendship.entity';
-import { UsersModule } from 'src/users/users.module';
 import { BlockedFriendshipsModule } from 'src/blocked-friendships/blocked-friendships.module';
+import { UsersModule } from 'src/users/users.module';
+import { UserFriendshipsModule } from 'src/user-friendships/user-friendships.module';
+import { GatewayManagerModule } from 'src/gateway-manager/gateway-manager.module';
 
 @Module({
   controllers: [FriendshipsController],
   providers: [FriendshipsService],
   imports: [
-    TypeOrmModule.forFeature([Friendship]),
-    forwardRef(() => UsersModule),
-    BlockedFriendshipsModule
+    BlockedFriendshipsModule,
+    UsersModule,
+    UserFriendshipsModule,
+    GatewayManagerModule
   ],
-  exports: [FriendshipsService, TypeOrmModule],
+  exports: [FriendshipsService],
 })
 export class FriendshipsModule {}

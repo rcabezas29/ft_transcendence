@@ -5,7 +5,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
-	imports: [AuthModule, UsersModule], 
+	imports: [AuthModule, UsersModule],
 	providers: [GatewayManagerService, GatewayManagerGateway],
 	exports: [GatewayManagerService, GatewayManagerGateway]
 })

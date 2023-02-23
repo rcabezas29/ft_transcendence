@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { GatewayUser } from './interfaces/gateway-user.interface';
@@ -11,6 +11,7 @@ export class GatewayManagerService {
 	private onDisconnectionCallbacks: Function[] = [];
 
 	constructor(
+        @Inject(UsersService)
 		private usersService: UsersService,
 	) {
 		this.addOnNewConnectionCallback((client: GatewayUser) => this.onNewConnection(client));
@@ -61,14 +62,14 @@ export class GatewayManagerService {
 		return this.onNewConnectionCallbacks;
 	}
 
-	getOnDisconnectionCallback(): Function[] {
+	getOnDisconnectionCallbacks(): Function[] {
 		return this.onDisconnectionCallbacks;
 	}
 
 	async onNewConnection(client: GatewayUser) {
 		const friends: GatewayUser[] = await this.getAllUserConnectedFriends(client.id);
 		const friendsPayload: number[] = friends.map((user) => user.id);
-
+		
 		client.socket.emit('connected-friends', friendsPayload);
 		friends.forEach(friend => {
 			friend.socket.emit('friend-online', client.id);
@@ -82,5 +83,4 @@ export class GatewayManagerService {
 			friend.socket.emit('friend-offline', client.id);
 		})
 	}
-
 }

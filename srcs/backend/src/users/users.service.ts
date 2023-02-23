@@ -1,7 +1,5 @@
 import {
     BadRequestException,
-    forwardRef,
-    Inject,
     Injectable,
     NotFoundException,
     StreamableFile,
@@ -11,24 +9,22 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { FriendshipsService } from 'src/friends/friendships.service';
-import { Friendship } from 'src/friends/entities/friendship.entity';
-import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { UserFriend } from './interfaces/user-friend.interface';
+import { UserFriendshipsService } from 'src/user-friendships/user-friendships.service';
+import { Friendship, FriendshipStatus } from 'src/friends/entities/friendship.entity';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
-
-        @Inject(forwardRef(() => FriendshipsService))
-        private friendshipsService: FriendshipsService,
         
-        private intraAuthService: IntraAuthService
+        private intraAuthService: IntraAuthService,
+
+        private userFriendshipsService: UserFriendshipsService
     ) {}
 
     async create(createUserDto: CreateUserDto) {
@@ -86,43 +82,44 @@ export class UsersService {
     }
 
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        const friendsRelations: Friendship[] = await this.friendshipsService.findUserFriendshipsByStatus(id, status);
+        /*const friendsRelations: Friendship[] = await this.findUserFriendshipsByStatus(id, status);
         const friendsIds: number[] = friendsRelations.map((friend) => {
             if (friend.user1Id == id)
                 return friend.user2Id;
             else
                 return friend.user1Id;
-        });
+        });*/
+        const friendsIds = await this.userFriendshipsService.findUserFriendsIdsByStatus(id, status);
         const friends = await this.findAllByIds(friendsIds);
         return friends;
     }
-
+    
     findUserActiveFriends(id: number) {
         return this.findUserFriendsByStatus(id, FriendshipStatus.Active);
     }
-
+    
     findUserFriendRequests(id: number) {
         return this.findUserFriendsByStatus(id, FriendshipStatus.Pending);
     }
-
+    
     findUserBlockedFriends(id: number) {
         return this.findUserFriendsByStatus(id, FriendshipStatus.Blocked);
     }
 
     async getAllUserFriends(userId: number): Promise<UserFriend[]> {
-        const friendsRelations: Friendship[] = await this.friendshipsService.findAllUserFriendships(userId);
+        const friendsRelations: Friendship[] = await this.userFriendshipsService.findAllUserFriendships(userId);
 
         const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations
-                .map(async (friendship: Friendship): Promise<UserFriend> => {
-                    const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
-                    const friend = await this.findOneById(friendId);
-                    return {
-                        userId: friendId,
-                        username: friend.username,
-                        friendshipId: friendship.id,
-                        friendshipStatus: friendship.status
-                    };
-                });
+            .map(async (friendship: Friendship): Promise<UserFriend> => {
+                const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
+                const friend = await this.findOneById(friendId);
+                return {
+                    userId: friendId,
+                    username: friend.username,
+                    friendshipId: friendship.id,
+                    friendshipStatus: friendship.status
+                };
+            });
 
         const allUserFriends: UserFriend[] = await Promise.all(allUserFriendsPromises);
         return allUserFriends;

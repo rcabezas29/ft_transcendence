@@ -56,7 +56,7 @@ watch(friendsController, () => {
             </div>
         </div>
         <div class="friends-subsection">
-            <h2>Blocked friends</h2>
+            <h2>Friends I've blocked</h2>
             <div v-for="friend in blockedFriends" :key="friend.userId">
                 <span>{{ friend.username }}</span>
                 <button @click="() => friendsController.unblockUser(friend.userId)">Unblock</button>

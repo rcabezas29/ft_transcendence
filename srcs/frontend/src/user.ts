@@ -111,10 +111,10 @@ class User {
 
 	onConnect(): void {
 		this.socketId = this.socket?.id;
+		friendsController.setEventHandlers();
 		directMessageController.setEventsHandlers();
 		channelController.setEventsHandlers();
 		gameController.setEventHandlers();
-		friendsController.setEventHandlers();
 	}
 
 	onDisconnect(): void {
