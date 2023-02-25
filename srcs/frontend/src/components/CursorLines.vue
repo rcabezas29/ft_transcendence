@@ -1,10 +1,11 @@
 <script setup lang="ts">
 	import { onMounted, onUnmounted, ref, type CSSProperties, type Ref } from "vue";
 	
-	const lineWidth = 2;
+	const lineWidth = 5;
 	const centerOffset = 5;
 	const color = "#33FF33"
 
+	const safeMarginForNoOverflow = 5;
 	const cursorLinesActive = ref(true);
 	const x = ref(0);
 	const y = ref(0);
@@ -23,7 +24,6 @@
 	});
 
 	const lineStyleRight: Ref<CSSProperties> = ref<CSSProperties>({
-		width: "100%",
 		height: lineWidth + "px",
 	});
 
@@ -45,11 +45,13 @@
 	function updateRight() {
 		lineStyleRight.value.marginLeft = (x.value + centerOffset) + "px";
 		lineStyleRight.value.marginTop = (y.value - lineWidth / 2) + "px";
+		lineStyleRight.value.width = (window.innerWidth - x.value - safeMarginForNoOverflow) + "px";
 	}
 
 	function updateBottom() {
 		lineStyleBottom.value.marginTop = (y.value + centerOffset) + "px";
 		lineStyleBottom.value.marginLeft = (x.value - lineWidth / 2) + "px";
+		lineStyleBottom.value.height = (window.innerHeight - y.value - safeMarginForNoOverflow) + "px";
 	}
 
 	function update(event: MouseEvent) {
