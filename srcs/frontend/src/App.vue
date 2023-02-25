@@ -4,7 +4,7 @@
 	import router from './router';
 	import AlreadyConnected from './views/AlreadyConnected.vue'
 	import { computed } from "vue";
-
+	import CursorLines from './components/CursorLines.vue'
 	const routes = router.getRoutes();
 		
 	const userImg = computed(() => {
@@ -22,6 +22,7 @@
 </script>
 
 <template>
+		<CursorLines/>
 
 	<h1>FT_TRANSCENDENCE</h1>
 
@@ -56,6 +57,8 @@
 </template>
 
 <style scoped>
+
+	
 
 	.dev {
 		border: 1px solid black;
