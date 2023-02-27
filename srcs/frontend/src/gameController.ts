@@ -92,7 +92,7 @@ class GameController {
     }
   }
 
-  updateGame(gamePayload: any) {
+  updateGame(gamePayload: UpdateGamePayload) {
     this.timestamp = new Date(gamePayload.currentTime).getTime();
     this.gameRenderer!.drawFrame(gamePayload);
   }
@@ -137,7 +137,7 @@ class GameRenderer {
       ball.hitBox.bounds.x,
       ball.hitBox.bounds.y
     );
-    paddles.forEach((paddle: any) => {
+    paddles.forEach((paddle: Paddle) => {
       this.canvas.fillRect(
         paddle.hitBox.position.x,
         paddle.hitBox.position.y,
