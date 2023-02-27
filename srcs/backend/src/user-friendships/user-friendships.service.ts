@@ -1,19 +1,43 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateFriendshipDto } from 'src/friends/dto/create-friendship.dto';
-import { UpdateFriendshipDto } from 'src/friends/dto/update-friendship.dto';
-import { Friendship, FriendshipStatus } from 'src/friends/entities/friendship.entity';
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
+import { BlockDirection, BlockedFriendshipsService } from 'src/blocked-friendships/blocked-friendships.service';
+import { FriendshipsService } from 'src/friendships/friendships.service';
+import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
+import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { UserFriend } from 'src/users/interfaces/user-friend.interface';
+import { UsersService } from 'src/users/users.service';
+import { CreateFriendshipDto } from '../friendships/dto/create-friendship.dto';
+import { UpdateFriendshipDto } from '../friendships/dto/update-friendship.dto';
+import { Friendship, FriendshipStatus } from '../friendships/entities/friendship.entity';
+
+export enum FriendRequestDirection {
+    Sender = 0,
+    Receiver = 1
+}
+
+interface FriendshipStatusPayload {
+    status: FriendshipStatus;
+    friendId: number;
+}
 
 @Injectable()
 export class UserFriendshipsService {
     constructor(
-        @InjectRepository(Friendship)
-        private friendshipsRepository: Repository<Friendship>,
-    ) {}
+        private blockedFriendshipsService: BlockedFriendshipsService,
+        private usersService: UsersService,
+        private friendshipsService: FriendshipsService,
+        private gatewayManagerService: GatewayManagerService
+    ) { }
 
-    async create(createFriendshipDto: CreateFriendshipDto, user1: User, user2: User, requestUser) {
+    async create(createFriendshipDto: CreateFriendshipDto, requestUser) {
+        const user1 = await this.usersService.findOneById(createFriendshipDto.user1Id);
+        const user2 = await this.usersService.findOneById(createFriendshipDto.user2Id);
+
         if (!user1 || !user2)
             throw new BadRequestException('One or more of the friendship users do not exist');
 
@@ -23,91 +47,159 @@ export class UserFriendshipsService {
         if (user1.id === user2.id)
             throw new BadRequestException('Users cannot friend themselves');
 
-        if (await this.usersAreFriends(user1.id, user2.id))
+        if (await this.friendshipsService.usersAreFriends(user1.id, user2.id))
             throw new BadRequestException('Users are already friends');
 
-        const newFriendship = await this.friendshipsRepository.save(createFriendshipDto);
+        const newFriendship = await this.friendshipsService.create(createFriendshipDto);
+        if (newFriendship.status === FriendshipStatus.Blocked)
+            this.createBlockedFriendship(requestUser.id, newFriendship.user1Id, newFriendship.user2Id, newFriendship.id);
+
+        await this.notifyUsersOfNewFriendship(user1.id, user2.id, newFriendship.id, newFriendship.status);
 
         return newFriendship;
     }
 
-    async update(id: number, updateFriendshipDto: UpdateFriendshipDto) {
-        const friendsToUpdate = {
-            id,
-            ...updateFriendshipDto,
-        };
-        try {
-            const friendship = await this.friendshipsRepository.preload(friendsToUpdate);
-            if (friendship) {
-                const res = await this.friendshipsRepository.save(friendship);
-                return res;
-            }
-        } catch (e) {
-            throw new BadRequestException();
-        }
-        throw new NotFoundException();
+    async update(id: number, updateFriendshipDto: UpdateFriendshipDto, userId: number) {
+        const res = await this.friendshipsService.update(id, updateFriendshipDto);
+
+        if (res.status === FriendshipStatus.Blocked)
+            this.createBlockedFriendship(userId, res.user1Id, res.user2Id, id);
+        
+        this.notifyUsersOfChangeInFriendshipStatus(res.user1Id, res.user2Id, res.status);
     }
 
     async remove(id: number) {
-        const friendship: Friendship = await this.findOneById(id);
+        const friendship: Friendship = await this.friendshipsService.findOneById(id);
         if (!friendship)
             throw new NotFoundException();
-        this.friendshipsRepository.delete(id);
+
+        this.friendshipsService.remove(id);
+        this.blockedFriendshipsService.removeByFriendshipId(id);
+        this.notifyUsersOfDeletedFriendship(friendship.user1Id, friendship.user2Id);
     }
 
-    findAll() {
-        return this.friendshipsRepository.find();
+    async handleFriendRequest(id: number, requestUser, action: string) {
+        const friendship: Friendship = await this.friendshipsService.findOneById(id);
+        if (!friendship)
+            throw new NotFoundException();
+
+        if (friendship.status != FriendshipStatus.Pending)
+            throw new BadRequestException('Friendship is not pending');
+
+        const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, id);
+        if (friendReqDirection === FriendRequestDirection.Sender)
+            throw new BadRequestException('User cannot handle their own friend request');
+        else if (friendReqDirection === FriendRequestDirection.Receiver) {
+            if (action === 'accept')
+                return this.update(id, { status: FriendshipStatus.Active }, requestUser.id);
+            else if (action === 'deny')
+                return this.remove(id);
+        }
+
+        throw new BadRequestException();
     }
 
-    findOneById(id: number) {
-        return this.friendshipsRepository.findOneBy({ id: id });
+    async blockFriend(id: number, requestUser) {
+        return this.update(id, { status: FriendshipStatus.Blocked }, requestUser.id);
     }
 
-    async findUserFriendsIdsByStatus(userId: number, status: FriendshipStatus): Promise<number[]> {
-        const friendsRelations: Friendship[] = await this.findUserFriendshipsByStatus(userId, status);
-        const friendsIds: number[] = friendsRelations.map((friend) => {
-            if (friend.user1Id == userId)
-                return friend.user2Id;
-            else
-                return friend.user1Id;
-        });
-        return friendsIds;
+    async unblockFriend(id: number, requestUser) {
+        this.blockedFriendshipsService.removeByFriendshipId(id);
+        return this.update(id, { status: FriendshipStatus.Active }, requestUser.id);
     }
 
-    findUserFriendshipsByStatus(userId: number, status: number): Promise<Friendship[]> {
-        return this.friendshipsRepository.find({
-            where: [
-                { user1Id: userId, status: status },
-                { user2Id: userId, status: status },
-            ]
-        });
+    async getFriendRequestDirection(id: number, requestUser) {
+        const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, id);
+        if (friendReqDirection === null)
+            throw new BadRequestException('Friendship does not exist or is not a friend request');
+        return friendReqDirection;
     }
 
-    findAllUserFriendships(userId: number): Promise<Friendship[]> {
-        return this.friendshipsRepository.find({
-            where: [
-                { user1Id: userId },
-                { user2Id: userId },
-            ]
-        });
+    async getBlockDirection(id: number, requestUser) {
+        const blockDirection: BlockDirection = await this.blockedFriendshipsService.checkBlockDirection(requestUser.id, id);
+        if (blockDirection === null)
+            throw new BadRequestException('Friendship does not exist or is not blocked');
+        return blockDirection;
     }
 
-    async findByFriendshipUsers(user1Id: number, user2Id: number) {
-        const friendship: Friendship[] = await this.friendshipsRepository.find({
-            where: [
-                { user1Id: user1Id, user2Id: user2Id },
-                { user1Id: user2Id, user2Id: user1Id }
-            ]
-        });
-        if (friendship.length > 0)
-            return friendship[0];
+    private async checkFriendRequestDirection(userId: number, friendshipId: number): Promise<FriendRequestDirection> {
+        const friendship: Friendship = await this.friendshipsService.findOneById(friendshipId);
+        if (!friendship)
+            return null;
+        if (friendship.status !== FriendshipStatus.Pending)
+            return null;
+
+        if (userId === friendship.user1Id)
+            return FriendRequestDirection.Sender;
+        else if (userId === friendship.user2Id)
+            return FriendRequestDirection.Receiver;
         return null;
     }
 
-    async usersAreFriends(user1Id: number, user2Id: number): Promise<boolean> {
-        const friendship: Friendship = await this.findByFriendshipUsers(user1Id, user2Id);
-        if (!friendship)
-            return false;
-        return true;
+    private createBlockedFriendship(userId: number, newUser1Id: number, newUser2Id: number, friendshipId: number) {
+        return this.blockedFriendshipsService.create({
+            userId: userId == newUser1Id ? newUser1Id : newUser2Id,
+            blockedUserId: userId == newUser1Id ? newUser2Id : newUser1Id,
+            friendshipId: friendshipId
+        });
+    }
+
+    private async notifyUsersOfNewFriendship(user1Id: number, user2Id: number, friendshipId: number, friendshipStatus: FriendshipStatus) {
+        const user1: User = await this.usersService.findOneById(user1Id);
+        const user2: User = await this.usersService.findOneById(user2Id);
+        
+        const gatewayUser1: GatewayUser = this.gatewayManagerService.getClientByUserId(user1Id);
+        const gatewayUser2: GatewayUser = this.gatewayManagerService.getClientByUserId(user2Id);
+
+        const user1Payload: UserFriend = {
+            userId: user2.id,
+            username: user2.username,
+            friendshipId: friendshipId,
+            friendshipStatus: friendshipStatus
+        };
+        const user2Payload: UserFriend = {
+            userId: user1.id,
+            username: user1.username,
+            friendshipId: friendshipId,
+            friendshipStatus: friendshipStatus
+        };
+        if (gatewayUser1)
+            gatewayUser1.socket.emit('new-friendship', user1Payload);
+        if (gatewayUser2)
+            gatewayUser2.socket.emit('new-friendship', user2Payload);
+
+        if (gatewayUser1 && gatewayUser2) {
+            gatewayUser2.socket.emit('friend-online', gatewayUser1.id);
+            gatewayUser1.socket.emit('friend-online', gatewayUser2.id);
+        }
+    }
+
+    private notifyUsersOfChangeInFriendshipStatus(user1Id: number, user2Id: number, friendshipStatus: FriendshipStatus) {
+        const gatewayUser1: GatewayUser = this.gatewayManagerService.getClientByUserId(user1Id);
+        const gatewayUser2: GatewayUser = this.gatewayManagerService.getClientByUserId(user2Id);
+
+        const user1Payload: FriendshipStatusPayload = {
+            friendId: user2Id,
+            status: friendshipStatus
+        };
+        const user2Payload: FriendshipStatusPayload = {
+            friendId: user1Id,
+            status: friendshipStatus
+        };
+        
+        if (gatewayUser1)
+            gatewayUser1.socket.emit('friendship-status-change', user1Payload);
+        if (gatewayUser2)
+            gatewayUser2.socket.emit('friendship-status-change', user2Payload);
+    }
+
+    private notifyUsersOfDeletedFriendship(user1Id: number, user2Id: number) {
+        const gatewayUser1: GatewayUser = this.gatewayManagerService.getClientByUserId(user1Id);
+        const gatewayUser2: GatewayUser = this.gatewayManagerService.getClientByUserId(user2Id);
+
+        if (gatewayUser1)
+            gatewayUser1.socket.emit('friendship-deleted', user2Id);
+        if (gatewayUser2)
+            gatewayUser2.socket.emit('friendship-deleted', user1Id);
     }
 }

@@ -4,12 +4,12 @@ import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { IntraAuthModule } from 'src/intra-auth/intra-auth.module';
-import { UserFriendshipsModule } from 'src/user-friendships/user-friendships.module';
+import { FriendshipsModule } from 'src/friendships/friendships.module';
 
 @Module({
   controllers: [UsersController],
   providers: [UsersService],
-  imports: [TypeOrmModule.forFeature([User]), IntraAuthModule, UserFriendshipsModule],
+  imports: [TypeOrmModule.forFeature([User]), IntraAuthModule, FriendshipsModule],
   exports: [UsersService, TypeOrmModule],
 })
 export class UsersModule {}

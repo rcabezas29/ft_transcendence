@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { FriendshipsService } from 'src/friendships/friendships.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
-import { UserFriendshipsService } from 'src/user-friendships/user-friendships.service';
 import { ChatUser, DirectMessagePayload } from './interfaces';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class ChatService {
 
     constructor(
         private gatewayManagerService: GatewayManagerService,
-		private userFriendshipsService: UserFriendshipsService
+		private friendshipsService: FriendshipsService
     ) { }
 
 	async directMessage(fromUser: GatewayUser, receivedPayload: DirectMessagePayload): Promise<void> {
@@ -18,7 +18,7 @@ export class ChatService {
 		if (!toUser)
 			return ;
 
-		const usersAreFriends = await this.userFriendshipsService.usersAreFriends(fromUser.id, toUser.id);
+		const usersAreFriends = await this.friendshipsService.usersAreFriends(fromUser.id, toUser.id);
 		if (!usersAreFriends)
 			return ;
 

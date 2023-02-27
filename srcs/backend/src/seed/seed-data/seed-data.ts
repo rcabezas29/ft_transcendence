@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt';
-import { FriendshipStatus } from 'src/friends/entities/friendship.entity';
+import { FriendshipStatus } from 'src/friendships/entities/friendship.entity';
 
 interface SeedUser {
     email: string;

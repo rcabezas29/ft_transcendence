@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlockedFriendship } from 'src/blocked-friendships/entities/blocked-friendship.entity';
-import { Friendship, FriendshipStatus } from 'src/friends/entities/friendship.entity';
+import { Friendship, FriendshipStatus } from 'src/friendships/entities/friendship.entity';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity'

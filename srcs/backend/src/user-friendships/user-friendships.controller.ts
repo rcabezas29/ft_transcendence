@@ -11,59 +11,59 @@ import {
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { FriendshipsService } from './friendships.service';
-import { CreateFriendshipDto } from './dto/create-friendship.dto';
+import { UserFriendshipsService } from './user-friendships.service';
+import { CreateFriendshipDto } from '../friendships/dto/create-friendship.dto';
 import { JwtAuthGuard, UserInFriendshipGuard } from 'src/auth/guards';
 
 @Controller('friendships')
-export class FriendshipsController {
-  constructor(private readonly friendshipsService: FriendshipsService) {}
+export class UserFriendshipsController {
+  constructor(private readonly userfriendshipsService: UserFriendshipsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
   create(@Body() createFriendshipDto: CreateFriendshipDto, @Req() req: Request) {
-    return this.friendshipsService.create(createFriendshipDto, req.user);
+    return this.userfriendshipsService.create(createFriendshipDto, req.user);
   }
 
   @Get(':id/request-direction')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   getFriendRequestDirection(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.friendshipsService.getFriendRequestDirection(id, req.user);
+    return this.userfriendshipsService.getFriendRequestDirection(id, req.user);
   }
 
   @Get(':id/block-direction')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   getBlockDirection(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.friendshipsService.getBlockDirection(id, req.user);
+    return this.userfriendshipsService.getBlockDirection(id, req.user);
   }
 
   @Patch(':id/block')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   blockFriend(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.friendshipsService.blockFriend(id, req.user);
+    return this.userfriendshipsService.blockFriend(id, req.user);
   }
 
   @Patch(':id/unblock')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   unblockFriend(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.friendshipsService.unblockFriend(id, req.user);
+    return this.userfriendshipsService.unblockFriend(id, req.user);
   }
 
   @Patch(':id/accept-request')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   acceptFriendRequest(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.friendshipsService.handleFriendRequest(id, req.user, 'accept');
+    return this.userfriendshipsService.handleFriendRequest(id, req.user, 'accept');
   }
 
   @Delete(':id/deny-request')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   denyFriendRequest(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.friendshipsService.handleFriendRequest(id, req.user, 'deny');
+    return this.userfriendshipsService.handleFriendRequest(id, req.user, 'deny');
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.friendshipsService.remove(id);
+    return this.userfriendshipsService.remove(id);
   }
 }

@@ -13,8 +13,8 @@ import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { UserFriend } from './interfaces/user-friend.interface';
-import { UserFriendshipsService } from 'src/user-friendships/user-friendships.service';
-import { Friendship, FriendshipStatus } from 'src/friends/entities/friendship.entity';
+import { Friendship } from 'src/friendships/entities/friendship.entity';
+import { FriendshipsService } from 'src/friendships/friendships.service';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +24,7 @@ export class UsersService {
         
         private intraAuthService: IntraAuthService,
 
-        private userFriendshipsService: UserFriendshipsService
+        private friendshipsService: FriendshipsService
     ) {}
 
     async create(createUserDto: CreateUserDto) {
@@ -82,7 +82,7 @@ export class UsersService {
     }
 /*
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        const friendsIds = await this.userFriendshipsService.findUserFriendsIdsByStatus(id, status);
+        const friendsIds = await this.friendshipsService.findUserFriendsIdsByStatus(id, status);
         const friends = await this.findAllByIds(friendsIds);
         return friends;
     }
@@ -100,7 +100,7 @@ export class UsersService {
     }
 */
     async getAllUserFriends(userId: number): Promise<UserFriend[]> {
-        const friendsRelations: Friendship[] = await this.userFriendshipsService.findAllUserFriendships(userId);
+        const friendsRelations: Friendship[] = await this.friendshipsService.findAllUserFriendships(userId);
 
         const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations
             .map(async (friendship: Friendship): Promise<UserFriend> => {
