@@ -159,7 +159,7 @@ export class UsersService {
     console.log(user);
     this.statsService.update(user.stats.id, {
       wonGames: user.stats.wonGames += (gameInfo.winner ? 1 : 0),
-      lostGames: user.stats.wonGames += (!gameInfo.winner ? 1 : 0),
+      lostGames: user.stats.lostGames += (!gameInfo.winner ? 1 : 0),
       scoredGoals: gameInfo.scoredGoals,
       receivedGoals: gameInfo.receivedGoals,
     });
