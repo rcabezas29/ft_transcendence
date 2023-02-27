@@ -4,10 +4,11 @@ import { SeedController } from './seed.controller';
 import { UsersModule } from 'src/users/users.module';
 import { BlockedFriendshipsModule } from 'src/blocked-friendships/blocked-friendships.module';
 import { FriendshipsModule } from 'src/friendships/friendships.module';
+import { StatsModule } from 'src/stats/stats.module';
 
 @Module({
   controllers: [SeedController],
   providers: [SeedService],
-  imports: [UsersModule, FriendshipsModule, BlockedFriendshipsModule]
+  imports: [UsersModule, FriendshipsModule, BlockedFriendshipsModule, StatsModule]
 })
 export class SeedModule {}

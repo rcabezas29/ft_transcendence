@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Stats } from 'src/stats/entity/stats.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Unique,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
 
 @Entity()
 @Unique(['username'])
@@ -21,4 +29,10 @@ export class User {
 
   @Column({ default: 1000 })
   elo: number;
+
+  @JoinColumn()
+  @OneToOne(() => Stats, (stats) => stats.user, {
+    onDelete: 'CASCADE',
+  })
+  stats: Stats;
 }

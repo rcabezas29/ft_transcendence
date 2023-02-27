@@ -15,6 +15,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { FilesModule } from './files/files.module';
 import { BlockedFriendship } from './blocked-friendships/entities/blocked-friendship.entity';
 import { BlockedFriendshipsModule } from './blocked-friendships/blocked-friendships.module';
+import { StatsModule } from './stats/stats.module';
+import { Stats } from './stats/entity/stats.entity';
 
 
 @Module({
@@ -29,7 +31,7 @@ import { BlockedFriendshipsModule } from './blocked-friendships/blocked-friendsh
       username: 'postgres',
       password: process.env.POSTGRES_PASSWORD,
       database: 'postgres',
-      entities: [User, Friendship, BlockedFriendship],
+      entities: [User, Friendship, BlockedFriendship, Stats],
       synchronize: true,
     }),
 	  ScheduleModule.forRoot(),
@@ -41,6 +43,7 @@ import { BlockedFriendshipsModule } from './blocked-friendships/blocked-friendsh
     FilesModule,
     BlockedFriendshipsModule,
     UserFriendshipsModule,
+    StatsModule,
   ],
 })
 export class AppModule {}
