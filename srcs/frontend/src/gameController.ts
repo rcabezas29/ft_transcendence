@@ -1,4 +1,9 @@
 import { reactive } from "vue";
+import type {
+  GameObject,
+  Paddle,
+  UpdateGamePayload,
+} from "./interfaces/update-game.interface";
 import { user } from "./user";
 
 enum GameState {
@@ -119,11 +124,11 @@ class GameRenderer {
     this.canvas.fillText(`LOSE :(`, 200, 100);
   }
 
-  drawFrame(payload: any) {
+  drawFrame(payload: UpdateGamePayload) {
     this.clearCanvas();
 
-    const ball: any = payload.ball;
-    const paddles: any = payload.paddles;
+    const ball: GameObject = payload.ball;
+    const paddles: Paddle[] = payload.paddles;
     this.canvas.fillStyle = "white";
     this.canvas.fillText(`${payload.score[0]} - ${payload.score[1]}`, 200, 20);
     this.canvas.fillRect(
