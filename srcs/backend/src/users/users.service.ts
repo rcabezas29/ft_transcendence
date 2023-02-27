@@ -16,6 +16,8 @@ import { UserFriend } from './interfaces/user-friend.interface';
 import { Friendship } from 'src/friendships/entities/friendship.entity';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { StatsService } from 'src/stats/stats.service';
+import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
+import { GameInfo } from './interfaces/game-info.interface';
 
 @Injectable()
 export class UsersService {
@@ -150,6 +152,18 @@ export class UsersService {
       throw new BadRequestException('Failed to update user');
     }
     throw new NotFoundException();
+  }
+
+  async updateStats(id: number, gameInfo: GameInfo) {
+    const user = await this.usersRepository.findOneBy({ id: id });
+
+    console.log(user);
+    this.statsService.update(user.stats.id, {
+      wonGames: user.stats.wonGames += (gameInfo.winner ? 1 : 0),
+      lostGames: user.stats.wonGames += (!gameInfo.winner ? 1 : 0),
+      scoredGoals: gameInfo.scoredGoals,
+      receivedGoals: gameInfo.receivedGoals,
+    });
   }
 
   async remove(id: number): Promise<void> {

@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
+import { UpdateStatsDto } from './dto/update-stats.dto';
 import { Stats } from './entity/stats.entity';
 
 @Injectable()
@@ -14,7 +15,20 @@ export class StatsService {
     return this.statsRepository.save({ user: user });
   }
 
-  update(id: number) {
-
+  async update(id: number, updateStats: UpdateStatsDto) {
+    const statToUpdate = {
+      id,
+      ...updateStats,
+    };
+    try {
+      const stat = await this.statsRepository.preload(statToUpdate);
+      if (stat) {
+        const res = await this.statsRepository.save(stat);
+        return res;
+      }
+    } catch (e) {
+      throw new BadRequestException('Failed to update stats');
+    }
+    throw new NotFoundException();
   }
 }
