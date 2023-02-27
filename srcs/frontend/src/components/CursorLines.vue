@@ -6,7 +6,7 @@
 	const color = "#33FF33"
 
 	const safeMarginForNoOverflow = 5;
-	const cursorLinesActive = ref(true);
+	const cursorLinesActive = ref(false);
 	const x = ref(0);
 	const y = ref(0);
 	
