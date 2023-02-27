@@ -275,8 +275,6 @@ class Game {
 
   movements: Move[] = [];
 
-  // usersService: UsersService;
-
   constructor(
     player1: GatewayUser,
     player2: GatewayUser,
@@ -438,15 +436,23 @@ class Game {
     clearInterval(this.gameInterval);
     console.log('game end', this.name);
     this.status = GameStatus.End;
+
     const expectedScore: number =
       1 / ((1 + 10) ^ ((this.players[1].elo - this.players[0].elo) / 400));
+
     this.players.forEach((player, index) => {
       player.socket.emit('end-game', index === winnerIndex);
       player.elo = Math.floor(
         player.elo + 32 * (Number(index === winnerIndex) - expectedScore),
       );
       this.usersService.update(player.id, { elo: player.elo });
+      this.usersService.updateStats(player.id, {
+        winner: index === winnerIndex,
+        scoredGoals: this.score[index],
+        receivedGoals: this.score[(index + 1) % 2],
+      });
     });
+
     this.players.forEach((player) => player.socket.leave(this.name));
   }
 
