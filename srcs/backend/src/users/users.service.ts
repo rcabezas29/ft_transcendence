@@ -16,7 +16,7 @@ import { UserFriend } from './interfaces/user-friend.interface';
 import { Friendship } from 'src/friendships/entities/friendship.entity';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { StatsService } from 'src/stats/stats.service';
-import { Stats } from 'src/stats/entity/stats.entity';
+import { Stats } from 'src/stats/entities/stats.entity';
 import { GameInfo } from './interfaces/game-info.interface';
 
 @Injectable()

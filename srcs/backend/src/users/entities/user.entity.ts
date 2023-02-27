@@ -1,4 +1,4 @@
-import { Stats } from 'src/stats/entity/stats.entity';
+import { Stats } from 'src/stats/entities/stats.entity';
 import {
   Entity,
   Column,

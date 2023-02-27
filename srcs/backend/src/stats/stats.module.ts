@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { StatsService } from './stats.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Stats } from './entity/stats.entity';
+import { Stats } from './entities/stats.entity';
 
 @Module({
   providers: [StatsService],

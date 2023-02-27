@@ -16,7 +16,7 @@ import { FilesModule } from './files/files.module';
 import { BlockedFriendship } from './blocked-friendships/entities/blocked-friendship.entity';
 import { BlockedFriendshipsModule } from './blocked-friendships/blocked-friendships.module';
 import { StatsModule } from './stats/stats.module';
-import { Stats } from './stats/entity/stats.entity';
+import { Stats } from './stats/entities/stats.entity';
 
 
 @Module({

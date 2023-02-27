@@ -8,7 +8,8 @@ has_children: true
 
 This section of the docs defines how the database is structured.
 
-We have three tables:
+We have four tables:
 * `user`: info about the user
+* `stats`: a user's stats
 * `friendship`: establishes friendships between users and the friendship status
 * `blocked_friendship`: establishes the direction of a blocked friendship

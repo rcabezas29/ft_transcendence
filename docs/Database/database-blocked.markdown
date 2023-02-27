@@ -2,7 +2,7 @@
 layout: default
 title: BlockedFriendships
 parent: Database
-nav_order: 3
+nav_order: 4
 ---
 
 ### blocked_friendship table

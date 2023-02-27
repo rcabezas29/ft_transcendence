@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateStatsDto } from './dto/update-stats.dto';
-import { Stats } from './entity/stats.entity';
+import { Stats } from './entities/stats.entity';
 
 @Injectable()
 export class StatsService {
