@@ -1,4 +1,9 @@
 import { reactive } from "vue";
+import type {
+  GameObject,
+  Paddle,
+  UpdateGamePayload,
+} from "./interfaces/update-game.interface";
 import { user } from "./user";
 
 enum GameState {
@@ -87,7 +92,7 @@ class GameController {
     }
   }
 
-  updateGame(gamePayload: any) {
+  updateGame(gamePayload: UpdateGamePayload) {
     this.timestamp = new Date(gamePayload.currentTime).getTime();
     this.gameRenderer!.drawFrame(gamePayload);
   }
@@ -119,11 +124,11 @@ class GameRenderer {
     this.canvas.fillText(`LOSE :(`, 200, 100);
   }
 
-  drawFrame(payload: any) {
+  drawFrame(payload: UpdateGamePayload) {
     this.clearCanvas();
 
-    const ball: any = payload.ball;
-    const paddles: any = payload.paddles;
+    const ball: GameObject = payload.ball;
+    const paddles: Paddle[] = payload.paddles;
     this.canvas.fillStyle = "white";
     this.canvas.fillText(`${payload.score[0]} - ${payload.score[1]}`, 200, 20);
     this.canvas.fillRect(
@@ -132,7 +137,7 @@ class GameRenderer {
       ball.hitBox.bounds.x,
       ball.hitBox.bounds.y
     );
-    paddles.forEach((paddle: any) => {
+    paddles.forEach((paddle: Paddle) => {
       this.canvas.fillRect(
         paddle.hitBox.position.x,
         paddle.hitBox.position.y,

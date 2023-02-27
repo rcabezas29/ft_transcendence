@@ -13,12 +13,12 @@ export class User {
   @Column()
   readonly email: string;
 
-  @Column({ default: "default_avatar.png" })
+  @Column({ default: 'default_avatar.png' })
   avatar: string;
 
   @Column()
   readonly password: string;
 
-  @Column({ default: 1000})
+  @Column({ default: 1000 })
   elo: number;
 }

@@ -21,7 +21,7 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
-        
+
         private intraAuthService: IntraAuthService,
 
         private friendshipsService: FriendshipsService
@@ -36,7 +36,7 @@ export class UsersService {
         const emailExists = await this.findOneByEmail(createUserDto.email)
         if (emailExists)
             throw new BadRequestException('Email address already in use. Please log in instead or choose a different one.');
-        
+
         try {
             const user = await this.usersRepository.save(createUserDto);
             const { password, ...result } = user;
@@ -47,7 +47,7 @@ export class UsersService {
     }
 
     async createWithoutPassword(email: string, username: string) {
-        const newUser = { email, username, password: "" };
+        const newUser = { email, username, password: '' };
         try {
             const user = await this.usersRepository.save(newUser);
             const { password, ...result } = user;
@@ -64,9 +64,9 @@ export class UsersService {
     findAllByIds(ids: number[]): Promise<User[]> {
         return this.usersRepository.find({
             where: {
-                id: In(ids)
-            }
-        })
+                id: In(ids),
+            },
+        });
     }
 
     findOneById(id: number): Promise<User> {
@@ -80,7 +80,7 @@ export class UsersService {
     async findOneByEmail(email: string) {
         return await this.usersRepository.findOneBy({ email: email });
     }
-/*
+    /*
     async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
         const friendsIds = await this.friendshipsService.findUserFriendsIdsByStatus(id, status);
         const friends = await this.findAllByIds(friendsIds);
@@ -98,7 +98,7 @@ export class UsersService {
     findUserBlockedFriends(id: number) {
         return this.findUserFriendsByStatus(id, FriendshipStatus.Blocked);
     }
-*/
+    */
     async getAllUserFriends(userId: number): Promise<UserFriend[]> {
         const friendsRelations: Friendship[] = await this.friendshipsService.findAllUserFriendships(userId);
 
@@ -142,10 +142,10 @@ export class UsersService {
     async getAvatar(username: string): Promise<StreamableFile> {
         const user: User = await this.findOneByUsername(username);
         if (!user)
-            throw new NotFoundException("Avatar not found");
-        
+            throw new NotFoundException('Avatar not found');
+
         const userAvatar: string = user.avatar;
-        const avatars_path = join(process.cwd(), "avatars");
+        const avatars_path = join(process.cwd(), 'avatars');
         const file = createReadStream(join(avatars_path, userAvatar));
         return new StreamableFile(file);
     }

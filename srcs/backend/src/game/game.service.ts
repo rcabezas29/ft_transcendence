@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { Server } from 'socket.io';
+import { UsersService } from 'src/users/users.service';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
@@ -274,7 +275,14 @@ class Game {
 
   movements: Move[] = [];
 
-  constructor(player1: GatewayUser, player2: GatewayUser, server: Server) {
+  // usersService: UsersService;
+
+  constructor(
+    player1: GatewayUser,
+    player2: GatewayUser,
+    server: Server,
+    private usersService: UsersService,
+  ) {
     this.server = server;
     this.players.push(player1);
     this.players.push(player2);
@@ -321,7 +329,6 @@ class Game {
     this.server.to(this.name).emit('start-game');
     this.players.forEach((player, playerIndex) => {
       player.socket.on('disconnect', () => {
-        //award the game to the player that has not disconnected
         this.end((playerIndex + 1) % 2);
       });
       player.socket.on('move', (movementIndex: number, pressed: boolean) => {
@@ -431,8 +438,14 @@ class Game {
     clearInterval(this.gameInterval);
     console.log('game end', this.name);
     this.status = GameStatus.End;
+    const expectedScore: number =
+      1 / ((1 + 10) ^ ((this.players[1].elo - this.players[0].elo) / 400));
     this.players.forEach((player, index) => {
       player.socket.emit('end-game', index === winnerIndex);
+      player.elo = Math.floor(
+        player.elo + 32 * (Number(index === winnerIndex) - expectedScore),
+      );
+      this.usersService.update(player.id, { elo: player.elo });
     });
     this.players.forEach((player) => player.socket.leave(this.name));
   }
@@ -446,7 +459,9 @@ class Game {
 export class GameService {
   public server: Server;
 
+  constructor(private usersService: UsersService) {}
+
   createGame(user1: GatewayUser, user2: GatewayUser) {
-    new Game(user1, user2, this.server);
+    new Game(user1, user2, this.server, this.usersService);
   }
 }
