@@ -4,7 +4,6 @@ import {
   Column,
   PrimaryGeneratedColumn,
   Unique,
-  JoinColumn,
   OneToOne,
 } from 'typeorm';
 
@@ -30,9 +29,9 @@ export class User {
   @Column({ default: 1000 })
   elo: number;
 
-  @JoinColumn()
   @OneToOne(() => Stats, (stats) => stats.user, {
-    onDelete: 'CASCADE',
+    cascade: true,
+    eager: true
   })
   stats: Stats;
 }

@@ -16,6 +16,7 @@ import { UserFriend } from './interfaces/user-friend.interface';
 import { Friendship } from 'src/friendships/entities/friendship.entity';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { StatsService } from 'src/stats/stats.service';
+import { Stats } from 'src/stats/entity/stats.entity';
 
 @Injectable()
 export class UsersService {
@@ -46,8 +47,8 @@ export class UsersService {
       );
 
     try {
-      const user = await this.usersRepository.save(createUserDto);
-      const stats = await this.statsService.create(user);
+      const newUser = { ...createUserDto, stats: new Stats() };
+      const user = await this.usersRepository.save(newUser);
       const { password, ...result } = user;
       return result;
     } catch (e) {
@@ -56,10 +57,9 @@ export class UsersService {
   }
 
   async createWithoutPassword(email: string, username: string) {
-    const newUser = { email, username, password: '' };
     try {
+      const newUser = { email, username, password: '', stats: new Stats() };
       const user = await this.usersRepository.save(newUser);
-      const stats = await this.statsService.create(user);
       const { password, ...result } = user;
       return result;
     } catch (e) {

@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BlockedFriendship } from 'src/blocked-friendships/entities/blocked-friendship.entity';
 import { Friendship, FriendshipStatus } from 'src/friendships/entities/friendship.entity';
 import { Stats } from 'src/stats/entity/stats.entity';
-import { StatsService } from 'src/stats/stats.service';
 import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity'
@@ -20,22 +19,17 @@ export class SeedService {
 
         @InjectRepository(BlockedFriendship)
         private readonly blockedFriendshipsRepository: Repository<BlockedFriendship>,
-
-        @InjectRepository(Stats)
-        private readonly statsRepository: Repository<Stats>,
         
         private userService: UsersService,
-
-        private statsService: StatsService
     ) {}
-    
+
     async runSeed() {
         await this.deleteTables();
         await this.insertUsers();
         await this.insertFriendships();
         return `seed executed`;
     }
-    
+
     private async deleteTables() {
         const queryBuilderUser = this.userRepository.createQueryBuilder();
         await queryBuilderUser.delete().where({}).execute();
@@ -43,20 +37,20 @@ export class SeedService {
         await queryBuilderFriends.delete().where({}).execute();
         const queryBuilderBlocked = this.blockedFriendshipsRepository.createQueryBuilder();
         await queryBuilderBlocked.delete().where({}).execute();
-        // const queryBuilderStats = this.statsRepository.createQueryBuilder();
-        // await queryBuilderStats.delete().where({}).execute();
     }
-    
+
     private async insertUsers() {
         const seedUsers = initialData.users;
         const users: User[] = [];
         
-        seedUsers.forEach(user => users.push(this.userRepository.create(user)));
+        seedUsers.forEach(user => {
+            const newUser = { ...user, stats: new Stats() };
+            users.push(this.userRepository.create(newUser));
+        });
         
-        const insertedUsers = await this.userRepository.save(users);
-        insertedUsers.forEach(async (user) => await this.statsService.create(user));
+        await this.userRepository.save(users);
     }
-    
+
     private async insertFriendships() {
         const seedFriendships = initialData.friendships;
         const friendships: Friendship[] = [];

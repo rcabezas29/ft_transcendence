@@ -6,11 +6,6 @@ export class Stats {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => User, (user) => user.stats, {
-    onDelete: 'CASCADE',
-  })
-  user: User;
-
   @Column({ default: 0 })
   wonGames: number;
 
@@ -22,4 +17,10 @@ export class Stats {
 
   @Column({ default: 0 })
   receivedGoals: number;
+
+  @OneToOne(() => User, (user) => user.stats, {
+     onDelete: 'CASCADE'
+  })
+  @JoinColumn()
+  user: User;
 }
