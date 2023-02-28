@@ -17,6 +17,8 @@ import { BlockedFriendship } from './blocked-friendships/entities/blocked-friend
 import { BlockedFriendshipsModule } from './blocked-friendships/blocked-friendships.module';
 import { StatsModule } from './stats/stats.module';
 import { Stats } from './stats/entities/stats.entity';
+import { MatchHistoryModule } from './match-history/match-history.module';
+import { MatchHistory } from './match-history/entity/match-history.entity';
 
 
 @Module({
@@ -31,7 +33,7 @@ import { Stats } from './stats/entities/stats.entity';
       username: 'postgres',
       password: process.env.POSTGRES_PASSWORD,
       database: 'postgres',
-      entities: [User, Friendship, BlockedFriendship, Stats],
+      entities: [User, Friendship, BlockedFriendship, Stats, MatchHistory],
       synchronize: true,
     }),
 	  ScheduleModule.forRoot(),
@@ -44,6 +46,7 @@ import { Stats } from './stats/entities/stats.entity';
     BlockedFriendshipsModule,
     UserFriendshipsModule,
     StatsModule,
+    MatchHistoryModule,
   ],
 })
 export class AppModule {}

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { Server } from 'socket.io';
 import { UsersService } from 'src/users/users.service';
+import { MatchHistoryService } from 'src/match-history/match-history.service';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
@@ -280,6 +281,7 @@ class Game {
     player2: GatewayUser,
     server: Server,
     private usersService: UsersService,
+    private matchHistoryService: MatchHistoryService
   ) {
     this.server = server;
     this.players.push(player1);
@@ -452,7 +454,12 @@ class Game {
         receivedGoals: this.score[(index + 1) % 2],
       });
     });
-
+    this.matchHistoryService.create({
+      user1Id: this.players[0].id,
+      user2Id: this.players[1].id,
+      winner: this.players[winnerIndex].id,
+      score: this.score,
+    });
     this.players.forEach((player) => player.socket.leave(this.name));
   }
 
@@ -465,9 +472,9 @@ class Game {
 export class GameService {
   public server: Server;
 
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService, private matchHistoryService: MatchHistoryService) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
-    new Game(user1, user2, this.server, this.usersService);
+    new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
   }
 }

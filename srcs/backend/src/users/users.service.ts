@@ -156,7 +156,6 @@ export class UsersService {
   async updateStats(id: number, gameInfo: GameInfo) {
     const user = await this.usersRepository.findOneBy({ id: id });
 
-    console.log(user);
     this.statsService.update(user.stats.id, {
       wonGames: user.stats.wonGames += (gameInfo.winner ? 1 : 0),
       lostGames: user.stats.lostGames += (!gameInfo.winner ? 1 : 0),
