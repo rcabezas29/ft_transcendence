@@ -5,6 +5,7 @@
 	import AlreadyConnected from './views/AlreadyConnected.vue'
 	import { computed } from "vue";
 	import CursorLines from './components/CursorLines.vue'
+
 	const routes = router.getRoutes();
 		
 	const userImg = computed(() => {
@@ -36,7 +37,7 @@
 				<div class="user-img">
 					<img :src="userImg" />
 				</div>
-				<h4 >User: {{ user.username }}</h4>
+				<h4>User: {{ user.username }}</h4>
 				<p>isLogged: {{ user.isLogged() }}</p>
 				<p>token: {{ user.token }}</p>
 				<p>socketId: {{ user.socketId }}</p>

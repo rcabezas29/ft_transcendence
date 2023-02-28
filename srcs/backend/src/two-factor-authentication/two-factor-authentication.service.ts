@@ -33,6 +33,7 @@ export class TwoFactorAuthenticationService {
     }
 
     async turnOnTwoFactorAuthentication(requestUser: User, { twoFactorAuthenticationCode }: TwoFactorAuthenticationCodeDto) {
+        console.log(twoFactorAuthenticationCode)
         const isCodeValid = this.isTwoFactorAuthenticationCodeValid(
             twoFactorAuthenticationCode, requestUser
         );

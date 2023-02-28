@@ -12,7 +12,7 @@ export class TwoFactorAuthenticationController {
 
     @UseGuards(JwtTwoFactorGuard)
     @Post('generate')
-    async register(@Res() res: Response, @Req() req: RequestWithUser) {
+    async generate(@Res() res: Response, @Req() req: RequestWithUser) {
         const { otpAuthUrl } = await this.twoFactorAuthenticationService.generateTwoFactorAuthenticationSecret(req.user);
         return this.twoFactorAuthenticationService.pipeQrCodeStream(res, otpAuthUrl);
     }
@@ -24,6 +24,7 @@ export class TwoFactorAuthenticationController {
         @Req() request: RequestWithUser,
         @Body() twoFactorAuthenticationCodeDto: TwoFactorAuthenticationCodeDto
     ) {
+        console.log(twoFactorAuthenticationCodeDto)
         await this.twoFactorAuthenticationService.turnOnTwoFactorAuthentication(request.user, twoFactorAuthenticationCodeDto);
     }
 
