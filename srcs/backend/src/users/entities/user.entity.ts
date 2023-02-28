@@ -30,10 +30,10 @@ export class User {
   elo: number;
 
   @Column({ nullable: true })
-  public twoFactorAuthenticationSecret?: string;
+  twoFactorAuthenticationSecret?: string;
 
   @Column({ default: false })
-  public isTwoFactorAuthenticationEnabled: boolean;
+  isTwoFactorAuthenticationEnabled: boolean;
 
   @OneToOne(() => Stats, (stats) => stats.user, {
     cascade: true,

@@ -7,6 +7,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import * as bcrypt from 'bcrypt';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,7 @@ export class AuthService {
         private readonly filesService: FilesService
     ) {}
     
-    async create(createUserDto: CreateUserDto) {
+    async createUser(createUserDto: CreateUserDto) {
         const newpass = await this.hashPassword(createUserDto.password);
         createUserDto.password = newpass;
         return this.usersService.create(createUserDto);
@@ -37,18 +38,23 @@ export class AuthService {
     }
     
     async login(requestUser) {
-        const payload: JwtPayload = { id: requestUser.id };
-        return {
-            access_token: this.getJwtToken(payload)
-        };
+        let access_token: string;
+
+       //if (requestUser.isTwoFactorAuthenticationEnabled)
+       //    access_token = this.getJwtToken(requestUser.id, true);
+       //else
+            access_token = this.getJwtToken(requestUser.id);
+
+        return { access_token };
     }
     
+    // TODO: 2fa with intra login
     async loginWithIntra(code: string, state: string) {
         const intraToken = await this.intraAuthService.getUserIntraToken(code, state);
         const {email, username, userImageURL} = await this.intraAuthService.getUserInfo(intraToken);
         let userId: number;
         
-        const foundUser = await this.usersService.findOneByEmail(email);
+        const foundUser: User = await this.usersService.findOneByEmail(email);
         if (!foundUser) {
             let createdUser = await this.usersService.createWithoutPassword(email, username);
             userId = createdUser.id;
@@ -56,11 +62,16 @@ export class AuthService {
         }
         else
             userId = foundUser.id;
-        
-        const jwtPayload: JwtPayload = { id: userId };
-        const jwtToken = this.getJwtToken(jwtPayload);
+
+        const jwtToken = this.getJwtToken(userId);
         
         return { access_token: jwtToken };
+    }
+
+    getJwtToken(userId: number, isSecondFactorAuthenticated: boolean = false) {
+        const payload: JwtPayload = { id: userId, isSecondFactorAuthenticated };
+        const access_token = this.jwtService.sign(payload);
+        return access_token;
     }
 
     private async hashPassword(password: string): Promise<string> {
@@ -68,11 +79,6 @@ export class AuthService {
         const salt = await bcrypt.genSalt(saltRounds);
         const hash = await bcrypt.hash(password, salt);
         return hash;
-    }
-    
-    private getJwtToken(payload: JwtPayload) {
-        const access_token = this.jwtService.sign(payload);
-        return access_token;
     }
     
     private async updateUserAvatarWithPixelizedIntraImage(userImageURL: string, username: string, userId: number) {

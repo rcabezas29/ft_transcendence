@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy, LocalStrategy } from './strategies';
+import { JwtStrategy, JwtTwoFactorStrategy, LocalStrategy } from './strategies';
 import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from '../users/users.module';
 import { IntraAuthModule } from 'src/intra-auth/intra-auth.module';
@@ -10,7 +10,7 @@ import { FilesModule } from 'src/files/files.module';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtTwoFactorStrategy],
   imports: [
     IntraAuthModule,
     FilesModule,
@@ -25,6 +25,6 @@ import { FilesModule } from 'src/files/files.module';
       }
     })
   ],
-  exports: [JwtModule]
+  exports: [JwtModule, AuthService]
 })
 export class AuthModule {}

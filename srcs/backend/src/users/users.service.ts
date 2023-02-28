@@ -188,8 +188,20 @@ export class UsersService {
   }
 
   async turnOnTwoFactorAuthentication(userId: number) {
+    if (!this.findOneById(userId))
+      throw new NotFoundException();
+
     return this.usersRepository.update(userId, {
       isTwoFactorAuthenticationEnabled: true
+    });
+  }
+
+  async turnOffTwoFactorAuthentication(userId: number) {
+    if (!this.findOneById(userId))
+      throw new NotFoundException();
+
+    return this.usersRepository.update(userId, {
+      isTwoFactorAuthenticationEnabled: false
     });
   }
 }
