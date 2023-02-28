@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Friendship } from 'src/friendships/entities/friendship.entity';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class BlockedFriendship {
@@ -11,6 +12,9 @@ export class BlockedFriendship {
   @Column()
   blockedUserId: number;
 
-  @Column()
-  friendshipId: number;
+  @OneToOne(() => Friendship, {
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn()
+  friendship: Friendship;
 }

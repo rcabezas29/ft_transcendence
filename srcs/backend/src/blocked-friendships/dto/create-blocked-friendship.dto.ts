@@ -6,8 +6,5 @@ export class CreateBlockedFriendshipDto {
 
   @IsInt()
   blockedUserId: number;
-
-  @IsInt()
-  friendshipId: number;
 }
   

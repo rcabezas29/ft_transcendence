@@ -21,8 +21,8 @@ export class UserFriendshipsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() createFriendshipDto: CreateFriendshipDto, @Req() req: Request) {
-    return this.userfriendshipsService.create(createFriendshipDto, req.user);
+  createFriendship(@Body() createFriendshipDto: CreateFriendshipDto, @Req() req: Request) {
+    return this.userfriendshipsService.createFriendship(createFriendshipDto, req.user);
   }
 
   @Get(':id/request-direction')
@@ -63,7 +63,7 @@ export class UserFriendshipsController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.userfriendshipsService.remove(id);
+  removeFriendship(@Param('id', ParseIntPipe) id: number) {
+    return this.userfriendshipsService.removeFriendship(id);
   }
 }

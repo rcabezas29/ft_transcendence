@@ -35,8 +35,6 @@ export class SeedService {
         await queryBuilderUser.delete().where({}).execute();
         const queryBuilderFriends = this.friendshipsRepository.createQueryBuilder();
         await queryBuilderFriends.delete().where({}).execute();
-        const queryBuilderBlocked = this.blockedFriendshipsRepository.createQueryBuilder();
-        await queryBuilderBlocked.delete().where({}).execute();
     }
 
     private async insertUsers() {
@@ -72,7 +70,7 @@ export class SeedService {
                 await this.blockedFriendshipsRepository.save({
                     userId: friendship.user1Id,
                     blockedUserId: friendship.user2Id,
-                    friendshipId: friendship.id
+                    friendship: friendship
                 });
             }
         })

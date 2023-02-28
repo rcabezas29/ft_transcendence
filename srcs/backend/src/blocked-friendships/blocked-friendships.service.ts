@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Friendship } from 'src/friendships/entities/friendship.entity';
 import { Repository } from 'typeorm';
 import { CreateBlockedFriendshipDto } from './dto/create-blocked-friendship.dto';
 import { BlockedFriendship } from './entities/blocked-friendship.entity';
@@ -16,7 +17,7 @@ export class BlockedFriendshipsService {
         private blockedFriendshipsRepository: Repository<BlockedFriendship>
     ) {}
 
-    async create(createBlockedFriendshipDto: CreateBlockedFriendshipDto) {
+    async create(createBlockedFriendshipDto: CreateBlockedFriendshipDto, friendship: Friendship) {
         const userId = createBlockedFriendshipDto.userId;
         const blockedUserId = createBlockedFriendshipDto.blockedUserId;
 
@@ -27,7 +28,8 @@ export class BlockedFriendshipsService {
         if (blockExists)
             return;
 
-        return await this.blockedFriendshipsRepository.save(createBlockedFriendshipDto);
+        const newBlock = {...createBlockedFriendshipDto, friendship};
+        return await this.blockedFriendshipsRepository.save(newBlock);
     }
 
     async removeByFriendshipId(friendshipId: number) {
@@ -38,7 +40,7 @@ export class BlockedFriendshipsService {
     }
 
     findByFriendshipId(friendshipId: number) {
-        return this.blockedFriendshipsRepository.findOneBy({ friendshipId: friendshipId });
+        return this.blockedFriendshipsRepository.findOneBy({ friendship: {id: friendshipId} });
     }
 
     async findByFriendshipUsers(userId: number, blockedUserId: number) {
@@ -56,25 +58,8 @@ export class BlockedFriendshipsService {
             return BlockDirection.Blocker;
         else if (userId === block.blockedUserId)
             return BlockDirection.Blocked;
-        
+
         return null;
     }
-/*
-    findAll() {
-        return this.blockedFriendshipsRepository.find();
-    }
-
-    findOneById(id: number) {
-        return this.blockedFriendshipsRepository.findOneBy({ id: id });
-    }
-
-    findByUserId(userId: number) {
-        return this.blockedFriendshipsRepository.findOneBy({ userId: userId });
-    }
-
-    findByBlockedUserId(blockedId: number) {
-        return this.blockedFriendshipsRepository.findOneBy({ blockedUserId: blockedId });
-    }
-*/
 
 }

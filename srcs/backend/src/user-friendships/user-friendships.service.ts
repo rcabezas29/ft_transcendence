@@ -5,6 +5,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { BlockDirection, BlockedFriendshipsService } from 'src/blocked-friendships/blocked-friendships.service';
+import { CreateBlockedFriendshipDto } from 'src/blocked-friendships/dto/create-blocked-friendship.dto';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
@@ -28,13 +29,13 @@ interface FriendshipStatusPayload {
 @Injectable()
 export class UserFriendshipsService {
     constructor(
-        private blockedFriendshipsService: BlockedFriendshipsService,
         private usersService: UsersService,
         private friendshipsService: FriendshipsService,
+        private blockedFriendshipsService: BlockedFriendshipsService,
         private gatewayManagerService: GatewayManagerService
     ) { }
 
-    async create(createFriendshipDto: CreateFriendshipDto, requestUser) {
+    async createFriendship(createFriendshipDto: CreateFriendshipDto, requestUser) {
         const user1 = await this.usersService.findOneById(createFriendshipDto.user1Id);
         const user2 = await this.usersService.findOneById(createFriendshipDto.user2Id);
 
@@ -52,71 +53,70 @@ export class UserFriendshipsService {
 
         const newFriendship = await this.friendshipsService.create(createFriendshipDto);
         if (newFriendship.status === FriendshipStatus.Blocked)
-            this.createBlockedFriendship(requestUser.id, newFriendship.user1Id, newFriendship.user2Id, newFriendship.id);
+            await this.createBlockedFriendship(requestUser.id, newFriendship.user1Id, newFriendship.user2Id, newFriendship.id);
 
         await this.notifyUsersOfNewFriendship(user1.id, user2.id, newFriendship.id, newFriendship.status);
 
         return newFriendship;
     }
 
-    async update(id: number, updateFriendshipDto: UpdateFriendshipDto, userId: number) {
-        const res = await this.friendshipsService.update(id, updateFriendshipDto);
+    async updateFriendship(friendshipId: number, updateFriendshipDto: UpdateFriendshipDto, userId: number) {
+        const res = await this.friendshipsService.update(friendshipId, updateFriendshipDto);
 
         if (res.status === FriendshipStatus.Blocked)
-            this.createBlockedFriendship(userId, res.user1Id, res.user2Id, id);
-        
+            await this.createBlockedFriendship(userId, res.user1Id, res.user2Id, friendshipId);
+
         this.notifyUsersOfChangeInFriendshipStatus(res.user1Id, res.user2Id, res.status);
     }
 
-    async remove(id: number) {
-        const friendship: Friendship = await this.friendshipsService.findOneById(id);
+    async removeFriendship(friendshipId: number) {
+        const friendship: Friendship = await this.friendshipsService.findOneById(friendshipId);
         if (!friendship)
             throw new NotFoundException();
 
-        this.friendshipsService.remove(id);
-        this.blockedFriendshipsService.removeByFriendshipId(id);
+        this.friendshipsService.remove(friendshipId);
         this.notifyUsersOfDeletedFriendship(friendship.user1Id, friendship.user2Id);
     }
 
-    async handleFriendRequest(id: number, requestUser, action: string) {
-        const friendship: Friendship = await this.friendshipsService.findOneById(id);
+    async handleFriendRequest(friendshipId: number, requestUser, action: string) {
+        const friendship: Friendship = await this.friendshipsService.findOneById(friendshipId);
         if (!friendship)
             throw new NotFoundException();
 
         if (friendship.status != FriendshipStatus.Pending)
             throw new BadRequestException('Friendship is not pending');
 
-        const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, id);
+        const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, friendshipId);
         if (friendReqDirection === FriendRequestDirection.Sender)
             throw new BadRequestException('User cannot handle their own friend request');
         else if (friendReqDirection === FriendRequestDirection.Receiver) {
             if (action === 'accept')
-                return this.update(id, { status: FriendshipStatus.Active }, requestUser.id);
+                return this.updateFriendship(friendshipId, { status: FriendshipStatus.Active }, requestUser.id);
             else if (action === 'deny')
-                return this.remove(id);
+                return this.removeFriendship(friendshipId);
         }
 
         throw new BadRequestException();
     }
 
-    async blockFriend(id: number, requestUser) {
-        return this.update(id, { status: FriendshipStatus.Blocked }, requestUser.id);
+    async blockFriend(friendshipId: number, requestUser) {
+        return this.updateFriendship(friendshipId, { status: FriendshipStatus.Blocked }, requestUser.id);
     }
 
-    async unblockFriend(id: number, requestUser) {
-        this.blockedFriendshipsService.removeByFriendshipId(id);
-        return this.update(id, { status: FriendshipStatus.Active }, requestUser.id);
+    async unblockFriend(friendshipId: number, requestUser) {
+        this.blockedFriendshipsService.removeByFriendshipId(friendshipId);
+        return this.updateFriendship(friendshipId, { status: FriendshipStatus.Active }, requestUser.id);
     }
 
-    async getFriendRequestDirection(id: number, requestUser) {
-        const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, id);
+    async getFriendRequestDirection(friendshipId: number, requestUser) {
+        const friendReqDirection: FriendRequestDirection = await this.checkFriendRequestDirection(requestUser.id, friendshipId);
         if (friendReqDirection === null)
             throw new BadRequestException('Friendship does not exist or is not a friend request');
         return friendReqDirection;
     }
 
-    async getBlockDirection(id: number, requestUser) {
-        const blockDirection: BlockDirection = await this.blockedFriendshipsService.checkBlockDirection(requestUser.id, id);
+    async getBlockDirection(friendshipId: number, requestUser) {
+        const blockDirection: BlockDirection = await this.blockedFriendshipsService.checkBlockDirection(requestUser.id, friendshipId);
         if (blockDirection === null)
             throw new BadRequestException('Friendship does not exist or is not blocked');
         return blockDirection;
@@ -136,12 +136,14 @@ export class UserFriendshipsService {
         return null;
     }
 
-    private createBlockedFriendship(userId: number, newUser1Id: number, newUser2Id: number, friendshipId: number) {
-        return this.blockedFriendshipsService.create({
+    private async createBlockedFriendship(userId: number, newUser1Id: number, newUser2Id: number, friendshipId: number) {
+        const newBlock: CreateBlockedFriendshipDto = {
             userId: userId == newUser1Id ? newUser1Id : newUser2Id,
             blockedUserId: userId == newUser1Id ? newUser2Id : newUser1Id,
-            friendshipId: friendshipId
-        });
+        }
+        const friendship: Friendship = await this.friendshipsService.findOneById(friendshipId);
+
+        return this.blockedFriendshipsService.create(newBlock, friendship);
     }
 
     private async notifyUsersOfNewFriendship(user1Id: number, user2Id: number, friendshipId: number, friendshipStatus: FriendshipStatus) {
