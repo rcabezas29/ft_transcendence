@@ -25,7 +25,8 @@ export class BlockedFriendshipsService {
             return;
 
         const blockExists = await this.findByFriendshipUsers(userId, blockedUserId);
-        if (blockExists)
+        const inverseBlockExists = await this.findByFriendshipUsers(blockedUserId, userId);
+        if (blockExists || inverseBlockExists)
             return;
 
         const newBlock = {...createBlockedFriendshipDto, friendship};
@@ -45,7 +46,7 @@ export class BlockedFriendshipsService {
 
     async findByFriendshipUsers(userId: number, blockedUserId: number) {
         const block: BlockedFriendship = await this.blockedFriendshipsRepository
-                    .findOneBy({ userId: userId, blockedUserId: blockedUserId });
+                    .findOneBy({ userId, blockedUserId });
         return block;
     }
 

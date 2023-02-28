@@ -24,7 +24,5 @@ The `blocked_friendship` table is defined as follows:
     - The `blocked_friendship` owns a **uni-directional OneToOne** relation with the
         `friendship` table. Therefore, the `friendship` is accesible from the
         `blocked_friendship`, but not the other way around.
-    - If a friendship is deleted, its **blocked_friendship is automatically deleted**, but
-        **not** the other way around.
-
-
+    - If a friendship is deleted (and if it had `status = 2`), its associated
+         **blocked_friendship is automatically deleted**, but **not** the other way around.
