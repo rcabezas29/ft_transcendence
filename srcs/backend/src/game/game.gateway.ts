@@ -9,6 +9,12 @@ import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interfa
 import { MatchmakingService } from './matchmaking.service';
 import { Server } from 'socket.io';
 import { GameService } from './game.service';
+import { Socket } from 'node:dgram';
+
+interface ChallengePlayers {
+  user1Id: string,
+  user2Id: string,
+}
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayInit {
@@ -31,5 +37,16 @@ export class GameGateway implements OnGatewayInit {
       client.id,
     );
     this.matchmakingService.searchGame(user);
+  }
+
+  @SubscribeMessage('challenge-game')
+  challengeGame(_: Socket, players: ChallengePlayers) {
+    const user1: GatewayUser = this.gatewayManagerService.getClientBySocketId(
+      players.user1Id,
+    );
+    const user2: GatewayUser = this.gatewayManagerService.getClientBySocketId(
+      players.user2Id,
+    );
+    this.gameService.createGame(user1, user2);
   }
 }
