@@ -13,8 +13,8 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Request } from 'express';
 import { JwtAuthGuard, UserGuard } from 'src/auth/guards';
+import { RequestWithUser } from './interfaces/request-with-user.interface';
 
 @Controller('users')
 export class UsersController {
@@ -33,7 +33,7 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req: Request) {
+  getProfile(@Req() req: RequestWithUser) {
     return req.user;
   }
 

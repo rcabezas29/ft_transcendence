@@ -154,7 +154,7 @@ export class UsersService {
   }
 
   async updateStats(id: number, gameInfo: GameInfo) {
-    const user = await this.usersRepository.findOneBy({ id: id });
+    const user = await this.findOneById(id);
 
     this.statsService.update(user.stats.id, {
       wonGames: user.stats.wonGames += (gameInfo.winner ? 1 : 0),
@@ -176,5 +176,14 @@ export class UsersService {
     const avatars_path = join(process.cwd(), 'avatars');
     const file = createReadStream(join(avatars_path, userAvatar));
     return new StreamableFile(file);
+  }
+
+  async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+    if (!this.findOneById(userId))
+      throw new NotFoundException();
+
+    return this.usersRepository.update(userId, {
+      twoFactorAuthenticationSecret: secret
+    });
   }
 }

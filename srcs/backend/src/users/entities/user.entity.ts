@@ -29,6 +29,9 @@ export class User {
   @Column({ default: 1000 })
   elo: number;
 
+  @Column({ nullable: true })
+  public twoFactorAuthenticationSecret?: string;
+
   @OneToOne(() => Stats, (stats) => stats.user, {
     cascade: true,
     eager: true

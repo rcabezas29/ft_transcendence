@@ -19,6 +19,7 @@ import { StatsModule } from './stats/stats.module';
 import { Stats } from './stats/entities/stats.entity';
 import { MatchHistoryModule } from './match-history/match-history.module';
 import { MatchHistory } from './match-history/entity/match-history.entity';
+import { TwoFactorAuthenticationModule } from './two-factor-authentication/two-factor-authentication.module';
 
 
 @Module({
@@ -47,6 +48,7 @@ import { MatchHistory } from './match-history/entity/match-history.entity';
     UserFriendshipsModule,
     StatsModule,
     MatchHistoryModule,
+    TwoFactorAuthenticationModule,
   ],
 })
 export class AppModule {}
