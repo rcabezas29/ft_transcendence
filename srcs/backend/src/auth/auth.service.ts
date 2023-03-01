@@ -42,7 +42,6 @@ export class AuthService {
         return { access_token };
     }
     
-    // TODO: 2fa with intra login
     async loginWithIntra(code: string, state: string) {
         const intraToken = await this.intraAuthService.getUserIntraToken(code, state);
         const {email, username, userImageURL} = await this.intraAuthService.getUserInfo(intraToken);

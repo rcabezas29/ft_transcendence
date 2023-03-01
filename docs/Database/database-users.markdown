@@ -9,11 +9,11 @@ nav_order: 1
 
 The users are in the `user` table and are defined as:
 
-| id  | username  |       email       |       avatar       |    password     |  elo |
-|-----|-----------|-------------------|--------------------|-----------------|------|
-|  1  |   user1   | user1@example.com | default-avatar.png | hashedpassw0rd1 | 1000 |
-|  2  |   user2   | user2@example.com |      user2.png     | hashedpassw0rd2 | 2000 |
-|  3  |   user3   | user3@example.com | default-avatar.png | hashedpassw0rd3 | 1000 |
+| id  | username  |       email       |       avatar       |    password     |  elo |  twoFactorAuthenticationSecret |  isTwoFactorAuthenticationEnabled |
+|-----|-----------|-------------------|--------------------|-----------------|------|--------------------------------|-----------------------------------|
+|  1  |   user1   | user1@example.com | default-avatar.png | hashedpassw0rd1 | 1000 |              NULL              |               FALSE               |
+|  2  |   user2   | user2@example.com |      user2.png     | hashedpassw0rd2 | 2000 |              NULL              |               FALSE               |
+|  3  |   user3   | user3@example.com | default-avatar.png | hashedpassw0rd3 | 1000 |             SECRET             |               TRUE                |
 
 - **username**: unique username.
 - **email**: unique email.
@@ -21,6 +21,8 @@ The users are in the `user` table and are defined as:
     Default is `default_avatar.png`.
 - **password**: hashed password.
 - **elo**: game elo. Default is `1000`.
+- **twoFactorAuthenticationSecret**: user secret for the 2FA generated in the proces of enabling 2FA.
+- **isTwoFactorAuthenticationEnabled**: whether the 2FA is enabled. Default is `false`.
 - **stats**: the user's stats.
     - The `user` table has a OneToOne relation with the `stats` table.
     - The `stats` table is the "owner" of the relation: even if the stats are **not visible** on

@@ -44,7 +44,6 @@ export class TwoFactorAuthenticationController {
         return this.twoFactorAuthenticationService.authenticate(request.user, twoFactorAuthenticationCodeDto);
     }
 
-    //FIXME: 2fa
     @UseGuards(JwtAuthGuard)
     @Get('is-enabled')
     isEnabled(@Req() request: RequestWithUser) {
