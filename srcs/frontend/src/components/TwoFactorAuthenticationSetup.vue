@@ -2,11 +2,14 @@
 import { user } from '@/user';
 import { onBeforeMount, ref } from 'vue';
 
-const twoFactorAuthenticationEnabled = ref<boolean>(false);
+const twoFactorAuthCheckboxActive = ref<boolean>(false);
+
+const twoFactorAuthEnabled = ref<boolean>(false);
 
 const qrCode = ref<string>('');
 
-const errorMessage = ref<string>('');
+const message = ref<string>('');
+const messageClass = ref<string>('error-message');
 
 const twoFactorAuthenticationCode = ref<string>('');
 
@@ -18,12 +21,12 @@ async function generateTwoFactorAuthSecret() {
         }
     });
     if (httpResponse.status != 201) {
-        errorMessage.value = 'Error while generating 2FA secret and getting QR code';
+        message.value = 'Error while generating 2FA secret and getting QR code';
         return;
     }
     const response = await httpResponse.blob();
     qrCode.value = URL.createObjectURL(response);
-    errorMessage.value = '';
+    message.value = '';
 }
 
 async function turnOnTwoFactorAuth() {
@@ -38,10 +41,10 @@ async function turnOnTwoFactorAuth() {
         body: JSON.stringify({twoFactorAuthenticationCode: code})
     });
     if (httpResponse.status != 200) {
-        errorMessage.value = 'Error while turning on 2FA';
+        message.value = 'Error while turning on 2FA';
         return;
     }
-    errorMessage.value = '';
+    message.value = '';
     qrCode.value = '';
 
     await secondFactorAuthenticate();
@@ -55,25 +58,28 @@ async function turnOffTwoFactorAuth() {
         }
     });
     if (httpResponse.status != 200) {
-        errorMessage.value = 'Error while turning off 2FA';
+        message.value = 'Error while turning off 2FA';
         return;
     }
+    twoFactorAuthEnabled.value = false;
     qrCode.value = '';
-    errorMessage.value = '';
+    message.value = '';
 }
 
 async function secondFactorAuthenticate() {
     const code = twoFactorAuthenticationCode.value;
     const authenticated = await user.secondFactorAuthenticate(code);
     if (!authenticated) {
-        errorMessage.value = 'Error while authenticating with 2FA';
+        message.value = 'Error while authenticating with 2FA';
         return;
     }
-    errorMessage.value = '';
+    message.value = "You have successfully activated 2FA!";
+	messageClass.value = "success-message";
+    twoFactorAuthEnabled.value = true;
 }
 
-async function toggleTwoFactorAuthenticationEnabled() {
-    if (twoFactorAuthenticationEnabled.value === true) {
+async function toggleTwoFactorAuthCheckbox() {
+    if (twoFactorAuthCheckboxActive.value === true) {
         await generateTwoFactorAuthSecret();
     }
     else {
@@ -82,14 +88,16 @@ async function toggleTwoFactorAuthenticationEnabled() {
 }
 
 onBeforeMount(async () => {
-    twoFactorAuthenticationEnabled.value = await user.isTwoFactorAuthenticationEnabled();
+    twoFactorAuthEnabled.value = await user.isTwoFactorAuthenticationEnabled();
+    if (twoFactorAuthEnabled.value == true)
+        twoFactorAuthCheckboxActive.value = true;
 })
 
 </script>
 
 <template>
-    <b>Enable Two Factor Authentication:</b> <input type="checkbox" id="checkbox" @change="toggleTwoFactorAuthenticationEnabled" v-model="twoFactorAuthenticationEnabled" />
-    <div v-if="twoFactorAuthenticationEnabled">
+    <b>Enable Two Factor Authentication:</b> <input type="checkbox" id="checkbox" @change="toggleTwoFactorAuthCheckbox" v-model="twoFactorAuthCheckboxActive" />
+    <div v-if="twoFactorAuthCheckboxActive && !twoFactorAuthEnabled">
         <p>Scan the QR code with Google Authenticator App and enter the resulting 6 digit code below</p>
         <img :src="qrCode">
         <form @submit.prevent="turnOnTwoFactorAuth">
@@ -97,13 +105,17 @@ onBeforeMount(async () => {
             <button>submit</button>
         </form>
     </div>
-    <div class="error-message">
-        {{ errorMessage }}
+    <div :class='messageClass'>
+        {{ message }}
     </div>
 </template>
 
 <style>
-    .error-message {
-        color: red;
-    }
+	.error-message {
+		color: red;
+	}
+
+	.success-message {
+		color: green;
+	}
 </style>

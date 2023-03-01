@@ -26,6 +26,7 @@ class User {
 	public alreadyConnected: boolean = false;
 	public id: number = -1;
 	public username: string = '';
+	private isSecondFactorAuthenticated: boolean = false;
 
 	async auth(access_token: string): Promise<void> {
 		if (this.token && this.token === access_token)
@@ -148,8 +149,23 @@ class User {
 		return localStorageToken;
 	}
 
-	//TODO: add logic for 2fa
 	isLogged(): boolean {
+		/*if (!this.token)
+		{
+		console.log("notoken")
+		return false;
+			
+		}
+		if (await this.checkIfSecondFactorAuthenticationIsNeeded(this.token))
+		{
+		console.log("2fa needed")
+
+			return false;
+
+		}
+		console.log("islogged")
+
+		return true;*/
 		return this.token != null;
 	}
 

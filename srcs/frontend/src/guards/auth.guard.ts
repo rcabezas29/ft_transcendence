@@ -1,7 +1,7 @@
 import { user } from "../user";
 
 export async function authenticationGuard(to, from, next) {
-	if (!user.isLogged())
+	if (!await user.isLogged())
 		next({name: "login"});
 	else next();
 }

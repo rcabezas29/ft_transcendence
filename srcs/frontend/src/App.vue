@@ -7,7 +7,7 @@
 	import CursorLines from './components/CursorLines.vue'
 
 	const routes = router.getRoutes();
-		
+
 	const userImg = computed(() => {
 		if (user.username)
 			return `http://localhost:3000/users/avatar/${user.username}`;

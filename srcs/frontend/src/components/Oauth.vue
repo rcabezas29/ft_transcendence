@@ -26,6 +26,12 @@ onBeforeMount(async () => {
 	const response = await httpResponse.json();
 
 	user.auth(response.access_token);
+
+	if (await user.checkIfSecondFactorAuthenticationIsNeeded(response.access_token)){
+		router.replace({ "name": "2fa-auth" });
+		return;
+	}
+
 	router.replace({ "name": "home"});
 });
 
