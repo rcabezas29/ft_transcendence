@@ -24,20 +24,21 @@ export class AuthService {
         return this.usersService.create(createUserDto);
     }
     
-    async validateUser(email: string, pass: string): Promise<any> {
+    async validateUser(email: string, pass: string): Promise<User> {
         const user = await this.usersService.findOneByEmail(email);
         if (!user)
             return null;
 
         const pass_check = await bcrypt.compare(pass, user.password)
         if (pass_check) {
-            const { password, ...result } = user;
-            return result;
+            //const { password, ...result } = user;
+            //return result;
+            return user;
         }
         return null;
     }
     
-    async login(requestUser) {
+    async login(requestUser: User) {
         const access_token = this.getJwtToken(requestUser.id);
         return { access_token };
     }
