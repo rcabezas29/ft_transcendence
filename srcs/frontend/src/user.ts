@@ -9,6 +9,7 @@ import { friendsController } from './friendsController';
 
 export interface JwtPayload {
     id: number;
+	isSecondFactorAuthenticated: boolean;
 	iat: number;
 	exp: number;
 }
@@ -69,15 +70,13 @@ class User {
 			},
 			body: JSON.stringify(createUser)
 		});
+		if (httpResponse.status != 201) {
+			return { registeredSuccessfully: false, response: null };
+		}
 
 		const response = await httpResponse.json();
 
-		let registeredSuccessfully = true;
-	
-		if (httpResponse.status != 201) {
-			registeredSuccessfully = false
-		}
-		return { registeredSuccessfully, response }
+		return { registeredSuccessfully: true, response };
 	}
 
 	async login(email: string, password: string) {
@@ -90,14 +89,13 @@ class User {
 			},
 			body: JSON.stringify(loginUser)
 		});
+		if (httpResponse.status != 201) {
+			return { loggedSuccessfully: false, response: null };
+		}
 
 		const response = await httpResponse.json();
-		let loggedSuccessfully = true;
-		
-		if (httpResponse.status != 201) {
-			loggedSuccessfully = false;
-		}
-		return { loggedSuccessfully, response }
+
+		return { loggedSuccessfully: true, response };
 	}
 
 	async loginWithIntra(): Promise<void> {
@@ -150,6 +148,7 @@ class User {
 		return localStorageToken;
 	}
 
+	//TODO: add logic for 2fa
 	isLogged(): boolean {
 		return this.token != null;
 	}
@@ -159,6 +158,49 @@ class User {
 		this.token = null;
 		this.socket?.disconnect();
 		this.socket = null;
+	}
+
+	async isTwoFactorAuthenticationEnabled(): Promise<boolean> {
+		const httpResponse = await fetch('http://localhost:3000/2fa/is-enabled', {
+			method: "GET",
+			headers: {
+				"Authorization": `Bearer ${this.token}`
+			}
+		});
+		if (httpResponse.status != 200) {
+			return false;
+		}
+		const isEnabled = await httpResponse.json();
+		return isEnabled;
+	}
+
+	async checkIfSecondFactorAuthenticationIsNeeded(access_token: string): Promise<boolean> {
+		const decodedToken: JwtPayload = jwt_decode(access_token);
+		const isTwoFactorAuthEnabled = await this.isTwoFactorAuthenticationEnabled();
+
+		if (isTwoFactorAuthEnabled && !decodedToken.isSecondFactorAuthenticated)
+			return true;
+		return false;
+	}
+
+	async secondFactorAuthenticate(code: string): Promise<boolean> {
+		if (!this.token)
+			return false;
+
+		const httpResponse = await fetch('http://localhost:3000/2fa/authenticate', {
+			method: "POST",
+			headers: {
+				"Authorization": `Bearer ${this.token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({twoFactorAuthenticationCode: code})
+		});
+		if (httpResponse.status != 200) {
+			return false;
+		}
+		const { access_token } = await httpResponse.json();
+		this.auth(access_token);
+		return true;
 	}
 }
 

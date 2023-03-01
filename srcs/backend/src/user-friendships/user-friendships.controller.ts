@@ -13,7 +13,7 @@ import {
 import { Request } from 'express';
 import { UserFriendshipsService } from './user-friendships.service';
 import { CreateFriendshipDto } from '../friendships/dto/create-friendship.dto';
-import { JwtTwoFactorGuard, UserInFriendshipGuard } from 'src/auth/guards';
+import { JwtAuthGuard, JwtTwoFactorGuard, UserInFriendshipGuard } from 'src/auth/guards';
 
 @Controller('friendships')
 export class UserFriendshipsController {
@@ -26,13 +26,13 @@ export class UserFriendshipsController {
   }
 
   @Get(':id/request-direction')
-  @UseGuards(JwtTwoFactorGuard, UserInFriendshipGuard)
+  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   getFriendRequestDirection(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     return this.userfriendshipsService.getFriendRequestDirection(id, req.user);
   }
 
   @Get(':id/block-direction')
-  @UseGuards(JwtTwoFactorGuard, UserInFriendshipGuard)
+  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
   getBlockDirection(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     return this.userfriendshipsService.getBlockDirection(id, req.user);
   }

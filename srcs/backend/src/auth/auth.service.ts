@@ -38,13 +38,7 @@ export class AuthService {
     }
     
     async login(requestUser) {
-        let access_token: string;
-
-       //if (requestUser.isTwoFactorAuthenticationEnabled)
-       //    access_token = this.getJwtToken(requestUser.id, true);
-       //else
-            access_token = this.getJwtToken(requestUser.id);
-
+        const access_token = this.getJwtToken(requestUser.id);
         return { access_token };
     }
     

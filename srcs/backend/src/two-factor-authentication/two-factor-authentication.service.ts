@@ -33,7 +33,6 @@ export class TwoFactorAuthenticationService {
     }
 
     async turnOnTwoFactorAuthentication(requestUser: User, { twoFactorAuthenticationCode }: TwoFactorAuthenticationCodeDto) {
-        console.log(twoFactorAuthenticationCode)
         const isCodeValid = this.isTwoFactorAuthenticationCodeValid(
             twoFactorAuthenticationCode, requestUser
         );
@@ -57,6 +56,10 @@ export class TwoFactorAuthenticationService {
 
         const accessToken = this.authService.getJwtToken(requestUser.id, true);
         return { access_token: accessToken };
+    }
+
+    isEnabled(requestUser: User): boolean {
+        return requestUser.isTwoFactorAuthenticationEnabled;
     }
 
     private isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, user: User) {

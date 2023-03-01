@@ -13,7 +13,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtTwoFactorGuard, UserGuard } from 'src/auth/guards';
+import { JwtAuthGuard, JwtTwoFactorGuard, UserGuard } from 'src/auth/guards';
 import { RequestWithUser } from './interfaces/request-with-user.interface';
 
 @Controller('users')
@@ -37,7 +37,7 @@ export class UsersController {
     return req.user;
   }
 
-  @UseGuards(JwtTwoFactorGuard)
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOneById(id);
@@ -60,7 +60,8 @@ export class UsersController {
 	  return this.usersService.getAvatar(username);
   }
 
-  @UseGuards(JwtTwoFactorGuard)
+    //FIXME: 2fa?
+  @UseGuards(JwtAuthGuard)
   @Get(':id/friends')
   getFriends(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.getAllUserFriends(id);

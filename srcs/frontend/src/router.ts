@@ -7,6 +7,7 @@ import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
 import FriendsList from './components/friends/FriendsList.vue';
 import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
+import TwoFactorAuthenticationSetup from './components/TwoFactorAuthenticationSetup.vue';
 import { authenticationGuard, loggedUserGuard } from './guards/index';
 import { createRouter, createWebHistory } from "vue-router";
 import { user } from './user';
@@ -60,10 +61,16 @@ const routes = [
 		beforeEnter: authenticationGuard
 	},
 	{
-		name: '2fa',
-		path: '/2fa',
-		component: TwoFactorAuthentication,
+		name: '2fa-setup',
+		path: '/2fa-setup',
+		component: TwoFactorAuthenticationSetup,
 		beforeEnter: authenticationGuard
+	},
+	{
+		name: '2fa-auth',
+		path: '/2fa-auth',
+		component: TwoFactorAuthentication,
+		//beforeEnter: loggedUserGuard
 	},
 ];
 

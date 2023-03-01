@@ -16,7 +16,13 @@
 			return;
 		}
 
-		user.auth(response.access_token);
+		await user.auth(response.access_token);
+
+		if (await user.checkIfSecondFactorAuthenticationIsNeeded(response.access_token)){
+			router.replace({ "name": "2fa-auth" });
+			return;
+		}
+
 		message.value = "Success";
 		messageClass.value = "success-message";
 

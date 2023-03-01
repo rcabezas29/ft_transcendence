@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Req, Res, HttpCode, Body } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Res, HttpCode, Body, Get } from '@nestjs/common';
 import { JwtAuthGuard, JwtTwoFactorGuard } from 'src/auth/guards';
 import { TwoFactorAuthenticationService } from './two-factor-authentication.service';
 import { RequestWithUser } from 'src/users/interfaces/request-with-user.interface';
@@ -24,7 +24,6 @@ export class TwoFactorAuthenticationController {
         @Req() request: RequestWithUser,
         @Body() twoFactorAuthenticationCodeDto: TwoFactorAuthenticationCodeDto
     ) {
-        console.log(twoFactorAuthenticationCodeDto)
         await this.twoFactorAuthenticationService.turnOnTwoFactorAuthentication(request.user, twoFactorAuthenticationCodeDto);
     }
 
@@ -43,5 +42,12 @@ export class TwoFactorAuthenticationController {
         @Body() twoFactorAuthenticationCodeDto: TwoFactorAuthenticationCodeDto
     ) {
         return this.twoFactorAuthenticationService.authenticate(request.user, twoFactorAuthenticationCodeDto);
+    }
+
+    //FIXME: 2fa
+    @UseGuards(JwtAuthGuard)
+    @Get('is-enabled')
+    isEnabled(@Req() request: RequestWithUser) {
+        return this.twoFactorAuthenticationService.isEnabled(request.user);
     }
 }
