@@ -27,6 +27,12 @@ export class ChatGateway {
 		this.chatService.directMessage(fromUser, payload);
 	}
 
+	@SubscribeMessage("challenge")
+	challenge(client: Socket, payload: DirectMessagePayload): void {
+		const fromUser: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.chatService.challenge(fromUser, payload);
+	}
+
 	@SubscribeMessage("channel-message")
 	channelMessage(client: Socket, payload: ChannelMessagePayload): void {
 		const fromUser: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
