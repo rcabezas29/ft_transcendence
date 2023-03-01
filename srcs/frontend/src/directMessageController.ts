@@ -2,11 +2,18 @@ import { reactive } from "vue";
 import type { Chat, ChatUser, Message } from "./interfaces";
 import { user } from './user';
 import { currentChat } from "./currentChat";
+import { routerKey } from "vue-router";
+import router from "./router";
 
 interface MessagePayload {
     friendId: FriendId;
     message: string;
 }
+
+interface ChallengePlayers {
+    user1Id: number,
+    user2Id: number,
+  }
 
 type FriendId = number;
 type ChatMap = {
@@ -19,6 +26,8 @@ class DirectMessageController {
 
 	setEventsHandlers() {
         user.socket?.on('direct-message', (payload: MessagePayload) => {this.receiveDirectMessage(payload)});
+        user.socket?.on('challenge', (payload: MessagePayload) => {this.receiveChallenge(payload)});
+        user.socket?.on('challenge-accepted', () => router.replace('game'));
     }
 
     onConnectedFriends(payload: ChatUser[]) {
@@ -51,6 +60,16 @@ class DirectMessageController {
 
         if (friendChat !== currentChat.value)
             friendChat.notification = true;
+    }
+
+    private receiveChallenge(payload: MessagePayload) {
+        const fromUsername: ChatUser | undefined = this.friends.find((friend) => payload.friendId === friend.id);
+        if (!fromUsername)
+            return ;
+        const friendChat: Chat | undefined = this.chats[fromUsername.id];
+
+        if (friendChat !== currentChat.value)
+            friendChat.challenge = true;
     }
 
     sendDirectMessage(message: string) {
@@ -86,10 +105,28 @@ class DirectMessageController {
             const newChat: Chat = {
                 target: friend,
                 messages: [],
-                notification: false
+                notification: false,
+                challenge: false
             }
             this.chats[friend.id] = newChat;
         }
+    }
+
+    sendChallenge() {
+        const toFriendId: FriendId = (<ChatUser>currentChat.value!.target).id;
+         const payload: MessagePayload = {
+            friendId: toFriendId,
+            message: 'challenge'
+        };
+        user.socket?.emit('direct-message', payload);
+    }
+
+    acceptChallenge(friendId: number) {
+        const challengePlayers: ChallengePlayers = {
+            user1Id: friendId,
+            user2Id: user.id,
+        }
+        user.socket?.emit('challenge-game', challengePlayers);
     }
 };
 

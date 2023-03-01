@@ -17,6 +17,10 @@ function onSubmit(e: Event) {
 	messageInput.value = "";
 }
 
+function	challengeThroughChat() {
+	directMessageController.sendChallenge();
+}
+
 function scrollDownChatMessages() {
 	const elem = document.querySelector(".chat-messages-container");
 	if (elem)
@@ -44,6 +48,7 @@ onUpdated(() => {
 		<div class="chat-messages-container">
 			<div class="chat-container-title">
 				{{ getChatName() }}
+				<button v-if="chatIsDirectMessage(currentChat!)" v-on:click="challengeThroughChat()">Challenge</button>
 			</div>
 			<div v-for="message in currentChat!.messages" class="chat-message-container">
 				<div class="chat-message-username">
