@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
@@ -20,9 +20,16 @@ import { Stats } from './stats/entities/stats.entity';
 import { MatchHistoryModule } from './match-history/match-history.module';
 import { MatchHistory } from './match-history/entity/match-history.entity';
 import { TwoFactorAuthenticationModule } from './two-factor-authentication/two-factor-authentication.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 
 @Module({
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },
+  ],
   imports: [
     IntraAuthModule,
     AuthModule,

@@ -45,7 +45,9 @@ class User {
 				}
 			});
 
-			const fetchedUser: FetchedUser = await fetchUserData.json();
+			const response = await fetchUserData.json();
+
+			const fetchedUser: FetchedUser = response;
 			this.username = fetchedUser.username;
 
 		} catch (error) {

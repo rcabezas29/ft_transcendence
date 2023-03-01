@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
-  ParseIntPipe,
+  ParseIntPipe
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';

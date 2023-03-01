@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Stats } from 'src/stats/entities/stats.entity';
 import {
   Entity,
@@ -24,12 +25,14 @@ export class User {
   avatar: string;
 
   @Column()
+  @Exclude()
   readonly password: string;
 
   @Column({ default: 1000 })
   elo: number;
 
   @Column({ nullable: true })
+  @Exclude()
   twoFactorAuthenticationSecret?: string;
 
   @Column({ default: false })

@@ -32,3 +32,7 @@ The users are in the `user` table and are defined as:
         corresponding user.
     - If a user is deleted, its **stats are automatically deleted**, but
         **not** the other way around.
+
+Note: The `password` and `twoFactorAuthenticationSecret` columns are excluded by the
+global `ClassSerializerInterceptor`, meaning that whenever a `User` object is returned in a
+network response, the frontend does **not** receive these properties.
