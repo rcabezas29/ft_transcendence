@@ -26,7 +26,7 @@ class User {
 	public alreadyConnected: boolean = false;
 	public id: number = -1;
 	public username: string = '';
-	private isSecondFactorAuthenticated: boolean = false;
+	private isLogged: boolean = false;
 
 	async auth(access_token: string): Promise<void> {
 		if (this.token && this.token === access_token)
@@ -53,11 +53,16 @@ class User {
 			return ;
 		}
 
-		if (!this.socket) {
-			this.socket = io("http://localhost:3000/", {auth: {token: access_token}});
-			this.socket.on("connect", () => { this.onConnect(); });
-			this.socket.on("disconnect", () => { this.onDisconnect(); });
-			this.socket.on("alreadyConnected", () => { this.onAlreadyConnected(); });
+		const needSecondFactorAuth = await this.checkIfSecondFactorAuthenticationIsNeeded(this.token);
+		if (!needSecondFactorAuth) {
+			this.isLogged = true;
+
+			if (!this.socket) {
+				this.socket = io("http://localhost:3000/", {auth: {token: access_token}});
+				this.socket.on("connect", () => { this.onConnect(); });
+				this.socket.on("disconnect", () => { this.onDisconnect(); });
+				this.socket.on("alreadyConnected", () => { this.onAlreadyConnected(); });
+			}
 		}
 	}
 
@@ -149,24 +154,8 @@ class User {
 		return localStorageToken;
 	}
 
-	isLogged(): boolean {
-		/*if (!this.token)
-		{
-		console.log("notoken")
-		return false;
-			
-		}
-		if (await this.checkIfSecondFactorAuthenticationIsNeeded(this.token))
-		{
-		console.log("2fa needed")
-
-			return false;
-
-		}
-		console.log("islogged")
-
-		return true;*/
-		return this.token != null;
+	checkIsLogged(): boolean {
+		return this.isLogged;
 	}
 
 	logout(): void {
@@ -174,6 +163,7 @@ class User {
 		this.token = null;
 		this.socket?.disconnect();
 		this.socket = null;
+		this.isLogged = false;
 	}
 
 	async isTwoFactorAuthenticationEnabled(): Promise<boolean> {
@@ -215,7 +205,7 @@ class User {
 			return false;
 		}
 		const { access_token } = await httpResponse.json();
-		this.auth(access_token);
+		await this.auth(access_token);
 		return true;
 	}
 }

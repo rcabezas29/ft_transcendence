@@ -26,13 +26,13 @@ export class UserFriendshipsController {
   }
 
   @Get(':id/request-direction')
-  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
+  @UseGuards(JwtTwoFactorGuard, UserInFriendshipGuard)
   getFriendRequestDirection(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     return this.userfriendshipsService.getFriendRequestDirection(id, req.user);
   }
 
   @Get(':id/block-direction')
-  @UseGuards(JwtAuthGuard, UserInFriendshipGuard)
+  @UseGuards(JwtTwoFactorGuard, UserInFriendshipGuard)
   getBlockDirection(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
     return this.userfriendshipsService.getBlockDirection(id, req.user);
   }

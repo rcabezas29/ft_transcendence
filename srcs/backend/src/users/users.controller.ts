@@ -60,8 +60,7 @@ export class UsersController {
 	  return this.usersService.getAvatar(username);
   }
 
-    //FIXME: 2fa?
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtTwoFactorGuard)
   @Get(':id/friends')
   getFriends(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.getAllUserFriends(id);

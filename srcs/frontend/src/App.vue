@@ -33,12 +33,12 @@
 	<div v-else>
 		<div class="dev">
 			<h3>Dev data</h3>
-			<div v-if="user.isLogged()">
+			<div v-if="user.checkIsLogged()">
 				<div class="user-img">
 					<img :src="userImg" />
 				</div>
 				<h4>User: {{ user.username }}</h4>
-				<p>isLogged: {{ user.isLogged() }}</p>
+				<p>isLogged: {{ user.checkIsLogged() }}</p>
 				<p>token: {{ user.token }}</p>
 				<p>socketId: {{ user.socketId }}</p>
 			</div>
@@ -49,7 +49,7 @@
 					<router-link :to="route.path">{{ route.name }}</router-link>
 				</div>
 			</div>
-			<button @click="logoutUser" v-if="user.isLogged()">Logout</button>
+			<button @click="logoutUser" v-if="user.checkIsLogged()">Logout</button>
 		</div>
 
 		<router-view/>
