@@ -39,7 +39,7 @@ export class GameGateway implements OnGatewayInit {
     this.matchmakingService.searchGame(user);
   }
 
-  @SubscribeMessage('challenge-game')
+  @SubscribeMessage('accept-challenge')
   challengeGame(_: Socket, players: ChallengePlayers) {
     const user1: GatewayUser = this.gatewayManagerService.getClientByUserId(
       players.user1Id,

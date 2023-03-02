@@ -25,7 +25,7 @@ function	acceptChallenge(friendId: number) {
 					{{ friend.username }}
 				</div>
 				<div class="chat-card-notification" :class="{'chat-card-notification-on': directMessageController.chats[friend.id].notification}"></div>
-				<div v-if="directMessageController.chats[friend.id].notification">
+				<div v-if="directMessageController.chats[friend.id].challenge">
 					<button v-on:click="acceptChallenge(friend.id)">Accept</button>
 				</div>
 			</div>

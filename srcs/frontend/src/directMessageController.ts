@@ -63,10 +63,11 @@ class DirectMessageController {
     }
 
     private receiveChallenge(payload: MessagePayload) {
-        const fromUsername: ChatUser | undefined = this.friends.find((friend) => payload.friendId === friend.id);
-        if (!fromUsername)
+        console.log('challenge-received');
+        const fromUser: ChatUser | undefined = this.friends.find((friend) => payload.friendId === friend.id);
+        if (!fromUser)
             return ;
-        const friendChat: Chat | undefined = this.chats[fromUsername.id];
+        const friendChat: Chat | undefined = this.chats[fromUser.id];
 
         if (friendChat !== currentChat.value)
             friendChat.challenge = true;
@@ -118,7 +119,7 @@ class DirectMessageController {
             friendId: toFriendId,
             message: 'challenge'
         };
-        user.socket?.emit('direct-message', payload);
+        user.socket?.emit('challenge', payload);
     }
 
     acceptChallenge(friendId: number) {
@@ -126,7 +127,7 @@ class DirectMessageController {
             user1Id: friendId,
             user2Id: user.id,
         }
-        user.socket?.emit('challenge-game', challengePlayers);
+        user.socket?.emit('accept-challenge', challengePlayers);
     }
 };
 

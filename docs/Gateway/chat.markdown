@@ -33,6 +33,8 @@ friends and chats.
 friend and the message. When the server receives the event it checks if the client and the addressee are friends. If that is the case the server sends a 
 `direct-message` event to the addressee with the sender and the message.
 
+- **On chellenge**: When a client sends a challenge request to another user, the frontend sends through `directMessageController` a `challenge` event. This signal is received by the backend that sends a `challenge` signal to the other user. A button appears in the first user chat to accept the challenge. If accepted, the second user sends an `accept-challenge` signal to the server and changes the route to `/game`, that manages it to create a new Game with those two players and sends the first user a `challenge-accepted` signal in order to change the route to `/game`.
+
 ### Channels
 
 - **On client connection to the server**: the server sends to the connected client an `all-channels` event,

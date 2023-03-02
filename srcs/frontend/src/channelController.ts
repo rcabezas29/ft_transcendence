@@ -267,6 +267,7 @@ class ChannelController {
 		else {
 			currentChat.value = chat;
 			chat.notification = false;
+			chat.challenge = false;
 		}
 	}
 
@@ -318,7 +319,8 @@ class ChannelController {
             const newChat: Chat = {
                 target: channelName,
                 messages: [],
-                notification: false
+                notification: false,
+				challenge: false
             }
             this.channels[channelName].chat = newChat;
         }
