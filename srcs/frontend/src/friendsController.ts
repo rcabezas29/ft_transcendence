@@ -65,6 +65,7 @@ class FriendsController {
 
     async onConnectedFriends(payload: FriendId[]) {
         await this.fetchFriends();
+        console.log("FRIENDS", this.friends);
         payload.forEach(friendId => this.setFriendOnline(friendId));
 
         const activeFriends = this.getActiveFriends();
@@ -302,6 +303,8 @@ class FriendsController {
     }
 
     private async fetchFriends() {
+        this.friends = {};
+
         const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friends`, {
             method: "GET",
             headers: {
