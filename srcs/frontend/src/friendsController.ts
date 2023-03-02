@@ -79,6 +79,9 @@ class FriendsController {
     onFriendConnected(payload: FriendId) {
         this.setFriendOnline(payload);
 
+        if (!this.userIsActiveFriend(payload))
+            return;
+
         const friend = this.friendIdToChatUser(payload);
         if (friend)
             directMessageController.onFriendConnected(friend);
@@ -100,7 +103,7 @@ class FriendsController {
             return;
         friend.friendshipStatus = payload.status;
 
-        if (friend.friendshipStatus === FriendshipStatus.Active) {
+        if (this.userIsActiveFriend(friend.userId)) {
             const chatUser = this.friendIdToChatUser(friend.userId);
             if (chatUser)
                 directMessageController.onFriendConnected(chatUser);
