@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { User } from 'src/users/entities/user.entity';
 import { UserFriend } from 'src/users/interfaces/user-friend.interface';
 import { UsersService } from 'src/users/users.service';
 import { GatewayUser } from './interfaces/gateway-user.interface';

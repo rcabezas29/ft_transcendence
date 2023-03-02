@@ -78,11 +78,12 @@ class User {
 			},
 			body: JSON.stringify(createUser)
 		});
-		if (httpResponse.status != 201) {
-			return { registeredSuccessfully: false, response: null };
-		}
 
 		const response = await httpResponse.json();
+
+		if (httpResponse.status != 201) {
+			return { registeredSuccessfully: false, response };
+		}
 
 		return { registeredSuccessfully: true, response };
 	}
@@ -97,12 +98,13 @@ class User {
 			},
 			body: JSON.stringify(loginUser)
 		});
-		if (httpResponse.status != 201) {
-			return { loggedSuccessfully: false, response: null };
-		}
 
 		const response = await httpResponse.json();
 
+		if (httpResponse.status != 201) {
+			return { loggedSuccessfully: false, response };
+		}
+	
 		return { loggedSuccessfully: true, response };
 	}
 

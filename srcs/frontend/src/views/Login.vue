@@ -10,8 +10,7 @@
 
 	async function handleSubmit(e: Event) {
 		const { loggedSuccessfully, response } = await user.login(email.value, password.value);
-		if (!loggedSuccessfully)
-		{
+		if (!loggedSuccessfully) {
 			message.value = response.message;
 			return;
 		}
