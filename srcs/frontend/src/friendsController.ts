@@ -61,11 +61,16 @@ class FriendsController {
         user.socket?.on('new-friendship', (payload: FriendPayload) => {this.onNewFriendship(payload)});
         user.socket?.on('friendship-status-change', (payload: FriendshipStatusPayload) => {this.onFriendshipStatusChange(payload)});
         user.socket?.on('friendship-deleted', (payload: FriendId) => {this.onFriendshipDeleted(payload)});
+
+        user.addOnLogoutCallback(() => this.onLogout());
+    }
+
+    onLogout() {
+        this.friends = {};
     }
 
     async onConnectedFriends(payload: FriendId[]) {
         await this.fetchFriends();
-        console.log("FRIENDS", this.friends);
         payload.forEach(friendId => this.setFriendOnline(friendId));
 
         const activeFriends = this.getActiveFriends();
@@ -303,8 +308,6 @@ class FriendsController {
     }
 
     private async fetchFriends() {
-        this.friends = {};
-
         const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friends`, {
             method: "GET",
             headers: {

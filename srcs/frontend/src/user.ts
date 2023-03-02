@@ -27,6 +27,7 @@ class User {
 	public id: number = -1;
 	public username: string = '';
 	private isLogged: boolean = false;
+	private onLogoutCallbacks: Function[] = [];
 
 	async auth(access_token: string): Promise<void> {
 		if (this.token && this.token === access_token)
@@ -163,11 +164,18 @@ class User {
 	}
 
 	logout(): void {
+		this.onLogoutCallbacks.forEach((callback) => {
+			callback();
+		});
 		localStorage.removeItem("token");
 		this.token = null;
 		this.socket?.disconnect();
 		this.socket = null;
 		this.isLogged = false;
+	}
+
+	addOnLogoutCallback(callback: Function): void {
+		this.onLogoutCallbacks.push(callback);
 	}
 
 	async isTwoFactorAuthenticationEnabled(): Promise<boolean> {
