@@ -58,6 +58,7 @@ class FriendsController {
         user.socket?.on('connected-friends', (payload: FriendId[]) => {this.onConnectedFriends(payload)});
         user.socket?.on('friend-online', (payload: FriendId) => {this.onFriendConnected(payload)});
         user.socket?.on('friend-offline', (payload: FriendId) => {this.onFriendDisconnected(payload)});
+        user.socket?.on('friend-in-a-game', (payload: FriendId) => {this.onFriendInAGame(payload)});
         user.socket?.on('new-friendship', (payload: FriendPayload) => {this.onNewFriendship(payload)});
         user.socket?.on('friendship-status-change', (payload: FriendshipStatusPayload) => {this.onFriendshipStatusChange(payload)});
         user.socket?.on('friendship-deleted', (payload: FriendId) => {this.onFriendshipDeleted(payload)});
@@ -96,6 +97,10 @@ class FriendsController {
     onFriendDisconnected(payload: FriendId) {
         this.setFriendOffline(payload);
         directMessageController.onFriendDisconnected(payload);
+    }
+
+    onFriendInAGame(payload: FriendId) {
+        this.setFriendInAGame(payload);
     }
 
     onNewFriendship(payload: FriendPayload) {
@@ -344,6 +349,13 @@ class FriendsController {
         if (!friend)
             return;
         friend.status = FriendStatus.offline;
+    }
+
+    private setFriendInAGame(friendId: FriendId) {
+        const friend = this.friends[friendId];
+        if (!friend)
+            return;
+        friend.status = FriendStatus.gaming;
     }
 
     private async checkFriendRequestDirection(friendshipId: number): Promise<FriendRequestDirection | null> {

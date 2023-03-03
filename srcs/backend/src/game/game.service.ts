@@ -3,6 +3,7 @@ import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interfa
 import { Server } from 'socket.io';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
+import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
@@ -472,9 +473,22 @@ class Game {
 export class GameService {
   public server: Server;
 
-  constructor(private usersService: UsersService, private matchHistoryService: MatchHistoryService) {}
+  constructor(private usersService: UsersService, private matchHistoryService: MatchHistoryService, private gatewayManagerService: GatewayManagerService) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
     new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
+    this.notifyFriends(user1, user2);
+  }
+
+  async notifyFriends(user1: GatewayUser, user2: GatewayUser) {
+    let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(user1.id);
+		friends.forEach(friend => {
+			friend.socket.emit('friend-in-a-game', user1.id);
+		});
+
+    friends = await this.gatewayManagerService.getAllUserConnectedFriends(user2.id);
+    friends.forEach(friend => {
+			friend.socket.emit('friend-in-a-game', user2.id);
+		});
   }
 }
