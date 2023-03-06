@@ -5,7 +5,6 @@
 	import AlreadyConnected from './views/AlreadyConnected.vue';
 	import { computed } from "vue";
 	import CursorLines from './components/CursorLines.vue';
-	import ImageCropper from './components/ImageCropper.vue';
 
 	const routes = router.getRoutes();
 
@@ -35,7 +34,6 @@
 		<div class="dev">
 			<h3>Dev data</h3>
 			<div v-if="user.checkIsLogged()">
-				<ImageCropper/>
 				<img id="user-image" :src="userImg" />
 				<h4>User: {{ user.username }}</h4>
 				<p>isLogged: {{ user.checkIsLogged() }}</p>

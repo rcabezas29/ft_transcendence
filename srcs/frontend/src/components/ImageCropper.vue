@@ -1,7 +1,10 @@
 <script setup lang="ts">
-	import Cropper from 'cropperjs';
-	import { computed } from "vue";
+	import { computed, ref } from "vue";
+	import { Cropper } from 'vue-advanced-cropper';
+	import 'vue-advanced-cropper/dist/style.css';
 	import { user } from '@/user';
+
+	const cropperRef = ref<any>(null);
 
 	const userImg = computed(() => {
 		if (user.username)
@@ -10,65 +13,55 @@
 			return "";
 	});
 
-	function onclick() {
-		const image = document.getElementById('image') as HTMLImageElement | null;
-		if (!image)
+	function cropImage() {
+		if (!cropperRef.value)
 			return;
-
-		const cropper = new Cropper(image, {
-			template:
-				"<cropper-canvas style=\"min-width: 250px; min-height: 250px;\" background>\
-					<cropper-image></cropper-image>\
-					<cropper-shade hidden></cropper-shade>\
-					<cropper-handle action=\"select\" plain></cropper-handle>\
-					<cropper-selection aspect-ratio=\"1\" initial-coverage=\"1\" movable resizable zoomable>\
-						<cropper-grid role=\"grid\" bordered covered></cropper-grid>\
-						<cropper-crosshair centered></cropper-crosshair>\
-						<cropper-handle action=\"move\" theme-color=\"rgba(255, 255, 255, 0.35)\"></cropper-handle>\
-						<cropper-handle action=\"n-resize\"></cropper-handle>\
-						<cropper-handle action=\"e-resize\"></cropper-handle>\
-						<cropper-handle action=\"s-resize\"></cropper-handle>\
-						<cropper-handle action=\"w-resize\"></cropper-handle>\
-						<cropper-handle action=\"ne-resize\"></cropper-handle>\
-						<cropper-handle action=\"nw-resize\"></cropper-handle>\
-						<cropper-handle action=\"se-resize\"></cropper-handle>\
-						<cropper-handle action=\"sw-resize\"></cropper-handle>\
-					</cropper-selection>\
-				</cropper-canvas>"
-		});
+		const { coordinates, image, visibleArea, canvas } = cropperRef.value.getResult();
+		try {
+			canvas.toBlob(
+				(blob: Blob) => {
+					console.log("blobbin");
+					if (!blob)
+						return;
+					
+					//TODO: guardar foto
+				},
+				'image/jpeg'
+			);
+		} catch(e) {
+			console.log("Error:", e);
+		}
 	}
-
-	/*
-
-				<div class=\"cropper-viewers\">\
-					<cropper-viewer selection=\"#cropperSelection\" style=\"width: 320px;\"></cropper-viewer>\
-					<cropper-viewer selection=\"#cropperSelection\" style=\"width: 160px;\"></cropper-viewer>\
-					<cropper-viewer selection=\"#cropperSelection\" style=\"width: 80px;\"></cropper-viewer>\
-					<cropper-viewer selection=\"#cropperSelection\" style=\"width: 40px;\"></cropper-viewer>\
-				</div>
-				*/
 
 </script>
 
 <template>
-	<div class="user-img-container">
-		<img id="image" :src="userImg" />
-	</div>
-	<button @click="onclick">CLICK</button>
+	<cropper ref="cropperRef" class="cropper"
+		:src="userImg"
+		:stencil-props="{
+			handlers: {},
+			movable: false,
+			resizable: false,
+			aspectRatio: 1,
+		}"
+		:stencil-size="{
+			width: 200,
+			height: 200
+		}"
+		image-restriction="stencil"
+	/>
+	<button @click="cropImage">CROP</button>
 </template>
 
-<style scoped>
-	.user-img-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 300px;
-		height: 300px;
-		background-color: rgb(255, 204, 0);
+<style>
+	button {
+		margin: 20px;
 	}
 
-	.user-img-container img {
-		display: block;
-		max-width: 100%;
+	.cropper {
+		height: 300px;
+		width: 300px;
+		background: #DDD;
+		margin: 20px;
 	}
 </style>
