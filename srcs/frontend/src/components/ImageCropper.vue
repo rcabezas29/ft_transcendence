@@ -14,21 +14,6 @@ const userImg = computed(() => {
         return "";
 });
 
-async function postImage(image: Blob): Promise<void> {
-    const formData: FormData = new FormData();
-    formData.append("file", image, "file");
-
-    const httpResponse = await fetch(userImg.value, {
-        method: "POST",
-        body: formData
-    });
-
-    if (httpResponse.status != 201) {
-        console.log('error while posting image');
-        return;
-    }
-}
-
 function cropImage(): void {
     if (!cropperRef.value)
         return;
@@ -38,7 +23,7 @@ function cropImage(): void {
             (blob: Blob) => {
                 if (!blob)
                     return;
-                postImage(blob);
+                user.updateAvatar(blob);
             },
             'image/jpeg'
         );

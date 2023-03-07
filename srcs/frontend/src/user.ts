@@ -277,6 +277,22 @@ class User {
 		}
 		return true;
 	}
+
+	async updateAvatar(image: Blob): Promise<boolean> {
+		const formData: FormData = new FormData();
+		formData.append("file", image, user.username);
+	
+		const httpResponse = await fetch(`http://localhost:3000/users/avatar/${user.username}`, {
+			method: "POST",
+			body: formData
+		});
+	
+		if (httpResponse.status != 201) {
+			console.log('error while posting image');
+			return false;
+		}
+		return true;
+	}
 }
 
 export const user = reactive<User>(new User);

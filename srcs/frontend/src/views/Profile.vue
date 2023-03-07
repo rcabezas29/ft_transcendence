@@ -5,6 +5,7 @@ import TwoFactorAuthenticationSetup from '../components/TwoFactorAuthenticationS
 
 const username = ref<string>("");
 const password = ref<string>("");
+const avatarImage = ref<Blob | null>(null);
 const userData = ref<UserData | null>(null);
 const previewImage = ref();
 const message = ref<string>('');
@@ -38,9 +39,9 @@ async function changePassword() {
     message.value = "password updated successfully!";
 }
 
-function uploadAvatar(e: any) {
-    const image: Blob = e.target.files[0];
-    if (!image)
+function loadAvatarPreview(e: any) {
+    avatarImage.value = e.target.files[0];
+    if (!avatarImage.value)
         return;
 
     const reader = new FileReader();
@@ -49,7 +50,13 @@ function uploadAvatar(e: any) {
             return;
         previewImage.value = event.target.result;
     };
-    reader.readAsDataURL(image);
+    reader.readAsDataURL(avatarImage.value);
+}
+
+function uploadAvatar() {
+    if (!avatarImage.value)
+        return;
+    user.updateAvatar(avatarImage.value);
 }
 
 onBeforeMount(async () => {
@@ -70,7 +77,10 @@ onBeforeMount(async () => {
             <h2>Avatar</h2>
             <img id="user-image" :src="userImg" />
             <img :src="previewImage" class="uploading-image" />
-            <input type="file" accept="image/jpeg" @change=uploadAvatar>
+            <form @submit.prevent="uploadAvatar">
+                <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
+                <button v-if="avatarImage">submit</button>
+            </form>
         </div>
         <div class="section">
             <h2>Username</h2>
