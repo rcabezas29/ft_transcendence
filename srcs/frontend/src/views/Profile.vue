@@ -1,21 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from "vue";
-import { user } from '../user';
+import { user, type UserData } from '../user';
 import TwoFactorAuthenticationSetup from '../components/TwoFactorAuthenticationSetup.vue';
-
-interface UserData {
-    id: number;
-    username: string;
-    email: string;
-    avatar: string;
-    elo: number;
-    isTwoFactorAuthenticationEnabled: boolean;
-    stats: Object;
-}
 
 const username = ref<string>("");
 const password = ref<string>("");
 const userData = ref<UserData | null>(null);
+const previewImage = ref();
+const message = ref<string>('');
+const messageClass = ref<string>('error-message');
 
 const userImg = computed(() => {
     if (user.username)
@@ -24,44 +17,43 @@ const userImg = computed(() => {
         return "";
 });
 
-
-async function fetchAllUserData() {
-    const httpResponse = await fetch(`http://localhost:3000/users/${user.id}`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${user.token}`
-        }
-    });
-
-    if (httpResponse.status != 200) {
-        return null;
+async function changeUsername() {
+    if (await user.updateUsername(username.value) === false) {
+        messageClass.value = "error-message";
+        message.value = "error while updating username";
+        return;
     }
-
-    const response = await httpResponse.json();
-    return response;
+    user.username = username.value;
+    messageClass.value = "success-message";
+    message.value = "username updated successfully!";
 }
 
-function changeUsername() {
-    console.log("change username")
-}
-
-function changePassword() {
-    console.log("change passwd")
+async function changePassword() {
+    if (await user.updatePassword(password.value) === false) {
+        messageClass.value = "error-message";
+        message.value = "error while updating password";
+        return;
+    }
+    messageClass.value = "success-message";
+    message.value = "password updated successfully!";
 }
 
 function uploadAvatar(e: any) {
-    console.log("change vatar")
-  /*  const image: Blob = e.target.files[0];
+    const image: Blob = e.target.files[0];
+    if (!image)
+        return;
+
     const reader = new FileReader();
+    reader.onload = function(event) {
+        if (!event.target)
+            return;
+        previewImage.value = event.target.result;
+    };
     reader.readAsDataURL(image);
-    reader.onload = e =>{
-        this.previewImage = e.target.result;
-        console.log(this.previewImage);
-    };*/
 }
 
 onBeforeMount(async () => {
-    userData.value = await fetchAllUserData();
+    userData.value = await user.fetchAllUserData();
 })
 
 </script>
@@ -69,11 +61,15 @@ onBeforeMount(async () => {
 <template>
 	
 	<h1>hola, this is {{ user.username }}'s profile</h1>
+    <div :class='messageClass'>
+        {{ message }}
+    </div>
 
     <div class="user-info">
         <div class="section">
             <h2>Avatar</h2>
             <img id="user-image" :src="userImg" />
+            <img :src="previewImage" class="uploading-image" />
             <input type="file" accept="image/jpeg" @change=uploadAvatar>
         </div>
         <div class="section">
@@ -131,5 +127,18 @@ onBeforeMount(async () => {
         width: 100px;
         height: 100px;
     }
+
+    .uploading-image{
+        display:flex;
+        max-width: 100px;
+    }
+
+    .error-message {
+		color: red;
+	}
+
+	.success-message {
+		color: green;
+	}
 
 </style>

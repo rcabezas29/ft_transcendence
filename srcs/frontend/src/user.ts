@@ -14,6 +14,16 @@ export interface JwtPayload {
 	exp: number;
 }
 
+export interface UserData {
+    id: number;
+    username: string;
+    email: string;
+    avatar: string;
+    elo: number;
+    isTwoFactorAuthenticationEnabled: boolean;
+    stats: Object;
+}
+
 interface FetchedUser {
 	id: number;
 	username: string;
@@ -39,16 +49,13 @@ class User {
 			const decoded: JwtPayload = jwt_decode(this.token);
 			this.id = decoded.id;
 
-			const fetchUserData = await fetch(`http://localhost:3000/users/${this.id}`, {
-				method: "GET",
-				headers: {
-					"Authorization": `Bearer ${user.token}`
-				}
-			});
+			const userData: UserData | null = await this.fetchAllUserData();
+			if (!userData) {
+				console.log('error fetching user data');
+				return ;
+			}
 
-			const response = await fetchUserData.json();
-
-			const fetchedUser: FetchedUser = response;
+			const fetchedUser: FetchedUser = userData;
 			this.username = fetchedUser.username;
 
 		} catch (error) {
@@ -220,6 +227,54 @@ class User {
 		}
 		const { access_token } = await httpResponse.json();
 		await this.auth(access_token);
+		return true;
+	}
+
+	async fetchAllUserData(): Promise<UserData | null> {
+		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+			method: "GET",
+			headers: {
+				"Authorization": `Bearer ${this.token}`
+			}
+		});
+
+		if (httpResponse.status != 200) {
+			return null;
+		}
+
+		const response = await httpResponse.json();
+		return response;
+	}
+
+	async updateUsername(newUsername: string): Promise<boolean> {
+		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+			method: "PATCH",
+			headers: {
+				"Authorization": `Bearer ${this.token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({username: newUsername})
+		})
+
+		if (httpResponse.status != 200) {
+			return false;
+		}
+		return true;
+	}
+
+	async updatePassword(newPassword: string): Promise<boolean> {
+		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+			method: "PATCH",
+			headers: {
+				"Authorization": `Bearer ${this.token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({password: newPassword})
+		})
+
+		if (httpResponse.status != 200) {
+			return false;
+		}
 		return true;
 	}
 }
