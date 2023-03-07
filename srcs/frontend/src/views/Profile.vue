@@ -2,6 +2,7 @@
 import { computed, onBeforeMount, ref } from "vue";
 import { user, type UserData } from '../user';
 import TwoFactorAuthenticationSetup from '../components/TwoFactorAuthenticationSetup.vue';
+import AvatarCropper from '../components/AvatarCropper.vue';
 
 const username = ref<string>("");
 const password = ref<string>("");
@@ -53,12 +54,6 @@ function loadAvatarPreview(e: any) {
     reader.readAsDataURL(avatarImage.value);
 }
 
-function uploadAvatar() {
-    if (!avatarImage.value)
-        return;
-    user.updateAvatar(avatarImage.value);
-}
-
 onBeforeMount(async () => {
     userData.value = await user.fetchAllUserData();
 })
@@ -76,11 +71,8 @@ onBeforeMount(async () => {
         <div class="section">
             <h2>Avatar</h2>
             <img id="user-image" :src="userImg" />
-            <img :src="previewImage" class="uploading-image" />
-            <form @submit.prevent="uploadAvatar">
-                <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
-                <button v-if="avatarImage">submit</button>
-            </form>
+            <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
+            <AvatarCropper v-if="previewImage" :avatar-url="previewImage" class="image-cropper" />
         </div>
         <div class="section">
             <h2>Username</h2>
@@ -138,9 +130,9 @@ onBeforeMount(async () => {
         height: 100px;
     }
 
-    .uploading-image{
+    .image-cropper{
         display:flex;
-        max-width: 100px;
+        max-width: 300px;
     }
 
     .error-message {
