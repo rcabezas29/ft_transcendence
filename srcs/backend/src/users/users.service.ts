@@ -18,6 +18,7 @@ import { FriendshipsService } from 'src/friendships/friendships.service';
 import { StatsService } from 'src/stats/stats.service';
 import { Stats } from 'src/stats/entities/stats.entity';
 import { GameInfo } from './interfaces/game-info.interface';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 export class UsersService {
@@ -29,7 +30,9 @@ export class UsersService {
 
     private friendshipsService: FriendshipsService,
 
-    private statsService: StatsService
+    private statsService: StatsService,
+
+    private filesService: FilesService
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -170,12 +173,23 @@ export class UsersService {
 
   async getAvatar(username: string): Promise<StreamableFile> {
     const user: User = await this.findOneByUsername(username);
-    if (!user) throw new NotFoundException('Avatar not found');
+    if (!user)
+      throw new NotFoundException('Avatar not found');
 
     const userAvatar: string = user.avatar;
     const avatars_path = join(process.cwd(), 'avatars');
     const file = createReadStream(join(avatars_path, userAvatar));
     return new StreamableFile(file);
+  }
+
+  async uploadAvatar(username: string, image: Express.Multer.File) {
+    const user: User = await this.findOneByUsername(username);
+    if (!user)
+      throw new NotFoundException();
+
+    const avatarPath = join(process.cwd(), 'avatars', user.avatar)
+    this.filesService.deleteFile(avatarPath);
+    this.filesService.uploadFile(avatarPath, image);
   }
 
   async setTwoFactorAuthenticationSecret(secret: string, userId: number) {

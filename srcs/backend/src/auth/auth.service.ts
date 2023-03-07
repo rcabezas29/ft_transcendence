@@ -45,9 +45,11 @@ export class AuthService {
         const intraToken = await this.intraAuthService.getUserIntraToken(code, state);
         const {email, username, userImageURL} = await this.intraAuthService.getUserInfo(intraToken);
         let userId: number;
+        let isFirstLogin = false;
         
         const foundUser: User = await this.usersService.findOneByEmail(email);
         if (!foundUser) {
+            isFirstLogin = true;
             let createdUser = await this.usersService.createWithoutPassword(email, username);
             userId = createdUser.id;
             await this.updateUserAvatarWithPixelizedIntraImage(userImageURL, username, userId);
@@ -57,7 +59,7 @@ export class AuthService {
 
         const jwtToken = this.getJwtToken(userId);
         
-        return { access_token: jwtToken };
+        return { access_token: jwtToken, isFirstLogin };
     }
 
     getJwtToken(userId: number, isSecondFactorAuthenticated: boolean = false) {
@@ -72,7 +74,7 @@ export class AuthService {
         const hash = await bcrypt.hash(password, salt);
         return hash;
     }
-    
+
     private async updateUserAvatarWithPixelizedIntraImage(userImageURL: string, username: string, userId: number) {
         const imagePath = await this.intraAuthService.downloadIntraImage(userImageURL);
         if (!imagePath)

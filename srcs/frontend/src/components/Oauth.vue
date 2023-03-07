@@ -7,8 +7,7 @@ onBeforeMount(async () => {
 	const params = new URLSearchParams(window.location.search);
 	const code = params.get("code");
 	const state = params.get("state");
-	if (!code || !state)
-	{
+	if (!code || !state) {
 		router.replace({ "name": "login" })
 		return;
 	}
@@ -18,21 +17,23 @@ onBeforeMount(async () => {
 	searchParams.append('state', state);
 
 	const httpResponse = await fetch('http://localhost:3000/auth/oauth?' + searchParams);
-	if (httpResponse.status != 200)
-	{
+	if (httpResponse.status != 200) {
 		router.replace({ "name": "login" })
 		return;
 	}
 	const response = await httpResponse.json();
 
-	user.auth(response.access_token);
+	await user.auth(response.access_token);
 
 	if (await user.checkIfSecondFactorAuthenticationIsNeeded(response.access_token)){
 		router.replace({ "name": "2fa-auth" });
 		return;
 	}
 
-	router.replace({ "name": "home"});
+	if (response.isFirstLogin === true)
+		router.replace({ "name": "cropper"});
+	else
+		router.replace({ "name": "home"});
 });
 
 </script>

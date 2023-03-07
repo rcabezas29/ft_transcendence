@@ -51,4 +51,9 @@ export class FilesService {
 		fs.writeFileSync(savePath, Buffer.from(fileContents));
 		return savePath;
 	}
+
+	uploadFile(savePath: string, file: Express.Multer.File): void {
+		const fileBuffer: Buffer = file.buffer;
+		fs.writeFileSync(savePath, fileBuffer);
+	}
 }
