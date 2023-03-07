@@ -55,7 +55,7 @@ function loadAvatarPreview(e: any) {
 }
 
 onBeforeMount(async () => {
-    userData.value = await user.fetchAllUserData();
+    userData.value = await user.fetchUserData();
 })
 
 </script>

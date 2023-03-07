@@ -12,7 +12,6 @@ const props = defineProps<{
 }>();
 
 function cropImage(): void {
-    console.log(props)
     if (!cropperRef.value)
         return;
     const { coordinates, image, visibleArea, canvas } = cropperRef.value.getResult();

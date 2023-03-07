@@ -186,10 +186,23 @@ export class UsersService {
     const user: User = await this.findOneByUsername(username);
     if (!user)
       throw new NotFoundException();
+    
+    const oldFileName = user.avatar;
+    const newFileName = `${username}.jpg`;
+    const avatarPath = join(process.cwd(), 'avatars', oldFileName)
+    const newAvatarPath = join(process.cwd(), 'avatars', newFileName);
 
-    const avatarPath = join(process.cwd(), 'avatars', user.avatar)
-    this.filesService.deleteFile(avatarPath);
-    this.filesService.uploadFile(avatarPath, image);
+    if (avatarPath == newAvatarPath)
+      this.filesService.deleteFile(avatarPath);
+
+    this.filesService.uploadFile(newAvatarPath, image);
+
+    if (oldFileName != newFileName) {
+      const updateUserDto: UpdateUserDto = {
+        avatar: this.filesService.getFileNameFromPath(newAvatarPath)
+      }
+      this.update(user.id, updateUserDto);
+    }
   }
 
   async setTwoFactorAuthenticationSecret(secret: string, userId: number) {

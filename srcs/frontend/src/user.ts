@@ -49,7 +49,7 @@ class User {
 			const decoded: JwtPayload = jwt_decode(this.token);
 			this.id = decoded.id;
 
-			const userData: UserData | null = await this.fetchAllUserData();
+			const userData: UserData | null = await this.fetchUserData();
 			if (!userData) {
 				console.log('error fetching user data');
 				return ;
@@ -230,7 +230,7 @@ class User {
 		return true;
 	}
 
-	async fetchAllUserData(): Promise<UserData | null> {
+	async fetchUserData(): Promise<UserData | null> {
 		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
 			method: "GET",
 			headers: {

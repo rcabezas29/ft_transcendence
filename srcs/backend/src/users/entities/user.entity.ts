@@ -18,6 +18,9 @@ export class User {
   @Column()
   username: string;
 
+  @Column({ nullable: true })
+  intraUsername: string;
+
   @Column()
   readonly email: string;
 
