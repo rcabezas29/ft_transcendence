@@ -23,7 +23,7 @@ export class FilesService {
 	}
 
 	deleteFile(filePath: string) {
-		if (!filePath)
+		if (filePath)
 			fs.unlinkSync(filePath);
 	}
 
