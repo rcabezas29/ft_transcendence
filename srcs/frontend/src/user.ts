@@ -171,6 +171,8 @@ class User {
 		this.token = null;
 		this.socket?.disconnect();
 		this.socket = null;
+		this.id = -1;
+		this.username = '';
 		this.isLogged = false;
 	}
 

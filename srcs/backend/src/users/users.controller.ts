@@ -16,7 +16,6 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard, JwtTwoFactorGuard, UserGuard } from 'src/auth/guards';
-import { RequestWithUser } from './interfaces/request-with-user.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
@@ -32,12 +31,6 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.findAll();
-  }
-
-  @UseGuards(JwtTwoFactorGuard)
-  @Get('profile')
-  getProfile(@Req() req: RequestWithUser) {
-    return req.user;
   }
 
   @UseGuards(JwtAuthGuard)

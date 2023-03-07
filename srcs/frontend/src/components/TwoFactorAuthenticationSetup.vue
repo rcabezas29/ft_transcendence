@@ -96,7 +96,9 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-    <b>Enable Two Factor Authentication:</b> <input type="checkbox" id="checkbox" @change="toggleTwoFactorAuthCheckbox" v-model="twoFactorAuthCheckboxActive" />
+    <p>Enable Two Factor Authentication:
+        <input type="checkbox" id="checkbox" @change="toggleTwoFactorAuthCheckbox" v-model="twoFactorAuthCheckboxActive" />
+    </p>
     <div v-if="twoFactorAuthCheckboxActive && !twoFactorAuthEnabled">
         <p>Scan the QR code with Google Authenticator App and enter the resulting 6 digit code below</p>
         <img :src="qrCode">

@@ -7,11 +7,11 @@ import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
 import FriendsList from './components/friends/FriendsList.vue';
 import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
-import TwoFactorAuthenticationSetup from './components/TwoFactorAuthenticationSetup.vue';
 import { authenticationGuard, firstFactorAuthenticationGuard, loggedUserGuard } from './guards/index';
 import { createRouter, createWebHistory } from "vue-router";
 import { user } from './user';
 import ImageCropper from './components/ImageCropper.vue';
+import Profile from './views/Profile.vue';
 
 const routes = [
 	{
@@ -62,12 +62,6 @@ const routes = [
 		beforeEnter: authenticationGuard
 	},
 	{
-		name: '2fa-setup',
-		path: '/2fa-setup',
-		component: TwoFactorAuthenticationSetup,
-		beforeEnter: authenticationGuard
-	},
-	{
 		name: '2fa-auth',
 		path: '/2fa-auth',
 		component: TwoFactorAuthentication,
@@ -77,6 +71,12 @@ const routes = [
 		name: 'cropper',
 		path: '/crop',
 		component: ImageCropper,
+		beforeEnter: authenticationGuard
+	},
+	{
+		name: 'profile',
+		path: '/profile',
+		component: Profile,
 		beforeEnter: authenticationGuard
 	}
 ];

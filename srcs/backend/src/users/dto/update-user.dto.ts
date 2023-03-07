@@ -9,9 +9,6 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   username?: string;
 
   @IsOptional()
-  avatar?: string;
-
-  @IsOptional()
   elo?: number;
 
   @IsOptional()
