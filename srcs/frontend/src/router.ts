@@ -11,6 +11,7 @@ import TwoFactorAuthenticationSetup from './components/TwoFactorAuthenticationSe
 import { authenticationGuard, firstFactorAuthenticationGuard, loggedUserGuard } from './guards/index';
 import { createRouter, createWebHistory } from "vue-router";
 import { user } from './user';
+import ImageCropper from './components/ImageCropper.vue';
 
 const routes = [
 	{
@@ -72,6 +73,12 @@ const routes = [
 		component: TwoFactorAuthentication,
 		beforeEnter: firstFactorAuthenticationGuard
 	},
+	{
+		name: 'cropper',
+		path: '/crop',
+		component: ImageCropper,
+		beforeEnter: authenticationGuard
+	}
 ];
 
 const router = createRouter({

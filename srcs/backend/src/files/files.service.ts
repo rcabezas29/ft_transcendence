@@ -23,7 +23,7 @@ export class FilesService {
 	}
 
 	deleteFile(filePath: string) {
-		if (!filePath)
+		if (filePath)
 			fs.unlinkSync(filePath);
 	}
 
@@ -50,5 +50,10 @@ export class FilesService {
 		const savePath = join(process.cwd(), "avatars", `${username}.jpg`);
 		fs.writeFileSync(savePath, Buffer.from(fileContents));
 		return savePath;
+	}
+
+	uploadFile(savePath: string, file: Express.Multer.File): void {
+		const fileBuffer: Buffer = file.buffer;
+		fs.writeFileSync(savePath, fileBuffer);
 	}
 }

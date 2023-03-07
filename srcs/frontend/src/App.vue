@@ -1,10 +1,10 @@
 <script setup lang="ts">
-	import "./assets/main.css"
+	import "./assets/main.css";
 	import { user } from "./user";
 	import router from './router';
-	import AlreadyConnected from './views/AlreadyConnected.vue'
+	import AlreadyConnected from './views/AlreadyConnected.vue';
 	import { computed } from "vue";
-	import CursorLines from './components/CursorLines.vue'
+	import CursorLines from './components/CursorLines.vue';
 
 	const routes = router.getRoutes();
 
@@ -19,11 +19,11 @@
 		user.logout();
 		router.replace({ "name": "login" });
 	}
-
 </script>
 
 <template>
-		<CursorLines/>
+	
+	<CursorLines/>
 
 	<h1>FT_TRANSCENDENCE</h1>
 
@@ -34,9 +34,7 @@
 		<div class="dev">
 			<h3>Dev data</h3>
 			<div v-if="user.checkIsLogged()">
-				<div class="user-img">
-					<img :src="userImg" />
-				</div>
+				<img id="user-image" :src="userImg" />
 				<h4>User: {{ user.username }}</h4>
 				<p>isLogged: {{ user.checkIsLogged() }}</p>
 				<p>token: {{ user.token }}</p>
@@ -73,9 +71,10 @@
 		margin-right: 10px;
 	}
 
-	.user-img img {
-		height: 100px;
+	#user-image {
+		display: block;
 		width: 100px;
+		height: 100px;
 	}
 
 </style>
