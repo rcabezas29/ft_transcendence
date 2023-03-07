@@ -8,6 +8,7 @@ import Game from './views/Game.vue';
 import FriendsList from './components/friends/FriendsList.vue';
 import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
 import TwoFactorAuthenticationSetup from './components/TwoFactorAuthenticationSetup.vue';
+import Social from './views/Social.vue'
 import { authenticationGuard, firstFactorAuthenticationGuard, loggedUserGuard } from './guards/index';
 import { createRouter, createWebHistory } from "vue-router";
 import { user } from './user';
@@ -77,6 +78,12 @@ const routes = [
 		name: 'cropper',
 		path: '/crop',
 		component: ImageCropper,
+		beforeEnter: authenticationGuard
+	},
+	{
+		name: 'social',
+		path: '/social',
+		component: Social,
 		beforeEnter: authenticationGuard
 	}
 ];
