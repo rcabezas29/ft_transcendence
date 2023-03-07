@@ -18,7 +18,7 @@ async function postImage(image: Blob): Promise<void> {
     const formData: FormData = new FormData();
     formData.append("file", image, "file");
 
-    const httpResponse = await fetch(`http://localhost:3000/users/avatar/${user.username}`, {
+    const httpResponse = await fetch(userImg.value, {
         method: "POST",
         body: formData
     });

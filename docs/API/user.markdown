@@ -68,10 +68,15 @@ Expected body:
 }
 ```
 
+### POST /users/avatar/:username
+
+Posts an image to replace the user's avatar image.
+
+Expected body: `multipart/form-data` containing the image.
+
 ### PATCH /users/:id
 
 Updates a user
-
 
 Expected body:
 ```json
