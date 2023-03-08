@@ -106,6 +106,7 @@ onBeforeMount(async () => {
             <ul>
                 <li>Id: {{ userData?.id }}</li>
                 <li>Username: {{ userData?.username }}</li>
+                <li>Intra username: {{ userData?.intraUsername }}</li>
                 <li>Email: {{ userData?.email }}</li>
                 <li>Avatar: {{ userData?.avatar }}</li>
                 <li>Elo: {{ userData?.elo }}</li>

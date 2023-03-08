@@ -50,7 +50,7 @@ export class AuthService {
         const foundUser: User = await this.usersService.findOneByEmail(email);
         if (!foundUser) {
             isFirstLogin = true;
-            let createdUser = await this.usersService.createWithoutPassword(email, username);
+            const createdUser = await this.usersService.createWithoutPassword(email, username, username);
             userId = createdUser.id;
             await this.updateUserAvatarWithPixelizedIntraImage(userImageURL, username, userId);
         }

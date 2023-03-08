@@ -8,7 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConnectionIsNotSetError, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -36,8 +36,7 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const usernameExistsInIntra =
-      await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
+    const usernameExistsInIntra = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
     const usernameExists = await this.findOneByUsername(createUserDto.username);
     if (usernameExistsInIntra || usernameExists)
       throw new BadRequestException(
@@ -60,12 +59,11 @@ export class UsersService {
     }
   }
 
-  async createWithoutPassword(email: string, username: string) {
+  async createWithoutPassword(email: string, username: string, intraUsername: string = null) {
     try {
-      const newUser = { email, username, password: '', stats: new Stats() };
+      const newUser = { email, username, intraUsername, password: '', stats: new Stats() };
       const user = await this.usersRepository.save(newUser);
-      const { password, ...result } = user;
-      return result;
+      return user;
     } catch (e) {
       throw new BadRequestException('Failed to create user');
     }
