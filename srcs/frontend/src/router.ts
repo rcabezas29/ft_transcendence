@@ -1,3 +1,5 @@
+import { createRouter, createWebHistory } from "vue-router";
+
 import Index  from './components/Index.vue';
 import Login from './views/Login.vue';
 import Chat from './views/Chat.vue';
@@ -7,11 +9,12 @@ import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
 import FriendsList from './components/friends/FriendsList.vue';
 import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
-import { authenticationGuard, firstFactorAuthenticationGuard, loggedUserGuard } from './guards/index';
-import { createRouter, createWebHistory } from "vue-router";
-import { user } from './user';
 import ImageCropper from './components/ImageCropper.vue';
 import Profile from './views/Profile.vue';
+import FirstTimeLogin from './views/FirstTimeLogin.vue';
+import { authenticationGuard, firstFactorAuthenticationGuard, loggedUserGuard } from './guards/index';
+import { user } from './user';
+
 
 const routes = [
 	{
@@ -68,15 +71,15 @@ const routes = [
 		beforeEnter: firstFactorAuthenticationGuard
 	},
 	{
-		name: 'cropper',
-		path: '/crop',
-		component: ImageCropper,
-		beforeEnter: authenticationGuard
-	},
-	{
 		name: 'profile',
 		path: '/profile',
 		component: Profile,
+		beforeEnter: authenticationGuard
+	},
+	{
+		name: 'first-login',
+		path: '/first-login',
+		component: FirstTimeLogin,
 		beforeEnter: authenticationGuard
 	}
 ];

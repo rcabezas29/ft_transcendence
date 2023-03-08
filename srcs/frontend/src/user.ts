@@ -260,6 +260,7 @@ class User {
 		if (httpResponse.status != 200) {
 			return false;
 		}
+        this.username = newUsername;
 		return true;
 	}
 

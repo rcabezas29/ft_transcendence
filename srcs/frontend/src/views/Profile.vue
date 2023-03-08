@@ -25,7 +25,6 @@ async function changeUsername() {
         message.value = "error while updating username";
         return;
     }
-    user.username = username.value;
     messageClass.value = "success-message";
     message.value = "username updated successfully!";
 }
@@ -70,8 +69,10 @@ onBeforeMount(async () => {
     <div class="user-info">
         <div class="section">
             <h2>Avatar</h2>
-            <img id="user-image" :src="userImg" />
-            <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
+            <div class="avatar-section">
+                <img id="user-image" :src="userImg" />
+                <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
+            </div>
             <AvatarCropper v-if="previewImage" :avatar-url="previewImage" class="image-cropper" />
         </div>
         <div class="section">
@@ -84,12 +85,15 @@ onBeforeMount(async () => {
             </form>
         </div>
         <div class="section">
+            <h2>Intra username</h2>
+            <p>Intra username: {{ userData?.intraUsername }}</p>
+        </div>
+        <div class="section">
             <h2>Email</h2>
             <p>Email: {{ userData?.email }}</p>
         </div>
         <div class="section">
             <h2>Password</h2>
-            <p>Password: *****</p>
             <form @submit.prevent="changePassword">
                 <label>new password: </label>
                 <input type="text" v-model="password"/>
@@ -121,14 +125,26 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
+    .user-info {
+        display: flex;
+        flex-wrap: wrap;
+    }
     .section {
-        margin-bottom: 20px;
+        margin: 20px;
+        width: 30%;
+        background-color: #f6f6f6;
+    }
+
+    .avatar-section {
+        display: flex;
+        align-items: center;
     }
 
     #user-image {
         display: block;
         width: 100px;
         height: 100px;
+        margin: 10px;
     }
 
     .image-cropper{
