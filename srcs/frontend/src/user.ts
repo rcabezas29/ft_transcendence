@@ -6,24 +6,7 @@ import { directMessageController } from './directMessageController';
 import { channelController } from './channelController';
 import { gameController } from './gameController';
 import { friendsController } from './friendsController';
-
-export interface JwtPayload {
-    id: number;
-	isSecondFactorAuthenticated: boolean;
-	iat: number;
-	exp: number;
-}
-
-export interface UserData {
-    id: number;
-    username: string;
-	intraUsername: string;
-    email: string;
-    avatar: string;
-    elo: number;
-    isTwoFactorAuthenticationEnabled: boolean;
-    stats: Object;
-}
+import type { JwtPayload, UserData } from './interfaces';
 
 interface FetchedUser {
 	id: number;
