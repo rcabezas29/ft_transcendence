@@ -277,12 +277,14 @@ class Game {
 
   movements: Move[] = [];
 
+  endGameCallbacks: Function[] = []
+
   constructor(
     player1: GatewayUser,
     player2: GatewayUser,
     server: Server,
     private usersService: UsersService,
-    private matchHistoryService: MatchHistoryService
+    private matchHistoryService: MatchHistoryService,
   ) {
     this.server = server;
     this.players.push(player1);
@@ -340,6 +342,7 @@ class Game {
     this.gameInterval = setInterval(() => {
       this.gameLoop();
     }, FRAME_TIME * 1000);
+	this.notifyNewGameToAllUsers()
   }
 
   gameLoop() {
@@ -419,8 +422,8 @@ class Game {
   computeGoal(receiver: number) {
     this.score[(receiver + 1) % 2] += 1;
     this.serveBall(receiver);
-    if (this.score[0] === 7 || this.score[1] === 7) {
-      this.end(Number(this.score[1] === 7));
+    if (this.score[0] === 1 || this.score[1] === 1) {
+      this.end(Number(this.score[1] === 1));
     }
   }
 
@@ -462,21 +465,52 @@ class Game {
       score: this.score,
     });
     this.players.forEach((player) => player.socket.leave(this.name));
+	this.callEndGameCallbacks();
+	this.notifyEndGameToAllUsers();
   }
 
   sendToPlayer(player: GatewayUser, signal: string, body: any) {
     player.socket.emit(signal, body);
   }
+
+  setEndGameCallback(fn: Function) {
+	this.endGameCallbacks.push(fn)
+  }
+
+  callEndGameCallbacks() {
+	this.endGameCallbacks.forEach(fn => {
+		fn(this.name)
+	})
+  }
+
+  notifyNewGameToAllUsers() {
+
+	const game = {
+		"name": this.name,
+		"player1": this.players[0].username,
+		"player2": this.players[1].username
+	}
+
+	this.server.emit("new-game", game);
+  }
+
+  notifyEndGameToAllUsers() {
+	this.server.emit("end-game", this.name);
+  }
+
 }
 
 @Injectable()
 export class GameService {
   public server: Server;
+  public ongoingGames: Game[] = [];
 
   constructor(private usersService: UsersService, private matchHistoryService: MatchHistoryService, private gatewayManagerService: GatewayManagerService) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
-    new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
+	const game: Game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
+	game.setEndGameCallback(this.onEndGame)
+    this.ongoingGames.push(game);
     this.notifyFriends(user1, user2);
   }
 
@@ -490,5 +524,27 @@ export class GameService {
     friends.forEach(friend => {
 			friend.socket.emit('friend-in-a-game', user2.id);
 		});
+  }
+
+  onEndGame(gameName: string) {
+	/*
+		FIXME: Esto explota y no se porque
+		tengo sueño, me voy a dormir
+	*/
+	const gameIndex = this.ongoingGames.findIndex(game => game.name == gameName);
+	if (gameIndex != -1)
+		this.ongoingGames.splice(gameIndex, 1);
+  }
+
+  sendOngoingMatchesToUser(client: GatewayUser) {
+	const games = this.ongoingGames.map((game) => {
+		return {
+			name: game.name,
+			player1: game.players[0].username,
+			player2: game.players[1].username
+		}
+	});
+
+	client.socket.emit("ongoing-games", games)
   }
 }

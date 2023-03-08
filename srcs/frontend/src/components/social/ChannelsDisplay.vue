@@ -15,12 +15,6 @@
 		channelController.joinChannel(channelName, password);
 	}
 
-	//FIXME: This function should be deleted and used the channelController isChannelMember()
-	function userInChannel(channel: string) {
-		if (channelController.channels[channel].chat)
-			return true;
-		return false;
-	}
 
 </script>
 
@@ -32,11 +26,11 @@
 		
 		<button
 			@click="() => joinChannel(channel.name)"
-			v-if="!userInChannel(channel.name)"
+			v-if="!channelController.userIsMemberOfChannel(channel.name)"
 		>
 			Join channel
 		</button>
-		<span v-else="userInChannel(channel.name)">
+		<span v-else="channelController.userIsMemberOfChannel(channel.name)">
 			Already joined
 		</span>
 	</li>

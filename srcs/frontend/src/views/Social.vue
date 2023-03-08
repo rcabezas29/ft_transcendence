@@ -2,6 +2,7 @@
 
 import UsersRanking from '@/components/social/UsersRanking.vue';
 import ChannelsDisplay from '@/components/social/ChannelsDisplay.vue';
+import  OngoingMatchesVue from '@/components/social/OngoingMatches.vue';
 
 </script>
 
@@ -13,7 +14,8 @@ import ChannelsDisplay from '@/components/social/ChannelsDisplay.vue';
 
 		<ChannelsDisplay/>
 
-		<h2>Ongoing matches</h2>
+		<OngoingMatchesVue/>
+
 
 	</div>
 
