@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
@@ -188,14 +189,18 @@ export class UsersService {
     const avatarPath = join(process.cwd(), 'avatars', oldFileName)
     const newAvatarPath = join(process.cwd(), 'avatars', newFileName);
 
-    if (avatarPath == newAvatarPath)
-      this.filesService.deleteFile(avatarPath);
-
     this.filesService.uploadFile(newAvatarPath, image);
+
+    const pixelizedImagePath = await this.filesService.pixelizeUserImage(newAvatarPath, user.username);
+    if (!pixelizedImagePath)
+      throw new InternalServerErrorException("Error while pixelizing");
+
+    if (oldFileName != "default_avatar.png")
+      this.filesService.deleteFile(avatarPath);
 
     if (oldFileName != newFileName) {
       const updateUserDto: UpdateUserDto = {
-        avatar: this.filesService.getFileNameFromPath(newAvatarPath)
+        avatar: newFileName
       }
       this.update(user.id, updateUserDto);
     }
