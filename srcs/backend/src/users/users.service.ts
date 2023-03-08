@@ -36,9 +36,8 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const usernameExistsInIntra = await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
     const usernameExists = await this.findOneByUsername(createUserDto.username);
-    if (usernameExistsInIntra || usernameExists)
+    if (usernameExists)
       throw new BadRequestException(
         'Username already in use. Please choose a different one.',
       );
