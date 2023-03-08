@@ -9,8 +9,8 @@
 	const routes = router.getRoutes();
 
 	const userImg = computed(() => {
-		if (user.username)
-			return `http://localhost:3000/users/avatar/${user.username}`;
+		if (user.id)
+			return `http://localhost:3000/users/avatar/${user.id}`;
 		else
 			return "";
 	});

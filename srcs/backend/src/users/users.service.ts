@@ -9,7 +9,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { UserFriend } from './interfaces/user-friend.interface';
@@ -26,8 +25,6 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
 
-    private intraAuthService: IntraAuthService,
-
     private friendshipsService: FriendshipsService,
 
     private statsService: StatsService,
@@ -37,16 +34,18 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const usernameExists = await this.findOneByUsername(createUserDto.username);
-    if (usernameExists)
+    if (usernameExists) {
       throw new BadRequestException(
         'Username already in use. Please choose a different one.',
       );
+    }
 
     const emailExists = await this.findOneByEmail(createUserDto.email);
-    if (emailExists)
+    if (emailExists) {
       throw new BadRequestException(
         'Email address already in use. Please log in instead or choose a different one.',
       );
+    }
 
     try {
       const newUser = { ...createUserDto, stats: new Stats() };
@@ -168,8 +167,8 @@ export class UsersService {
     await this.usersRepository.delete(id);
   }
 
-  async getAvatar(username: string): Promise<StreamableFile> {
-    const user: User = await this.findOneByUsername(username);
+  async getAvatar(id: number): Promise<StreamableFile> {
+    const user: User = await this.findOneById(id);
     if (!user)
       throw new NotFoundException('Avatar not found');
 
@@ -179,13 +178,13 @@ export class UsersService {
     return new StreamableFile(file);
   }
 
-  async uploadAvatar(username: string, image: Express.Multer.File) {
-    const user: User = await this.findOneByUsername(username);
+  async uploadAvatar(id: number, image: Express.Multer.File) {
+    const user: User = await this.findOneById(id);
     if (!user)
       throw new NotFoundException();
     
     const oldFileName = user.avatar;
-    const newFileName = `${username}.jpg`;
+    const newFileName = `${user.username}.jpg`;
     const avatarPath = join(process.cwd(), 'avatars', oldFileName)
     const newAvatarPath = join(process.cwd(), 'avatars', newFileName);
 

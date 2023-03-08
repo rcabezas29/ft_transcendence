@@ -271,9 +271,9 @@ class User {
 
 	async updateAvatar(image: Blob): Promise<boolean> {
 		const formData: FormData = new FormData();
-		formData.append("file", image, user.username);
+		formData.append("file", image, "file");
 	
-		const httpResponse = await fetch(`http://localhost:3000/users/avatar/${user.username}`, {
+		const httpResponse = await fetch(`http://localhost:3000/users/avatar/${user.id}`, {
 			method: "POST",
 			body: formData
 		});

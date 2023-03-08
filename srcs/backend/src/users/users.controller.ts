@@ -10,13 +10,15 @@ import {
   Req,
   ParseIntPipe,
   UseInterceptors,
-  UploadedFile
+  UploadedFile,
+  NotFoundException
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard, JwtTwoFactorGuard, UserGuard } from 'src/auth/guards';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { User } from './entities/user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -50,16 +52,16 @@ export class UsersController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }
-
-  @Get("avatar/:user")
-  getAvatar(@Param("user") username: string) {
-	  return this.usersService.getAvatar(username);
+  
+  @Get("avatar/:id")
+  async getAvatar(@Param("id", ParseIntPipe) id: number) {
+	  return this.usersService.getAvatar(id);
   }
 
-  @Post("avatar/:user")
+  @Post("avatar/:id")
   @UseInterceptors(FileInterceptor('file'))
-  uploadAvatar(@Param("user") username: string, @UploadedFile() file: Express.Multer.File) {
-	  return this.usersService.uploadAvatar(username, file);
+  async uploadAvatar(@Param("id", ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {
+	  return this.usersService.uploadAvatar(id, file);
   }
 
   @UseGuards(JwtTwoFactorGuard)

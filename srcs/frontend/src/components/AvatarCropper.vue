@@ -3,13 +3,16 @@
 import { ref } from "vue";
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
-import { user } from '@/user';
 
 const cropperRef = ref<any>(null);
 
 const props = defineProps<{
     avatarUrl: string
 }>();
+
+const emit = defineEmits<{
+  (e: 'crop', imageBlob: Blob): void
+}>()
 
 function cropImage(): void {
     if (!cropperRef.value)
@@ -20,7 +23,7 @@ function cropImage(): void {
             (blob: Blob) => {
                 if (!blob)
                     return;
-                user.updateAvatar(blob);
+                emit('crop', blob);
             },
             'image/jpeg'
         );
@@ -47,7 +50,7 @@ function cropImage(): void {
         }"
         image-restriction="stencil"
         />
-        <button @click="cropImage">crop and upload</button>
+        <button type="button" @click="cropImage">crop</button>
     </div>
 </template>
 

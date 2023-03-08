@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import { user } from '../user';
 import TwoFactorAuthenticationSetup from '../components/TwoFactorAuthenticationSetup.vue';
 import AvatarCropper from '../components/AvatarCropper.vue';
@@ -13,12 +13,7 @@ const previewImage = ref();
 const message = ref<string>('');
 const messageClass = ref<string>('error-message');
 
-const userImg = computed(() => {
-    if (user.username)
-        return `http://localhost:3000/users/avatar/${user.username}`;
-    else
-        return "";
-});
+const userImg = `http://localhost:3000/users/avatar/${user.id}`;
 
 async function changeUsername() {
     if (await user.updateUsername(username.value) === false) {
@@ -54,6 +49,10 @@ function loadAvatarPreview(e: any) {
     reader.readAsDataURL(avatarImage.value);
 }
 
+function updateAvatar(imageBlob: Blob) {
+    user.updateAvatar(imageBlob);
+}
+
 onBeforeMount(async () => {
     userData.value = await user.fetchUserData();
 })
@@ -74,7 +73,7 @@ onBeforeMount(async () => {
                 <img id="user-image" :src="userImg" />
                 <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
             </div>
-            <AvatarCropper v-if="previewImage" :avatar-url="previewImage" class="image-cropper" />
+            <AvatarCropper v-if="previewImage" :avatar-url="previewImage" @crop="updateAvatar" class="image-cropper" />
         </div>
         <div class="section">
             <h2>Username</h2>
