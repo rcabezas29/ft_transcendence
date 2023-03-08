@@ -43,16 +43,16 @@ export class AuthService {
     
     async loginWithIntra(code: string, state: string) {
         const intraToken = await this.intraAuthService.getUserIntraToken(code, state);
-        const {email, username, userImageURL} = await this.intraAuthService.getUserInfo(intraToken);
+        const {email, intraUsername, userImageURL} = await this.intraAuthService.getUserInfo(intraToken);
         let userId: number;
         let isFirstLogin = false;
         
         const foundUser: User = await this.usersService.findOneByEmail(email);
         if (!foundUser) {
             isFirstLogin = true;
-            const createdUser = await this.usersService.createWithoutPassword(email, username, username);
+            const createdUser = await this.usersService.createWithIntraUser(email, intraUsername);
             userId = createdUser.id;
-            await this.updateUserAvatarWithPixelizedIntraImage(userImageURL, username, userId);
+            await this.updateUserAvatarWithPixelizedIntraImage(userImageURL, intraUsername, userId);
         }
         else
             userId = foundUser.id;
@@ -75,12 +75,12 @@ export class AuthService {
         return hash;
     }
 
-    private async updateUserAvatarWithPixelizedIntraImage(userImageURL: string, username: string, userId: number) {
+    private async updateUserAvatarWithPixelizedIntraImage(userImageURL: string, intraUsername: string, userId: number) {
         const imagePath = await this.intraAuthService.downloadIntraImage(userImageURL);
         if (!imagePath)
             return;
         
-        const pixelizedImagePath = await this.filesService.pixelizeUserImage(imagePath, username);
+        const pixelizedImagePath = await this.filesService.pixelizeUserImage(imagePath, intraUsername);
         this.filesService.deleteFile(imagePath);
         if (!pixelizedImagePath)
             return;

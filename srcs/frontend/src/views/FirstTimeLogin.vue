@@ -24,7 +24,6 @@
        }
 
 */
-
 		router.replace({ "name": "home"});
 	}
 	

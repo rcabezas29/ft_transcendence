@@ -35,10 +35,10 @@ onBeforeMount(async () => {
 		return;
 	}
 
-	if (response.isFirstLogin === true)
-		router.replace({ "name": "first-login"});
+	if (response.isFirstLogin || user.hasSubmittedFirstTimeLoginForm() === false)
+		router.replace({ "name": "first-login" });
 	else
-		router.replace({ "name": "home"});
+		router.replace({ "name": "home" });
 });
 
 </script>

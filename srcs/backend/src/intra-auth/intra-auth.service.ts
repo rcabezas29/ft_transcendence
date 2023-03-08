@@ -63,10 +63,10 @@ export class IntraAuthService {
         const response = await httpResponse.json();
     
         const userEmail = response.email;
-        const username = response.login;
+        const intraUsername = response.login;
 		const userImageURL = response.image.link;
         
-        return { email: userEmail, username, userImageURL };
+        return { email: userEmail, intraUsername, userImageURL };
     }
 
     private async authorizeIntraApp(): Promise<void> {

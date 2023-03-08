@@ -59,9 +59,9 @@ export class UsersService {
     }
   }
 
-  async createWithoutPassword(email: string, username: string, intraUsername: string = null) {
+  async createWithIntraUser(email: string, intraUsername: string) {
     try {
-      const newUser = { email, username, intraUsername, password: '', stats: new Stats() };
+      const newUser = { email, username: '', intraUsername, password: '', stats: new Stats() };
       const user = await this.usersRepository.save(newUser);
       return user;
     } catch (e) {

@@ -9,12 +9,15 @@ import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
 import FriendsList from './components/friends/FriendsList.vue';
 import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
-import ImageCropper from './components/ImageCropper.vue';
 import Profile from './views/Profile.vue';
 import FirstTimeLogin from './views/FirstTimeLogin.vue';
-import { authenticationGuard, firstFactorAuthenticationGuard, loggedUserGuard } from './guards/index';
+import {
+	authenticationGuard,
+	firstFactorAuthenticationGuard,
+	firstLoginGuard,
+	loggedUserGuard
+} from './guards/index';
 import { user } from './user';
-
 
 const routes = [
 	{
@@ -80,7 +83,7 @@ const routes = [
 		name: 'first-login',
 		path: '/first-login',
 		component: FirstTimeLogin,
-		beforeEnter: authenticationGuard
+		beforeEnter: firstLoginGuard
 	}
 ];
 

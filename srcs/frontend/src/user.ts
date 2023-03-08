@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive } from 'vue';
 import type { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
@@ -152,6 +152,12 @@ class User {
 
 	checkIsLogged(): boolean {
 		return this.isLogged;
+	}
+
+	hasSubmittedFirstTimeLoginForm(): boolean {
+		if (this.username.length > 0)
+			return true;
+		return false;
 	}
 
 	logout(): void {
