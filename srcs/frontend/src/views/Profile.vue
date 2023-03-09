@@ -7,13 +7,10 @@ import type { UserData } from "@/interfaces";
 
 const username = ref<string>('');
 const password = ref<string>('');
-const avatarImage = ref<Blob | null>(null);
 const userData = ref<UserData | null>(null);
-const previewImage = ref();
+const previewImageURL = ref<string | null>(null);
 const message = ref<string>('');
 const messageClass = ref<string>('error-message');
-
-const userImg = `http://localhost:3000/users/avatar/${user.id}`;
 
 async function changeUsername() {
     if (await user.updateUsername(username.value) === false) {
@@ -36,17 +33,21 @@ async function changePassword() {
 }
 
 function loadAvatarPreview(e: any) {
-    avatarImage.value = e.target.files[0];
-    if (!avatarImage.value)
+    const avatarImage = e.target.files[0];
+    if (!avatarImage)
         return;
 
     const reader = new FileReader();
     reader.onload = function(event) {
         if (!event.target)
             return;
-        previewImage.value = event.target.result;
+            previewImageURL.value = event.target.result as string | null;
     };
-    reader.readAsDataURL(avatarImage.value);
+    reader.readAsDataURL(avatarImage);
+}
+
+function cancelAvatarPreview() {
+    previewImageURL.value = null;
 }
 
 async function updateAvatar(imageBlob: Blob) {
@@ -56,6 +57,9 @@ async function updateAvatar(imageBlob: Blob) {
         message.value = "error while updating avatar";
         return;
     }
+    previewImageURL.value = null;
+    messageClass.value = "success-message";
+    message.value = "avatar updated successfully!";
 }
 
 onBeforeMount(async () => {
@@ -75,10 +79,13 @@ onBeforeMount(async () => {
         <div class="section">
             <h2>Avatar</h2>
             <div class="avatar-section">
-                <img id="user-image" :src="userImg" />
+                <img id="user-image" :src="user.avatarImageURL" />
                 <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
             </div>
-            <AvatarCropper v-if="previewImage" :avatar-url="previewImage" @crop="updateAvatar" class="image-cropper" />
+            <div v-if="previewImageURL">
+                <AvatarCropper  :avatar-url="previewImageURL" @crop="updateAvatar" class="image-cropper" />
+                <button @click="cancelAvatarPreview">cancel</button>
+            </div>
         </div>
         <div class="section">
             <h2>Username</h2>
@@ -122,7 +129,6 @@ onBeforeMount(async () => {
                 <li>Stats: {{ userData?.stats }}</li>
                 <li>Is 2fa enabled: {{ userData?.isTwoFactorAuthenticationEnabled }}</li>
             </ul>
-
         </div>
     </div>
 

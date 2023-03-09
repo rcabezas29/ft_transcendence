@@ -20,6 +20,8 @@ class User {
 	public alreadyConnected: boolean = false;
 	public id: number = -1;
 	public username: string = '';
+	public avatarImageURL: string = '';
+
 	private isLogged: boolean = false;
 	private onLogoutCallbacks: Function[] = [];
 
@@ -41,6 +43,7 @@ class User {
 
 			const fetchedUser: FetchedUser = userData;
 			this.username = fetchedUser.username;
+			this.avatarImageURL = `http://localhost:3000/users/avatar/${this.id}`;
 
 		} catch (error) {
 			console.log(error, 'error from decoding token');
@@ -282,7 +285,19 @@ class User {
 			console.log('error while posting image');
 			return false;
 		}
+
+		this.updateAvatarImageURL();
 		return true;
+	}
+
+	updateAvatarImageURL() {
+		let basicURL = this.avatarImageURL;
+		const randomPartIndex = this.avatarImageURL.indexOf("?rand=");
+		if (randomPartIndex != -1)
+			basicURL = this.avatarImageURL.substring(0, randomPartIndex);
+
+		const rand = +new Date();
+		this.avatarImageURL = `${basicURL}?rand=${rand}`;
 	}
 }
 

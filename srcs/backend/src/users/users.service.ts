@@ -185,7 +185,12 @@ export class UsersService {
 
     const userAvatar: string = user.avatar;
     const avatars_path = join(process.cwd(), 'avatars');
-    const file = createReadStream(join(avatars_path, userAvatar));
+    const path = join(avatars_path, userAvatar);
+
+    if (this.filesService.fileExists(path) === false)
+      throw new NotFoundException('Avatar not found');
+
+    const file = createReadStream(path);
     return new StreamableFile(file);
   }
 

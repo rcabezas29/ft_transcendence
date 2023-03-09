@@ -27,7 +27,8 @@ export class FilesService {
 	}
 
 	deleteFile(filePath: string): boolean {
-		if (filePath)
+		if (!this.fileExists(filePath))
+            return false;
 		try {
 			fs.unlinkSync(filePath);
 			return true;
@@ -43,11 +44,14 @@ export class FilesService {
 	}
 
     async pixelizeUserImage(imagePath: string, username: string): Promise<string> {
+		if (!this.fileExists(imagePath))
+			return null;
+
 		const file = fs.readFileSync(imagePath);
 		const formData: FormData = new FormData();
 		formData.append("file", new Blob([file]), "file");
 
-		let httpResponse = await fetch("http://pixelizer:3001/pixelizer", {
+		const httpResponse = await fetch("http://pixelizer:3001/pixelizer", {
 			method: "POST",
 			body: formData
 		})
@@ -75,5 +79,9 @@ export class FilesService {
 		} catch(e) {
 			return false;
 		}
+	}
+
+	fileExists(path: string): boolean {
+		return fs.existsSync(path);
 	}
 }
