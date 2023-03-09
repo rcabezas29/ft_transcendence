@@ -25,6 +25,10 @@
 		ongoingGames.value = games;
 	}
 
+	function watchGame(gameName: string) {
+		console.log("watch game", gameName)
+	}
+
 	onBeforeMount(() => {
 		user.socket?.on("ongoing-games", (games) => { fetchOngoingGames(games) });
 		user.socket?.emit("ongoing-games");
@@ -44,7 +48,8 @@
 	<h1>Ongoing </h1>
 
 	<li v-for="game in ongoingGames">
-		{{ game.name }} | {{ game.player1 }} vs {{ game.player2 }}
+		{{ game.name }} | {{ game.player1 }} vs {{ game.player2 }} |
+		<button @click="watchGame(game.name)">Watch</button>
 	</li>
 </template>
 

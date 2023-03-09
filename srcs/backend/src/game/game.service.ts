@@ -509,7 +509,7 @@ export class GameService {
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
 	const game: Game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
-	game.setEndGameCallback(this.onEndGame)
+	game.setEndGameCallback((gameName) => { this.onEndGame(gameName) })
     this.ongoingGames.push(game);
     this.notifyFriends(user1, user2);
   }
@@ -527,10 +527,6 @@ export class GameService {
   }
 
   onEndGame(gameName: string) {
-	/*
-		FIXME: Esto explota y no se porque
-		tengo sueño, me voy a dormir
-	*/
 	const gameIndex = this.ongoingGames.findIndex(game => game.name == gameName);
 	if (gameIndex != -1)
 		this.ongoingGames.splice(gameIndex, 1);

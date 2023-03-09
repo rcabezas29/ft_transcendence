@@ -104,7 +104,7 @@ class User {
 
 		if (httpResponse.status != 201) {
 			return { loggedSuccessfully: false, response };
-		}
+		}	
 	
 		return { loggedSuccessfully: true, response };
 	}
