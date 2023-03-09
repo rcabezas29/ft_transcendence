@@ -50,4 +50,15 @@ export class GameGateway implements OnGatewayInit {
     user1.socket.emit('challenge-accepted');
     this.gameService.createGame(user1, user2);
   }
+
+  @SubscribeMessage('check-game-continuity')
+  playerContinuity(client: Socket, playerId: number) {
+    console.log('rejoin');
+    if (this.gameService.isPlayerInAGame(playerId)) {
+      const player: GatewayUser = this.gatewayManagerService.getClientByUserId(
+        playerId,
+      );
+      this.gameService.joinPlayerToGame(player);
+    }
+  }
 }
