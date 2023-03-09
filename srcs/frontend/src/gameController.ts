@@ -79,6 +79,7 @@ class GameController {
         gameActions[e.key](false);
       }
     });
+
   }
 
   endGame(win: boolean) {
@@ -99,6 +100,10 @@ class GameController {
 
   initCanvas(canvasContext: CanvasRenderingContext2D) {
     this.gameRenderer = new GameRenderer(canvasContext);
+  }
+
+  checkPlayerContinuity() {
+    user.socket?.emit('check-game-continuity', user.id);
   }
 }
 

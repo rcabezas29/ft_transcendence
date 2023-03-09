@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { gameController } from "@/gameController";
-import { onMounted, ref } from "vue";
+import { onBeforeMount, onBeforeUpdate, onMounted, onUpdated, ref } from "vue";
 
 const canvasRef = ref<HTMLCanvasElement>();
 
 function findGame() {
   gameController.searchGame();
 }
+
+onBeforeMount(() => {
+  gameController.checkPlayerContinuity();
+})
 
 onMounted(() => {
   gameController.initCanvas(canvasRef.value!.getContext("2d")!);

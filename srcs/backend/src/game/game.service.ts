@@ -96,9 +96,9 @@ class Game {
     this.status = GameStatus.Playing;
     this.server.to(this.name).emit('start-game');
     this.players.forEach((player, playerIndex) => {
-      player.socket.on('disconnect', () => {
-        this.end((playerIndex + 1) % 2);
-      });
+      // player.socket.on('disconnect', () => {
+      //   this.end((playerIndex + 1) % 2);
+      // });
       player.socket.on('move', (movementIndex: number, pressed: boolean) => {
         this.playerActions[playerIndex][movementIndex].input = pressed;
       });
@@ -234,16 +234,22 @@ class Game {
   sendToPlayer(player: GatewayUser, signal: string, body: any) {
     player.socket.emit(signal, body);
   }
+
+  rejoinPlayer(player: GatewayUser) {
+    player.socket.join(this.name);
+  }
 }
 
 @Injectable()
 export class GameService {
   public server: Server;
+  public games: Game[] = [];
 
   constructor(private usersService: UsersService, private matchHistoryService: MatchHistoryService, private gatewayManagerService: GatewayManagerService) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
-    new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
+    const game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
+    this.games.push(game);
     this.notifyFriends(user1, user2);
   }
 
@@ -257,5 +263,20 @@ export class GameService {
     friends.forEach(friend => {
 			friend.socket.emit('friend-in-a-game', user2.id);
 		});
+  }
+
+  isPlayerInAGame(playerId: number): boolean {
+    for (const game of this.games) {
+      if (game.players[0].id === playerId || game.players[1].id === playerId)
+        return true;
+    }
+    return false;
+  }
+
+  joinPlayerToGame(player: GatewayUser) {
+    for (const game of this.games) {
+      if (game.players[0].id === player.id || game.players[1].id === player.id)
+        game.rejoinPlayer(player);
+    }
   }
 }
