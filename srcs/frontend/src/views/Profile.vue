@@ -5,8 +5,8 @@ import TwoFactorAuthenticationSetup from '../components/TwoFactorAuthenticationS
 import AvatarCropper from '../components/AvatarCropper.vue';
 import type { UserData } from "@/interfaces";
 
-const username = ref<string>("");
-const password = ref<string>("");
+const username = ref<string>('');
+const password = ref<string>('');
 const avatarImage = ref<Blob | null>(null);
 const userData = ref<UserData | null>(null);
 const previewImage = ref();

@@ -116,10 +116,7 @@ export class UsersService {
 
     const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations.map(
       async (friendship: Friendship): Promise<UserFriend> => {
-        const friendId =
-          friendship.user1Id == userId
-            ? friendship.user2Id
-            : friendship.user1Id;
+        const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
         const friend = await this.findOneById(friendId);
         return {
           userId: friendId,
@@ -130,9 +127,7 @@ export class UsersService {
       },
     );
 
-    const allUserFriends: UserFriend[] = await Promise.all(
-      allUserFriendsPromises,
-    );
+    const allUserFriends: UserFriend[] = await Promise.all(allUserFriendsPromises);
     return allUserFriends;
   }
 
@@ -141,6 +136,16 @@ export class UsersService {
       id,
       ...updateUserDto,
     };
+
+    if (updateUserDto.username) {
+      const usernameExists = await this.findOneByUsername(updateUserDto.username);
+      if (usernameExists && usernameExists.id != id) {
+        throw new BadRequestException(
+          'Username already in use. Please choose a different one.',
+        );
+      };
+    }
+
     try {
       const user = await this.usersRepository.preload(userToUpdate);
       if (user) {
@@ -183,7 +188,7 @@ export class UsersService {
     const user: User = await this.findOneById(id);
     if (!user)
       throw new NotFoundException();
-    
+
     const oldFileName = user.avatar;
     const newFileName = `${user.username}.jpg`;
     const avatarPath = join(process.cwd(), 'avatars', oldFileName)
