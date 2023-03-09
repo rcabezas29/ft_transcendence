@@ -80,7 +80,7 @@ export class IntraAuthService {
         this._appIntraToken = response.access_token;
     }
 
-	async downloadIntraImage(userImageURL: string) {
+	async downloadIntraImage(userImageURL: string): Promise<string | null> {
 		const savePath = join(process.cwd(), "intra-images");
 		const downloadedFilePath = await this.filesService.downlaodFile(
 			savePath,

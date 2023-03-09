@@ -49,8 +49,13 @@ function loadAvatarPreview(e: any) {
     reader.readAsDataURL(avatarImage.value);
 }
 
-function updateAvatar(imageBlob: Blob) {
-    user.updateAvatar(imageBlob);
+async function updateAvatar(imageBlob: Blob) {
+    const avatarUpdated = await user.updateAvatar(imageBlob);
+    if (avatarUpdated === false) {
+        messageClass.value = "error-message";
+        message.value = "error while updating avatar";
+        return;
+    }
 }
 
 onBeforeMount(async () => {

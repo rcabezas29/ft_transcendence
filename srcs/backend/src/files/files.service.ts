@@ -17,14 +17,23 @@ export class FilesService {
 		const fileContents = await httpResponse.arrayBuffer();
 		const newSavePath = join(savePath, fileName);
 
-		fs.writeFileSync(newSavePath, Buffer.from(fileContents));
+		try {
+			fs.writeFileSync(newSavePath, Buffer.from(fileContents));
+		} catch(e) {
+			return null;
+		}
 
 		return newSavePath;
 	}
 
-	deleteFile(filePath: string) {
+	deleteFile(filePath: string): boolean {
 		if (filePath)
+		try {
 			fs.unlinkSync(filePath);
+			return true;
+		} catch(e) {
+			return false;
+		}
 	}
 
 	getFileNameFromPath(path: string): string {
@@ -48,12 +57,23 @@ export class FilesService {
 
 		const fileContents = await httpResponse.arrayBuffer();
 		const savePath = join(process.cwd(), "avatars", `${username}.jpg`);
-		fs.writeFileSync(savePath, Buffer.from(fileContents));
+
+		try {
+			fs.writeFileSync(savePath, Buffer.from(fileContents));
+		} catch(e) {
+			return null;
+		}
+
 		return savePath;
 	}
 
-	uploadFile(savePath: string, file: Express.Multer.File): void {
+	uploadFile(savePath: string, file: Express.Multer.File): boolean {
 		const fileBuffer: Buffer = file.buffer;
-		fs.writeFileSync(savePath, fileBuffer);
+		try {
+			fs.writeFileSync(savePath, fileBuffer);
+			return true;
+		} catch(e) {
+			return false;
+		}
 	}
 }

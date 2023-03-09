@@ -189,14 +189,15 @@ export class UsersService {
     const avatarPath = join(process.cwd(), 'avatars', oldFileName)
     const newAvatarPath = join(process.cwd(), 'avatars', newFileName);
 
-    this.filesService.uploadFile(newAvatarPath, image);
+    if (oldFileName && oldFileName != "default_avatar.png")
+      this.filesService.deleteFile(avatarPath);
+
+    if (!this.filesService.uploadFile(newAvatarPath, image))
+      throw new InternalServerErrorException("Error while uploading file");
 
     const pixelizedImagePath = await this.filesService.pixelizeUserImage(newAvatarPath, user.username);
     if (!pixelizedImagePath)
       throw new InternalServerErrorException("Error while pixelizing");
-
-    if (oldFileName != "default_avatar.png")
-      this.filesService.deleteFile(avatarPath);
 
     if (oldFileName != newFileName) {
       const updateUserDto: UpdateUserDto = {

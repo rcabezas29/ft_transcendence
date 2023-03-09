@@ -277,7 +277,7 @@ class User {
 			method: "POST",
 			body: formData
 		});
-	
+
 		if (httpResponse.status != 201) {
 			console.log('error while posting image');
 			return false;
