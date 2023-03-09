@@ -12,8 +12,6 @@ const previewImageURL = ref<string | null>(null);
 const message = ref<string>('');
 const messageClass = ref<string>('error-message');
 
-const userImg = `http://localhost:3000/users/avatar/${user.id}`;
-
 async function changeUsername() {
     if (await user.updateUsername(username.value) === false) {
         messageClass.value = "error-message";
@@ -81,7 +79,7 @@ onBeforeMount(async () => {
         <div class="section">
             <h2>Avatar</h2>
             <div class="avatar-section">
-                <img id="user-image" :src="userImg" />
+                <img id="user-image" :src="user.avatarImageURL" />
                 <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
             </div>
             <div v-if="previewImageURL">
@@ -131,7 +129,6 @@ onBeforeMount(async () => {
                 <li>Stats: {{ userData?.stats }}</li>
                 <li>Is 2fa enabled: {{ userData?.isTwoFactorAuthenticationEnabled }}</li>
             </ul>
-
         </div>
     </div>
 
