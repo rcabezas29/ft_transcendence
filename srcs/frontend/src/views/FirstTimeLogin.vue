@@ -22,16 +22,16 @@
             return;
         }
 
-        const userUpdated = await user.updateUsername(username.value);
-        if (userUpdated === false) {
+        const usernameUpdated = await user.updateUsername(username.value);
+        if (usernameUpdated === false) {
             errorMessage.value = "error while updating username";
             return;
         }
 
         const avatarUpdated = await user.updateAvatar(avatarImage.value);
         if (avatarUpdated === false) {
-                errorMessage.value = "error while updating avatar";
-                return;
+            errorMessage.value = "error while updating avatar";
+            return;
         }
 
         router.replace({ "name": "home"});

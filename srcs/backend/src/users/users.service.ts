@@ -204,7 +204,7 @@ export class UsersService {
     const avatarPath = join(process.cwd(), 'avatars', oldFileName)
     const newAvatarPath = join(process.cwd(), 'avatars', newFileName);
 
-    if (oldFileName && oldFileName != "default_avatar.png")
+    if (oldFileName && oldFileName != "default_avatar.jpg")
       this.filesService.deleteFile(avatarPath);
 
     if (!this.filesService.uploadFile(newAvatarPath, image))
