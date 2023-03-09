@@ -8,6 +8,7 @@ import { UpdateUserDto } from '../users/dto/update-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/users/entities/user.entity';
+import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
 
 @Injectable()
 export class AuthService {
@@ -15,11 +16,12 @@ export class AuthService {
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
         private readonly intraAuthService: IntraAuthService,
-        private readonly filesService: FilesService
+        private readonly filesService: FilesService,
+        private readonly passwordUtilsService: PasswordUtilsService
     ) {}
     
     async createUser(createUserDto: CreateUserDto) {
-        const newpass = await this.hashPassword(createUserDto.password);
+        const newpass = await this.passwordUtilsService.hashPassword(createUserDto.password);
         createUserDto.password = newpass;
         return this.usersService.create(createUserDto);
     }
@@ -66,13 +68,6 @@ export class AuthService {
         const payload: JwtPayload = { id: userId, isSecondFactorAuthenticated };
         const access_token = this.jwtService.sign(payload);
         return access_token;
-    }
-
-    private async hashPassword(password: string): Promise<string> {
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hash = await bcrypt.hash(password, salt);
-        return hash;
     }
 
     private async updateUserAvatarWithPixelizedIntraImage(userImageURL: string, intraUsername: string, userId: number) {

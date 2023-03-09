@@ -21,6 +21,7 @@ import { MatchHistoryModule } from './match-history/match-history.module';
 import { MatchHistory } from './match-history/entity/match-history.entity';
 import { TwoFactorAuthenticationModule } from './two-factor-authentication/two-factor-authentication.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { PasswordUtilsModule } from './password-utils/password-utils.module';
 
 
 @Module({
@@ -56,6 +57,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     StatsModule,
     MatchHistoryModule,
     TwoFactorAuthenticationModule,
+    PasswordUtilsModule,
   ],
 })
 export class AppModule {}

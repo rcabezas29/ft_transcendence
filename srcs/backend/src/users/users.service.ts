@@ -19,18 +19,18 @@ import { StatsService } from 'src/stats/stats.service';
 import { Stats } from 'src/stats/entities/stats.entity';
 import { GameInfo } from './interfaces/game-info.interface';
 import { FilesService } from 'src/files/files.service';
+import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
 
 @Injectable()
 export class UsersService {
   constructor(
+    private readonly friendshipsService: FriendshipsService,
+    private readonly statsService: StatsService,
+    private readonly filesService: FilesService,
+    private readonly passwordUtilsService: PasswordUtilsService,
+
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-
-    private friendshipsService: FriendshipsService,
-
-    private statsService: StatsService,
-
-    private filesService: FilesService
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -144,6 +144,11 @@ export class UsersService {
           'Username already in use. Please choose a different one.',
         );
       };
+    }
+
+    if (updateUserDto.password) {
+      const newpass = await this.passwordUtilsService.hashPassword(updateUserDto.password);
+      userToUpdate.password = newpass;
     }
 
     try {

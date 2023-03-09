@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { FriendshipsModule } from 'src/friendships/friendships.module';
 import { StatsModule } from 'src/stats/stats.module';
 import { FilesModule } from 'src/files/files.module';
+import { PasswordUtilsModule } from 'src/password-utils/password-utils.module';
 
 @Module({
   controllers: [UsersController],
@@ -14,7 +15,8 @@ import { FilesModule } from 'src/files/files.module';
     TypeOrmModule.forFeature([User]),
     FriendshipsModule,
     StatsModule,
-    FilesModule
+    FilesModule,
+    PasswordUtilsModule
   ],
   exports: [UsersService, TypeOrmModule],
 })
