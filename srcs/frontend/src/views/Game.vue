@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { gameController } from "@/gameController";
-import { onBeforeMount, onBeforeUpdate, onMounted, onUpdated, ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
 
 const canvasRef = ref<HTMLCanvasElement>();
 
@@ -19,7 +19,7 @@ onMounted(() => {
 
 <template>
   <h2>Game</h2>
-  <button @click="findGame">Find game</button>
+  <button v-if="gameController.state !== 'Playing'" @click="findGame">Find game</button>
 
   Status: <span>{{ gameController.state }}</span>
 

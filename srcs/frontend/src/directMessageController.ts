@@ -63,7 +63,6 @@ class DirectMessageController {
     }
 
     private receiveChallenge(payload: MessagePayload) {
-        console.log('challenge-received');
         const fromUser: ChatUser | undefined = this.friends.find((friend) => payload.friendId === friend.id);
         if (!fromUser)
             return ;
