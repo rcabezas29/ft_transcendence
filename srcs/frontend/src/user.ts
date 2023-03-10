@@ -296,8 +296,8 @@ class User {
 		if (randomPartIndex != -1)
 			basicURL = this.avatarImageURL.substring(0, randomPartIndex);
 
-		const rand = +new Date();
-		this.avatarImageURL = `${basicURL}?rand=${rand}`;
+		const randomKey = +new Date();
+		this.avatarImageURL = `${basicURL}?rand=${randomKey}`;
 	}
 }
 

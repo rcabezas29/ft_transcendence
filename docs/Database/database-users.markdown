@@ -18,7 +18,7 @@ The users are in the `user` table and are defined as:
 - **username**: unique username.
 - **email**: unique email.
 - **avatar**: avatar image filename. Avatars are located in the `backend/avatars/` folder.
-    Default is `default_avatar.png`.
+    Default is `default_avatar.jpg`.
 - **password**: hashed password.
 - **elo**: game elo. Default is `1000`.
 - **twoFactorAuthenticationSecret**: user secret for the 2FA generated in the proces of enabling 2FA.
