@@ -236,7 +236,14 @@ class Game {
   }
 
   rejoinPlayer(player: GatewayUser) {
-    player.socket.join(this.name);
+    for (const i in this.players) {
+      if (this.players[i].socket.connected === false)
+        this.players[i].socket = player.socket;
+        this.players[i].socket.join(this.name);
+        this.players[i].socket.on('move', (movementIndex: number, pressed: boolean) => {
+          this.playerActions[i][movementIndex].input = pressed;
+        });
+    }
   }
 }
 
@@ -275,8 +282,10 @@ export class GameService {
 
   joinPlayerToGame(player: GatewayUser) {
     for (const game of this.games) {
-      if (game.players[0].id === player.id || game.players[1].id === player.id)
+      if (game.players[0].id === player.id || game.players[1].id === player.id) {
         game.rejoinPlayer(player);
+        player.socket.emit('rejoin-game');
+      }
     }
   }
 }

@@ -51,6 +51,9 @@ class GameController {
     user.socket?.on("update-game", (gamePayload) => {
       this.updateGame(gamePayload);
     });
+    user.socket?.on("rejoin-game", () => {
+      this.startGame();
+    });
   }
 
   searchGame() {
@@ -79,7 +82,6 @@ class GameController {
         gameActions[e.key](false);
       }
     });
-
   }
 
   endGame(win: boolean) {

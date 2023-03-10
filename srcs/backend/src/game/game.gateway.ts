@@ -53,9 +53,8 @@ export class GameGateway implements OnGatewayInit {
 
   @SubscribeMessage('check-game-continuity')
   playerContinuity(client: Socket, playerId: number) {
-    console.log('rejoin');
     if (this.gameService.isPlayerInAGame(playerId)) {
-      const player: GatewayUser = this.gatewayManagerService.getClientByUserId(
+      let player: GatewayUser = this.gatewayManagerService.getClientByUserId(
         playerId,
       );
       this.gameService.joinPlayerToGame(player);
