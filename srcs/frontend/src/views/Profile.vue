@@ -68,6 +68,9 @@ async function saveChanges() {
     if (password.value.length > 0)
         passwordUpdateOk = await user.updatePassword(password.value);
 
+    if (usernameUpdateOk)
+        user.notifyOfUserChange();
+
     if (!usernameUpdateOk || !avatarUpdateOk || !passwordUpdateOk) {
         if (!usernameUpdateOk)
             message.value.push("error while updating username");
@@ -135,6 +138,10 @@ onBeforeMount(async () => {
         <div class="section">
             <h2>Email</h2>
             <p>Email: {{ userData?.email }}</p>
+        </div>
+        <div class="section">
+            <h2>ELO</h2>
+            <p>ELO: {{ userData?.elo }}</p>
         </div>
         <div class="section">
             <h2>Two Factor Authentication</h2>

@@ -1,4 +1,10 @@
-import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+	OnGatewayConnection,
+	OnGatewayDisconnect,
+	SubscribeMessage,
+	WebSocketGateway,
+	WebSocketServer
+} from '@nestjs/websockets';
 import { GatewayManagerService } from './gateway-manager.service';
 import type { Socket, Server } from 'socket.io'
 import { GatewayUser } from './interfaces/gateway-user.interface';
@@ -68,4 +74,16 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 		this.gatewayManagerService.removeClient(client.id);
 	}
 
+	@SubscribeMessage("user-updated")
+	async notifyOfUpdatedUser(client: Socket): Promise<void> {
+		const gatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		if (!gatewayUser)
+			return;
+
+		const user: User = await this.usersService.findOneById(gatewayUser.id);
+
+		const { id, username } = user;
+		//this.gatewayManagerService.onUserUpdated(gatewayUser);
+		client.broadcast.emit("user-updated", {id, username});
+	}
 }
