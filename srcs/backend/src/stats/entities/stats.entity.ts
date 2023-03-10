@@ -13,6 +13,9 @@ export class Stats {
   lostGames: number;
 
   @Column({ default: 0 })
+  drawGames: number;
+
+  @Column({ default: 0 })
   scoredGoals: number;
 
   @Column({ default: 0 })

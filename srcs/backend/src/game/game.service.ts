@@ -7,6 +7,7 @@ import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.servi
 import { Vector2 } from './classes/vector2';
 import { GameObject, Paddle } from './classes/game-object';
 import { Table } from './classes/table';
+import { GameResult } from 'src/users/interfaces/game-info.interface';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
@@ -96,9 +97,6 @@ class Game {
     this.status = GameStatus.Playing;
     this.server.to(this.name).emit('start-game');
     this.players.forEach((player, playerIndex) => {
-      // player.socket.on('disconnect', () => {
-      //   this.end((playerIndex + 1) % 2);
-      // });
       player.socket.on('move', (movementIndex: number, pressed: boolean) => {
         this.playerActions[playerIndex][movementIndex].input = pressed;
       });
@@ -113,7 +111,11 @@ class Game {
     const now = new Date();
 
     if (now.getTime() - this.startDate.getTime() >= 200 * 1000) {
-      this.end(Number(this.score[1] > this.score[0]));
+      if (this.score[1] === this.score[0]) {
+        this.end(GameResult.Draw);
+      } else {
+        this.end(Number(this.score[1] > this.score[0]));
+      }
     }
     this.updateObjects(now);
     const payload = {
@@ -202,7 +204,7 @@ class Game {
     );
   }
 
-  end(winnerIndex: number) {
+  end(gameResult: GameResult) {
     clearInterval(this.gameInterval);
     console.log('game end', this.name);
     this.status = GameStatus.End;
@@ -211,21 +213,27 @@ class Game {
       1 / ((1 + 10) ^ ((this.players[1].elo - this.players[0].elo) / 400));
 
     this.players.forEach((player, index) => {
-      player.socket.emit('end-game', index === winnerIndex);
-      player.elo = Math.floor(
-        player.elo + 32 * (Number(index === winnerIndex) - expectedScore),
-      );
-      this.usersService.update(player.id, { elo: player.elo });
+      player.socket.emit('end-game', gameResult);
+      if (gameResult !== GameResult.Draw) {
+        player.elo = Math.floor(
+          player.elo + 32 * (Number(gameResult) - expectedScore),
+        );
+        this.usersService.update(player.id, { elo: player.elo });
+      }
       this.usersService.updateStats(player.id, {
-        winner: index === winnerIndex,
+        gameResult: gameResult,
         scoredGoals: this.score[index],
         receivedGoals: this.score[(index + 1) % 2],
       });
     });
+    let winnerId: number = 0;
+    if (this.score[0] !== this.score[1]) {
+      winnerId = this.score[0] > this.score[1] ? this.players[0].id : this.players[1].id;
+    }
     this.matchHistoryService.create({
       user1Id: this.players[0].id,
       user2Id: this.players[1].id,
-      winner: this.players[winnerIndex].id,
+      winner: winnerId,
       score: this.score,
     });
     this.players.forEach((player) => player.socket.leave(this.name));

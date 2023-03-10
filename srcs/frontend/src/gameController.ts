@@ -19,6 +19,12 @@ enum Moves {
   Down,
 }
 
+enum GameResult {
+  Lose,
+  Win,
+  Draw,
+}
+
 //hardcoded for now
 const MappedKeys: string[] = ["ArrowUp", "ArrowDown"];
 
@@ -45,8 +51,8 @@ class GameController {
     user.socket?.on("start-game", () => {
       this.startGame();
     });
-    user.socket?.on("end-game", (winner: boolean) => {
-      this.endGame(winner);
+    user.socket?.on("end-game", (gameResult: GameResult) => {
+      this.endGame(gameResult);
     });
     user.socket?.on("update-game", (gamePayload) => {
       this.updateGame(gamePayload);
@@ -84,14 +90,16 @@ class GameController {
     });
   }
 
-  endGame(win: boolean) {
+  endGame(gameResult: GameResult) {
     this.state = GameState.End;
     this.timestamp = 0;
     this.gameRenderer?.clearCanvas();
-    if (win) {
+    if (gameResult === GameResult.Win) {
       this.gameRenderer?.winGame();
-    } else {
+    } else if (gameResult === GameResult.Lose) {
       this.gameRenderer?.loseGame();
+    } else {
+      this.gameRenderer?.tieGame();
     }
   }
 
@@ -129,6 +137,11 @@ class GameRenderer {
   loseGame() {
     this.canvas.fillStyle = "white";
     this.canvas.fillText(`LOSE :(`, 200, 100);
+  }
+
+  tieGame() {
+    this.canvas.fillStyle = "white";
+    this.canvas.fillText(`DRAW :|`, 200, 100);
   }
 
   drawFrame(payload: UpdateGamePayload) {

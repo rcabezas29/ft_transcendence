@@ -1,5 +1,11 @@
+export enum GameResult {
+    Lose,
+    Win,
+    Draw,
+}
+
 export interface GameInfo {
-    winner: boolean,
+    gameResult: GameResult,
     scoredGoals: number,
     receivedGoals: number,
 }
