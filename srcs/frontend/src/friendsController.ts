@@ -39,6 +39,11 @@ interface FriendshipStatusPayload {
     friendId: number;
 }
 
+export interface UserUpdatedPayload {
+    id: FriendId;
+    username: string;
+}
+
 export interface Friend {
     userId: FriendId;
     username: string;
@@ -62,15 +67,16 @@ class FriendsController {
         user.socket?.on('new-friendship', (payload: FriendPayload) => {this.onNewFriendship(payload)});
         user.socket?.on('friendship-status-change', (payload: FriendshipStatusPayload) => {this.onFriendshipStatusChange(payload)});
         user.socket?.on('friendship-deleted', (payload: FriendId) => {this.onFriendshipDeleted(payload)});
+        user.socket?.on('user-updated', (payload: UserUpdatedPayload) => {this.onUserUpdated(payload)});
 
         user.addOnLogoutCallback(() => this.onLogout());
     }
 
-    onLogout() {
+    private onLogout() {
         this.friends = {};
     }
 
-    async onConnectedFriends(payload: FriendId[]) {
+    private async onConnectedFriends(payload: FriendId[]) {
         await this.fetchFriends();
         payload.forEach(friendId => this.setFriendOnline(friendId));
 
@@ -83,7 +89,7 @@ class FriendsController {
         directMessageController.onConnectedFriends(chatOnlineFriends);
     }
 
-    onFriendConnected(payload: FriendId) {
+    private onFriendConnected(payload: FriendId) {
         this.setFriendOnline(payload);
 
         if (!this.userIsActiveFriend(payload))
@@ -94,21 +100,21 @@ class FriendsController {
             directMessageController.onFriendConnected(friend);
     }
 
-    onFriendDisconnected(payload: FriendId) {
+    private onFriendDisconnected(payload: FriendId) {
         this.setFriendOffline(payload);
         directMessageController.onFriendDisconnected(payload);
     }
 
-    onFriendInAGame(payload: FriendId) {
+    private onFriendInAGame(payload: FriendId) {
         this.setFriendInAGame(payload);
     }
 
-    onNewFriendship(payload: FriendPayload) {
+    private onNewFriendship(payload: FriendPayload) {
         const newFriend: Friend = { ...payload, status: FriendStatus.offline };
         this.friends[payload.userId] = newFriend;
     }
 
-    onFriendshipStatusChange(payload: FriendshipStatusPayload) {
+    private onFriendshipStatusChange(payload: FriendshipStatusPayload) {
         const friend = this.friends[payload.friendId];
         if (!friend)
             return;
@@ -123,13 +129,22 @@ class FriendsController {
             directMessageController.onFriendDisconnected(friend.userId);
     }
 
-    onFriendshipDeleted(payload: FriendId) {
+    private onFriendshipDeleted(payload: FriendId) {
         directMessageController.onFriendDisconnected(payload);
 
         const friend = this.friends[payload];
         if (!friend)
             return;
         delete this.friends[payload];
+    }
+
+    private onUserUpdated(payload: UserUpdatedPayload) {
+        const { id, username } = payload;
+        const friend = this.friends[id];
+        if (!friend)
+            return;
+        friend.username = username;
+        directMessageController.onUserUpdated(payload);
     }
 
     userIsActiveFriend(userId: number): boolean {

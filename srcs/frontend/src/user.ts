@@ -299,6 +299,10 @@ class User {
 		const randomKey = +new Date();
 		this.avatarImageURL = `${basicURL}?rand=${randomKey}`;
 	}
+
+	notifyOfUserChange() {
+		this.socket?.emit("user-updated");
+	}
 }
 
 export const user = reactive<User>(new User);

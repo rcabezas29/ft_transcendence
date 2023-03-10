@@ -2,8 +2,8 @@ import { reactive } from "vue";
 import type { Chat, ChatUser, Message } from "./interfaces";
 import { user } from './user';
 import { currentChat } from "./currentChat";
-import { routerKey } from "vue-router";
 import router from "./router";
+import type { UserUpdatedPayload } from "./friendsController";
 
 interface MessagePayload {
     friendId: FriendId;
@@ -46,8 +46,20 @@ class DirectMessageController {
         this.friends = this.friends.filter((friend) => friend.id != payload);
     }
 
+    onUserUpdated(payload: UserUpdatedPayload) {
+        const { id, username } = payload;
+        const friend: ChatUser | undefined = this.findFriendById(id);
+        if (!friend)
+            return;
+        friend.username = username;
+
+        const friendChat: Chat | undefined = this.chats[id];
+        if (friendChat)
+            (<ChatUser>friendChat.target).username = username;
+    }
+
     private receiveDirectMessage(payload: MessagePayload) {
-        const fromUsername: ChatUser | undefined = this.friends.find((friend) => payload.friendId === friend.id);
+        const fromUsername: ChatUser | undefined = this.findFriendById(payload.friendId);
         if (!fromUsername)
             return;
         const newMessage: Message = {
@@ -111,6 +123,10 @@ class DirectMessageController {
             }
             this.chats[friend.id] = newChat;
         }
+    }
+
+    private findFriendById(id: number): ChatUser | undefined {
+        return this.friends.find((friend) => id === friend.id);
     }
 
     sendChallenge() {

@@ -83,4 +83,13 @@ export class GatewayManagerService {
 			friend.socket.emit('friend-offline', client.id);
 		})
 	}
+
+	async onUserUpdated(client: GatewayUser) {
+
+		const friends: GatewayUser[] = await this.getAllUserConnectedFriends(client.id);
+
+		friends.forEach(friend => {
+			friend.socket.emit('friend-offline', client.id);
+		})
+	}
 }
