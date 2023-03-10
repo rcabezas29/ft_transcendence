@@ -55,6 +55,7 @@ export class UsersController {
 	  return this.usersService.getAvatar(id);
   }
 
+  @UseGuards(JwtTwoFactorGuard)
   @Post("avatar/:id")
   @UseInterceptors(FileInterceptor('file'))
   async uploadAvatar(@Param("id", ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {
@@ -65,5 +66,11 @@ export class UsersController {
   @Get(':id/friends')
   getFriends(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.getAllUserFriends(id);
+  }
+
+  @UseGuards(JwtTwoFactorGuard)
+  @Get('search/:username')
+  findUsernameMatches(@Param('username') usernameSegment: string) {
+    return this.usersService.findUsernameMatches(usernameSegment);
   }
 }

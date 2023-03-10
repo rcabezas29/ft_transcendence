@@ -75,15 +75,10 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 	}
 
 	@SubscribeMessage("user-updated")
-	async notifyOfUpdatedUser(client: Socket): Promise<void> {
+	notifyOfUpdatedUser(client: Socket): Promise<void> {
 		const gatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		if (!gatewayUser)
 			return;
-
-		const user: User = await this.usersService.findOneById(gatewayUser.id);
-
-		const { id, username } = user;
-		//this.gatewayManagerService.onUserUpdated(gatewayUser);
-		client.broadcast.emit("user-updated", {id, username});
+		this.gatewayManagerService.onUserUpdated(gatewayUser);
 	}
 }

@@ -248,4 +248,12 @@ export class UsersService {
       isTwoFactorAuthenticationEnabled: false
     });
   }
+
+  async findUsernameMatches(username: string) {
+    const users: User[] = await this.findAll();
+
+    return users.filter((u) =>
+      u.username.toLowerCase().includes(username.toLowerCase())
+    );
+  }
 }

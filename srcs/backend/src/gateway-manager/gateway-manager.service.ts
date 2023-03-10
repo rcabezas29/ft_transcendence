@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { User } from 'src/users/entities/user.entity';
 import { UserFriend } from 'src/users/interfaces/user-friend.interface';
 import { UsersService } from 'src/users/users.service';
 import { GatewayUser } from './interfaces/gateway-user.interface';
@@ -85,11 +86,8 @@ export class GatewayManagerService {
 	}
 
 	async onUserUpdated(client: GatewayUser) {
-
-		const friends: GatewayUser[] = await this.getAllUserConnectedFriends(client.id);
-
-		friends.forEach(friend => {
-			friend.socket.emit('friend-offline', client.id);
-		})
+		const user: User = await this.usersService.findOneById(client.id);
+		const { id, username } = user;
+		client.socket.broadcast.emit("user-updated", { id, username });
 	}
 }
