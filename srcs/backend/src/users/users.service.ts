@@ -17,7 +17,7 @@ import { Friendship } from 'src/friendships/entities/friendship.entity';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { StatsService } from 'src/stats/stats.service';
 import { Stats } from 'src/stats/entities/stats.entity';
-import { GameInfo } from './interfaces/game-info.interface';
+import { GameInfo, GameResult } from './interfaces/game-info.interface';
 import { FilesService } from 'src/files/files.service';
 import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
 
@@ -167,8 +167,9 @@ export class UsersService {
     const user = await this.findOneById(id);
 
     this.statsService.update(user.stats.id, {
-      wonGames: user.stats.wonGames += (gameInfo.winner ? 1 : 0),
-      lostGames: user.stats.lostGames += (!gameInfo.winner ? 1 : 0),
+      wonGames: user.stats.wonGames += gameInfo.gameResult === GameResult.Win ? 1 : 0,
+      lostGames: user.stats.lostGames += gameInfo.gameResult === GameResult.Lose ? 1 : 0,
+      drawGames: user.stats.drawGames += gameInfo.gameResult === GameResult.Draw ? 1 : 0,
       scoredGoals: gameInfo.scoredGoals,
       receivedGoals: gameInfo.receivedGoals,
     });
