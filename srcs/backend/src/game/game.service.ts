@@ -11,16 +11,11 @@ import { GameResult } from 'src/users/interfaces/game-info.interface';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
-
 const INITIAL_BALL_SPEED = 5; // in px per second;
+const WIN_SCORE = 7
 
 type Move = (playerIndex: number, deltaTime: number) => void;
 type gameAction = { move: Move; input: boolean };
-
-enum Moves {
-  Up,
-  Down,
-}
 
 enum GameStatus {
   Preparing = 'preparing',
@@ -191,8 +186,8 @@ class Game {
   computeGoal(receiver: number) {
     this.score[(receiver + 1) % 2] += 1;
     this.serveBall(receiver);
-    if (this.score[0] === 1 || this.score[1] === 1) {
-      this.end(Number(this.score[1] === 1));
+    if (this.score[0] === WIN_SCORE || this.score[1] === WIN_SCORE) {
+      this.end(Number(this.score[1] === WIN_SCORE));
     }
   }
 
