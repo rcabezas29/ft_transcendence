@@ -66,4 +66,5 @@ export class GameGateway implements OnGatewayInit {
       this.gameService.joinPlayerToGame(player);
     }
   }
+
 }

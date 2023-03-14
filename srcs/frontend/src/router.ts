@@ -9,10 +9,12 @@ import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
 import FriendsList from './components/friends/FriendsList.vue';
 import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
-import TwoFactorAuthenticationSetup from './components/TwoFactorAuthenticationSetup.vue';
 import Social from './views/Social.vue'
 import Profile from './views/Profile.vue';
 import FirstTimeLogin from './views/FirstTimeLogin.vue';
+import Spectator from './views/Spectator.vue';
+import NotFound from './views/NotFound.vue'
+
 import {
 	authenticationGuard,
 	firstFactorAuthenticationGuard,
@@ -92,6 +94,16 @@ const routes = [
 		path: '/first-login',
 		component: FirstTimeLogin,
 		beforeEnter: firstLoginGuard
+	},
+	{
+		name: 'spectate',
+		path: '/spectate/:matchId',
+		component: Spectator
+	},
+	{
+		name: "not-found",
+		path: "/:pathMatch(.*)*",
+		component: NotFound
 	}
 ];
 
