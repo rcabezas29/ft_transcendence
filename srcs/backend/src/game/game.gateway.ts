@@ -56,4 +56,14 @@ export class GameGateway implements OnGatewayInit {
 	const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 	this.gameService.sendOngoingMatchesToUser(user);
   }
+  
+  @SubscribeMessage('check-game-continuity')
+  playerContinuity(client: Socket, playerId: number) {
+    if (this.gameService.isPlayerInAGame(playerId)) {
+      let player: GatewayUser = this.gatewayManagerService.getClientByUserId(
+        playerId,
+      );
+      this.gameService.joinPlayerToGame(player);
+    }
+  }
 }

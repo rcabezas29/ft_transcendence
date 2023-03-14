@@ -1,3 +1,5 @@
+import { createRouter, createWebHistory } from "vue-router";
+
 import Index  from './components/Index.vue';
 import Login from './views/Login.vue';
 import Chat from './views/Chat.vue';
@@ -9,10 +11,15 @@ import FriendsList from './components/friends/FriendsList.vue';
 import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
 import TwoFactorAuthenticationSetup from './components/TwoFactorAuthenticationSetup.vue';
 import Social from './views/Social.vue'
-import { authenticationGuard, firstFactorAuthenticationGuard, loggedUserGuard } from './guards/index';
-import { createRouter, createWebHistory } from "vue-router";
+import Profile from './views/Profile.vue';
+import FirstTimeLogin from './views/FirstTimeLogin.vue';
+import {
+	authenticationGuard,
+	firstFactorAuthenticationGuard,
+	firstLoginGuard,
+	loggedUserGuard
+} from './guards/index';
 import { user } from './user';
-import ImageCropper from './components/ImageCropper.vue';
 
 const routes = [
 	{
@@ -63,21 +70,15 @@ const routes = [
 		beforeEnter: authenticationGuard
 	},
 	{
-		name: '2fa-setup',
-		path: '/2fa-setup',
-		component: TwoFactorAuthenticationSetup,
-		beforeEnter: authenticationGuard
-	},
-	{
 		name: '2fa-auth',
 		path: '/2fa-auth',
 		component: TwoFactorAuthentication,
 		beforeEnter: firstFactorAuthenticationGuard
 	},
 	{
-		name: 'cropper',
-		path: '/crop',
-		component: ImageCropper,
+		name: 'profile',
+		path: '/profile',
+		component: Profile,
 		beforeEnter: authenticationGuard
 	},
 	{
@@ -85,6 +86,12 @@ const routes = [
 		path: '/social',
 		component: Social,
 		beforeEnter: authenticationGuard
+	},
+	{
+		name: 'first-login',
+		path: '/first-login',
+		component: FirstTimeLogin,
+		beforeEnter: firstLoginGuard
 	}
 ];
 

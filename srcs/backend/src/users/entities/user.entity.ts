@@ -18,10 +18,13 @@ export class User {
   @Column()
   username: string;
 
+  @Column({ nullable: true })
+  intraUsername: string;
+
   @Column()
   readonly email: string;
 
-  @Column({ default: 'default_avatar.png' })
+  @Column({ default: 'default_avatar.jpg' })
   avatar: string;
 
   @Column()

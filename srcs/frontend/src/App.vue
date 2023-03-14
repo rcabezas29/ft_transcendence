@@ -3,17 +3,9 @@
 	import { user } from "./user";
 	import router from './router';
 	import AlreadyConnected from './views/AlreadyConnected.vue';
-	import { computed } from "vue";
 	import CursorLines from './components/CursorLines.vue';
 
 	const routes = router.getRoutes();
-
-	const userImg = computed(() => {
-		if (user.username)
-			return `http://localhost:3000/users/avatar/${user.username}`;
-		else
-			return "";
-	});
 
 	function logoutUser(): void {
 		user.logout();
@@ -34,7 +26,7 @@
 		<div class="dev">
 			<h3>Dev data</h3>
 			<div v-if="user.checkIsLogged()">
-				<img id="user-image" :src="userImg" />
+				<img id="user-image" :src=user.avatarImageURL />
 				<h4>User: {{ user.username }}</h4>
 				<p>isLogged: {{ user.checkIsLogged() }}</p>
 				<p>token: {{ user.token }}</p>

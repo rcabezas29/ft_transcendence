@@ -30,7 +30,6 @@ export class ChatGateway {
 	@SubscribeMessage("challenge")
 	challenge(client: Socket, payload: DirectMessagePayload): void {
 		const fromUser: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		console.log('Entra en challenge');
 		this.chatService.challenge(fromUser, payload);
 	}
 

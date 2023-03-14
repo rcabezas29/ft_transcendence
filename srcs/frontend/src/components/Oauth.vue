@@ -3,6 +3,11 @@ import router from '@/router';
 import { user } from '@/user';
 import { onBeforeMount } from 'vue';
 
+interface OauthResponse {
+	access_token: string;
+	isFirstLogin: boolean;
+}
+
 onBeforeMount(async () => {
 	const params = new URLSearchParams(window.location.search);
 	const code = params.get("code");
@@ -21,7 +26,7 @@ onBeforeMount(async () => {
 		router.replace({ "name": "login" })
 		return;
 	}
-	const response = await httpResponse.json();
+	const response: OauthResponse = await httpResponse.json();
 
 	await user.auth(response.access_token);
 
@@ -30,10 +35,10 @@ onBeforeMount(async () => {
 		return;
 	}
 
-	if (response.isFirstLogin === true)
-		router.replace({ "name": "cropper"});
+	if (response.isFirstLogin || user.hasSubmittedFirstTimeLoginForm() === false)
+		router.replace({ "name": "first-login" });
 	else
-		router.replace({ "name": "home"});
+		router.replace({ "name": "home" });
 });
 
 </script>

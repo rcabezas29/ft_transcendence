@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from '../users/users.module';
 import { IntraAuthModule } from 'src/intra-auth/intra-auth.module';
 import { FilesModule } from 'src/files/files.module';
+import { PasswordUtilsModule } from 'src/password-utils/password-utils.module';
 
 @Module({
   controllers: [AuthController],
@@ -23,7 +24,8 @@ import { FilesModule } from 'src/files/files.module';
           signOptions: {expiresIn: '2h'}
         }
       }
-    })
+    }),
+    PasswordUtilsModule
   ],
   exports: [JwtModule, AuthService]
 })

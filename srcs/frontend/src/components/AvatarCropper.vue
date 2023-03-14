@@ -1,33 +1,18 @@
 <script setup lang="ts">
 
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
-import { user } from '@/user';
 
 const cropperRef = ref<any>(null);
 
-const userImg = computed(() => {
-    if (user.username)
-        return `http://localhost:3000/users/avatar/${user.username}`;
-    else
-        return "";
-});
+const props = defineProps<{
+    avatarUrl: string
+}>();
 
-async function postImage(image: Blob): Promise<void> {
-    const formData: FormData = new FormData();
-    formData.append("file", image, "file");
-
-    const httpResponse = await fetch(userImg.value, {
-        method: "POST",
-        body: formData
-    });
-
-    if (httpResponse.status != 201) {
-        console.log('error while posting image');
-        return;
-    }
-}
+const emit = defineEmits<{
+  (e: 'crop', imageBlob: Blob): void
+}>()
 
 function cropImage(): void {
     if (!cropperRef.value)
@@ -38,7 +23,7 @@ function cropImage(): void {
             (blob: Blob) => {
                 if (!blob)
                     return;
-                postImage(blob);
+                emit('crop', blob);
             },
             'image/jpeg'
         );
@@ -52,7 +37,7 @@ function cropImage(): void {
 <template>
     <div class="cropper-container">
         <cropper ref="cropperRef" class="cropper"
-        :src="userImg"
+        :src="avatarUrl"
         :stencil-props="{
             handlers: {},
             movable: false,
@@ -65,12 +50,14 @@ function cropImage(): void {
         }"
         image-restriction="stencil"
         />
-        <button @click="cropImage">CROP</button>
+        <button type="button" @click="cropImage">crop</button>
     </div>
 </template>
 
 <style scoped>
     .cropper-container {
+        display: flex;
+        align-items: center;
         margin: 20px;
     }
 
@@ -78,5 +65,10 @@ function cropImage(): void {
         height: 300px;
         width: 300px;
         background: #DDD;
+    }
+
+    .cropper-container > button {
+        height: fit-content;
+        margin-left: 10px;
     }
 </style>

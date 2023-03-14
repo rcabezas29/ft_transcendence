@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
@@ -8,8 +9,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConnectionIsNotSetError, In, Repository } from 'typeorm';
-import { IntraAuthService } from 'src/intra-auth/intra-auth.service';
+import { In, Repository } from 'typeorm';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { UserFriend } from './interfaces/user-friend.interface';
@@ -17,38 +17,36 @@ import { Friendship } from 'src/friendships/entities/friendship.entity';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { StatsService } from 'src/stats/stats.service';
 import { Stats } from 'src/stats/entities/stats.entity';
-import { GameInfo } from './interfaces/game-info.interface';
+import { GameInfo, GameResult } from './interfaces/game-info.interface';
 import { FilesService } from 'src/files/files.service';
+import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
 
 @Injectable()
 export class UsersService {
   constructor(
+    private readonly friendshipsService: FriendshipsService,
+    private readonly statsService: StatsService,
+    private readonly filesService: FilesService,
+    private readonly passwordUtilsService: PasswordUtilsService,
+
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-
-    private intraAuthService: IntraAuthService,
-
-    private friendshipsService: FriendshipsService,
-
-    private statsService: StatsService,
-
-    private filesService: FilesService
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const usernameExistsInIntra =
-      await this.intraAuthService.usernameExistsInIntra(createUserDto.username);
     const usernameExists = await this.findOneByUsername(createUserDto.username);
-    if (usernameExistsInIntra || usernameExists)
+    if (usernameExists) {
       throw new BadRequestException(
         'Username already in use. Please choose a different one.',
       );
+    }
 
     const emailExists = await this.findOneByEmail(createUserDto.email);
-    if (emailExists)
+    if (emailExists) {
       throw new BadRequestException(
         'Email address already in use. Please log in instead or choose a different one.',
       );
+    }
 
     try {
       const newUser = { ...createUserDto, stats: new Stats() };
@@ -60,12 +58,11 @@ export class UsersService {
     }
   }
 
-  async createWithoutPassword(email: string, username: string) {
+  async createWithIntraUser(email: string, intraUsername: string) {
     try {
-      const newUser = { email, username, password: '', stats: new Stats() };
+      const newUser = { email, username: '', intraUsername, password: '', stats: new Stats() };
       const user = await this.usersRepository.save(newUser);
-      const { password, ...result } = user;
-      return result;
+      return user;
     } catch (e) {
       throw new BadRequestException('Failed to create user');
     }
@@ -119,10 +116,7 @@ export class UsersService {
 
     const allUserFriendsPromises: Promise<UserFriend>[] = friendsRelations.map(
       async (friendship: Friendship): Promise<UserFriend> => {
-        const friendId =
-          friendship.user1Id == userId
-            ? friendship.user2Id
-            : friendship.user1Id;
+        const friendId = friendship.user1Id == userId ? friendship.user2Id : friendship.user1Id;
         const friend = await this.findOneById(friendId);
         return {
           userId: friendId,
@@ -133,9 +127,7 @@ export class UsersService {
       },
     );
 
-    const allUserFriends: UserFriend[] = await Promise.all(
-      allUserFriendsPromises,
-    );
+    const allUserFriends: UserFriend[] = await Promise.all(allUserFriendsPromises);
     return allUserFriends;
   }
 
@@ -144,6 +136,21 @@ export class UsersService {
       id,
       ...updateUserDto,
     };
+
+    if (updateUserDto.username) {
+      const usernameExists = await this.findOneByUsername(updateUserDto.username);
+      if (usernameExists && usernameExists.id != id) {
+        throw new BadRequestException(
+          'Username already in use. Please choose a different one.',
+        );
+      };
+    }
+
+    if (updateUserDto.password) {
+      const newpass = await this.passwordUtilsService.hashPassword(updateUserDto.password);
+      userToUpdate.password = newpass;
+    }
+
     try {
       const user = await this.usersRepository.preload(userToUpdate);
       if (user) {
@@ -160,8 +167,9 @@ export class UsersService {
     const user = await this.findOneById(id);
 
     this.statsService.update(user.stats.id, {
-      wonGames: user.stats.wonGames += (gameInfo.winner ? 1 : 0),
-      lostGames: user.stats.lostGames += (!gameInfo.winner ? 1 : 0),
+      wonGames: user.stats.wonGames += gameInfo.gameResult === GameResult.Win ? 1 : 0,
+      lostGames: user.stats.lostGames += gameInfo.gameResult === GameResult.Lose ? 1 : 0,
+      drawGames: user.stats.drawGames += gameInfo.gameResult === GameResult.Draw ? 1 : 0,
       scoredGoals: gameInfo.scoredGoals,
       receivedGoals: gameInfo.receivedGoals,
     });
@@ -171,25 +179,48 @@ export class UsersService {
     await this.usersRepository.delete(id);
   }
 
-  async getAvatar(username: string): Promise<StreamableFile> {
-    const user: User = await this.findOneByUsername(username);
+  async getAvatar(id: number): Promise<StreamableFile> {
+    const user: User = await this.findOneById(id);
     if (!user)
       throw new NotFoundException('Avatar not found');
 
     const userAvatar: string = user.avatar;
     const avatars_path = join(process.cwd(), 'avatars');
-    const file = createReadStream(join(avatars_path, userAvatar));
+    const path = join(avatars_path, userAvatar);
+
+    if (this.filesService.fileExists(path) === false)
+      throw new NotFoundException('Avatar not found');
+
+    const file = createReadStream(path);
     return new StreamableFile(file);
   }
 
-  async uploadAvatar(username: string, image: Express.Multer.File) {
-    const user: User = await this.findOneByUsername(username);
+  async uploadAvatar(id: number, image: Express.Multer.File) {
+    const user: User = await this.findOneById(id);
     if (!user)
       throw new NotFoundException();
 
-    const avatarPath = join(process.cwd(), 'avatars', user.avatar)
-    this.filesService.deleteFile(avatarPath);
-    this.filesService.uploadFile(avatarPath, image);
+    const oldFileName = user.avatar;
+    const newFileName = `${user.username}.jpg`;
+    const avatarPath = join(process.cwd(), 'avatars', oldFileName)
+    const newAvatarPath = join(process.cwd(), 'avatars', newFileName);
+
+    if (oldFileName && oldFileName != "default_avatar.jpg")
+      this.filesService.deleteFile(avatarPath);
+
+    if (!this.filesService.uploadFile(newAvatarPath, image))
+      throw new InternalServerErrorException("Error while uploading file");
+
+    const pixelizedImagePath = await this.filesService.pixelizeUserImage(newAvatarPath, user.username);
+    if (!pixelizedImagePath)
+      throw new InternalServerErrorException("Error while pixelizing");
+
+    if (oldFileName != newFileName) {
+      const updateUserDto: UpdateUserDto = {
+        avatar: newFileName
+      }
+      this.update(user.id, updateUserDto);
+    }
   }
 
   async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
@@ -217,5 +248,13 @@ export class UsersService {
     return this.usersRepository.update(userId, {
       isTwoFactorAuthenticationEnabled: false
     });
+  }
+
+  async findUsernameMatches(username: string) {
+    const users: User[] = await this.findAll();
+
+    return users.filter((u) =>
+      u.username.toLowerCase().includes(username.toLowerCase())
+    );
   }
 }

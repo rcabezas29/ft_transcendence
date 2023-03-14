@@ -3,20 +3,20 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { IntraAuthModule } from 'src/intra-auth/intra-auth.module';
 import { FriendshipsModule } from 'src/friendships/friendships.module';
 import { StatsModule } from 'src/stats/stats.module';
 import { FilesModule } from 'src/files/files.module';
+import { PasswordUtilsModule } from 'src/password-utils/password-utils.module';
 
 @Module({
   controllers: [UsersController],
   providers: [UsersService],
   imports: [
     TypeOrmModule.forFeature([User]),
-    IntraAuthModule,
     FriendshipsModule,
     StatsModule,
-    FilesModule
+    FilesModule,
+    PasswordUtilsModule
   ],
   exports: [UsersService, TypeOrmModule],
 })

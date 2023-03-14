@@ -55,6 +55,10 @@ Returns a user's friends in the `UserFriend[]` format:
 }
 ```
 
+### GET /users/search/:username
+
+Searches users by a fragment of a username, and returns an array with all the partial matches.
+
 ### POST /users
 
 Creates new user and returns the created user

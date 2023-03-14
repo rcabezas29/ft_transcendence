@@ -4,11 +4,14 @@ import { Server } from 'socket.io';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
+import { Vector2 } from './classes/vector2';
+import { GameObject, Paddle } from './classes/game-object';
+import { Table } from './classes/table';
+import { GameResult } from 'src/users/interfaces/game-info.interface';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 
-const PADDLE_SPEED = 200; // in px per second;
 const INITIAL_BALL_SPEED = 5; // in px per second;
 
 type Move = (playerIndex: number, deltaTime: number) => void;
@@ -23,241 +26,6 @@ enum GameStatus {
   Preparing = 'preparing',
   Playing = 'playing',
   End = 'end',
-}
-
-class Vector2 {
-  x: number;
-  y: number;
-
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-}
-
-function addVec2(u: Vector2, v: Vector2): Vector2 {
-  return new Vector2(u.x + v.x, u.y + v.y);
-}
-
-function multConstToVec2(k: number, u: Vector2): Vector2 {
-  return new Vector2(u.x * k, u.y * k);
-}
-
-function rotateVec2(u: Vector2, angle: number): Vector2 {
-  const v: Vector2 = new Vector2(
-    u.x * Math.cos(angle) - u.y * Math.sin(angle),
-    u.x * Math.sin(angle) + u.y * Math.cos(angle),
-  );
-
-  return v;
-}
-
-function isPointInHitBox(point: Vector2, hitbox: HitBox): boolean {
-  return (
-    point.x >= hitbox.position.x &&
-    point.x <= hitbox.position.x + hitbox.bounds.x &&
-    point.y >= hitbox.position.y &&
-    point.y <= hitbox.position.y + hitbox.bounds.y
-  );
-}
-
-class HitBox {
-  position: Vector2;
-  orientation: Vector2;
-  bounds: Vector2;
-
-  constructor(position: Vector2, orientation: Vector2, bounds: Vector2) {
-    this.position = position;
-    this.orientation = orientation;
-    this.bounds = bounds;
-  }
-
-  contains(object: HitBox): boolean {
-    return this.incidentPoints(object) === 4;
-  }
-
-  overlaps(object: HitBox): boolean {
-    return this.incidentPoints(object) > 0;
-  }
-
-  incidentPoints(object: HitBox): number {
-    let pointCount = 0;
-
-    pointCount += Number(isPointInHitBox(object.position, this));
-    pointCount += Number(
-      isPointInHitBox(
-        new Vector2(object.position.x, object.position.y + object.bounds.y),
-        this,
-      ),
-    );
-    pointCount += Number(
-      isPointInHitBox(
-        new Vector2(object.position.x + object.bounds.x, object.position.y),
-        this,
-      ),
-    );
-    pointCount += Number(
-      isPointInHitBox(
-        new Vector2(
-          object.position.x + object.bounds.x,
-          object.position.y + object.bounds.y,
-        ),
-        this,
-      ),
-    );
-
-    return pointCount;
-  }
-}
-
-class GameObject {
-  hitBox: HitBox;
-  direction: Vector2;
-  speed: number;
-
-  constructor(
-    position: Vector2,
-    orientation: Vector2,
-    bounds: Vector2,
-    speed: number,
-  ) {
-    this.hitBox = new HitBox(position, orientation, bounds);
-    this.direction = new Vector2(0, 0);
-    this.speed = speed;
-  }
-
-  updatePosition(deltaTime: number) {
-    this.hitBox.position = addVec2(
-      this.hitBox.position,
-      multConstToVec2(this.speed, this.direction),
-    );
-  }
-}
-
-class Paddle extends GameObject {
-  bounceDirections: Vector2[] = [];
-  gameArea: HitBox;
-  sectionLength: number;
-
-  constructor(
-    position: Vector2,
-    orientation: Vector2,
-    length: number,
-    gameArea: HitBox,
-  ) {
-    const width: number = orientation.x ? 1 : length;
-    const height: number = orientation.y ? 1 : length;
-
-    super(position, orientation, new Vector2(width, height), PADDLE_SPEED);
-
-    let angleDifference: number = Math.PI / 6;
-    if (orientation.x) angleDifference *= orientation.x;
-    else angleDifference *= orientation.y;
-    //fix transposition
-    const transposedOrientation: Vector2 = new Vector2(
-      -Math.abs(orientation.y),
-      -Math.abs(orientation.x),
-    );
-    this.bounceDirections[0] = rotateVec2(
-      transposedOrientation,
-      angleDifference,
-    );
-    for (let i = 1; i < 3; ++i) {
-      this.bounceDirections.push(
-        rotateVec2(this.bounceDirections[i - 1], angleDifference),
-      );
-    }
-    this.bounceDirections[2] = new Vector2(orientation.x, orientation.y);
-    for (let i = 3; i < 5; ++i) {
-      this.bounceDirections.push(
-        rotateVec2(this.bounceDirections[i - 1], angleDifference),
-      );
-    }
-
-    this.gameArea = gameArea;
-    this.sectionLength = length / this.bounceDirections.length;
-  }
-
-  moveUp(deltaTime: number) {
-    console.log(`delta ${deltaTime}`);
-    const newPosition: Vector2 = new Vector2(
-      this.hitBox.position.x,
-      this.hitBox.position.y - this.speed * deltaTime,
-    );
-    this.move(newPosition);
-  }
-
-  moveDown(deltaTime: number) {
-    const newPosition: Vector2 = new Vector2(
-      this.hitBox.position.x,
-      this.hitBox.position.y + this.speed * deltaTime,
-    );
-    this.move(newPosition);
-  }
-
-  move(newPosition: Vector2) {
-    const newHitbox = new HitBox(
-      newPosition,
-      this.hitBox.orientation,
-      this.hitBox.bounds,
-    );
-    if (this.gameArea.contains(newHitbox)) {
-      this.hitBox.position.y = newHitbox.position.y;
-      this.hitBox.position.x = newHitbox.position.x;
-    }
-  }
-
-  bounceBall(ball: GameObject): Vector2 {
-    const ballPosition: number =
-      ball.hitBox.position.y + ball.hitBox.bounds.y / 2;
-    const bouncePoints: number[] = [];
-
-    this.bounceDirections.forEach((_, index) => {
-      bouncePoints.push(
-        this.hitBox.position.y + this.sectionLength * (index + 1),
-      );
-    });
-
-    for (let i = 0; i < bouncePoints.length; ++i) {
-      if (ballPosition < bouncePoints[i]) {
-        return this.bounceDirections[i];
-      }
-    }
-    return this.bounceDirections[bouncePoints.length - 1];
-  }
-}
-
-class Table {
-  walls: Array<HitBox>;
-  goals: Array<HitBox>;
-  area: HitBox;
-
-  constructor(/* config info */) {
-    this.walls = new Array<HitBox>();
-    this.goals = new Array<HitBox>();
-    this.area = new HitBox(
-      new Vector2(0, 0),
-      new Vector2(1, 0),
-      new Vector2(400, 200),
-    );
-    this.walls.push(
-      new HitBox(new Vector2(0, -40), new Vector2(0, -1), new Vector2(400, 40)),
-    );
-    this.walls.push(
-      new HitBox(new Vector2(0, 200), new Vector2(0, 1), new Vector2(400, 40)),
-    );
-    this.goals.push(
-      new HitBox(new Vector2(-40, 0), new Vector2(1, 0), new Vector2(40, 200)),
-    );
-    this.goals.push(
-      new HitBox(new Vector2(400, 0), new Vector2(-1, 0), new Vector2(40, 200)),
-    );
-  }
-
-  reflect(u: Vector2, v: Vector2): Vector2 {
-    const w = new Vector2(u.x * (v.x ? -1 : 1), u.y * (v.y ? -1 : 1));
-    return w;
-  }
 }
 
 class Game {
@@ -331,9 +99,6 @@ class Game {
     this.status = GameStatus.Playing;
     this.server.to(this.name).emit('start-game');
     this.players.forEach((player, playerIndex) => {
-      player.socket.on('disconnect', () => {
-        this.end((playerIndex + 1) % 2);
-      });
       player.socket.on('move', (movementIndex: number, pressed: boolean) => {
         this.playerActions[playerIndex][movementIndex].input = pressed;
       });
@@ -349,7 +114,11 @@ class Game {
     const now = new Date();
 
     if (now.getTime() - this.startDate.getTime() >= 200 * 1000) {
-      this.end(Number(this.score[1] > this.score[0]));
+      if (this.score[1] === this.score[0]) {
+        this.end(GameResult.Draw);
+      } else {
+        this.end(Number(this.score[1] > this.score[0]));
+      }
     }
     this.updateObjects(now);
     const payload = {
@@ -438,7 +207,7 @@ class Game {
     );
   }
 
-  end(winnerIndex: number) {
+  end(gameResult: GameResult) {
     clearInterval(this.gameInterval);
     console.log('game end', this.name);
     this.status = GameStatus.End;
@@ -447,21 +216,27 @@ class Game {
       1 / ((1 + 10) ^ ((this.players[1].elo - this.players[0].elo) / 400));
 
     this.players.forEach((player, index) => {
-      player.socket.emit('end-game', index === winnerIndex);
-      player.elo = Math.floor(
-        player.elo + 32 * (Number(index === winnerIndex) - expectedScore),
-      );
-      this.usersService.update(player.id, { elo: player.elo });
+      player.socket.emit('end-game', gameResult);
+      if (gameResult !== GameResult.Draw) {
+        player.elo = Math.floor(
+          player.elo + 32 * (Number(gameResult) - expectedScore),
+        );
+        this.usersService.update(player.id, { elo: player.elo });
+      }
       this.usersService.updateStats(player.id, {
-        winner: index === winnerIndex,
+        gameResult: gameResult,
         scoredGoals: this.score[index],
         receivedGoals: this.score[(index + 1) % 2],
       });
     });
+    let winnerId: number = 0;
+    if (this.score[0] !== this.score[1]) {
+      winnerId = this.score[0] > this.score[1] ? this.players[0].id : this.players[1].id;
+    }
     this.matchHistoryService.create({
       user1Id: this.players[0].id,
       user2Id: this.players[1].id,
-      winner: this.players[winnerIndex].id,
+      winner: winnerId,
       score: this.score,
     });
     this.players.forEach((player) => player.socket.leave(this.name));
@@ -498,6 +273,16 @@ class Game {
 	this.server.emit("end-game", this.name);
   }
 
+  rejoinPlayer(player: GatewayUser) {
+    for (const i in this.players) {
+      if (this.players[i].socket.connected === false)
+        this.players[i].socket = player.socket;
+        this.players[i].socket.join(this.name);
+        this.players[i].socket.on('move', (movementIndex: number, pressed: boolean) => {
+          this.playerActions[i][movementIndex].input = pressed;
+        });
+    }
+  }
 }
 
 @Injectable()
@@ -509,7 +294,7 @@ export class GameService {
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
 	const game: Game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
-	game.setEndGameCallback((gameName) => { this.onEndGame(gameName) })
+	game.setEndGameCallback((gameName: string) => { this.onEndGame(gameName) })
     this.ongoingGames.push(game);
     this.notifyFriends(user1, user2);
   }
@@ -542,5 +327,22 @@ export class GameService {
 	});
 
 	client.socket.emit("ongoing-games", games)
+  }
+
+  isPlayerInAGame(playerId: number): boolean {
+    for (const game of this.ongoingGames) {
+      if (game.players[0].id === playerId || game.players[1].id === playerId)
+        return true;
+    }
+    return false;
+  }
+
+  joinPlayerToGame(player: GatewayUser) {
+    for (const game of this.ongoingGames) {
+      if (game.players[0].id === player.id || game.players[1].id === player.id) {
+        game.rejoinPlayer(player);
+        player.socket.emit('rejoin-game');
+      }
+    }
   }
 }

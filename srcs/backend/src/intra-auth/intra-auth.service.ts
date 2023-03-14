@@ -16,15 +16,6 @@ export class IntraAuthService {
         return this._appIntraToken;
     }
 
-    async usernameExistsInIntra(username: string): Promise<boolean> {
-        const httpResponse = await fetch(`https://api.intra.42.fr/v2/users/${username}`, {
-            headers: {"Authorization": `Bearer ${this._appIntraToken}`}
-        });
-        if (httpResponse.status === 200)
-            return true;
-        return false;
-    }
-
     async getUserIntraToken(code: string, state: string) {
         if (state != process.env.STATE_STRING)
             throw new UnauthorizedException('state strings do not match');
@@ -63,10 +54,10 @@ export class IntraAuthService {
         const response = await httpResponse.json();
     
         const userEmail = response.email;
-        const username = response.login;
+        const intraUsername = response.login;
 		const userImageURL = response.image.link;
         
-        return { email: userEmail, username, userImageURL };
+        return { email: userEmail, intraUsername, userImageURL };
     }
 
     private async authorizeIntraApp(): Promise<void> {
@@ -89,7 +80,7 @@ export class IntraAuthService {
         this._appIntraToken = response.access_token;
     }
 
-	async downloadIntraImage(userImageURL: string) {
+	async downloadIntraImage(userImageURL: string): Promise<string | null> {
 		const savePath = join(process.cwd(), "intra-images");
 		const downloadedFilePath = await this.filesService.downlaodFile(
 			savePath,

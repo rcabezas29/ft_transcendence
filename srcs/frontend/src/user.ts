@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive } from 'vue';
 import type { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
@@ -6,13 +6,7 @@ import { directMessageController } from './directMessageController';
 import { channelController } from './channelController';
 import { gameController } from './gameController';
 import { friendsController } from './friendsController';
-
-export interface JwtPayload {
-    id: number;
-	isSecondFactorAuthenticated: boolean;
-	iat: number;
-	exp: number;
-}
+import type { JwtPayload, UserData } from './interfaces';
 
 interface FetchedUser {
 	id: number;
@@ -26,6 +20,8 @@ class User {
 	public alreadyConnected: boolean = false;
 	public id: number = -1;
 	public username: string = '';
+	public avatarImageURL: string = '';
+
 	private isLogged: boolean = false;
 	private onLogoutCallbacks: Function[] = [];
 
@@ -39,17 +35,15 @@ class User {
 			const decoded: JwtPayload = jwt_decode(this.token);
 			this.id = decoded.id;
 
-			const fetchUserData = await fetch(`http://localhost:3000/users/${this.id}`, {
-				method: "GET",
-				headers: {
-					"Authorization": `Bearer ${user.token}`
-				}
-			});
+			const userData: UserData | null = await this.fetchUserData();
+			if (!userData) {
+				console.log('error fetching user data');
+				return ;
+			}
 
-			const response = await fetchUserData.json();
-
-			const fetchedUser: FetchedUser = response;
+			const fetchedUser: FetchedUser = userData;
 			this.username = fetchedUser.username;
+			this.avatarImageURL = `http://localhost:3000/users/avatar/${this.id}`;
 
 		} catch (error) {
 			console.log(error, 'error from decoding token');
@@ -163,6 +157,12 @@ class User {
 		return this.isLogged;
 	}
 
+	hasSubmittedFirstTimeLoginForm(): boolean {
+		if (this.username.length > 0)
+			return true;
+		return false;
+	}
+
 	logout(): void {
 		this.onLogoutCallbacks.forEach((callback) => {
 			callback();
@@ -171,6 +171,8 @@ class User {
 		this.token = null;
 		this.socket?.disconnect();
 		this.socket = null;
+		this.id = -1;
+		this.username = '';
 		this.isLogged = false;
 	}
 
@@ -219,6 +221,87 @@ class User {
 		const { access_token } = await httpResponse.json();
 		await this.auth(access_token);
 		return true;
+	}
+
+	async fetchUserData(): Promise<UserData | null> {
+		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+			method: "GET",
+			headers: {
+				"Authorization": `Bearer ${this.token}`
+			}
+		});
+
+		if (httpResponse.status != 200) {
+			return null;
+		}
+
+		const response = await httpResponse.json();
+		return response;
+	}
+
+	async updateUsername(newUsername: string): Promise<boolean> {
+		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+			method: "PATCH",
+			headers: {
+				"Authorization": `Bearer ${this.token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({username: newUsername})
+		})
+
+		if (httpResponse.status != 200) {
+			return false;
+		}
+        this.username = newUsername;
+		return true;
+	}
+
+	async updatePassword(newPassword: string): Promise<boolean> {
+		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+			method: "PATCH",
+			headers: {
+				"Authorization": `Bearer ${this.token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({password: newPassword})
+		})
+
+		if (httpResponse.status != 200) {
+			return false;
+		}
+		return true;
+	}
+
+	async updateAvatar(image: Blob): Promise<boolean> {
+		const formData: FormData = new FormData();
+		formData.append("file", image, "file");
+	
+		const httpResponse = await fetch(`http://localhost:3000/users/avatar/${user.id}`, {
+			method: "POST",
+			body: formData
+		});
+
+		if (httpResponse.status != 201) {
+			console.log('error while posting image');
+			return false;
+		}
+
+		this.updateAvatarImageURL();
+		return true;
+	}
+
+	updateAvatarImageURL() {
+		let basicURL = this.avatarImageURL;
+		const randomPartIndex = this.avatarImageURL.indexOf("?rand=");
+		if (randomPartIndex != -1)
+			basicURL = this.avatarImageURL.substring(0, randomPartIndex);
+
+		const randomKey = +new Date();
+		this.avatarImageURL = `${basicURL}?rand=${randomKey}`;
+	}
+
+	notifyOfUserChange() {
+		this.socket?.emit("user-updated");
 	}
 }
 

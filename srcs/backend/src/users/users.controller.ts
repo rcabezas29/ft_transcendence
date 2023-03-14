@@ -7,16 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
-  Req,
   ParseIntPipe,
   UseInterceptors,
-  UploadedFile
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard, JwtTwoFactorGuard, UserGuard } from 'src/auth/guards';
-import { RequestWithUser } from './interfaces/request-with-user.interface';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
@@ -32,12 +30,6 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.findAll();
-  }
-
-  @UseGuards(JwtTwoFactorGuard)
-  @Get('profile')
-  getProfile(@Req() req: RequestWithUser) {
-    return req.user;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -57,21 +49,28 @@ export class UsersController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
   }
-
-  @Get("avatar/:user")
-  getAvatar(@Param("user") username: string) {
-	  return this.usersService.getAvatar(username);
+  
+  @Get("avatar/:id")
+  async getAvatar(@Param("id", ParseIntPipe) id: number) {
+	  return this.usersService.getAvatar(id);
   }
 
-  @Post("avatar/:user")
+  @UseGuards(JwtTwoFactorGuard)
+  @Post("avatar/:id")
   @UseInterceptors(FileInterceptor('file'))
-  uploadAvatar(@Param("user") username: string, @UploadedFile() file: Express.Multer.File) {
-	  return this.usersService.uploadAvatar(username, file);
+  async uploadAvatar(@Param("id", ParseIntPipe) id: number, @UploadedFile() file: Express.Multer.File) {
+	  return this.usersService.uploadAvatar(id, file);
   }
 
   @UseGuards(JwtTwoFactorGuard)
   @Get(':id/friends')
   getFriends(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.getAllUserFriends(id);
+  }
+
+  @UseGuards(JwtTwoFactorGuard)
+  @Get('search/:username')
+  findUsernameMatches(@Param('username') usernameSegment: string) {
+    return this.usersService.findUsernameMatches(usernameSegment);
   }
 }

@@ -17,14 +17,24 @@ export class FilesService {
 		const fileContents = await httpResponse.arrayBuffer();
 		const newSavePath = join(savePath, fileName);
 
-		fs.writeFileSync(newSavePath, Buffer.from(fileContents));
+		try {
+			fs.writeFileSync(newSavePath, Buffer.from(fileContents));
+		} catch(e) {
+			return null;
+		}
 
 		return newSavePath;
 	}
 
-	deleteFile(filePath: string) {
-		if (filePath)
+	deleteFile(filePath: string): boolean {
+		if (!this.fileExists(filePath))
+            return false;
+		try {
 			fs.unlinkSync(filePath);
+			return true;
+		} catch(e) {
+			return false;
+		}
 	}
 
 	getFileNameFromPath(path: string): string {
@@ -34,11 +44,14 @@ export class FilesService {
 	}
 
     async pixelizeUserImage(imagePath: string, username: string): Promise<string> {
+		if (!this.fileExists(imagePath))
+			return null;
+
 		const file = fs.readFileSync(imagePath);
 		const formData: FormData = new FormData();
 		formData.append("file", new Blob([file]), "file");
 
-		let httpResponse = await fetch("http://pixelizer:3001/pixelizer", {
+		const httpResponse = await fetch("http://pixelizer:3001/pixelizer", {
 			method: "POST",
 			body: formData
 		})
@@ -48,12 +61,27 @@ export class FilesService {
 
 		const fileContents = await httpResponse.arrayBuffer();
 		const savePath = join(process.cwd(), "avatars", `${username}.jpg`);
-		fs.writeFileSync(savePath, Buffer.from(fileContents));
+
+		try {
+			fs.writeFileSync(savePath, Buffer.from(fileContents));
+		} catch(e) {
+			return null;
+		}
+
 		return savePath;
 	}
 
-	uploadFile(savePath: string, file: Express.Multer.File): void {
+	uploadFile(savePath: string, file: Express.Multer.File): boolean {
 		const fileBuffer: Buffer = file.buffer;
-		fs.writeFileSync(savePath, fileBuffer);
+		try {
+			fs.writeFileSync(savePath, fileBuffer);
+			return true;
+		} catch(e) {
+			return false;
+		}
+	}
+
+	fileExists(path: string): boolean {
+		return fs.existsSync(path);
 	}
 }
