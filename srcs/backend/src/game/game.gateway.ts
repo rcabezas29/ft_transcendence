@@ -51,6 +51,12 @@ export class GameGateway implements OnGatewayInit {
     this.gameService.createGame(user1, user2);
   }
 
+  @SubscribeMessage('refuse-challenge')
+  refuseGame(client: any, challengerId: number) {
+    const challenger: GatewayUser = this.gatewayManagerService.getClientByUserId(challengerId);
+    challenger.socket.emit('challenge-refused', this.gatewayManagerService.getClientBySocketId(client.id).id);
+  }
+
   @SubscribeMessage('check-game-continuity')
   playerContinuity(client: Socket, playerId: number) {
     if (this.gameService.isPlayerInAGame(playerId)) {
