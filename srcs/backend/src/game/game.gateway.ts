@@ -7,9 +7,8 @@ import {
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { MatchmakingService } from './matchmaking.service';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
-import { Socket } from 'node:dgram';
 
 interface ChallengePlayers {
   user1Id: number,
@@ -52,7 +51,7 @@ export class GameGateway implements OnGatewayInit {
   }
 
   @SubscribeMessage('ongoing-games')
-  getOngoingGames(client: any) {
+  getOngoingGames(client: Socket) {
 	const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 	this.gameService.sendOngoingMatchesToUser(user);
   }
@@ -67,4 +66,9 @@ export class GameGateway implements OnGatewayInit {
     }
   }
 
+  @SubscribeMessage('spectate-game')
+  spectateGame(client: Socket, gameName: string) {
+	let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+	this.gameService.joinSpectatorToGame(spectator, gameName);
+  }
 }

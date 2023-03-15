@@ -44,6 +44,7 @@ class GameController {
   public timestamp: number = 0;
   public gameRenderer: null | GameRenderer = null;
 
+  //FIXME: The socket handlers should be deleted after the game end. (on gameEnd method)
   setEventHandlers(): void {
     user.socket?.on("game-found", (adversaryName: string) => {
       this.gameFound(adversaryName);
@@ -101,6 +102,7 @@ class GameController {
     } else {
       this.gameRenderer?.tieGame();
     }
+	//TODO: delete all socket event handlers
   }
 
   updateGame(gamePayload: UpdateGamePayload) {

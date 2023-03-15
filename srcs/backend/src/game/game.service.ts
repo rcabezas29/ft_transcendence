@@ -340,4 +340,14 @@ export class GameService {
       }
     }
   }
+
+  joinSpectatorToGame(spectator: GatewayUser, gameName: string) {
+	const gameIndex = this.ongoingGames.findIndex((game) => game.name == gameName);
+	if (gameIndex == -1) {
+		spectator.socket.emit("spectate-game", false);
+		return;
+	}
+	this.ongoingGames[gameIndex].viwers.push(spectator);
+	spectator.socket.join(gameName);
+  }
 }

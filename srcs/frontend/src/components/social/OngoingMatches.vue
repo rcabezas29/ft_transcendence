@@ -1,6 +1,8 @@
 <script setup lang="ts">
 	import { onBeforeMount, onBeforeUnmount, ref, type Ref } from 'vue';
 	import { user } from "../../user"
+	import router from "../../router"
+import path from 'path';
 
 	//FIXME: find better name and move the interface from here
 	interface Game {
@@ -26,7 +28,10 @@
 	}
 
 	function watchGame(gameName: string) {
-		console.log("watch game", gameName)
+		router.push({
+			name: "spectate",
+			params: { matchId: gameName }
+		})
 	}
 
 	onBeforeMount(() => {
