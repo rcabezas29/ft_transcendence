@@ -50,7 +50,8 @@ class Game {
     player2: GatewayUser,
     server: Server,
     private usersService: UsersService,
-    private matchHistoryService: MatchHistoryService
+    private matchHistoryService: MatchHistoryService,
+    private gatewayManagerService: GatewayManagerService
   ) {
     this.server = server;
     this.players.push(player1);
@@ -105,6 +106,7 @@ class Game {
     this.gameInterval = setInterval(() => {
       this.gameLoop();
     }, FRAME_TIME * 1000);
+    this.notifyFriendsOfGameStart();
   }
 
   gameLoop() {
@@ -237,6 +239,7 @@ class Game {
       score: this.score,
     });
     this.players.forEach((player) => player.socket.leave(this.name));
+    this.notifyFriendsOfGameEnd();
   }
 
   sendToPlayer(player: GatewayUser, signal: string, body: any) {
@@ -253,6 +256,30 @@ class Game {
         });
     }
   }
+
+  async notifyFriendsOfGameStart() {
+    let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[0].id);
+    friends.forEach(friend => {
+      friend.socket.emit('friend-in-a-game', this.players[0].id);
+    });
+
+    friends = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[1].id);
+    friends.forEach(friend => {
+      friend.socket.emit('friend-in-a-game', this.players[1].id);
+    });
+  }
+
+  async notifyFriendsOfGameEnd() {
+    let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[0].id);
+		friends.forEach(friend => {
+			friend.socket.emit('friend-game-ended', this.players[0].id);
+		});
+
+    friends = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[1].id);
+    friends.forEach(friend => {
+			friend.socket.emit('friend-game-ended', this.players[1].id);
+		});
+  }
 }
 
 @Injectable()
@@ -260,24 +287,17 @@ export class GameService {
   public server: Server;
   public games: Game[] = [];
 
-  constructor(private usersService: UsersService, private matchHistoryService: MatchHistoryService, private gatewayManagerService: GatewayManagerService) {}
+  constructor(
+    private usersService: UsersService,
+    private matchHistoryService: MatchHistoryService,
+    private gatewayManagerService: GatewayManagerService
+    ) {
+      this.gatewayManagerService.addOnNewConnectionCallback((client: GatewayUser) => this.onNewConnection(client));
+    }
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
-    const game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService);
+    const game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
     this.games.push(game);
-    this.notifyFriends(user1, user2);
-  }
-
-  async notifyFriends(user1: GatewayUser, user2: GatewayUser) {
-    let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(user1.id);
-		friends.forEach(friend => {
-			friend.socket.emit('friend-in-a-game', user1.id);
-		});
-
-    friends = await this.gatewayManagerService.getAllUserConnectedFriends(user2.id);
-    friends.forEach(friend => {
-			friend.socket.emit('friend-in-a-game', user2.id);
-		});
   }
 
   isPlayerInAGame(playerId: number): boolean {
@@ -296,4 +316,23 @@ export class GameService {
       }
     }
   }
+
+
+    //FIXME: a veces el orden no es el bueno, y si coge primero esto y luego que esta online, se queda verde el cuadrado
+    // tb es porque el friendscontroller del front fetchea los usuarios con el connected-friends solo
+  async onNewConnection(client: GatewayUser) {
+    // al nuevo le mando sus amigos quue esten gaming
+		const friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(client.id);
+		const friendsIds: number[] = friends.map((user) => user.id);
+    const gamingFriendsIds: number[] = friendsIds.filter((friendId) => this.isPlayerInAGame(friendId))
+
+    client.socket.emit('gaming-friends', gamingFriendsIds);
+
+    // avisar a sus amigos de si el nuevo esta en un juego
+    if (this.isPlayerInAGame(client.id)) {
+      friends.forEach(friend => {
+        friend.socket.emit('friend-in-a-game', client.id);
+      })
+    }
+	}
 }

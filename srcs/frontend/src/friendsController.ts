@@ -61,9 +61,11 @@ class FriendsController {
 
     setEventHandlers() {
         user.socket?.on('connected-friends', (payload: FriendId[]) => {this.onConnectedFriends(payload)});
+        user.socket?.on('gaming-friends', (payload: FriendId[]) => {this.onGamingFriends(payload)});
         user.socket?.on('friend-online', (payload: FriendId) => {this.onFriendConnected(payload)});
         user.socket?.on('friend-offline', (payload: FriendId) => {this.onFriendDisconnected(payload)});
         user.socket?.on('friend-in-a-game', (payload: FriendId) => {this.onFriendInAGame(payload)});
+        user.socket?.on('friend-game-ended', (payload: FriendId) => {this.onFriendGameEnded(payload)});
         user.socket?.on('new-friendship', (payload: FriendPayload) => {this.onNewFriendship(payload)});
         user.socket?.on('friendship-status-change', (payload: FriendshipStatusPayload) => {this.onFriendshipStatusChange(payload)});
         user.socket?.on('friendship-deleted', (payload: FriendId) => {this.onFriendshipDeleted(payload)});
@@ -87,6 +89,13 @@ class FriendsController {
                     return {id: friend.userId, username: friend.username};
                 });
         directMessageController.onConnectedFriends(chatOnlineFriends);
+        console.log("onConnectedFriends", payload)
+
+    }
+
+    private async onGamingFriends(payload: FriendId[]) {
+        console.log("onGamingFriends", payload)
+        payload.forEach(friendId => this.setFriendInAGame(friendId));
     }
 
     private onFriendConnected(payload: FriendId) {
@@ -107,6 +116,10 @@ class FriendsController {
 
     private onFriendInAGame(payload: FriendId) {
         this.setFriendInAGame(payload);
+    }
+
+    private onFriendGameEnded(payload: FriendId) {
+        this.setFriendOnline(payload);
     }
 
     private onNewFriendship(payload: FriendPayload) {
