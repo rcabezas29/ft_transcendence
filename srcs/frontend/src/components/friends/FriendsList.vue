@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
-import FriendSearchBar from "./FriendSearchBar.vue";
 
 function isOnline(friend: any): boolean {
     return friend.status === FriendStatus.online;
@@ -44,7 +43,6 @@ watch(friendsController, () => {
 </script>
 
 <template>
-	<h1>Friends Component</h1>
     <div class="friends-section">
         <div class="friends-subsection">
             <h2>Active friends</h2>
@@ -76,18 +74,17 @@ watch(friendsController, () => {
                 <button @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>
             </div>
         </div>
-        <FriendSearchBar/>
     </div>
-    
 </template>
 
 <style scoped>
     .friends-section {
+        width: 50%;
         display: flex;
         justify-content: space-around;
         margin-bottom: 20px;
     }
-
+    
     .active-friend {
         display: flex;
         justify-content: space-between;

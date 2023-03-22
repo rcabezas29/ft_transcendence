@@ -7,16 +7,18 @@ import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
 import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
-import FriendsList from './components/friends/FriendsList.vue';
+import Friends from './views/Friends.vue';
 import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
 import Profile from './views/Profile.vue';
 import FirstTimeLogin from './views/FirstTimeLogin.vue';
+
 import {
 	authenticationGuard,
 	firstFactorAuthenticationGuard,
 	firstLoginGuard,
 	loggedUserGuard
 } from './guards/index';
+
 import { user } from './user';
 
 const routes = [
@@ -64,7 +66,7 @@ const routes = [
 	{
 		name: 'friends',
 		path: '/friends',
-		component: FriendsList,
+		component: Friends,
 		beforeEnter: authenticationGuard
 	},
 	{
