@@ -1,7 +1,6 @@
 import { reactive } from "vue";
 import { currentChat } from "./currentChat";
-import type { Chat, Channel, ChatUser } from "./interfaces";
-import type { Message } from "./interfaces/message.interface";
+import type { Chat, Channel, ChatUser, Message } from "./interfaces";
 import { user } from "./user";
 
 interface ChannelPayload {

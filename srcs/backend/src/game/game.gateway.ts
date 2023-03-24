@@ -60,9 +60,7 @@ export class GameGateway implements OnGatewayInit {
   @SubscribeMessage('check-game-continuity')
   playerContinuity(client: Socket, playerId: number) {
     if (this.gameService.isPlayerInAGame(playerId)) {
-      let player: GatewayUser = this.gatewayManagerService.getClientByUserId(
-        playerId,
-      );
+      let player: GatewayUser = this.gatewayManagerService.getClientByUserId(playerId);
       this.gameService.joinPlayerToGame(player);
     }
   }

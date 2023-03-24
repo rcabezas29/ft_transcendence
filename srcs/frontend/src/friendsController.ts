@@ -39,6 +39,11 @@ interface FriendshipStatusPayload {
     friendId: number;
 }
 
+interface ConnectedFriendsPayload {
+    id: number;
+    isGaming: boolean;
+}
+
 export interface UserUpdatedPayload {
     id: FriendId;
     username: string;
@@ -60,10 +65,11 @@ class FriendsController {
     public friends: FriendMap = {};
 
     setEventHandlers() {
-        user.socket?.on('connected-friends', (payload: FriendId[]) => {this.onConnectedFriends(payload)});
+        user.socket?.on('connected-friends', (payload: ConnectedFriendsPayload[]) => {this.onConnectedFriends(payload)});
         user.socket?.on('friend-online', (payload: FriendId) => {this.onFriendConnected(payload)});
         user.socket?.on('friend-offline', (payload: FriendId) => {this.onFriendDisconnected(payload)});
         user.socket?.on('friend-in-a-game', (payload: FriendId) => {this.onFriendInAGame(payload)});
+        user.socket?.on('friend-game-ended', (payload: FriendId) => {this.onFriendGameEnded(payload)});
         user.socket?.on('new-friendship', (payload: FriendPayload) => {this.onNewFriendship(payload)});
         user.socket?.on('friendship-status-change', (payload: FriendshipStatusPayload) => {this.onFriendshipStatusChange(payload)});
         user.socket?.on('friendship-deleted', (payload: FriendId) => {this.onFriendshipDeleted(payload)});
@@ -76,13 +82,18 @@ class FriendsController {
         this.friends = {};
     }
 
-    private async onConnectedFriends(payload: FriendId[]) {
+    private async onConnectedFriends(payload: ConnectedFriendsPayload[]) {
         await this.fetchFriends();
-        payload.forEach(friendId => this.setFriendOnline(friendId));
+        payload.forEach(friend => {
+            if (friend.isGaming == false)
+                this.setFriendOnline(friend.id);
+            else
+                this.setFriendInAGame(friend.id);
+        });
 
         const activeFriends = this.getActiveFriends();
         const chatOnlineFriends: ChatUser[] = activeFriends
-                .filter(friend => friend.status === FriendStatus.online)
+                .filter(friend => friend.status === FriendStatus.online || friend.status === FriendStatus.gaming)
                 .map(friend => {
                     return {id: friend.userId, username: friend.username};
                 });
@@ -106,7 +117,14 @@ class FriendsController {
     }
 
     private onFriendInAGame(payload: FriendId) {
+        const friend = this.friends[payload];
+        if (friend && friend.status === FriendStatus.offline)
+            this.onFriendConnected(payload);
         this.setFriendInAGame(payload);
+    }
+
+    private onFriendGameEnded(payload: FriendId) {
+        this.setFriendOnline(payload);
     }
 
     private onNewFriendship(payload: FriendPayload) {
