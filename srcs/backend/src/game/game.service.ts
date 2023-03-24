@@ -299,9 +299,7 @@ export class GameService {
     private usersService: UsersService,
     private matchHistoryService: MatchHistoryService,
     private gatewayManagerService: GatewayManagerService
-    ) {
-      this.gatewayManagerService.addOnNewConnectionCallback((client: GatewayUser) => this.onNewConnection(client));
-    }
+    ) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
     const game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
@@ -324,23 +322,4 @@ export class GameService {
       }
     }
   }
-
-
-    //FIXME: a veces el orden no es el bueno, y si coge primero esto y luego que esta online, se queda verde el cuadrado
-    // tb es porque el friendscontroller del front fetchea los usuarios con el connected-friends solo
-  async onNewConnection(client: GatewayUser) {
-    // al nuevo le mando sus amigos quue esten gaming
-		const friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(client.id);
-		const friendsIds: number[] = friends.map((user) => user.id);
-    const gamingFriendsIds: number[] = friendsIds.filter((friendId) => this.isPlayerInAGame(friendId))
-
-    //client.socket.emit('gaming-friends', gamingFriendsIds);
-
-    // avisar a sus amigos de si el nuevo esta en un juego
-    //if (this.isPlayerInAGame(client.id)) {
-    //  friends.forEach(friend => {
-    //    friend.socket.emit('friend-in-a-game', client.id);
-    //  })
-    //}
-	}
 }

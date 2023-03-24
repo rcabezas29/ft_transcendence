@@ -93,7 +93,7 @@ class FriendsController {
 
         const activeFriends = this.getActiveFriends();
         const chatOnlineFriends: ChatUser[] = activeFriends
-                .filter(friend => friend.status === FriendStatus.online) //TODO: si el chat  no muestra gaming, probablemente sea algo en plan esta linea
+                .filter(friend => friend.status === FriendStatus.online || friend.status === FriendStatus.gaming)
                 .map(friend => {
                     return {id: friend.userId, username: friend.username};
                 });
@@ -117,6 +117,9 @@ class FriendsController {
     }
 
     private onFriendInAGame(payload: FriendId) {
+        const friend = this.friends[payload];
+        if (friend && friend.status === FriendStatus.offline)
+            this.onFriendConnected(payload);
         this.setFriendInAGame(payload);
     }
 
