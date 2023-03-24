@@ -12,7 +12,7 @@ import { GameResult } from 'src/users/interfaces/game-info.interface';
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 
-const INITIAL_BALL_SPEED = 5; // in px per second;
+const INITIAL_BALL_SPEED = 100;
 
 type Move = (playerIndex: number, deltaTime: number) => void;
 type gameAction = { move: Move; input: boolean };
@@ -132,11 +132,14 @@ class Game {
     this.server.to(this.name).emit('update-game', payload);
   }
 
-  private previousFrameTime_: number;
+  private previousFrameTime_: number = null;
 
   updateObjects(now: Date) {
     //deltaTime is in seconds !
-    const deltaTime: number = (now.getTime() - this.previousFrameTime_) / 1000;
+    let deltaTime: number = 0;
+    if (this.previousFrameTime_ != null) {
+      deltaTime = (now.getTime() - this.previousFrameTime_) / 1000;
+    }
     this.previousFrameTime_ = now.getTime();
 
     for (
@@ -156,6 +159,9 @@ class Game {
     this.paddles.forEach((paddle) => {
       if (paddle.hitBox.overlaps(this.ball.hitBox)) {
         this.ball.direction = paddle.bounceBall(this.ball);
+        if (this.ball.speed < 450) {
+          this.ball.speed *= 1.1;
+        }
       }
     });
     this.table.walls.forEach((wall) => {
@@ -179,13 +185,13 @@ class Game {
     this.paddles[0] = new Paddle(
       new Vector2(40, 100),
       this.table.goals[0].orientation,
-      20,
+      30,
       this.table.area,
     );
     this.paddles[1] = new Paddle(
       new Vector2(400 - 40, 100),
       this.table.goals[1].orientation,
-      20,
+      30,
       this.table.area,
     );
   }
@@ -201,7 +207,7 @@ class Game {
   serveBall(ballServer: number) {
     this.ball.hitBox.position.x = 200;
     this.ball.hitBox.position.y = 100;
-    this.ball.speed = 1;
+    this.ball.speed = INITIAL_BALL_SPEED;
 
     this.ball.direction = new Vector2(
       this.table.goals[0].orientation.x * (1 - 2 * ballServer),
