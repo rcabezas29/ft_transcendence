@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
-import Game from './game.class';
+import Game, { GameStatus } from './game.class';
 
 @Injectable()
 export class GameService {
@@ -24,7 +24,7 @@ export class GameService {
 
   isPlayerInAGame(playerId: number): boolean {
     for (const game of this.games) {
-      if (game.players[0].id === playerId || game.players[1].id === playerId)
+      if (game.status != GameStatus.End && (game.players[0].id === playerId || game.players[1].id === playerId))
         return true;
     }
     return false;
@@ -32,7 +32,7 @@ export class GameService {
 
   joinPlayerToGame(player: GatewayUser) {
     for (const game of this.games) {
-      if (game.players[0].id === player.id || game.players[1].id === player.id) {
+      if (game.status != GameStatus.End && (game.players[0].id === player.id || game.players[1].id === player.id)) {
         game.rejoinPlayer(player);
         player.socket.emit('rejoin-game');
       }

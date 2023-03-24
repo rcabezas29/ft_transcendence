@@ -16,7 +16,7 @@ const INITIAL_BALL_SPEED = 100;
 type Move = (playerIndex: number, deltaTime: number) => void;
 type gameAction = { move: Move; input: boolean };
 
-enum GameStatus {
+export enum GameStatus {
     Preparing = 'preparing',
     Playing = 'playing',
     End = 'end',
