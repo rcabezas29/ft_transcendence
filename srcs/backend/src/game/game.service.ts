@@ -210,7 +210,7 @@ class Game {
     );
   }
 
-  end(gameResult: GameResult) {
+  end(winner: number) {
     clearInterval(this.gameInterval);
     console.log('game end', this.name);
     this.status = GameStatus.End;
@@ -219,15 +219,17 @@ class Game {
       1 / ((1 + 10) ^ ((this.players[1].elo - this.players[0].elo) / 400));
 
     this.players.forEach((player, index) => {
-      player.socket.emit('end-game', gameResult);
-      if (gameResult !== GameResult.Draw) {
+      if (winner === GameResult.Draw) {
+        player.socket.emit('end-game', GameResult.Draw);
+      } else {
+        player.socket.emit('end-game', winner === index ? GameResult.Win : GameResult.Lose);
         player.elo = Math.floor(
-          player.elo + 32 * (Number(gameResult) - expectedScore),
+          player.elo + 32 * (Number(winner) - expectedScore),
         );
         this.usersService.update(player.id, { elo: player.elo });
       }
       this.usersService.updateStats(player.id, {
-        gameResult: gameResult,
+        gameResult: index === winner ? GameResult.Win : GameResult.Lose,
         scoredGoals: this.score[index],
         receivedGoals: this.score[(index + 1) % 2],
       });
