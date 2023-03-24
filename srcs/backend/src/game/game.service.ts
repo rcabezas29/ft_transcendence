@@ -106,7 +106,10 @@ class Game {
     this.gameInterval = setInterval(() => {
       this.gameLoop();
     }, FRAME_TIME * 1000);
+
     this.notifyFriendsOfGameStart();
+    this.gatewayManagerService.setUserAsGaming(this.players[0].id);
+    this.gatewayManagerService.setUserAsGaming(this.players[1].id);
   }
 
   gameLoop() {
@@ -238,8 +241,12 @@ class Game {
       winner: winnerId,
       score: this.score,
     });
+
     this.players.forEach((player) => player.socket.leave(this.name));
+
     this.notifyFriendsOfGameEnd();
+    this.gatewayManagerService.unsetUserAsGaming(this.players[0].id);
+    this.gatewayManagerService.unsetUserAsGaming(this.players[1].id);
   }
 
   sendToPlayer(player: GatewayUser, signal: string, body: any) {
@@ -255,6 +262,7 @@ class Game {
           this.playerActions[i][movementIndex].input = pressed;
         });
     }
+    this.gatewayManagerService.setUserAsGaming(player.id);
   }
 
   async notifyFriendsOfGameStart() {
@@ -326,13 +334,13 @@ export class GameService {
 		const friendsIds: number[] = friends.map((user) => user.id);
     const gamingFriendsIds: number[] = friendsIds.filter((friendId) => this.isPlayerInAGame(friendId))
 
-    client.socket.emit('gaming-friends', gamingFriendsIds);
+    //client.socket.emit('gaming-friends', gamingFriendsIds);
 
     // avisar a sus amigos de si el nuevo esta en un juego
-    if (this.isPlayerInAGame(client.id)) {
-      friends.forEach(friend => {
-        friend.socket.emit('friend-in-a-game', client.id);
-      })
-    }
+    //if (this.isPlayerInAGame(client.id)) {
+    //  friends.forEach(friend => {
+    //    friend.socket.emit('friend-in-a-game', client.id);
+    //  })
+    //}
 	}
 }

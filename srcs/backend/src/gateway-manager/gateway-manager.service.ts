@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { UserFriend } from 'src/users/interfaces/user-friend.interface';
 import { UsersService } from 'src/users/users.service';
-import { GatewayUser } from './interfaces/gateway-user.interface';
+import { ConnectedFriendsPayload, GatewayUser } from './interfaces';
 
 @Injectable()
 export class GatewayManagerService {
@@ -69,12 +69,21 @@ export class GatewayManagerService {
 
 	async onNewConnection(client: GatewayUser) {
 		const friends: GatewayUser[] = await this.getAllUserConnectedFriends(client.id);
-		const friendsPayload: number[] = friends.map((user) => user.id);
+		const friendsPayload: ConnectedFriendsPayload[] = friends.map((user) => {
+			return { id: user.id, isGaming: user.isGaming}
+		});
 		
 		client.socket.emit('connected-friends', friendsPayload);
-		friends.forEach(friend => {
-			friend.socket.emit('friend-online', client.id);
-		})
+
+		if (client.isGaming == false) {
+			friends.forEach(friend => {
+				friend.socket.emit('friend-online', client.id);
+			})
+		} else {
+			friends.forEach(friend => {
+				friend.socket.emit('friend-in-a-game', client.id);
+			})
+		}
 	}
 
     async onDisconnection(client: GatewayUser) {
@@ -89,5 +98,17 @@ export class GatewayManagerService {
 		const user: User = await this.usersService.findOneById(client.id);
 		const { id, username } = user;
 		client.socket.broadcast.emit("user-updated", { id, username });
+	}
+
+	setUserAsGaming(id: number) {
+		const user: GatewayUser = this.users.find((u) => u.id == id);
+		if (user)
+			user.isGaming = true;
+	}
+
+	unsetUserAsGaming(id: number) {
+		const user: GatewayUser = this.users.find((u) => u.id == id);
+		if (user)
+			user.isGaming = false;
 	}
 }

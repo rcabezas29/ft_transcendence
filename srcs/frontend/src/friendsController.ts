@@ -39,6 +39,11 @@ interface FriendshipStatusPayload {
     friendId: number;
 }
 
+interface ConnectedFriendsPayload {
+    id: number;
+    isGaming: boolean;
+}
+
 export interface UserUpdatedPayload {
     id: FriendId;
     username: string;
@@ -60,8 +65,7 @@ class FriendsController {
     public friends: FriendMap = {};
 
     setEventHandlers() {
-        user.socket?.on('connected-friends', (payload: FriendId[]) => {this.onConnectedFriends(payload)});
-        user.socket?.on('gaming-friends', (payload: FriendId[]) => {this.onGamingFriends(payload)});
+        user.socket?.on('connected-friends', (payload: ConnectedFriendsPayload[]) => {this.onConnectedFriends(payload)});
         user.socket?.on('friend-online', (payload: FriendId) => {this.onFriendConnected(payload)});
         user.socket?.on('friend-offline', (payload: FriendId) => {this.onFriendDisconnected(payload)});
         user.socket?.on('friend-in-a-game', (payload: FriendId) => {this.onFriendInAGame(payload)});
@@ -78,24 +82,22 @@ class FriendsController {
         this.friends = {};
     }
 
-    private async onConnectedFriends(payload: FriendId[]) {
+    private async onConnectedFriends(payload: ConnectedFriendsPayload[]) {
         await this.fetchFriends();
-        payload.forEach(friendId => this.setFriendOnline(friendId));
+        payload.forEach(friend => {
+            if (friend.isGaming == false)
+                this.setFriendOnline(friend.id);
+            else
+                this.setFriendInAGame(friend.id);
+        });
 
         const activeFriends = this.getActiveFriends();
         const chatOnlineFriends: ChatUser[] = activeFriends
-                .filter(friend => friend.status === FriendStatus.online)
+                .filter(friend => friend.status === FriendStatus.online) //TODO: si el chat  no muestra gaming, probablemente sea algo en plan esta linea
                 .map(friend => {
                     return {id: friend.userId, username: friend.username};
                 });
         directMessageController.onConnectedFriends(chatOnlineFriends);
-        console.log("onConnectedFriends", payload)
-
-    }
-
-    private async onGamingFriends(payload: FriendId[]) {
-        console.log("onGamingFriends", payload)
-        payload.forEach(friendId => this.setFriendInAGame(friendId));
     }
 
     private onFriendConnected(payload: FriendId) {
