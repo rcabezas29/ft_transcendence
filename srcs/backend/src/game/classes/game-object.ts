@@ -20,7 +20,7 @@ export class GameObject {
     updatePosition(deltaTime: number) {
       this.hitBox.position = addVec2(
         this.hitBox.position,
-        multConstToVec2(this.speed, this.direction),
+        multConstToVec2(this.speed * deltaTime, this.direction),
       );
     }
 }
@@ -38,8 +38,8 @@ export class Paddle extends GameObject {
       length: number,
       gameArea: HitBox,
     ) {
-      const width: number = orientation.x ? 1 : length;
-      const height: number = orientation.y ? 1 : length;
+      const width: number = orientation.x ? 5 : length;
+      const height: number = orientation.y ? 5 : length;
   
       super(position, orientation, new Vector2(width, height), PADDLE_SPEED);
   
@@ -72,7 +72,6 @@ export class Paddle extends GameObject {
     }
   
     moveUp(deltaTime: number) {
-      console.log(`delta ${deltaTime}`);
       const newPosition: Vector2 = new Vector2(
         this.hitBox.position.x,
         this.hitBox.position.y - this.speed * deltaTime,
