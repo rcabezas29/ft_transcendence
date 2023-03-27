@@ -38,4 +38,28 @@ export class GameService {
       }
     }
   }
+
+  findGameByPlayerUserId(playerId: number): Game {
+    const game: Game = this.games.find((game) =>
+      game.status != GameStatus.End
+      && (game.players[0].id === playerId || game.players[1].id === playerId)
+    );
+    return game;
+  }
+
+  findPlayerIndexByGame(playerId: number, game: Game): number {
+    if (game.players[0].id === playerId)
+      return 0;
+    else if (game.players[1].id === playerId)
+      return 1;
+    else
+      return -1;
+  }
+
+  endGamePrematurely(userId: number): void {
+    const game = this.findGameByPlayerUserId(userId);
+    const playerIndex = this.findPlayerIndexByGame(userId, game);
+    const winner = playerIndex === 0 ? 1 : 0;
+    game.end(winner);
+  }
 }

@@ -15,11 +15,13 @@ onBeforeMount(() => {
 onMounted(() => {
   gameController.initCanvas(canvasRef.value!.getContext("2d")!);
 });
+
 </script>
 
 <template>
   <h2>Game</h2>
   <button v-if="gameController.state !== 'Playing'" @click="findGame">Find game</button>
+  <button v-if="gameController.state === 'Playing'" @click="gameController.endGamePrematurely">Stop game</button>
 
   Status: <span>{{ gameController.state }}</span>
 

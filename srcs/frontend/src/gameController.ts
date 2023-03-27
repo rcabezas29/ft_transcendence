@@ -6,6 +6,7 @@ import type {
 } from "./interfaces/update-game.interface";
 import { user } from "./user";
 
+// TODO: refactor this useless enum
 enum GameState {
   None = "None",
   Searching = "Searching",
@@ -114,6 +115,10 @@ class GameController {
 
   checkPlayerContinuity() {
     user.socket?.emit('check-game-continuity', user.id);
+  }
+
+  endGamePrematurely() {
+    user.socket?.emit('end-game-prematurely');
   }
 }
 

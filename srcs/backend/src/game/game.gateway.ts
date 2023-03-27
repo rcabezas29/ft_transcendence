@@ -7,9 +7,8 @@ import {
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interface';
 import { MatchmakingService } from './matchmaking.service';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
-import { Socket } from 'node:dgram';
 
 interface ChallengePlayers {
   user1Id: number,
@@ -40,7 +39,7 @@ export class GameGateway implements OnGatewayInit {
   }
 
   @SubscribeMessage('accept-challenge')
-  challengeGame(_: Socket, players: ChallengePlayers) {
+  challengeGame(client: Socket, players: ChallengePlayers) {
     const user1: GatewayUser = this.gatewayManagerService.getClientByUserId(
       players.user1Id,
     );
@@ -52,7 +51,7 @@ export class GameGateway implements OnGatewayInit {
   }
 
   @SubscribeMessage('refuse-challenge')
-  refuseGame(client: any, challengerId: number) {
+  refuseGame(client: Socket, challengerId: number) {
     const challenger: GatewayUser = this.gatewayManagerService.getClientByUserId(challengerId);
     challenger.socket.emit('challenge-refused', this.gatewayManagerService.getClientBySocketId(client.id).id);
   }
@@ -63,5 +62,11 @@ export class GameGateway implements OnGatewayInit {
       let player: GatewayUser = this.gatewayManagerService.getClientByUserId(playerId);
       this.gameService.joinPlayerToGame(player);
     }
+  }
+
+  @SubscribeMessage('end-game-prematurely')
+  endGamePrematurely(client: Socket) {
+    const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    this.gameService.endGamePrematurely(user.id);
   }
 }

@@ -109,7 +109,7 @@ export default class Game {
     gameLoop() {
         const now = new Date();
         
-        if (now.getTime() - this.startDate.getTime() >= 20 * 1000) {
+        if (now.getTime() - this.startDate.getTime() >= 200 * 1000) {
             if (this.score[1] === this.score[0]) {
                 this.end(GameResult.Draw);
             } else {
@@ -223,7 +223,7 @@ export default class Game {
             } else {
                 player.socket.emit('end-game', winner === index ? GameResult.Win : GameResult.Lose);
                 player.elo = Math.floor(
-                player.elo + 32 * (Number(winner) - expectedScore),
+                    player.elo + 32 * (Number(winner) - expectedScore),
                 );
                 this.usersService.update(player.id, { elo: player.elo });
             }
