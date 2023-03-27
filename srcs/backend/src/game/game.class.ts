@@ -17,9 +17,9 @@ type Move = (playerIndex: number, deltaTime: number) => void;
 type gameAction = { move: Move; input: boolean };
 
 export enum GameStatus {
-    Preparing = 'preparing',
-    Playing = 'playing',
-    End = 'end',
+    Preparing,
+    Playing,
+    End,
 }
 
 export default class Game {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { gameController } from "@/gameController";
+import { gameController, GameState } from "@/gameController";
 import { onBeforeMount, onMounted, ref } from "vue";
 
 const canvasRef = ref<HTMLCanvasElement>();
@@ -20,8 +20,8 @@ onMounted(() => {
 
 <template>
   <h2>Game</h2>
-  <button v-if="gameController.state !== 'Playing'" @click="findGame">Find game</button>
-  <button v-if="gameController.state === 'Playing'" @click="gameController.endGamePrematurely">Stop game</button>
+  <button v-if="gameController.state !== GameState.Playing" @click="findGame">Find game</button>
+  <button v-if="gameController.state === GameState.Playing" @click="gameController.endGamePrematurely">Stop game</button>
 
   Status: <span>{{ gameController.state }}</span>
 

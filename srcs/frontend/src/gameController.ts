@@ -6,13 +6,12 @@ import type {
 } from "./interfaces/update-game.interface";
 import { user } from "./user";
 
-// TODO: refactor this useless enum
-enum GameState {
-  None = "None",
-  Searching = "Searching",
-  Ready = "Ready",
-  Playing = "Playing",
-  End = "End",
+export enum GameState {
+  None,
+  Searching,
+  Ready,
+  Playing,
+  End,
 }
 
 enum Moves {
