@@ -213,17 +213,16 @@ export default class Game {
         clearInterval(this.gameInterval);
         console.log('game end', this.name);
         this.status = GameStatus.End;
-        
-        const expectedScore: number =
-        1 / ((1 + 10) ^ ((this.players[1].elo - this.players[0].elo) / 400));
-        
+
         this.players.forEach((player, index) => {
+            const expectedScore: number =
+                1 / (1 + 10 ^ ((this.players[index].elo - this.players[(index + 1) % 2].elo) / 400));
             if (winner === GameResult.Draw) {
                 player.socket.emit('end-game', GameResult.Draw);
             } else {
                 player.socket.emit('end-game', winner === index ? GameResult.Win : GameResult.Lose);
                 player.elo = Math.floor(
-                    player.elo + 32 * (Number(winner) - expectedScore),
+                    player.elo + 32 * (Number(winner === index) - expectedScore),
                 );
                 this.usersService.update(player.id, { elo: player.elo });
             }
