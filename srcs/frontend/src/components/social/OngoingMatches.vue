@@ -37,13 +37,13 @@ import path from 'path';
 	onBeforeMount(() => {
 		user.socket?.on("ongoing-games", (games) => { fetchOngoingGames(games) });
 		user.socket?.emit("ongoing-games");
-		user.socket?.on("new-game", (game) => { onNewGame(game) });
-		user.socket?.on("end-game", (gameId) => { onEndGame(gameId) });
+		user.socket?.on("spectator-new-game", (game) => { onNewGame(game) });
+		user.socket?.on("spectator-end-game", (gameId) => { onEndGame(gameId) });
 	})
 
 	onBeforeUnmount(() => {
-		user.socket?.off("new-game");
-		user.socket?.off("end-game");
+		user.socket?.off("spectator-new-game");
+		user.socket?.off("spectator-end-game");
 		user.socket?.off("ongoing-games");
 	})
 

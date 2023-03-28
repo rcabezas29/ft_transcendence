@@ -28,6 +28,7 @@ class DirectMessageController {
         user.socket?.on('direct-message', (payload: MessagePayload) => {this.receiveDirectMessage(payload)});
         user.socket?.on('challenge', (payload: MessagePayload) => {this.receiveChallenge(payload)});
         user.socket?.on('challenge-accepted', () => router.replace('game'));
+        user.socket?.on('challenge-refused', (friendId) => {this.chats[friendId].challenge = false;});
     }
 
     onConnectedFriends(payload: ChatUser[]) {
@@ -143,6 +144,11 @@ class DirectMessageController {
             user2Id: user.id,
         }
         user.socket?.emit('accept-challenge', challengePlayers);
+    }
+
+    refuseChallenge(friendId: number) {
+        user.socket?.emit('refuse-challenge', friendId);
+        this.chats[friendId].challenge = false;
     }
 };
 

@@ -12,6 +12,11 @@ function	acceptChallenge(friendId: number) {
 	router.replace('game');
 }
 
+function	refuseChallenge(friendId: number) {
+	directMessageController.refuseChallenge(friendId);
+	// router.replace('game');
+}
+
 </script>
 
 <template>
@@ -27,6 +32,7 @@ function	acceptChallenge(friendId: number) {
 				<div class="chat-card-notification" :class="{'chat-card-notification-on': directMessageController.chats[friend.id].notification}"></div>
 				<div v-if="directMessageController.chats[friend.id].challenge">
 					<button v-on:click="acceptChallenge(friend.id)">Accept</button>
+					<button v-on:click="refuseChallenge(friend.id)">Refuse</button>
 				</div>
 			</div>
 		</div>

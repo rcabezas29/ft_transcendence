@@ -11,7 +11,7 @@
 
 	onMounted(() => {
 		console.log(route.params)
-		const id: string = route.params.matchId;
+		const id: string = route.params.matchId as string;
 		console.log("ID: ", id);
 		matchId.value = id
 

@@ -278,6 +278,9 @@ class User {
 	
 		const httpResponse = await fetch(`http://localhost:3000/users/avatar/${user.id}`, {
 			method: "POST",
+			headers: {
+				"Authorization": `Bearer ${this.token}`,
+			},
 			body: formData
 		});
 

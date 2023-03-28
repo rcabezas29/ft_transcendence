@@ -6,12 +6,12 @@ import type {
 } from "./interfaces/update-game.interface";
 import { user } from "./user";
 
-enum GameState {
-  None = "None",
-  Searching = "Searching",
-  Ready = "Ready",
-  Playing = "Playing",
-  End = "End",
+export enum GameState {
+  None,
+  Searching,
+  Ready,
+  Playing,
+  End,
 }
 
 enum Moves {
@@ -116,6 +116,10 @@ class GameController {
 
   checkPlayerContinuity() {
     user.socket?.emit('check-game-continuity', user.id);
+  }
+
+  endGamePrematurely() {
+    user.socket?.emit('end-game-prematurely');
   }
 }
 
