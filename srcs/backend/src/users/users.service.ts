@@ -163,6 +163,7 @@ export class UsersService {
     throw new NotFoundException();
   }
 
+  //FIXME: Remove the GameResult from this function
   async updateStats(id: number, gameInfo: GameInfo) {
     const user = await this.findOneById(id);
 

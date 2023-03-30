@@ -11,8 +11,11 @@ export class MatchHistory {
   @Column()
   user2Id: number;
 
-  @Column()
+  @Column({nullable: true})
   winner: number;
+
+  @Column({nullable: true})
+  loser: number;
 
   @Column("int", { array: true })
   score: number[];

@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, Length } from "class-validator";
+import { IsArray, IsNumber, IsOptional, Length } from "class-validator";
 
 export class CreateMatchHistoryDto {
     @IsNumber()
@@ -7,8 +7,13 @@ export class CreateMatchHistoryDto {
     @IsNumber()
     user2Id: number;
 
+	@IsOptional()
     @IsNumber()
-    winner: number;
+    winner?: number;
+
+	@IsOptional()
+	@IsNumber()
+    loser?: number;
 
     @IsArray()
     @IsNumber()
