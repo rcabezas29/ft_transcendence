@@ -13,7 +13,7 @@ import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 100;
-const WIN_SCORE = 2;
+const WIN_SCORE = 1;
 const GAME_DURATION = 200; // in seconds (?)
 
 // TODO: calculate from game-canvas size
@@ -23,18 +23,11 @@ const BALL_START_POSITION_Y = 100;
 type Move = (playerIndex: number, deltaTime: number) => void;
 type gameAction = { move: Move; input: boolean };
 
-export enum GameStatus {
-    Preparing,
-    Playing,
-    End,
-}
-
 export default class Game {
     name: string;
     players: Player[] = [];
     playerActions: gameAction[][] = [];
     viwers: GatewayUser[] = [];
-    status: GameStatus;
     startDate: Date;
     gameInterval: NodeJS.Timer;
     server: Server;
@@ -45,6 +38,7 @@ export default class Game {
     
     movements: Move[] = [];
 	endGameCallbacks: Function[] = []
+	startGameCallbacks: Function[] = []
     
     constructor(
         player1: GatewayUser,
@@ -69,7 +63,6 @@ export default class Game {
         this.players.push(player1interface);
         this.players.push(player2interface);
 
-        this.status = GameStatus.Preparing;
         this.name = this.players[0].user.username + '_game_' + this.players[1].user.username;
         this.table = new Table();
         
@@ -95,6 +88,10 @@ export default class Game {
         }
 
         this.startDate = new Date();
+
+        this.setStartGameCallback(() => this.notifyNewGameToAllUsers());
+        this.setEndGameCallback(() => this.notifyEndGameToAllUsers());
+
         this.start();
     }
     
@@ -107,7 +104,6 @@ export default class Game {
         );
         this.serveBall(Math.floor(Math.random() * 2));
         this.instancePaddles();
-        this.status = GameStatus.Playing;
         this.server.to(this.name).emit('start-game');
         this.players.forEach((player, playerIndex) => {
             player.user.socket.on('move', (movementIndex: number, pressed: boolean) => {
@@ -119,7 +115,6 @@ export default class Game {
             this.gameLoop();
         }, FRAME_TIME * 1000);
         
-        this.notifyFriendsOfGameStart();
         this.gatewayManagerService.setGatewayUserGamingStatus(this.players[0].user.id);
         this.gatewayManagerService.setGatewayUserGamingStatus(this.players[1].user.id);
 		this.notifyNewGameToAllUsers();
@@ -241,7 +236,6 @@ export default class Game {
     end() {
 		clearInterval(this.gameInterval);
         console.log('game end', this.name);
-        this.status = GameStatus.End; //FIXME: ????
 
         const matchHistory = {
             user1Id: this.players[0].user.id,
@@ -278,10 +272,9 @@ export default class Game {
         this.matchHistoryService.create(matchHistory);
         
         this.removePlayersFromGameChannel();
-        this.notifyFriendsOfGameEnd();
-
-		this.callEndGameCallbacks();
 		this.notifyEndGameToAllUsers();
+
+        this.callEndGameCallbacks();
     }
 
     async updateUserStats(player: Player, otherPlayer: Player): Promise<void> {
@@ -319,45 +312,27 @@ export default class Game {
         }
         this.gatewayManagerService.setGatewayUserGamingStatus(player.id);
     }
-    
-
-	//TODO: maybe this could be moved to game.service
-    async notifyFriendsOfGameStart() {
-        let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[0].user.id);
-        friends.forEach(friend => {
-            friend.socket.emit('friend-in-a-game', this.players[0].user.id);
-        });
-        
-        friends = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[1].user.id);
-        friends.forEach(friend => {
-            friend.socket.emit('friend-in-a-game', this.players[1].user.id);
-        });
-    }
-    
-	//TODO: maybe this could be moved to game.service
-    async notifyFriendsOfGameEnd() {
-        let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[0].user.id);
-        friends.forEach(friend => {
-            friend.socket.emit('friend-game-ended', this.players[0].user.id);
-        });
-        
-        friends = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[1].user.id);
-        friends.forEach(friend => {
-            friend.socket.emit('friend-game-ended', this.players[1].user.id);
-        });
-    }
 
 	setEndGameCallback(fn: Function) {
-		this.endGameCallbacks.push(fn)
+		this.endGameCallbacks.push(fn);
 	}
 
 	callEndGameCallbacks() {
 		this.endGameCallbacks.forEach(fn => {
 			fn(this.name)
-		})
+		});
 	}
 
-	//TODO: create a start game callback array
+    setStartGameCallback(fn: Function) {
+		this.startGameCallbacks.push(fn);
+	}
+
+	callStartGameCallbacks() {
+		this.startGameCallbacks.forEach(fn => {
+			fn(this.name)
+		});
+	}
+
 	notifyNewGameToAllUsers() {
 		const game = {
 			"name": this.name,
