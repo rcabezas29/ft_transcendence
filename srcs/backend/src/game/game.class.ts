@@ -90,9 +90,10 @@ export default class Game {
         this.startDate = new Date();
 
         this.setStartGameCallback(() => this.notifyNewGameToAllUsers());
-        this.setEndGameCallback(() => this.notifyEndGameToAllUsers());
 
-        this.start();
+        this.setEndGameCallback(() => this.notifyEndGameToAllUsers());
+        this.setEndGameCallback(() => this.createMatchHistory());
+        this.setEndGameCallback(() => this.removePlayersFromGameChannel());
     }
     
     start() {
@@ -110,21 +111,27 @@ export default class Game {
                 this.playerActions[playerIndex][movementIndex].input = pressed;
             });
         });
-        
+
+        this.callStartGameCallbacks();
+
         this.gameInterval = setInterval(() => {
             this.gameLoop();
         }, FRAME_TIME * 1000);
         
         this.gatewayManagerService.setGatewayUserGamingStatus(this.players[0].user.id);
         this.gatewayManagerService.setGatewayUserGamingStatus(this.players[1].user.id);
-		this.notifyNewGameToAllUsers();
+
     }
 
-	checkGameTimeIsOver(currentTime: Date): boolean {
+	private checkGameTimeIsOver(currentTime: Date): boolean {
 		return currentTime.getTime() - this.startDate.getTime() >= GAME_DURATION * 1000;
 	}
 
-    gameLoop() {
+    private checkIfMaxScoreWasReached(): boolean {
+		return (this.players[0].score === WIN_SCORE || this.players[1].score === WIN_SCORE);
+	}
+
+    private gameLoop() {
         const now = new Date();
         
         if (this.checkGameTimeIsOver(now) || this.checkIfMaxScoreWasReached()) {
@@ -140,14 +147,10 @@ export default class Game {
         };
         this.server.to(this.name).emit('update-game', payload);
     }
-    
-	checkIfMaxScoreWasReached(): boolean {
-		return (this.players[0].score === WIN_SCORE || this.players[1].score === WIN_SCORE);
-	}
 
     private previousFrameTime_: number = null;
         
-    updateObjects(now: Date) {
+    private updateObjects(now: Date) {
         //deltaTime is in seconds !
         let deltaTime: number = 0;
         if (this.previousFrameTime_ != null) {
@@ -194,7 +197,7 @@ export default class Game {
         this.ball.updatePosition(deltaTime);
     }
                 
-    instancePaddles() {
+    private instancePaddles() {
         this.paddles = [];
         this.paddles[0] = new Paddle(
             new Vector2(40, 100),
@@ -210,11 +213,11 @@ export default class Game {
         );
     }
     
-    computeGoal(receiver: number) {
+    private computeGoal(receiver: number) {
         this.players[(receiver + 1) % 2].score += 1;
     }
     
-    serveBall(ballServer: number) {
+    private serveBall(ballServer: number) {
         this.ball.hitBox.position.x = BALL_START_POSITION_X;
         this.ball.hitBox.position.y = BALL_START_POSITION_Y;
         this.ball.speed = INITIAL_BALL_SPEED;
@@ -225,18 +228,7 @@ export default class Game {
         );
     }
 
-	calculateUserElo(user: GatewayUser, other: GatewayUser, userGameResult: GameResult): number {
-		const expectedScore = 1 / (1 + 10 ^ ((user.elo - other.elo) / 400));
-		const eloScalar = 32;
-		const eloModifier = userGameResult === GameResult.Win ? 1 : 0;
-		const elo = user.elo + eloScalar * (eloModifier - expectedScore);
-		return elo;
-	}
-
-    end() {
-		clearInterval(this.gameInterval);
-        console.log('game end', this.name);
-
+    private createMatchHistory(): void {
         const matchHistory = {
             user1Id: this.players[0].user.id,
             user2Id: this.players[1].user.id,
@@ -246,38 +238,45 @@ export default class Game {
         }
 
         this.players.forEach(async (player, index) => {
+            if (player.result === GameResult.Win) {
+                matchHistory.winner = index;
+            } else if (player.result === GameResult.Lose) {
+                matchHistory.loser = index;
+            }
+        });
+    
+        this.matchHistoryService.create(matchHistory);
+    }
+
+    private calculateUserElo(user: GatewayUser, other: GatewayUser, userGameResult: GameResult): number {
+		const expectedScore = 1 / (1 + 10 ^ ((user.elo - other.elo) / 400));
+		const eloScalar = 32;
+		const eloModifier = userGameResult === GameResult.Win ? 1 : 0;
+		const elo = user.elo + eloScalar * (eloModifier - expectedScore);
+		return elo;
+	}
+
+    private updateUserElo(player: Player, otherPlayer: Player): void {
+        const elo: number = Math.floor(this.calculateUserElo(player.user, otherPlayer.user, player.result));
+        player.user.elo = elo;
+        this.usersService.update(player.user.id, { elo });
+    }
+
+    private resolvePlayersGameResultFromScore(): void {
+        this.players.forEach(async (player, index) => {
             const otherPlayer: Player = this.players[(index + 1) % 2];
 
             if (player.score > otherPlayer.score) {
                 player.result = GameResult.Win;
-                matchHistory.winner = index;
             } else if (player.score < otherPlayer.score) {
                 player.result = GameResult.Lose;
-                matchHistory.loser = index;
             } else {
                 player.result = GameResult.Draw;
             }
-
-            player.user.socket.emit('end-game', player.result);
-
-            if (player.score !== otherPlayer.score) {
-                const elo: number = Math.floor(this.calculateUserElo(player.user, otherPlayer.user, player.result));
-                player.user.elo = elo;
-                this.usersService.update(player.user.id, { elo });
-            }
-            this.updateUserStats(player, otherPlayer);
-            this.gatewayManagerService.unsetGatewayUserGamingStatus(player.user.id);
         });
-
-        this.matchHistoryService.create(matchHistory);
-        
-        this.removePlayersFromGameChannel();
-		this.notifyEndGameToAllUsers();
-
-        this.callEndGameCallbacks();
     }
 
-    async updateUserStats(player: Player, otherPlayer: Player): Promise<void> {
+    private async updateUserStats(player: Player, otherPlayer: Player): Promise<void> {
         const userStats: Stats = await this.usersService.getUserStats(player.user.id);
         const statsToUpdate: UpdateStatsDto = {
             scoredGoals: userStats.scoredGoals += player.score,
@@ -293,12 +292,38 @@ export default class Game {
         this.usersService.updateStats(player.user.id, statsToUpdate);
     }
 
-    removePlayersFromGameChannel(): void {
+    private removePlayersFromGameChannel(): void {
         this.players.forEach((player) => player.user.socket.leave(this.name));
     }
-    
-    sendToPlayer(player: GatewayUser, signal: string, body: any) {
-        player.socket.emit(signal, body);
+
+    // If one of the players ended the game by hand (prematurely),
+    // the function will set the game ender as loser
+    end(gameEnderIndex: number = -1) {
+		clearInterval(this.gameInterval);
+
+        if (gameEnderIndex != -1) {
+            console.log(`player {${gameEnderIndex}} ended the game {${this.name}} prematurely`);
+            this.players[gameEnderIndex].result = GameResult.Lose;
+            this.players[gameEnderIndex == 0 ? 1 : 0].result = GameResult.Win;
+        } else {
+            console.log('game end', this.name);
+            this.resolvePlayersGameResultFromScore();
+        }
+
+        this.players.forEach(async (player, index) => {
+            const otherPlayer: Player = this.players[(index + 1) % 2];
+  
+            player.user.socket.emit('end-game', player.result);
+
+            if (player.result !== GameResult.Draw) {
+                this.updateUserElo(player, otherPlayer);
+            }
+
+            this.updateUserStats(player, otherPlayer);
+            this.gatewayManagerService.unsetGatewayUserGamingStatus(player.user.id);
+        });
+
+        this.callEndGameCallbacks();
     }
     
     rejoinPlayer(player: GatewayUser) {
@@ -333,7 +358,7 @@ export default class Game {
 		});
 	}
 
-	notifyNewGameToAllUsers() {
+	private notifyNewGameToAllUsers() {
 		const game = {
 			"name": this.name,
 			"player1": this.players[0].user.username,
@@ -343,7 +368,7 @@ export default class Game {
 		this.server.emit("spectator-new-game", game);
 	}
 
-	notifyEndGameToAllUsers() {
+	private notifyEndGameToAllUsers() {
 		this.server.to(this.name).emit("spectator-end-game", this.name);
 	}
 }

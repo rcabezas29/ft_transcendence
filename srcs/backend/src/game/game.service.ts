@@ -22,17 +22,18 @@ export class GameService {
     game.setStartGameCallback((gameName: string) => this.onStartGame(gameName));
     game.setEndGameCallback((gameName: string) => this.onEndGame(gameName));
     this.ongoingGames.push(game);
+    game.start();
+  }
+
+  onStartGame(gameName: string) {
+    const game: Game = this.findGameByGameName(gameName);
+    this.notifyFriendsOfGameStart(game.players[0].user.id, game.players[1].user.id);
   }
 
   onEndGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameEnd(game.players[0].user.id, game.players[1].user.id);
     this.deleteGameFromOngoingGames(gameName);
-  }
-
-  onStartGame(gameName: string) {
-    const game: Game = this.findGameByGameName(gameName);
-    this.notifyFriendsOfGameStart(game.players[0].user.id, game.players[1].user.id);
   }
 
   private deleteGameFromOngoingGames(gameName: string): void {
@@ -101,10 +102,10 @@ export class GameService {
       return -1;
   }
 
-  //FIXME: game ender must be loser
   endGamePrematurely(userId: number): void {
     const game = this.findGameByPlayerUserId(userId);
-    game.end();
+    const playerIndex = this.findPlayerIndexByGame(userId, game);
+    game.end(playerIndex);
   }
 
   async notifyFriendsOfGameStart(player0Id: number, player1Id: number) {

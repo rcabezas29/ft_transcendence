@@ -101,11 +101,6 @@ class GameController {
     } else {
       this.gameRenderer?.tieGame();
     }
-    user.socket?.removeAllListeners("game-found");
-    user.socket?.removeAllListeners("start-game");
-    user.socket?.removeAllListeners("end-game");
-    user.socket?.removeAllListeners("update-game");
-    user.socket?.removeAllListeners("rejoin-game");
   }
 
   updateGame(gamePayload: UpdateGamePayload) {
