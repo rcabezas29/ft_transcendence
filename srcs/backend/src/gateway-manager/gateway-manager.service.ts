@@ -100,13 +100,13 @@ export class GatewayManagerService {
 		client.socket.broadcast.emit("user-updated", { id, username });
 	}
 
-	setUserAsGaming(id: number) {
+	setGatewayUserGamingStatus(id: number) {
 		const user: GatewayUser = this.users.find((u) => u.id == id);
 		if (user)
 			user.isGaming = true;
 	}
 
-	unsetUserAsGaming(id: number) {
+	unsetGatewayUserGamingStatus(id: number) {
 		const user: GatewayUser = this.users.find((u) => u.id == id);
 		if (user)
 			user.isGaming = false;

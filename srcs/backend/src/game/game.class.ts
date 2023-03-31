@@ -7,13 +7,17 @@ import { GameResult } from 'src/users/interfaces/game-info.interface';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
-import { GatewayManagerGateway } from 'src/gateway-manager/gateway-manager.gateway';
-import exp from 'constants';
+import { Player } from './interfaces/player.interface';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 100;
-const WIN_SCORE = 1
+const WIN_SCORE = 1;
+const GAME_DURATION = 10; // in seconds (?)
+
+// TODO: calculate from game-canvas size
+const BALL_START_POSITION_X = 200;
+const BALL_START_POSITION_Y = 100;
 
 type Move = (playerIndex: number, deltaTime: number) => void;
 type gameAction = { move: Move; input: boolean };
@@ -26,15 +30,14 @@ export enum GameStatus {
 
 export default class Game {
     name: string;
-    players: GatewayUser[] = [];
+    players: Player[] = [];
     playerActions: gameAction[][] = [];
     viwers: GatewayUser[] = [];
     status: GameStatus;
     startDate: Date;
     gameInterval: NodeJS.Timer;
     server: Server;
-    
-    score: number[];
+
     ball: GameObject;
     paddles: Paddle[];
     table: Table;
@@ -51,12 +54,23 @@ export default class Game {
         private gatewayManagerService: GatewayManagerService
     ) {
         this.server = server;
-        this.players.push(player1);
-        this.players.push(player2);
+
+        const player1interface: Player = {
+            user: player1,
+            score: 0,
+            result: GameResult.Draw,
+        }
+        const player2interface: Player = {
+            user: player2,
+            score: 0,
+            result: GameResult.Draw,
+        }
+        this.players.push(player1interface);
+        this.players.push(player2interface);
+
         this.status = GameStatus.Preparing;
-        this.name = this.players[0].username + '_game_' + this.players[1].username;
+        this.name = this.players[0].user.username + '_game_' + this.players[1].user.username;
         this.table = new Table();
-        this.score = [0, 0];
         
         this.movements.push((playerIndex: number, deltaTime: number) => {
             this.paddles[playerIndex].moveUp(deltaTime);
@@ -74,11 +88,11 @@ export default class Game {
             { move: this.movements[0], input: false },
             { move: this.movements[1], input: false },
         ]);
-        
+
         for (const i in this.players) {
-            this.players[i].socket.join(this.name);
+            this.players[i].user.socket.join(this.name);
         }
-        
+
         this.startDate = new Date();
         this.start();
     }
@@ -95,7 +109,7 @@ export default class Game {
         this.status = GameStatus.Playing;
         this.server.to(this.name).emit('start-game');
         this.players.forEach((player, playerIndex) => {
-            player.socket.on('move', (movementIndex: number, pressed: boolean) => {
+            player.user.socket.on('move', (movementIndex: number, pressed: boolean) => {
                 this.playerActions[playerIndex][movementIndex].input = pressed;
             });
         });
@@ -105,13 +119,13 @@ export default class Game {
         }, FRAME_TIME * 1000);
         
         this.notifyFriendsOfGameStart();
-        this.gatewayManagerService.setUserAsGaming(this.players[0].id);
-        this.gatewayManagerService.setUserAsGaming(this.players[1].id);
+        this.gatewayManagerService.setGatewayUserGamingStatus(this.players[0].user.id);
+        this.gatewayManagerService.setGatewayUserGamingStatus(this.players[1].user.id);
 		this.notifyNewGameToAllUsers();
     }
 
 	checkGameTimeIsOver(currentTime: Date): boolean {
-		return currentTime.getTime() - this.startDate.getTime() >= 200 * 1000;
+		return currentTime.getTime() - this.startDate.getTime() >= GAME_DURATION * 1000;
 	}
 
     gameLoop() {
@@ -124,7 +138,7 @@ export default class Game {
         this.updateObjects(now);
         const payload = {
             paddles: this.paddles,
-            score: this.score,
+            score: [this.players[0].score, this.players[1].score],
             ball: this.ball,
             currentTime: now,
         };
@@ -132,7 +146,7 @@ export default class Game {
     }
     
 	checkIfMaxScoreWasReached(): boolean {
-		return (this.score[0] === WIN_SCORE || this.score[1] === WIN_SCORE);
+		return (this.players[0].score === WIN_SCORE || this.players[1].score === WIN_SCORE);
 	}
 
     private previousFrameTime_: number = null;
@@ -201,13 +215,12 @@ export default class Game {
     }
     
     computeGoal(receiver: number) {
-        this.score[(receiver + 1) % 2] += 1;
+        this.players[(receiver + 1) % 2].score += 1;
     }
     
     serveBall(ballServer: number) {
-		//FIXME: the values of the ball are hardcoded...
-        this.ball.hitBox.position.x = 200;
-        this.ball.hitBox.position.y = 100;
+        this.ball.hitBox.position.x = BALL_START_POSITION_X;
+        this.ball.hitBox.position.y = BALL_START_POSITION_Y;
         this.ball.speed = INITIAL_BALL_SPEED;
         
         this.ball.direction = new Vector2(
@@ -216,91 +229,68 @@ export default class Game {
         );
     }
 
-	calculateUserElo(user: GatewayUser, other: GatewayUser, userIsWinner: boolean): number {
+	calculateUserElo(user: GatewayUser, other: GatewayUser, userGameResult: GameResult): number {
 		const expectedScore = 1 / (1 + 10 ^ ((user.elo - other.elo) / 400));
 		const eloScalar = 32;
-		const eloModifier = userIsWinner ? 1 : 0;
+		const eloModifier = userGameResult === GameResult.Win ? 1 : 0;
 		const elo = user.elo + eloScalar * (eloModifier - expectedScore);
 		return elo;
 	}
 
-	//TODO: change function prototype
     end() {
 		clearInterval(this.gameInterval);
         console.log('game end', this.name);
         this.status = GameStatus.End; //FIXME: ????
 
-		let winner: GatewayUser | null = null;
-		let winnerIndex: number = 0;
-		let loser: GatewayUser | null = null;
-		let loserIndex: number = 0;
-
-		if (this.score[0] > this.score[1]) {
-			winner = this.players[0];
-			loser = this.players[1];
-			winnerIndex = 0;
-			loserIndex = 1;
-		} else if (this.score[0] < this.score[1]) {
-			winner = this.players[1];
-			loser = this.players[0];
-			winnerIndex = 1;
-			loserIndex = 0;
-		}
-
-		if (this.score[0] === this.score[1]) {
-			this.players[0].socket.emit('end-game', GameResult.Draw);
-			this.players[1].socket.emit('end-game', GameResult.Draw);
-		}
-		else {
-			winner.socket.emit('end-game', GameResult.Win);
-			loser.socket.emit('end-game', GameResult.Lose);
-
-			this.usersService.update(winner.id, { elo: this.calculateUserElo(winner, loser, true) });
-			this.usersService.update(loser.id, { elo: this.calculateUserElo(loser, winner, false) });
-		}
-
-		this.usersService.updateStats(this.players[0].id, {
-			gameResult: GameResult.Win,
-			scoredGoals: this.score[winnerIndex],
-			receivedGoals: this.score[loserIndex],
-		});
-
-		this.usersService.updateStats(this.players[1].id, {
-			gameResult: GameResult.Lose,
-			scoredGoals: this.score[loserIndex],
-			receivedGoals: this.score[winnerIndex],
-		});
-
-		this.players.forEach((player, index) => {
-	
-          
-			//TODO: move player elo upudate to another function
-            
-        });
-
-		//TODO: move to another function
-        let winnerId: number = 0;
-        if (this.score[0] !== this.score[1]) {
-            winnerId = this.score[0] > this.score[1] ? this.players[0].id : this.players[1].id;
+        const matchHistory = {
+            user1Id: this.players[0].user.id,
+            user2Id: this.players[1].user.id,
+            winner: null,
+            loser: null,
+            score: [this.players[0].score, this.players[1].score],
         }
 
-        this.matchHistoryService.create({
-            user1Id: this.players[0].id,
-            user2Id: this.players[1].id,
-            winner: winnerId,
-            score: this.score,
+        this.players.forEach((player, index) => {
+            const otherPlayer: Player = this.players[(index + 1) % 2];
+
+            if (player.score > otherPlayer.score) {
+                player.result = GameResult.Win;
+                matchHistory.winner = index;
+            } else if (player.score < otherPlayer.score) {
+                player.result = GameResult.Lose;
+                matchHistory.loser = index;
+            } else {
+                player.result = GameResult.Draw;
+            }
+
+            player.user.socket.emit('end-game', player.result);
+
+            if (player.score !== otherPlayer.score) {
+                const elo: number = Math.floor(this.calculateUserElo(player.user, otherPlayer.user, player.result));
+                player.user.elo = elo;
+                this.usersService.update(player.user.id, { elo });
+            }
+
+            this.usersService.updateStats(player.user.id, {
+                gameResult: player.result,
+                scoredGoals: player.score,
+                receivedGoals: otherPlayer.score
+            });
+
+            this.gatewayManagerService.unsetGatewayUserGamingStatus(player.user.id);
         });
+
+        this.matchHistoryService.create(matchHistory);
         
-		//TODO: move to another function. Maybe removePlayersFromGameChannel() ?
-        this.players.forEach((player) => player.socket.leave(this.name));
-        
+        this.removePlayersFromGameChannel();
         this.notifyFriendsOfGameEnd();
 
-		//TODO: rename this function
-        this.gatewayManagerService.unsetUserAsGaming(this.players[0].id);
-        this.gatewayManagerService.unsetUserAsGaming(this.players[1].id);
 		this.callEndGameCallbacks();
 		this.notifyEndGameToAllUsers();
+    }
+
+    removePlayersFromGameChannel(): void {
+        this.players.forEach((player) => player.user.socket.leave(this.name));
     }
     
     sendToPlayer(player: GatewayUser, signal: string, body: any) {
@@ -309,40 +299,40 @@ export default class Game {
     
     rejoinPlayer(player: GatewayUser) {
         for (const i in this.players) {
-            if (this.players[i].socket.connected === false)
-            this.players[i].socket = player.socket;
-            this.players[i].socket.join(this.name);
-            this.players[i].socket.on('move', (movementIndex: number, pressed: boolean) => {
+            if (this.players[i].user.socket.connected === false)
+            this.players[i].user.socket = player.socket;
+            this.players[i].user.socket.join(this.name);
+            this.players[i].user.socket.on('move', (movementIndex: number, pressed: boolean) => {
                 this.playerActions[i][movementIndex].input = pressed;
             });
         }
-        this.gatewayManagerService.setUserAsGaming(player.id);
+        this.gatewayManagerService.setGatewayUserGamingStatus(player.id);
     }
     
 
 	//TODO: maybe this could be moved to game.service
     async notifyFriendsOfGameStart() {
-        let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[0].id);
+        let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[0].user.id);
         friends.forEach(friend => {
-            friend.socket.emit('friend-in-a-game', this.players[0].id);
+            friend.socket.emit('friend-in-a-game', this.players[0].user.id);
         });
         
-        friends = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[1].id);
+        friends = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[1].user.id);
         friends.forEach(friend => {
-            friend.socket.emit('friend-in-a-game', this.players[1].id);
+            friend.socket.emit('friend-in-a-game', this.players[1].user.id);
         });
     }
     
 	//TODO: maybe this could be moved to game.service
     async notifyFriendsOfGameEnd() {
-        let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[0].id);
+        let friends: GatewayUser[] = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[0].user.id);
         friends.forEach(friend => {
-            friend.socket.emit('friend-game-ended', this.players[0].id);
+            friend.socket.emit('friend-game-ended', this.players[0].user.id);
         });
         
-        friends = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[1].id);
+        friends = await this.gatewayManagerService.getAllUserConnectedFriends(this.players[1].user.id);
         friends.forEach(friend => {
-            friend.socket.emit('friend-game-ended', this.players[1].id);
+            friend.socket.emit('friend-game-ended', this.players[1].user.id);
         });
     }
 
@@ -360,8 +350,8 @@ export default class Game {
 	notifyNewGameToAllUsers() {
 		const game = {
 			"name": this.name,
-			"player1": this.players[0].username,
-			"player2": this.players[1].username
+			"player1": this.players[0].user.username,
+			"player2": this.players[1].user.username
 		}
 	
 		this.server.emit("spectator-new-game", game);
