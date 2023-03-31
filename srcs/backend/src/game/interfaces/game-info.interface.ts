@@ -4,7 +4,7 @@ export enum GameResult {
     Draw,
 }
 
-export interface GameInfo {
+export interface GameStatsInfo {
     gameResult: GameResult,
     scoredGoals: number,
     receivedGoals: number,

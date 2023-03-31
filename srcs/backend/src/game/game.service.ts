@@ -23,7 +23,6 @@ export class GameService {
   }
 
   onEndGame(gameName: string) {
-    console.log("ENDINGGGG")
     const gameIndex = this.ongoingGames.findIndex(game => game.name == gameName);
     if (gameIndex != -1)
       this.ongoingGames.splice(gameIndex, 1);

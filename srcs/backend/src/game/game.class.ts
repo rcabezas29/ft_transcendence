@@ -3,17 +3,18 @@ import { GatewayUser } from "src/gateway-manager/interfaces";
 import { Vector2 } from './classes/vector2';
 import { GameObject, Paddle } from './classes/game-object';
 import { Table } from './classes/table';
-import { GameResult } from 'src/users/interfaces/game-info.interface';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
-import { Player } from './interfaces/player.interface';
+import { Player, GameResult } from './interfaces';
+import { Stats } from 'src/stats/entities/stats.entity';
+import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 100;
-const WIN_SCORE = 1;
-const GAME_DURATION = 10; // in seconds (?)
+const WIN_SCORE = 2;
+const GAME_DURATION = 200; // in seconds (?)
 
 // TODO: calculate from game-canvas size
 const BALL_START_POSITION_X = 200;
@@ -250,7 +251,7 @@ export default class Game {
             score: [this.players[0].score, this.players[1].score],
         }
 
-        this.players.forEach((player, index) => {
+        this.players.forEach(async (player, index) => {
             const otherPlayer: Player = this.players[(index + 1) % 2];
 
             if (player.score > otherPlayer.score) {
@@ -270,13 +271,7 @@ export default class Game {
                 player.user.elo = elo;
                 this.usersService.update(player.user.id, { elo });
             }
-
-            this.usersService.updateStats(player.user.id, {
-                gameResult: player.result,
-                scoredGoals: player.score,
-                receivedGoals: otherPlayer.score
-            });
-
+            this.updateUserStats(player, otherPlayer);
             this.gatewayManagerService.unsetGatewayUserGamingStatus(player.user.id);
         });
 
@@ -287,6 +282,22 @@ export default class Game {
 
 		this.callEndGameCallbacks();
 		this.notifyEndGameToAllUsers();
+    }
+
+    async updateUserStats(player: Player, otherPlayer: Player): Promise<void> {
+        const userStats: Stats = await this.usersService.getUserStats(player.user.id);
+        const statsToUpdate: UpdateStatsDto = {
+            scoredGoals: userStats.scoredGoals += player.score,
+            receivedGoals: userStats.receivedGoals += otherPlayer.score
+        }
+        if (player.result === GameResult.Win)
+            statsToUpdate.wonGames = userStats.wonGames += 1;
+        else if (player.result === GameResult.Lose)
+            statsToUpdate.lostGames = userStats.lostGames += 1;
+        else
+            statsToUpdate.drawGames = userStats.drawGames += 1;
+
+        this.usersService.updateStats(player.user.id, statsToUpdate);
     }
 
     removePlayersFromGameChannel(): void {
@@ -339,7 +350,7 @@ export default class Game {
 	setEndGameCallback(fn: Function) {
 		this.endGameCallbacks.push(fn)
 	}
-	
+
 	callEndGameCallbacks() {
 		this.endGameCallbacks.forEach(fn => {
 			fn(this.name)
@@ -356,7 +367,7 @@ export default class Game {
 	
 		this.server.emit("spectator-new-game", game);
 	}
-	
+
 	notifyEndGameToAllUsers() {
 		this.server.to(this.name).emit("spectator-end-game", this.name);
 	}

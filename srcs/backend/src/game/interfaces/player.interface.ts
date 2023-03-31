@@ -1,5 +1,5 @@
 import { GatewayUser } from "src/gateway-manager/interfaces";
-import { GameResult } from "src/users/interfaces/game-info.interface";
+import { GameResult } from "./game-info.interface";
 
 export interface Player {
     user: GatewayUser;

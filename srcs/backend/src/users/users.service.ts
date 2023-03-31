@@ -17,9 +17,9 @@ import { Friendship } from 'src/friendships/entities/friendship.entity';
 import { FriendshipsService } from 'src/friendships/friendships.service';
 import { StatsService } from 'src/stats/stats.service';
 import { Stats } from 'src/stats/entities/stats.entity';
-import { GameInfo, GameResult } from './interfaces/game-info.interface';
 import { FilesService } from 'src/files/files.service';
 import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
+import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
 
 @Injectable()
 export class UsersService {
@@ -163,17 +163,14 @@ export class UsersService {
     throw new NotFoundException();
   }
 
-  //FIXME: Remove the GameResult from this function
-  async updateStats(id: number, gameInfo: GameInfo) {
-    const user = await this.findOneById(id);
+  async updateStats(userId: number, newStats: UpdateStatsDto) {
+    const user = await this.findOneById(userId);
+    this.statsService.update(user.stats.id, newStats);
+  }
 
-    this.statsService.update(user.stats.id, {
-      wonGames: user.stats.wonGames += gameInfo.gameResult === GameResult.Win ? 1 : 0,
-      lostGames: user.stats.lostGames += gameInfo.gameResult === GameResult.Lose ? 1 : 0,
-      drawGames: user.stats.drawGames += gameInfo.gameResult === GameResult.Draw ? 1 : 0,
-      scoredGoals: gameInfo.scoredGoals,
-      receivedGoals: gameInfo.receivedGoals,
-    });
+  async getUserStats(userId: number): Promise<Stats> {
+    const user = await this.findOneById(userId);
+    return user.stats;
   }
 
   async remove(id: number): Promise<void> {
