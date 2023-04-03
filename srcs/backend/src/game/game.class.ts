@@ -13,8 +13,8 @@ import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 100;
-const WIN_SCORE = 1;
-const GAME_DURATION = 200; // in seconds (?)
+const WIN_SCORE = 7;
+const GAME_DURATION = 100; // in seconds (?)
 
 // TODO: calculate from game-canvas size
 const BALL_START_POSITION_X = 200;
@@ -44,9 +44,9 @@ export default class Game {
         player1: GatewayUser,
         player2: GatewayUser,
         server: Server,
-        private usersService: UsersService,
-        private matchHistoryService: MatchHistoryService,
-        private gatewayManagerService: GatewayManagerService
+        protected usersService: UsersService,
+        protected matchHistoryService: MatchHistoryService,
+        protected gatewayManagerService: GatewayManagerService
     ) {
         this.server = server;
 
@@ -123,21 +123,20 @@ export default class Game {
 
     }
 
-	private checkGameTimeIsOver(currentTime: Date): boolean {
+	protected checkGameTimeIsOver(currentTime: Date): boolean {
 		return currentTime.getTime() - this.startDate.getTime() >= GAME_DURATION * 1000;
 	}
 
-    private checkIfMaxScoreWasReached(): boolean {
+    protected checkIfMaxScoreWasReached(): boolean {
 		return (this.players[0].score === WIN_SCORE || this.players[1].score === WIN_SCORE);
 	}
 
-    private gameLoop() {
+    protected gameLoop() {
         const now = new Date();
         
         if (this.checkGameTimeIsOver(now) || this.checkIfMaxScoreWasReached()) {
             this.end();
         }
-
         this.updateObjects(now);
         const payload = {
             paddles: this.paddles,
@@ -148,9 +147,9 @@ export default class Game {
         this.server.to(this.name).emit('update-game', payload);
     }
 
-    private previousFrameTime_: number = null;
+    protected previousFrameTime_: number = null;
         
-    private updateObjects(now: Date) {
+    protected updateObjects(now: Date) {
         //deltaTime is in seconds !
         let deltaTime: number = 0;
         if (this.previousFrameTime_ != null) {
@@ -371,4 +370,68 @@ export default class Game {
 	private notifyEndGameToAllUsers() {
 		this.server.to(this.name).emit("spectator-end-game", this.name);
 	}
+}
+
+export class PowerUpsGame extends Game {
+    powerups: GameObject[] = [];
+    constructor(
+        player1: GatewayUser,
+        player2: GatewayUser,
+        server: Server,
+        protected usersService: UsersService,
+        protected matchHistoryService: MatchHistoryService,
+        protected gatewayManagerService: GatewayManagerService
+        ) {
+            super(player1, player2, server, usersService, matchHistoryService, gatewayManagerService);
+    }
+
+    private checkIfTimeToPowerUp(currentTime: Date) : boolean {
+        if ((currentTime.getTime() - this.startDate.getTime() >= GAME_DURATION / 4 * 1000)
+            && (currentTime.getTime() - this.startDate.getTime() <= GAME_DURATION / 4 * 1000 + 18)) {
+            return true;
+        } else if ((currentTime.getTime() - this.startDate.getTime() >= GAME_DURATION / 2 * 1000)
+            && (currentTime.getTime() - this.startDate.getTime() <= GAME_DURATION / 2 * 1000 + 18)) {
+            return true;
+        } else if ((currentTime.getTime() - this.startDate.getTime() >= (GAME_DURATION / 4 + GAME_DURATION / 2) * 1000)
+        && (currentTime.getTime() - this.startDate.getTime() <= (GAME_DURATION / 4 + GAME_DURATION / 2) * 1000 + 18)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    protected updateObjects(now: Date): void {
+        super.updateObjects(now);
+        this.powerups.forEach((pow, i) => {
+            if (pow.hitBox.overlaps(this.ball.hitBox)) {
+                this.powerups.splice(i, 1);
+            }
+        });
+    }
+
+    protected gameLoop(): void {
+        const now = new Date();
+        
+        if (this.checkGameTimeIsOver(now) || this.checkIfMaxScoreWasReached()) {
+            this.end();
+        }
+        if (this.checkIfTimeToPowerUp(now)) {
+            this.powerups.push(new GameObject(
+                new Vector2(200 - 10, Math.random() * 150 + 25),
+                new Vector2(0, 0),
+                new Vector2(20, 20),
+                0,
+            ));
+        }
+        this.updateObjects(now);
+        const payload = {
+            paddles: this.paddles,
+            score: [this.players[0].score, this.players[1].score],
+            ball: this.ball,
+            currentTime: now,
+            powerups: this.powerups,
+        };
+        this.server.to(this.name).emit('update-game', payload);
+    }
+    
 }
