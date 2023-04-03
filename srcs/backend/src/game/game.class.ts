@@ -415,7 +415,7 @@ export class PowerUpsGame extends Game {
                 console.log('Slowed 1');
                 this.paddles[1].speed /= 2;
             }
-        } else if (result === 3) {
+        } else if (result === 2) {
             console.log('Change direction');
             this.ball.direction.y *= -1;
         }
