@@ -20,6 +20,8 @@ const GAME_DURATION = 100; // in seconds (?)
 const BALL_START_POSITION_X = 200;
 const BALL_START_POSITION_Y = 100;
 
+const MAX_BALL_SPEED = 450;
+
 type Move = (playerIndex: number, deltaTime: number) => void;
 type gameAction = { move: Move; input: boolean };
 
@@ -174,7 +176,7 @@ export default class Game {
         this.paddles.forEach((paddle) => {
             if (paddle.hitBox.overlaps(this.ball.hitBox)) {
                 this.ball.direction = paddle.bounceBall(this.ball);
-                if (this.ball.speed < 450) {
+                if (this.ball.speed < MAX_BALL_SPEED) {
                     this.ball.speed *= 1.1;
                 }
             }
@@ -400,11 +402,31 @@ export class PowerUpsGame extends Game {
         }
     }
 
+    apply_powerup() {
+        const result : number = Math.floor(Math.random() * 3);
+        if (result === 0) {
+            console.log('Maax Speeeed');
+            this.ball.speed = MAX_BALL_SPEED;
+        } else if (result === 1) {
+            if (this.ball.direction.x < 0) {
+                console.log('Slowed 0');
+                this.paddles[0].speed /= 2;
+            } else {
+                console.log('Slowed 1');
+                this.paddles[1].speed /= 2;
+            }
+        } else if (result === 3) {
+            console.log('Change direction');
+            this.ball.direction.y *= -1;
+        }
+    }
+
     protected updateObjects(now: Date): void {
         super.updateObjects(now);
         this.powerups.forEach((pow, i) => {
             if (pow.hitBox.overlaps(this.ball.hitBox)) {
                 this.powerups.splice(i, 1);
+                this.apply_powerup();
             }
         });
     }
