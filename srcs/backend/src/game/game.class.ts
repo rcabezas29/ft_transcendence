@@ -403,7 +403,7 @@ export class PowerUpsGame extends Game {
     }
 
     apply_powerup() {
-        const result : number = Math.floor(Math.random() * 3);
+        const result : number = Math.floor(Math.random() * 4);
         if (result === 0) {
             console.log('Maax Speeeed');
             this.ball.speed = MAX_BALL_SPEED;
@@ -418,6 +418,14 @@ export class PowerUpsGame extends Game {
         } else if (result === 2) {
             console.log('Change direction');
             this.ball.direction.y *= -1;
+        } else if (result === 3) {
+            if (this.ball.direction.x < 0) {
+                console.log('Increased 1');
+                this.paddles[1].hitBox.bounds.y += 10;
+            } else {
+                console.log('Increased 0');
+                this.paddles[0].hitBox.bounds.y += 10;
+            }
         }
     }
 
