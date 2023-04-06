@@ -1,6 +1,18 @@
 @import url("./normalize.css");
 
+@font-face {
+    font-family: 'vp-pixel';
+    src: url('vppixel-simplified-webfont.woff2') format('woff2'),
+         url('vppixel-simplified-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
 body {
+	font-family: vp-pixel;
 	margin: 0;
 	padding: 0;
+	background-color: #08150C;
+	color: #B3F9D7;
 }

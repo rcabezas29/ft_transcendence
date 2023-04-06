@@ -13,6 +13,7 @@ import Social from './views/Social.vue'
 import Profile from './views/Profile.vue';
 import FirstTimeLogin from './views/FirstTimeLogin.vue';
 import Spectator from './views/Spectator.vue';
+import UIExamples from './views/UIExamples.vue'
 import NotFound from './views/NotFound.vue'
 
 import {
@@ -100,6 +101,11 @@ const routes = [
 		name: 'spectate',
 		path: '/spectate/:matchId',
 		component: Spectator
+	},
+	{
+		name: 'uiexamples',
+		path: '/uiexamples',
+		component: UIExamples
 	},
 	{
 		name: "not-found",
