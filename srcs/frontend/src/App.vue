@@ -32,11 +32,14 @@
 		padding: 24px 24px;
 		margin: auto;
 		box-sizing: border-box;
+		height: 100vh;
 	}
 
 	.app-body {
 		padding-top: 24px;
 		box-sizing: border-box;
+		height: 80%;
+		max-height: 80%;
 	}
 
 

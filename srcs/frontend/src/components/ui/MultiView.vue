@@ -29,6 +29,9 @@
 		border: 4px solid #4BFE65;
 		color: #B3F9D7;
 		box-sizing: border-box;
+		min-height: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.multiview-header {
@@ -38,6 +41,7 @@
 
 	.multiview-body {
 		padding: 34px;
+		flex: 1;
 	}
 
 </style>

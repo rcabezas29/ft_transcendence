@@ -1,6 +1,7 @@
 <script setup lang="ts">
-	import { ref } from "vue";
+	import { computed, ref } from "vue";
 	import { user } from "../user";
+	import { useRoute } from "vue-router";
 	import Button from "./ui/Button.vue"
 	import BurguerMenu from "./icons/BurguerMenu.vue";
 
@@ -14,21 +15,23 @@
 		menuClosed.value = true;
 	}
 
+	const route = useRoute();
+
 </script>
 
 <template>
 	<div class="nav-header">
 		<div class="nav-buttons" :class="{ hiddenMenu: menuClosed}">
 			<router-link to="home">
-				<Button @click="closeMenu()">PONG.EXE</Button>
+				<Button @click="closeMenu()" :selected="route.path == '/home'">PONG.EXE</Button>
 			</router-link>
 
 			<router-link to="social">
-				<Button @click="closeMenu()">SOCIAL</Button>
+				<Button @click="closeMenu()" :selected="route.path == '/social'">SOCIAL</Button>
 			</router-link>
 
 			<router-link to="profile">
-				<Button @click="closeMenu()">PROFILE</Button>
+				<Button @click="closeMenu()" :selected="route.path == '/profile'">PROFILE</Button>
 			</router-link>
 		</div>
 		<div class="right-nav-container">

@@ -40,7 +40,7 @@
 
 	.chat-container {
 		box-sizing: border-box;
-		position: absolute;
+		position: fixed;
 		bottom: 0;
 		margin-left: -24px;
 		width: 100%;

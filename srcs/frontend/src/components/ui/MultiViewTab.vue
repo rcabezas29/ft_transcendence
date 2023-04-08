@@ -1,10 +1,17 @@
 <script setup lang="ts">
+	interface Props {
+		selected?: boolean
+	}
+
+	const props = withDefaults(defineProps<Props>(), {
+		selected: false,
+	})
 
 </script>
 
 <template>
 
-	<div class="multiview-tab">
+	<div class="multiview-tab" :class="{ selected: props.selected}">
 		<slot/>
 	</div>
 
@@ -31,6 +38,7 @@
 		border-right: none;
 	}
 
+	.selected,
 	.multiview-tab:hover {
 		background-color: #4BFE65;
 		color: #08150C;
