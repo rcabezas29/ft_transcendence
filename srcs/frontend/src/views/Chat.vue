@@ -39,9 +39,10 @@
 <style scoped>
 
 	.chat-container {
+		box-sizing: border-box;
 		position: absolute;
 		bottom: 0;
-		max-width: 500px;
+		margin-left: -24px;
 		width: 100%;
 	}
 
@@ -60,6 +61,14 @@
 
 	.chat-messages-container {
 		display: flex;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.chat-container {
+			max-width: 500px;
+			margin-left: 0;
+		}
 	}
 
 </style>
