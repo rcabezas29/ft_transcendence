@@ -14,11 +14,11 @@
 	<div v-else>
 		<DevBar/>
 		<div class="app-container">
-			<NavBar/>
+			<NavBar v-if="user.checkIsLogged()"/>
 			<div class="app-body">
 				<router-view/>
 			</div>
-			<Chat/>
+			<Chat v-if="user.checkIsLogged()"/>
 		</div>
 	</div>
 	

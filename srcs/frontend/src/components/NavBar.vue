@@ -10,21 +10,25 @@
 		menuOpened.value = !menuOpened.value;
 	}
 
+	function closeMenu() {
+		menuOpened.value = false;
+	}
+
 </script>
 
 <template>
 	<div class="nav-header">
 		<div class="nav-buttons" :class="{ hiddenMenu: menuOpened}">
 			<router-link to="home">
-				<Button @click="toggleMenu()">PONG.EXE</Button>
+				<Button @click="closeMenu()">PONG.EXE</Button>
 			</router-link>
 
 			<router-link to="social">
-				<Button @click="toggleMenu()">SOCIAL</Button>
+				<Button @click="closeMenu()">SOCIAL</Button>
 			</router-link>
 
 			<router-link to="profile">
-				<Button @click="toggleMenu()">PROFILE</Button>
+				<Button @click="closeMenu()">PROFILE</Button>
 			</router-link>
 		</div>
 		<div class="right-nav-container">
