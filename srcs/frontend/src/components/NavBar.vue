@@ -4,21 +4,21 @@
 	import Button from "./ui/Button.vue"
 	import BurguerMenu from "./icons/BurguerMenu.vue";
 
-	const menuOpened = ref(true);
+	const menuClosed = ref(true);
 
 	function toggleMenu() {
-		menuOpened.value = !menuOpened.value;
+		menuClosed.value = !menuClosed.value;
 	}
 
 	function closeMenu() {
-		menuOpened.value = false;
+		menuClosed.value = true;
 	}
 
 </script>
 
 <template>
 	<div class="nav-header">
-		<div class="nav-buttons" :class="{ hiddenMenu: menuOpened}">
+		<div class="nav-buttons" :class="{ hiddenMenu: menuClosed}">
 			<router-link to="home">
 				<Button @click="closeMenu()">PONG.EXE</Button>
 			</router-link>
