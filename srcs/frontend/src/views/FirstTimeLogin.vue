@@ -3,6 +3,7 @@
     import { computed, ref } from "vue"
     import { user } from "../user";
     import AvatarCropper from '../components/AvatarCropper.vue';
+	import Button from "../components/ui/Button.vue";
 
     const avatarURL: string = `http://localhost:3000/users/avatar/${user.id}`;
     const cropperImg = ref<string | ArrayBuffer | null >(avatarURL);
@@ -58,28 +59,66 @@
 </script>
 
 <template>
-    <h1>Welcome! Since this is your first time...</h1>
-    <form @submit.prevent="handleSubmit">
-        <label>Choose a display username: </label>
-        <input type="text" v-model="username"/>
-        <br/>
-
-        <p>crop your photo or upload a new one</p>
-        <AvatarCropper v-if="cropperImg" :avatar-url="cropperImg as string" @crop="updateAvatar" class="image-cropper" />
-        <input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
-
-        <p>Preview:</p>
-        <img :src="imagePreview" class="image-preview"/>
-
-
-        <label class="error-message">{{ errorMessage }}</label>
-        <br/>
-        <button>Submit</button>
-    </form>
+	<div class="form-container">
+		<div class="form-header">
+			<span>WELCOME TO PONGHUB!</span>
+		</div>
+		<p>Since this is your first time...</p>
+		<form @submit.prevent="handleSubmit">
+			<label>Choose a display username:</label>
+			<input type="text" v-model="username" placeholder="$> DISPLAY USERNAME..."/>
+			
+			<p>Crop your avatar image or upload a new one:</p>
+			<AvatarCropper v-if="cropperImg" :avatar-url="cropperImg as string" @crop="updateAvatar" class="image-cropper" />
+			<input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
+			
+			<p>Preview:</p>
+        	<img :src="imagePreview" class="image-preview"/>
+			
+			<div class="error-message">{{ errorMessage }}</div>
+			<Button type="submit">DONE!</button>
+		</form>
+	</div>
 </template>
 
 <style scoped>
-    .error-message {
+	.form-container {
+		max-width: 700px;
+		margin: auto;
+		margin-top: 34px;
+		border: 4px solid #4BFE65;
+        margin-bottom: 42px;
+	}
+
+	.form-header {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: #1E9052;
+		width: 100%;
+		font-size: 34px;
+		border-bottom: 4px solid #4BFE65;
+		padding: 12px;
+		box-sizing: border-box;
+	}
+
+	form {
+		padding: 32px;
+	}
+
+	input {
+		font-family: vp-pixel;
+		color: #B3F9D7;
+		border: 1px solid #1E9052;
+		background-color: #222035;
+		height: 38px;
+		width: 100%;
+		padding: 0 24px;
+		box-sizing: border-box;
+		margin-bottom: 14px;
+	}
+
+	.error-message {
         color: red;
     }
 
@@ -87,9 +126,5 @@
         width: 100px;
         display: block;
         margin: 20px;
-    }
-
-    form {
-        margin-bottom: 20px;
     }
 </style>
