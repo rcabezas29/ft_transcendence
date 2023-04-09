@@ -45,12 +45,12 @@
 			<span>LOGIN</span>
 		</div>
 		<form @submit.prevent="handleSubmit">
-			<input type="text" v-model="email" placeholder="email"/>
-			<input type="password" v-model="password" placeholder="password"/>
+			<input type="text" v-model="email" placeholder="$> EMAIL"/>
+			<input type="password" v-model="password" placeholder="$> PASSWORD"/>
 			<div :class="messageClass">{{ message }}</div>
 			<div class="form-buttons">
-				<Button @click="moveToRegister">REGISTER</Button>
-				<Button :selected="true" @click="handleSubmit">LOGIN</Button>
+				<Button type="button" @click="moveToRegister">REGISTER</Button>
+				<Button type="submit" :selected="true" @click="handleSubmit">LOGIN</Button>
 			</div>
 			<Button @click="loginWithIntra" class="button-42">LOG WITH 42 INTRA</Button>
 		</form>
