@@ -3,6 +3,8 @@
 	import { onBeforeMount, ref } from "vue";
 	import { user } from "../../user"
 	import Table from "../ui/Table.vue"
+	import FriendSearchBar from "@/components/friends/FriendSearchBar.vue";
+
 
 	async function getUsers() {
 
@@ -31,7 +33,7 @@
 <template>
 
 	<div class="search-bar">
-		<input type="text" placeholder="$> SEARCH PEOPLE">
+		<FriendSearchBar/>
 	</div>
 	
 	<Table class="users-table">
@@ -72,19 +74,6 @@
 </template>
 
 <style scoped>
-
-	.search-bar input {
-		width: 100%;
-		border: 1px solid #4BFE65;
-		background-color: #08150C;
-		color: #B3F9D7;
-		height: 60px;
-		box-sizing: border-box;
-		padding: 0 24px;
-		font-size: 18px;
-		font-family: vp-pixel;
-	}
-
 	.users-table {
 		margin-top: 24px;
 	}

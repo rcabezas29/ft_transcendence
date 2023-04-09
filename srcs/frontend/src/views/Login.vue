@@ -52,7 +52,7 @@
 				<Button type="button" @click="moveToRegister">REGISTER</Button>
 				<Button type="submit" :selected="true" @click="handleSubmit">LOGIN</Button>
 			</div>
-			<Button @click="loginWithIntra" class="button-42">LOG WITH 42 INTRA</Button>
+			<Button type="button" @click="loginWithIntra" class="button-42">LOG WITH 42 INTRA</Button>
 		</form>
 	</div>
 </template>

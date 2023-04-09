@@ -51,9 +51,8 @@ watch(input, async () => {
 </script>
 
 <template>
-	<div class="search-section">
-		<h2>Find your people</h2>
-		<input type="text" v-model="input" placeholder="Search users..." />
+	<div class="search-bar">
+		<input type="text" v-model="input" placeholder="$> SEARCH PEOPLE..." />
 		<div class="user-item" v-for="u in users" :key="u.id">
 			<span>{{ u.username }}</span>
 			<button @click="() => friendsController.sendFriendRequest(u.id)" v-if="userIsFriendable(u.id)">Send friend request</button>
@@ -65,6 +64,19 @@ watch(input, async () => {
 </template>
 
 <style scoped>
+
+.search-bar input {
+    width: 100%;
+    border: 1px solid #4BFE65;
+    background-color: #08150C;
+    color: #B3F9D7;
+    height: 60px;
+    box-sizing: border-box;
+    padding: 0 24px;
+    font-size: 18px;
+    font-family: vp-pixel;
+}
+
 .user-item {
 	display: flex;
 	justify-content: space-between;
