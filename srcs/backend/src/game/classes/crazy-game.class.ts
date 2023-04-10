@@ -10,8 +10,6 @@ import Game from './game.class';
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 100;
-const WIN_SCORE = 7;
-const GAME_DURATION = 200; // in seconds (?)
 
 // TODO: calculate from game-canvas size
 const BALL_START_POSITION_X = 200;
@@ -73,7 +71,6 @@ export default class CrazyGame extends Game {
     }
 
     checkIfTimeForNewBall(now: Date) : boolean {
-        console.log(now.getTime() - this.timeSinceLastBall.getTime());
         if (now.getTime() - this.timeSinceLastBall.getTime() < 20 * 1000) {
             return false;
         } else {
