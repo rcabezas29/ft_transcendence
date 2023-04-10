@@ -151,17 +151,19 @@ class GameRenderer {
   drawFrame(payload: UpdateGamePayload) {
     this.clearCanvas();
 
-    const ball: GameObject = payload.ball;
+    const balls: GameObject[] = payload.balls;
     const paddles: Paddle[] = payload.paddles;
     const powerups: GameObject[] = payload.powerups;
     this.canvas.fillStyle = "white";
     this.canvas.fillText(`${payload.score[0]} - ${payload.score[1]}`, 200, 20);
-    this.canvas.fillRect(
-      ball.hitBox.position.x,
-      ball.hitBox.position.y,
-      ball.hitBox.bounds.x,
-      ball.hitBox.bounds.y
-    );
+    balls.forEach((ball) => {
+      this.canvas.fillRect(
+        ball.hitBox.position.x,
+        ball.hitBox.position.y,
+        ball.hitBox.bounds.x,
+        ball.hitBox.bounds.y
+      );
+    })
     paddles.forEach((paddle: Paddle) => {
       this.canvas.fillRect(
         paddle.hitBox.position.x,

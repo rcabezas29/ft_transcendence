@@ -14,7 +14,7 @@ const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 100;
 const WIN_SCORE = 7;
-const GAME_DURATION = 100; // in seconds (?)
+const GAME_DURATION = 200; // in seconds (?)
 
 // TODO: calculate from game-canvas size
 const BALL_START_POSITION_X = 200;
@@ -143,7 +143,7 @@ export default class Game {
         const payload = {
             paddles: this.paddles,
             score: [this.players[0].score, this.players[1].score],
-            ball: this.ball,
+            balls: [this.ball],
             currentTime: now,
         };
         this.server.to(this.name).emit('update-game', payload);
@@ -198,7 +198,7 @@ export default class Game {
         this.ball.updatePosition(deltaTime);
     }
                 
-    private instancePaddles() {
+    protected instancePaddles() {
         this.paddles = [];
         this.paddles[0] = new Paddle(
             new Vector2(40, 100),
@@ -214,11 +214,11 @@ export default class Game {
         );
     }
     
-    private computeGoal(receiver: number) {
+    protected computeGoal(receiver: number) {
         this.players[(receiver + 1) % 2].score += 1;
     }
     
-    private serveBall(ballServer: number) {
+    protected serveBall(ballServer: number) {
         this.ball.hitBox.position.x = BALL_START_POSITION_X;
         this.ball.hitBox.position.y = BALL_START_POSITION_Y;
         this.ball.speed = INITIAL_BALL_SPEED;
@@ -229,7 +229,7 @@ export default class Game {
         );
     }
 
-    private createMatchHistory(): void {
+    protected createMatchHistory(): void {
         const matchHistory = {
             user1Id: this.players[0].user.id,
             user2Id: this.players[1].user.id,
@@ -249,7 +249,7 @@ export default class Game {
         this.matchHistoryService.create(matchHistory);
     }
 
-    private calculateUserElo(user: GatewayUser, other: GatewayUser, userGameResult: GameResult): number {
+    protected calculateUserElo(user: GatewayUser, other: GatewayUser, userGameResult: GameResult): number {
 		const expectedScore = 1 / (1 + 10 ^ ((user.elo - other.elo) / 400));
 		const eloScalar = 32;
 		const eloModifier = userGameResult === GameResult.Win ? 1 : 0;
@@ -257,13 +257,13 @@ export default class Game {
 		return elo;
 	}
 
-    private updateUserElo(player: Player, otherPlayer: Player): void {
+    protected updateUserElo(player: Player, otherPlayer: Player): void {
         const elo: number = Math.floor(this.calculateUserElo(player.user, otherPlayer.user, player.result));
         player.user.elo = elo;
         this.usersService.update(player.user.id, { elo });
     }
 
-    private resolvePlayersGameResultFromScore(): void {
+    protected resolvePlayersGameResultFromScore(): void {
         this.players.forEach(async (player, index) => {
             const otherPlayer: Player = this.players[(index + 1) % 2];
 
@@ -277,7 +277,7 @@ export default class Game {
         });
     }
 
-    private async updateUserStats(player: Player, otherPlayer: Player): Promise<void> {
+    protected async updateUserStats(player: Player, otherPlayer: Player): Promise<void> {
         const userStats: Stats = await this.usersService.getUserStats(player.user.id);
         const statsToUpdate: UpdateStatsDto = {
             scoredGoals: userStats.scoredGoals += player.score,
@@ -293,7 +293,7 @@ export default class Game {
         this.usersService.updateStats(player.user.id, statsToUpdate);
     }
 
-    private removePlayersFromGameChannel(): void {
+    protected removePlayersFromGameChannel(): void {
         this.players.forEach((player) => player.user.socket.leave(this.name));
     }
 
@@ -359,7 +359,7 @@ export default class Game {
 		});
 	}
 
-	private notifyNewGameToAllUsers() {
+	protected notifyNewGameToAllUsers() {
 		const game = {
 			"name": this.name,
 			"player1": this.players[0].user.username,
@@ -369,7 +369,7 @@ export default class Game {
 		this.server.emit("spectator-new-game", game);
 	}
 
-	private notifyEndGameToAllUsers() {
+	protected notifyEndGameToAllUsers() {
 		this.server.to(this.name).emit("spectator-end-game", this.name);
 	}
 }
@@ -387,7 +387,7 @@ export class PowerUpsGame extends Game {
             super(player1, player2, server, usersService, matchHistoryService, gatewayManagerService);
     }
 
-    private checkIfTimeToPowerUp(currentTime: Date) : boolean {
+    protected checkIfTimeToPowerUp(currentTime: Date) : boolean {
         if ((currentTime.getTime() - this.startDate.getTime() >= GAME_DURATION / 4 * 1000)
             && (currentTime.getTime() - this.startDate.getTime() <= GAME_DURATION / 4 * 1000 + 18)) {
             return true;
@@ -457,7 +457,7 @@ export class PowerUpsGame extends Game {
         const payload = {
             paddles: this.paddles,
             score: [this.players[0].score, this.players[1].score],
-            ball: this.ball,
+            balls: [this.ball],
             currentTime: now,
             powerups: this.powerups,
         };
@@ -465,3 +465,161 @@ export class PowerUpsGame extends Game {
     }
     
 }
+
+export class CrazyGame extends Game {
+    balls: GameObject[] = [];
+    timeSinceLastBall: Date;
+    constructor(
+        player1: GatewayUser,
+        player2: GatewayUser,
+        server: Server,
+        protected usersService: UsersService,
+        protected matchHistoryService: MatchHistoryService,
+        protected gatewayManagerService: GatewayManagerService
+        ) {
+            super(player1, player2, server, usersService, matchHistoryService, gatewayManagerService);
+    }
+
+    start() {
+        this.balls.push(new GameObject(
+            new Vector2(200, 100),
+            new Vector2(0, 0),
+            new Vector2(5, 5),
+            INITIAL_BALL_SPEED,
+        ));
+        this.serveBall(Math.floor(Math.random() * 2));
+        this.timeSinceLastBall = new Date();
+        this.instancePaddles();
+        this.server.to(this.name).emit('start-game');
+        this.players.forEach((player, playerIndex) => {
+            player.user.socket.on('move', (movementIndex: number, pressed: boolean) => {
+                this.playerActions[playerIndex][movementIndex].input = pressed;
+            });
+        });
+
+        this.callStartGameCallbacks();
+
+        this.gameInterval = setInterval(() => {
+            this.gameLoop();
+        }, FRAME_TIME * 1000);
+        
+        this.gatewayManagerService.setGatewayUserGamingStatus(this.players[0].user.id);
+        this.gatewayManagerService.setGatewayUserGamingStatus(this.players[1].user.id);
+
+    }
+
+    protected serveBall(ballServer: number) {
+        this.balls[0].hitBox.position.x = BALL_START_POSITION_X;
+        this.balls[0].hitBox.position.y = BALL_START_POSITION_Y;
+        this.balls[0].speed = INITIAL_BALL_SPEED;
+        
+        this.balls[0].direction = new Vector2(
+            this.table.goals[0].orientation.x * (1 - 2 * ballServer),
+            this.table.goals[0].orientation.y * (1 - 2 * ballServer),
+        );
+    }
+
+    checkIfTimeForNewBall(now: Date) : boolean {
+        console.log(now.getTime() - this.timeSinceLastBall.getTime());
+        if (now.getTime() - this.timeSinceLastBall.getTime() < 20 * 1000) {
+            return false;
+        } else {
+            this.timeSinceLastBall = new Date();
+            return true;
+        }
+    }
+
+    protected updateObjects(now: Date) {
+        let deltaTime: number = 0;
+        if (this.previousFrameTime_ != null) {
+            deltaTime = (now.getTime() - this.previousFrameTime_) / 1000;
+        }
+        this.previousFrameTime_ = now.getTime();
+        
+        for (
+            let playerIndex = 0;
+            playerIndex < this.playerActions.length;
+            ++playerIndex
+        ) {
+            for (let moveIndex = 0; moveIndex < 2; ++moveIndex) {
+                if (this.playerActions[playerIndex][moveIndex].input === true) {
+                    this.playerActions[playerIndex][moveIndex].move(
+                        playerIndex,
+                        deltaTime,
+                    );
+                }
+            }
+        }
+        this.paddles.forEach((paddle) => {
+            this.balls.forEach((ball) => {
+                if (paddle.hitBox.overlaps(ball.hitBox)) {
+                    ball.direction = paddle.bounceBall(ball);
+                    if (ball.speed < MAX_BALL_SPEED) {
+                        ball.speed *= 1.1;
+                    }
+                }
+            })
+        });
+        this.table.walls.forEach((wall) => {
+            this.balls.forEach((ball) => {
+                if (wall.overlaps(ball.hitBox)) {
+                    ball.direction = this.table.reflect(
+                        ball.direction,
+                        wall.orientation,
+                    );
+                }
+            })
+        });
+        this.table.goals.forEach((goal, goalIndex) => {
+            this.balls.forEach((ball, ballIndex) => {
+                if (goal.overlaps(ball.hitBox)) {
+                    this.computeGoal(goalIndex);
+                    this.serveNewBall(goalIndex ,ballIndex);
+                }
+            })
+        });
+        this.balls.forEach((ball) => {
+            ball.updatePosition(deltaTime);
+        })
+    }
+
+    serveNewBall(ballServer: number, ballIndex: number) {
+        this.balls[ballIndex].hitBox.position.x = BALL_START_POSITION_X;
+        this.balls[ballIndex].hitBox.position.y = BALL_START_POSITION_Y;
+        this.balls[ballIndex].speed = INITIAL_BALL_SPEED;
+        
+        this.balls[ballIndex].direction = new Vector2(
+            this.table.goals[0].orientation.x * (1 - 2 * ballServer),
+            this.table.goals[0].orientation.y * (1 - 2 * ballServer),
+        );
+    }
+
+    protected gameLoop() {
+        const now = new Date();
+        
+        if (this.checkGameTimeIsOver(now)) {
+            this.end();
+        }
+        if (this.checkIfTimeForNewBall(now)) {
+            console.log('Serving new Ball');
+            this.balls.push(new GameObject(
+                    new Vector2(200, 100),
+                    new Vector2(0, 0),
+                    new Vector2(5, 5),
+                    INITIAL_BALL_SPEED,
+                ));
+            this.serveNewBall(Math.floor(Math.random() * 2), this.balls.length - 1);
+            this.timeSinceLastBall = new Date();
+        }
+        this.updateObjects(now);
+        const payload = {
+            paddles: this.paddles,
+            score: [this.players[0].score, this.players[1].score],
+            balls: this.balls,
+            currentTime: now,
+        };
+        this.server.to(this.name).emit('update-game', payload);
+    }
+}
+
+

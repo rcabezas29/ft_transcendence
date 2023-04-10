@@ -24,7 +24,7 @@ export interface Paddle extends GameObject {
 export interface UpdateGamePayload {
   paddles: Paddle[];
   score: number[];
-  ball: GameObject;
+  balls: GameObject[];
   currentTime: Date;
   powerups: GameObject[];
 }
