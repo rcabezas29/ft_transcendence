@@ -153,6 +153,7 @@ class GameRenderer {
 
     const ball: GameObject = payload.ball;
     const paddles: Paddle[] = payload.paddles;
+    const powerups: GameObject[] = payload.powerups;
     this.canvas.fillStyle = "white";
     this.canvas.fillText(`${payload.score[0]} - ${payload.score[1]}`, 200, 20);
     this.canvas.fillRect(
@@ -169,6 +170,16 @@ class GameRenderer {
         paddle.hitBox.bounds.y
       );
     });
+    powerups.forEach((powerup: GameObject) => {
+      this.canvas.globalAlpha = 0.2;
+      this.canvas.fillRect(
+        powerup.hitBox.position.x,
+        powerup.hitBox.position.y,
+        powerup.hitBox.bounds.x,
+        powerup.hitBox.bounds.y
+      );
+      this.canvas.globalAlpha = 1.0;
+    })
   }
 }
 

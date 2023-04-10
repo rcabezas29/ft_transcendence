@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
-import Game from './game.class';
+import Game, { PowerUpsGame } from './game.class';
 
 @Injectable()
 export class GameService {
@@ -18,7 +18,7 @@ export class GameService {
     ) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser) {
-    const game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
+    const game = new PowerUpsGame(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
     game.setStartGameCallback((gameName: string) => this.onStartGame(gameName));
     game.setEndGameCallback((gameName: string) => this.onEndGame(gameName));
     this.ongoingGames.push(game);
