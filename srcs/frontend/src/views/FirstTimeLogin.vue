@@ -4,6 +4,7 @@
     import { user } from "../user";
     import AvatarCropper from '../components/AvatarCropper.vue';
 	import Button from "../components/ui/Button.vue";
+    import FileUploadButton from "../components/ui/FileUploadButton.vue";
 
     const username = ref("");
     const intraAvatarURL: string = `http://localhost:3000/users/avatar/${user.id}`;
@@ -49,11 +50,7 @@
         router.replace({ "name": "home"});
     }
 
-    function loadImage(e: any) {
-        const image: Blob = e.target.files[0];
-        if (!image)
-            return;
-
+    function loadImage(imageBlob: Blob) {
         const reader = new FileReader();
         reader.onload = function(event) {
             if (!event.target || !event.target.result)
@@ -61,7 +58,7 @@
             cropperImgURL.value = event.target.result.toString();
             openCropper();
         };
-        reader.readAsDataURL(image);
+        reader.readAsDataURL(imageBlob);
     }
 
     function updateAvatar(imageBlob: Blob) {
@@ -95,7 +92,7 @@
                 <div class="avatar-section-buttons">
                     <Button type="button" @click="openCropper">CROP THIS IMAGE</Button>
                     <AvatarCropper v-if="cropperImgURL && cropperVisible" :visible="cropperVisible" :avatar-url="cropperImgURL" @cancel="cancelCropper" @crop="updateAvatar"/>
-                    <input type="file" id="fileUpload" accept="image/jpeg" @change="loadImage"/>
+                    <FileUploadButton @new-file="loadImage"/>
                 </div>
             </div>
 			
@@ -170,22 +167,6 @@
     .avatar-section-buttons > button {
 		padding: 20px 20px;
         margin: 20px 0px;
-    }
-
-    input[type="file"]::file-selector-button {
-        cursor: pointer;
-		background-color: #08150C;
-		border: 4px solid #4BFE65;
-		color: #B3F9D7;
-		font-family: vp-pixel;
-		padding: 20px 20px;
-		width: 100%;
-		max-height: 66px;
-    }
-
-    input[type="file"]::file-selector-button:hover {
-        background-color: #4BFE65;
-		color: #08150C;
     }
 
     .image-preview {
