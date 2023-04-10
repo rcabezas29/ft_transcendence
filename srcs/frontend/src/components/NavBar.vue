@@ -22,8 +22,8 @@
 <template>
 	<div class="nav-header">
 		<div class="nav-buttons" :class="{ hiddenMenu: menuClosed}">
-			<router-link to="home">
-				<Button @click="closeMenu()" :selected="route.path == '/home'">PONG.EXE</Button>
+			<router-link to="game">
+				<Button @click="closeMenu()" :selected="route.path == '/game'">PONG.EXE</Button>
 			</router-link>
 
 			<router-link to="social">
