@@ -5,20 +5,31 @@
     import AvatarCropper from '../components/AvatarCropper.vue';
 	import Button from "../components/ui/Button.vue";
 
-    const avatarURL: string = `http://localhost:3000/users/avatar/${user.id}`;
-    const cropperImg = ref<string | ArrayBuffer | null >(avatarURL);
     const username = ref("");
-    const avatarImage = ref<Blob | null>(null);
-    const imagePreview = computed(() => {
-        if (avatarImage.value)
-            return URL.createObjectURL(avatarImage.value);
-        return "";
+    const intraAvatarURL: string = `http://localhost:3000/users/avatar/${user.id}`;
+
+    const cropperImgURL = ref<string>(intraAvatarURL);
+    const avatarImageURL = ref<string>(intraAvatarURL);
+    const croppedAvatarImage = ref<Blob | null>(null);
+    const imagePreviewURL = computed(() => {
+        if (croppedAvatarImage.value)
+            return URL.createObjectURL(croppedAvatarImage.value);
+        return intraAvatarURL;
     })
     
     const errorMessage = ref("");
 
+    const cropperVisible = ref<boolean>(false);
+    function openCropper() {
+		cropperVisible.value = true;
+	}
+
+    function closeCropper() {
+		cropperVisible.value = false;
+	}
+
     async function handleSubmit() {
-        if (!username.value || !avatarImage.value) {
+        if (!username.value || !croppedAvatarImage.value) {
             errorMessage.value = "missing info! please check that you have filled all sections";
             return;
         }
@@ -29,7 +40,7 @@
             return;
         }
 
-        const avatarUpdated = await user.updateAvatar(avatarImage.value);
+        const avatarUpdated = await user.updateAvatar(croppedAvatarImage.value);
         if (avatarUpdated === false) {
             errorMessage.value = "error while updating avatar";
             return;
@@ -38,22 +49,30 @@
         router.replace({ "name": "home"});
     }
 
-    function loadAvatarPreview(e: any) {
+    function loadImage(e: any) {
         const image: Blob = e.target.files[0];
         if (!image)
             return;
 
         const reader = new FileReader();
         reader.onload = function(event) {
-            if (!event.target)
+            if (!event.target || !event.target.result)
                 return;
-            cropperImg.value = event.target.result;
+            cropperImgURL.value = event.target.result.toString();
+            openCropper();
         };
         reader.readAsDataURL(image);
     }
 
     function updateAvatar(imageBlob: Blob) {
-        avatarImage.value = imageBlob;
+        avatarImageURL.value = cropperImgURL.value;
+        croppedAvatarImage.value = imageBlob;
+		closeCropper();
+    }
+
+    function cancelCropper() {
+        cropperImgURL.value = avatarImageURL.value;
+		closeCropper();
     }
 
 </script>
@@ -63,20 +82,25 @@
 		<div class="form-header">
 			<span>WELCOME TO PONGHUB!</span>
 		</div>
-		<p>Since this is your first time...</p>
 		<form @submit.prevent="handleSubmit">
+		    <p>Since this is your first time...</p>
 			<label>Choose a display username:</label>
-			<input type="text" v-model="username" placeholder="$> DISPLAY USERNAME..."/>
+            <div class="username-section">
+			    <input type="text" v-model="username" placeholder="$> DISPLAY USERNAME..."/>
+            </div>
 			
-			<p>Crop your avatar image or upload a new one:</p>
-			<AvatarCropper v-if="cropperImg" :avatar-url="cropperImg as string" @crop="updateAvatar" class="image-cropper" />
-			<input type="file" accept="image/jpeg" @change="loadAvatarPreview"/>
-			
-			<p>Preview:</p>
-        	<img :src="imagePreview" class="image-preview"/>
+			<label>Crop your avatar image or upload a new one:</label>
+            <div class="avatar-section">
+        	    <img :src="imagePreviewURL" class="image-preview"/>
+                <div class="avatar-section-buttons">
+                    <Button type="button" @click="openCropper">CROP THIS IMAGE</Button>
+                    <AvatarCropper v-if="cropperImgURL && cropperVisible" :visible="cropperVisible" :avatar-url="cropperImgURL" @cancel="cancelCropper" @crop="updateAvatar"/>
+                    <input type="file" id="fileUpload" accept="image/jpeg" @change="loadImage"/>
+                </div>
+            </div>
 			
 			<div class="error-message">{{ errorMessage }}</div>
-			<Button type="submit">DONE!</button>
+			<Button :selected="true" type="submit">DONE!</button>
 		</form>
 	</div>
 </template>
@@ -104,9 +128,15 @@
 
 	form {
 		padding: 32px;
+        display: flex;
+        flex-direction: column;
 	}
 
-	input {
+    label {
+        margin-bottom: 10px;
+    }
+
+	.username-section > input {
 		font-family: vp-pixel;
 		color: #B3F9D7;
 		border: 1px solid #1E9052;
@@ -122,9 +152,46 @@
         color: red;
     }
 
+    .avatar-section {
+        align-self: center;
+        display: flex;
+        justify-content: space-between;
+        width: 70%;
+        margin-bottom: 40px;
+    }
+
+    .avatar-section-buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 45%;
+    }
+
+    .avatar-section-buttons > button {
+		padding: 20px 20px;
+        margin: 20px 0px;
+    }
+
+    input[type="file"]::file-selector-button {
+        cursor: pointer;
+		background-color: #08150C;
+		border: 4px solid #4BFE65;
+		color: #B3F9D7;
+		font-family: vp-pixel;
+		padding: 20px 20px;
+		width: 100%;
+		max-height: 66px;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+        background-color: #4BFE65;
+		color: #08150C;
+    }
+
     .image-preview {
-        width: 100px;
+        width: 45%;
         display: block;
-        margin: 20px;
+        border: 4px solid #1E9052;
+        padding: 8px;
     }
 </style>
