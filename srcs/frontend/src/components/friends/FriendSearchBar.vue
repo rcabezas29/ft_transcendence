@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { friendsController } from '@/friendsController';
 import { user } from "@/user";
 import type { UserData } from "@/interfaces";
+import TextInputField from "../ui/TextInputField.vue";
 
 interface UserInfo {
     id: number,
@@ -52,7 +53,7 @@ watch(input, async () => {
 
 <template>
 	<div class="search-bar">
-		<input type="text" v-model="input" placeholder="$> SEARCH PEOPLE..." />
+        <TextInputField v-model="input" placeholderText="SEARCH PEOPLE..."/>
 		<div class="user-item" v-for="u in users" :key="u.id">
 			<span>{{ u.username }}</span>
 			<button @click="() => friendsController.sendFriendRequest(u.id)" v-if="userIsFriendable(u.id)">Send friend request</button>

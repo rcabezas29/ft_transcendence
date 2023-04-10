@@ -5,6 +5,7 @@
     import AvatarCropper from '../components/AvatarCropper.vue';
 	import Button from "../components/ui/Button.vue";
     import FileUploadButton from "../components/ui/FileUploadButton.vue";
+    import TextInputField from "../components/ui/TextInputField.vue";
 
     const username = ref("");
     const intraAvatarURL: string = `http://localhost:3000/users/avatar/${user.id}`;
@@ -83,7 +84,7 @@
 		    <p>Since this is your first time...</p>
 			<label>Choose a display username:</label>
             <div class="username-section">
-			    <input type="text" v-model="username" placeholder="$> DISPLAY USERNAME..."/>
+                <TextInputField v-model="username" placeholderText="DISPLAY USERNAME..."/>
             </div>
 			
 			<label>Crop your avatar image or upload a new one:</label>
@@ -132,19 +133,7 @@
     label {
         margin-bottom: 10px;
     }
-
-	.username-section > input {
-		font-family: vp-pixel;
-		color: #B3F9D7;
-		border: 1px solid #1E9052;
-		background-color: #222035;
-		height: 38px;
-		width: 100%;
-		padding: 0 24px;
-		box-sizing: border-box;
-		margin-bottom: 14px;
-	}
-
+    
 	.error-message {
         color: red;
     }

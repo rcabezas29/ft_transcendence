@@ -2,7 +2,8 @@
 	import router from "../router";
 	import { ref } from "vue"
 	import { user } from "../user";
-	import Button from "../components/ui/Button.vue"
+	import Button from "../components/ui/Button.vue";
+	import TextInputField from "../components/ui/TextInputField.vue";
 
 	const email = ref("");
 	const password = ref("");
@@ -45,8 +46,8 @@
 			<span>LOGIN</span>
 		</div>
 		<form @submit.prevent="handleSubmit">
-			<input type="text" v-model="email" placeholder="$> EMAIL"/>
-			<input type="password" v-model="password" placeholder="$> PASSWORD"/>
+			<TextInputField v-model="email" placeholder-text="EMAIL"/>
+			<TextInputField v-model="password" placeholder-text="PASSWORD"/>
 			<div :class="messageClass">{{ message }}</div>
 			<div class="form-buttons">
 				<Button type="button" @click="moveToRegister">REGISTER</Button>
@@ -91,17 +92,5 @@
 
 	form {
 		padding: 32px;
-	}
-
-	input {
-		font-family: vp-pixel;
-		color: #B3F9D7;
-		border: 1px solid #1E9052;
-		background-color: #222035;
-		height: 38px;
-		width: 100%;
-		padding: 0 24px;
-		box-sizing: border-box;
-		margin-bottom: 14px;
 	}
 </style>

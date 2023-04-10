@@ -2,7 +2,8 @@
 	import router from "@/router";
 	import { ref } from "vue"
 	import { user } from "../user";
-	import Button from "../components/ui/Button.vue"
+	import Button from "../components/ui/Button.vue";
+	import TextInputField from "../components/ui/TextInputField.vue";
 
 	const username = ref("");
 	const email = ref("");
@@ -49,9 +50,10 @@
 			<span>REGISTER</span>
 		</div>
 		<form @submit.prevent="handleSubmit">
-			<input type="text" v-model="username" placeholder="$> USERNAME"/>
-			<input type="email" v-model="email" placeholder="$> EMAIL"/>
-			<input type="password" v-model="password" placeholder="$> PASSWORD"/>
+			<TextInputField v-model="username" placeholder-text="USERNAME"/>
+			<TextInputField v-model="email" placeholder-text="EMAIL"/>
+			<TextInputField v-model="password" placeholder-text="PASSWORD"/>
+
 			<label :class="messageClass">{{ message }}</label>
 			<div class="form-buttons">
 				<Button type="button" @click="moveToLogin">LOGIN</Button>
