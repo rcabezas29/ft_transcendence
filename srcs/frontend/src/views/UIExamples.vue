@@ -1,9 +1,12 @@
 <script setup lang="ts">
 	import { ref } from "vue";
-	import Button from "../components/ui/Button.vue"
-	import Modal from "../components/ui/Modal.vue"
-	import MultiView from "../components/ui/MultiView.vue"
-	import MultiViewTab from "../components/ui/MultiViewTab.vue"
+	import Button from "../components/ui/Button.vue";
+	import Modal from "../components/ui/Modal.vue";
+	import MultiView from "../components/ui/MultiView.vue";
+	import MultiViewTab from "../components/ui/MultiViewTab.vue";
+	import TextInputField from "../components/ui/TextInputField.vue";
+	import FileUploadButton from "@/components/ui/FileUploadButton.vue";
+import { computed } from "@vue/reactivity";
 
 	//----------------------------- MODAL -----------------------------
 
@@ -28,6 +31,24 @@
 	}
 	//------------------------------------------------------------------
 
+	//----------------------------- TEXT INPUT FIELD -----------------------------
+	const aString = ref("");
+	//------------------------------------------------------------------
+
+	//----------------------------- FILE UPLOAD BUTTON -----------------------------
+
+    const imageURL = ref<string>("");
+
+	function loadImage(imageBlob: Blob) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            if (!event.target || !event.target.result)
+                return;
+			imageURL.value = event.target.result.toString();
+        };
+        reader.readAsDataURL(imageBlob);
+    }
+	//------------------------------------------------------------------
 
 </script>
 
@@ -73,6 +94,45 @@
 
 	<br>
 	<br>
+
+	<hr>
+	<!---------------------------------------------------------------------------------------->
+	
+	<!---------------------------------------------------------------------------------------->
+
+	<h3>FILE UPLOAD BUTTON</h3>
+	<!--
+		The new-file event is fired when a new image is selected, and the handler function
+		will receive the uploaded image blob as an argument.
+	-->
+	<FileUploadButton @new-file="loadImage"/>
+	<img :src="imageURL" style="width: 200px; display: block">
+
+	<br>
+	<br>
+
+	<hr>
+	<!---------------------------------------------------------------------------------------->
+
+	<!---------------------------------------------------------------------------------------->
+
+	<h3>TEXT INPUT FIELD</h3>
+
+	<!--
+		The component will add a "$>" at the beginning of the placeholder-text prop
+		You can even add v-models!
+	-->
+	<TextInputField v-model="aString" placeholder-text="ENTER SOME TEXT..."/>
+	Inputted string model: {{ aString }}
+
+	<br>
+	<br>
+
+
+	<!--
+		It admits some other personalisations using props
+	-->
+	<TextInputField bg-color="#ff77b8" border-color="#0099b8" placeholder-text="THIS IS A PINK/BLUE TEXT FIELD!"/>
 
 	<hr>
 	<!---------------------------------------------------------------------------------------->
