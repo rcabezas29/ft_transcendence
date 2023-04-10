@@ -1,5 +1,4 @@
 <script setup lang="ts">
-	import { ref } from "vue";
 	import CrossIcon from "../icons/CrossIcon.vue"
 
 	interface Props {
@@ -26,7 +25,7 @@
 			<div class="modal-header">
 				<span class="modal-title">{{ title }}</span>
 				<span @click="closeModal" class="modal-exit-btn">
-					<CrossIcon />
+					<CrossIcon cross-colour="#1E9052"/>
 				</span>
 			</div>
 			<div class="modal-body">
@@ -84,5 +83,9 @@
 		display: inline-flex;
 		position: absolute;
 		right: 6px;
+	}
+
+	.modal-exit-btn:hover {
+		cursor: pointer;
 	}
 </style>
