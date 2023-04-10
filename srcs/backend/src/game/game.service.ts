@@ -4,7 +4,8 @@ import { Server } from 'socket.io';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
-import Game, { CrazyGame, PowerUpsGame } from './game.class';
+import Game from './classes/game.class';
+import CrazyGame from './classes/crazy-game.class';
 
 @Injectable()
 export class GameService {
