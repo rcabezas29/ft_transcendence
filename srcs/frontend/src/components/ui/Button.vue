@@ -7,11 +7,13 @@
 
 	const props = withDefaults(defineProps<Props>(), {
 		selected: false,
+		bgColor: "#08150C",
+        borderColor: "#4BFE65"
 	})
 </script>
 
 <template>
-	<button :class="{selected: props.selected}" style="background-color: {{ props.bgCOlor; }};">
+	<button :class="{selected: props.selected}">
 		<span>
 			<slot>
 				BUTTON
@@ -23,8 +25,8 @@
 <style scoped>
 	button {
 		cursor: pointer;
-		background-color: #08150C;
-		border: 4px solid #4BFE65;
+        background-color: v-bind(bgColor);
+		border: 4px solid v-bind(borderColor);
 		color: #B3F9D7;
 		font-family: vp-pixel;
 		padding: 20px 60px;
