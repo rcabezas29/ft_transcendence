@@ -1,4 +1,5 @@
 import { reactive } from "vue";
+import { GameSelection } from "./interfaces/game-selection";
 import type {
   GameObject,
   Paddle,
@@ -23,13 +24,6 @@ enum GameResult {
   Lose,
   Win,
   Draw,
-}
-
-enum GameSelection {
-  Original,
-  SuperCool,
-  Obstacles,
-  Crazy,
 }
 
 //hardcoded for now

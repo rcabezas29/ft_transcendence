@@ -4,20 +4,13 @@ import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interfa
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { GameService } from './game.service';
-
-enum GameSelection {
-	Original,
-	SuperCool,
-	Obstacles,
-	Crazy,
-}
+import { GameSelection } from './interfaces/game-selection.interface';
 
 @Injectable()
 export class MatchmakingService {
 
 	private originalQueue: GatewayUser[] = [];
 	private supercoolQueue: GatewayUser[] = [];
-	private obstaclesQueue: GatewayUser[] = [];
 	private crazyQueue: GatewayUser[] = [];
 
 	private queues: GatewayUser[][] = [];
@@ -28,7 +21,6 @@ export class MatchmakingService {
 	) {
 		this.queues.push(this.originalQueue);
 		this.queues.push(this.supercoolQueue);
-		this.queues.push(this.obstaclesQueue);
 		this.queues.push(this.crazyQueue);
 	}
 
@@ -43,9 +35,6 @@ export class MatchmakingService {
 		} else if (gameSelection === GameSelection.SuperCool) {
 			if (this.supercoolQueue.find((user) => user.id === requestor.id) === undefined)
 				this.supercoolQueue.push(requestor);
-		} else if (gameSelection === GameSelection.Obstacles) {
-			if (this.obstaclesQueue.find((user) => user.id === requestor.id) === undefined)
-				this.obstaclesQueue.push(requestor);
 		} else if (gameSelection === GameSelection.Crazy) {
 			if (this.crazyQueue.find((user) => user.id === requestor.id) === undefined)
 				this.crazyQueue.push(requestor);

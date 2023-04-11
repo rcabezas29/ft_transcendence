@@ -9,17 +9,11 @@ import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interfa
 import { MatchmakingService } from './matchmaking.service';
 import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
+import { GameSelection } from './interfaces/game-selection.interface';
 
 interface ChallengePlayers {
   user1Id: number,
   user2Id: number,
-}
-
-enum GameSelection {
-  Original,
-  SuperCool,
-  Obstacles,
-  Crazy,
 }
 
 @WebSocketGateway()

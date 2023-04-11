@@ -5,13 +5,7 @@ import { onBeforeMount, onMounted, ref } from "vue";
 import Button from '@/components/ui/Button.vue';
 import MultiView from "@/components/ui/MultiView.vue";
 import type MultiViewTab from "@/components/ui/MultiViewTab.vue";
-
-enum GameSelection {
-  Original,
-  SuperCool,
-  Obstacles,
-  Crazy,
-}
+import { GameSelection } from "@/interfaces/game-selection";
 
 const canvasRef = ref<HTMLCanvasElement>();
 
@@ -43,7 +37,6 @@ onMounted(() => {
       <div class="mode-selector" v-if="gameController.state === GameState.None || gameController.state === GameState.Searching">
         <Button @click="changeGameSelection(GameSelection.Original)" :selected="gameController.gameSelection === GameSelection.Original">ORIGINAL</Button>
         <Button @click="changeGameSelection(GameSelection.SuperCool)" :selected="gameController.gameSelection === GameSelection.SuperCool">SUPER COOL</Button>
-        <Button @click="changeGameSelection(GameSelection.Obstacles)" :selected="gameController.gameSelection === GameSelection.Obstacles">OBSTACLES</Button>
         <Button @click="changeGameSelection(GameSelection.Crazy)" :selected="gameController.gameSelection === GameSelection.Crazy">CRAZY</Button>
       </div>
       <canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
@@ -69,6 +62,7 @@ onMounted(() => {
 
 .mode-selector {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
 }
+
 </style>
