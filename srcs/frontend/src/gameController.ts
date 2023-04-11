@@ -28,7 +28,6 @@ enum GameResult {
 enum GameSelection {
   Original,
   SuperCool,
-  Obstacles,
   Crazy,
 }
 

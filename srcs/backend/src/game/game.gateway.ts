@@ -18,7 +18,6 @@ interface ChallengePlayers {
 enum GameSelection {
   Original,
   SuperCool,
-  Obstacles,
   Crazy,
 }
 

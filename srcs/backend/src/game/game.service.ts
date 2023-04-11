@@ -11,7 +11,6 @@ import { PowerUpsGame } from './classes/powerups-game.class';
 enum GameSelection {
   Original,
   SuperCool,
-  Obstacles,
   Crazy,
 }
 
@@ -33,8 +32,6 @@ export class GameService {
       game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
     } else if (gameSelection === GameSelection.SuperCool) {
       game = new PowerUpsGame(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
-    } else if (gameSelection === GameSelection.Obstacles) {
-      game = new CrazyGame(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService); // to change when fully implemented
     } else if (gameSelection === GameSelection.Crazy) {
       game = new CrazyGame(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
     }
