@@ -68,7 +68,8 @@
 		border: 4px solid #4BFE65;
 		border-top: none;
 		background-color: #08150C;
-		min-height: 450px;
+		max-height: 450px;
+		height: 450px;
 	}
 
 	.chats-list {

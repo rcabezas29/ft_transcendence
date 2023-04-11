@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onUpdated, computed } from 'vue'; 
+import { type Ref, ref, onUpdated, computed, onMounted } from 'vue'; 
 import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage, unsetCurrentChat } from '@/currentChat';
 import type { ChatUser } from '../../interfaces';
@@ -8,7 +8,6 @@ import BackArrow from '@/components/icons/BackArrow.vue';
 import groupAvatar from '@/assets/group_avatar.jpg';
 
 const messageInput: Ref<string> = ref<string>("");
-//const chatAvatar = ref<string>("");
 
 function onSubmit(e: Event) {
 	if (messageInput.value.length == 0 || !currentChat.value)
@@ -25,7 +24,7 @@ function	challengeThroughChat() {
 }
 
 function scrollDownChatMessages() {
-	const elem = document.querySelector(".chat-messages-container");
+	const elem = document.querySelector(".chat-container-body");
 	if (elem)
 		elem.scrollTop = elem.scrollHeight;
 }
@@ -55,6 +54,10 @@ function goToProfile() {
 }
 
 onUpdated(() => {
+	scrollDownChatMessages();
+})
+
+onMounted(() => {
 	scrollDownChatMessages();
 })
 
