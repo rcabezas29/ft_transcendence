@@ -4,12 +4,7 @@ import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interfa
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { GameService } from './game.service';
-
-enum GameSelection {
-	Original,
-	SuperCool,
-	Crazy,
-}
+import { GameSelection } from './interfaces/game-selection.interface';
 
 @Injectable()
 export class MatchmakingService {

@@ -5,12 +5,7 @@ import { onBeforeMount, onMounted, ref } from "vue";
 import Button from '@/components/ui/Button.vue';
 import MultiView from "@/components/ui/MultiView.vue";
 import type MultiViewTab from "@/components/ui/MultiViewTab.vue";
-
-enum GameSelection {
-  Original,
-  SuperCool,
-  Crazy,
-}
+import { GameSelection } from "@/interfaces/game-selection";
 
 const canvasRef = ref<HTMLCanvasElement>();
 

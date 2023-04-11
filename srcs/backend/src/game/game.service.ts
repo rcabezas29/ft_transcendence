@@ -7,12 +7,7 @@ import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.servi
 import Game from './classes/game.class';
 import CrazyGame from './classes/crazy-game.class';
 import { PowerUpsGame } from './classes/powerups-game.class';
-
-enum GameSelection {
-  Original,
-  SuperCool,
-  Crazy,
-}
+import { GameSelection } from './interfaces/game-selection.interface';
 
 @Injectable()
 export class GameService {
