@@ -47,7 +47,7 @@
 		</div>
 		<form @submit.prevent="handleSubmit">
 			<TextInputField v-model="email" placeholder-text="EMAIL"/>
-			<TextInputField v-model="password" placeholder-text="PASSWORD"/>
+			<TextInputField type="password" v-model="password" placeholder-text="PASSWORD"/>
 			<div :class="messageClass">{{ message }}</div>
 			<div class="form-buttons">
 				<Button type="button" @click="moveToRegister">REGISTER</Button>

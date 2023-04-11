@@ -47,7 +47,7 @@ export class UsersController {
   @UseGuards(JwtTwoFactorGuard, UserGuard)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.remove(id);
+    return this.usersService.anonimizeUser(id);
   }
   
   @Get("avatar/:id")

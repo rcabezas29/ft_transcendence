@@ -4,6 +4,8 @@ import { user } from '../user';
 import TwoFactorAuthenticationSetup from '../components/TwoFactorAuthenticationSetup.vue';
 import AvatarCropper from '../components/AvatarCropper.vue';
 import type { UserData } from "@/interfaces";
+import Button from "../components/ui/Button.vue";
+import router from "@/router";
 
 const username = ref<string>('');
 const password = ref<string>('');
@@ -83,6 +85,22 @@ async function saveChanges() {
     editModeOff();
 }
 
+async function deleteUserAccount() {
+    const httpResponse = await fetch(`http://localhost:3000/users/${user.id}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${user.token}`,
+        },
+    });
+
+    if (httpResponse.status != 200) {
+        console.log("error while deleting user");
+        return;
+    }
+    user.logout();
+	router.replace({ "name": "login" });
+}
+
 onBeforeMount(async () => {
     userData.value = await user.fetchUserData();
 })
@@ -91,7 +109,11 @@ onBeforeMount(async () => {
 
 <template>
 
+
 	<h1>hola, this is {{ user.username }}'s profile</h1>
+
+    <Button type="button" @click="deleteUserAccount" border-color="#EC3F74">DELETE MY ACCOUNT</Button>
+
     <button class="edit-button" v-if="!editMode" @click="editModeOn">EDIT PROFILE (avatar/username/password)</button>
     <div v-else>
         <button class="edit-button" @click="saveChanges">SAVE CHANGES</button>

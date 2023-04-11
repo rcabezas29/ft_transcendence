@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { CreateUserDto } from './create-user.dto';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
@@ -23,4 +23,16 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   //    message: 'The password must have a Uppercase, lowercase letter and a number'
   //})
   password?: string;
+
+  @IsOptional()
+  intraUsername?: string;
+
+  @IsOptional()
+  email?: string;
+
+  @IsOptional()
+  twoFactorAuthenticationSecret?: string;
+
+  @IsOptional()
+  isTwoFactorAuthenticationEnabled?: boolean;
 }

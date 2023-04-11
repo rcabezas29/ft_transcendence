@@ -165,16 +165,33 @@ export class UsersService {
 
   async updateStats(userId: number, newStats: UpdateStatsDto) {
     const user = await this.findOneById(userId);
+    if (!user)
+      throw new NotFoundException('User not found');
+
     this.statsService.update(user.stats.id, newStats);
   }
 
   async getUserStats(userId: number): Promise<Stats> {
     const user = await this.findOneById(userId);
+    if (!user)
+      throw new NotFoundException('User not found');
+
     return user.stats;
   }
 
-  async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+  async anonimizeUser(id: number) {
+    const newUsername: string = this.generateRandomString(15);
+
+    const updateUserDto: UpdateUserDto = {
+      username: newUsername,
+      intraUsername: newUsername,
+      email: newUsername + "@pong.hub",
+      avatar: 'default_avatar.jpg',
+      password: "",
+      twoFactorAuthenticationSecret: "",
+      isTwoFactorAuthenticationEnabled: false
+    }
+    return this.update(id, updateUserDto);
   }
 
   async getAvatar(id: number): Promise<StreamableFile> {
@@ -254,5 +271,17 @@ export class UsersService {
     return users.filter((u) =>
       u.username.toLowerCase().includes(username.toLowerCase())
     );
+  }
+
+  private generateRandomString(length: number): string {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
   }
 }
