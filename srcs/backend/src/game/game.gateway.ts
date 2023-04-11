@@ -15,6 +15,13 @@ interface ChallengePlayers {
   user2Id: number,
 }
 
+enum GameSelection {
+  Original,
+  SuperCool,
+  Obstacles,
+  Crazy,
+}
+
 @WebSocketGateway()
 export class GameGateway implements OnGatewayInit {
   @WebSocketServer()
@@ -31,11 +38,11 @@ export class GameGateway implements OnGatewayInit {
   }
 
   @SubscribeMessage('search-game')
-  handleMessage(client: any): void {
+  handleMessage(client: any, gameSelection: GameSelection): void {
     const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(
       client.id,
     );
-    this.matchmakingService.searchGame(user);
+    this.matchmakingService.searchGame(user, gameSelection);
   }
 
   @SubscribeMessage('accept-challenge')

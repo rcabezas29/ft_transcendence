@@ -25,6 +25,13 @@ enum GameResult {
   Draw,
 }
 
+enum GameSelection {
+  Original,
+  SuperCool,
+  Obstacles,
+  Crazy,
+}
+
 //hardcoded for now
 const MappedKeys: string[] = ["ArrowUp", "ArrowDown"];
 
@@ -43,6 +50,7 @@ class GameController {
   public state: GameState = GameState.None;
   public timestamp: number = 0;
   public gameRenderer: null | GameRenderer = null;
+  public gameSelection : GameSelection = GameSelection.Original;
 
   setEventHandlers(): void {
     user.socket?.on("game-found", (adversaryName: string) => {
@@ -63,7 +71,7 @@ class GameController {
   }
 
   searchGame() {
-    user.socket?.emit("search-game");
+    user.socket?.emit("search-game", this.gameSelection);
     this.state = GameState.Searching;
   }
 
