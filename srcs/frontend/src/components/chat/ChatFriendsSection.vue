@@ -21,7 +21,7 @@ function	refuseChallenge(friendId: number) {
 
 <template>
 	<div class="chat-section">
-		<div @click="(e: Event) => handleClick(e, friend.id)" v-for="friend in directMessageController.friends" :key="friend.id" class="chat-card">
+		<div class="chat-card" @click="(e: Event) => handleClick(e, friend.id)" v-for="friend in directMessageController.friends" :key="friend.id">
 			<div class="chat-card-info">
 				<div class="chat-card-avatar">
 					<img :src="`http://localhost:3000/users/avatar/${friend.id}`"/>

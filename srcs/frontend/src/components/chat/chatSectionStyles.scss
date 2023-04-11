@@ -3,12 +3,20 @@
 }
 
 .chat-card {
-    border: 1px solid rgb(255, 255, 255);
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 50px;
     padding: 10px;
+}
+
+.chat-card:hover {
+    background-color: #4BFE65;
+    color: #08150C;
+}
+
+.chat-card:hover img {
+    border-color: #08150C;
 }
 
 .chat-card-info {

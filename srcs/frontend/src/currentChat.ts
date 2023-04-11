@@ -9,4 +9,8 @@ export function chatIsDirectMessage(chat: Chat): boolean {
 	return (typeof chat.target == "object"); 
 }
 
+export function unsetCurrentChat() {
+	currentChat.value = null;
+}
+
 export const currentChat: Ref<Chat | null> = ref<Chat | null>(null);

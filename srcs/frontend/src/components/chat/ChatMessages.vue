@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { type Ref, ref, onUpdated } from 'vue'; 
+import { type Ref, ref, onUpdated, computed } from 'vue'; 
 import { directMessageController } from '@/directMessageController';
-import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
+import { currentChat, chatIsChannel, chatIsDirectMessage, unsetCurrentChat } from '@/currentChat';
 import type { ChatUser } from '../../interfaces';
 import { channelController } from '@/channelController';
+import BackArrow from '@/components/icons/BackArrow.vue';
+import groupAvatar from '@/assets/group_avatar.jpg';
 
 const messageInput: Ref<string> = ref<string>("");
+//const chatAvatar = ref<string>("");
 
 function onSubmit(e: Event) {
 	if (messageInput.value.length == 0 || !currentChat.value)
@@ -37,6 +40,20 @@ function getChatName(): string {
 	return ""
 }
 
+const chatAvatar = computed(() => {
+	if (currentChat.value) {
+		if (chatIsChannel(currentChat.value))
+			return groupAvatar;
+		else if (chatIsDirectMessage(currentChat.value))
+			return `http://localhost:3000/users/avatar/${(<ChatUser>currentChat.value.target).id}`;
+	}
+	return ""
+})
+
+function goToProfile() {
+	console.log("go to profile!! ")
+}
+
 onUpdated(() => {
 	scrollDownChatMessages();
 })
@@ -44,15 +61,24 @@ onUpdated(() => {
 </script>
 
 <template>
-	<div>
-		<div class="chat-messages-container">
-			<div class="chat-container-title">
-				{{ getChatName() }}
-				<button v-if="chatIsDirectMessage(currentChat!)" v-on:click="challengeThroughChat()">Challenge</button>
+	<div class="container">
+		<div class="chat-container-header">
+			<div class="back-arrow" @click="unsetCurrentChat">
+				<BackArrow/>
 			</div>
-			<div v-for="message in currentChat!.messages" class="chat-message-container">
+			<div class="chat-title" @click="goToProfile">
+				{{ getChatName() }}
+			</div>
+			<div class="chat-avatar">
+				<img :src="chatAvatar"/>
+
+			</div>
+		</div>
+		<button v-if="chatIsDirectMessage(currentChat!)" v-on:click="challengeThroughChat()">Challenge</button>
+		<div class="chat-container-body">
+			<div v-for="message in currentChat!.messages" class="message">
 				<div class="chat-message-username">
-					{{ message.from }}
+					{{ `${message.from}:` }}
 				</div>
 				<div class="chat-message">
 					{{ message.message }}
@@ -60,37 +86,90 @@ onUpdated(() => {
 			</div>
 		</div>
 		<form @submit.prevent="onSubmit" class="chat-message-input">
-			<input type="text" v-model="messageInput"/>
-			<button type="submit" >Send</button>
+			<input type="text" v-model="messageInput" placeholder="$>"/>
 		</form>
 	</div>
 	
 </template>
 
 <style scoped>
-	.chat-messages-container {
-		border: 1px solid black;
-		margin-left: 10px;
-		width: 300px;
-		height: 300px;
-		overflow-y: scroll; 
+	.container {
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 
-	.chat-message-container {
-		margin: 4px 0;
+	.chat-container-body {
+		overflow-y: scroll;
+		height: 100%;
+        padding: 0 24px;
+	}
+
+	.message {
+		display: flex;
 	}
 
 	.chat-message-username {
-		font-weight: bold;
+		color: #1E9052;
+		margin-right: 10px;
 	}
 
-	.chat-container-title {
-		font-weight: bold;
-		border-bottom: 5px solid black;
-		margin-bottom: 20px;
+	.chat-message {
+		color: #B3F9D7;
+		overflow-wrap: anywhere;
 	}
 
-	.chat-message-input {
-		margin-left: 10px;
+	.chat-container-header {
+		box-sizing: border-box;
+		background-color: #1E9052;
+		border-bottom: 4px solid #4BFE65;
+		font-size: 18px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 4px 8px;
+	}
+
+	.chat-message-input input {
+		box-sizing: border-box;
+        font-family: vp-pixel;
+		background-color: #08150C;
+        color: #B3F9D7;
+		border: none;
+        border-top: 4px solid #4BFE65;
+		width: 100%;
+        height: 38px;
+        padding: 0 24px;
+	}
+
+	.back-arrow {
+		height: 30px;
+		width: 30px;
+		display: flex;
+		align-items: center;
+	}
+
+	.back-arrow:hover {
+		cursor: pointer;
+		color: #08150C;
+	}
+
+	.chat-title:hover {
+		cursor: pointer;
+		color: #08150C;
+	}
+
+	.chat-avatar {
+		display: flex;
+	}
+
+	.chat-avatar img {
+		box-sizing: border-box;
+		border: 1px solid #4BFE65;
+		padding: 2px;
+		width: 30px;
+		background-color: #08150C;
 	}
 </style>
