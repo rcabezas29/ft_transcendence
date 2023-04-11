@@ -1,3 +1,8 @@
+export interface UserStats {
+	wonGames: number;
+	lostGames: number;
+}
+
 export interface UserData {
     id: number;
     username: string;
@@ -6,5 +11,5 @@ export interface UserData {
     avatar: string;
     elo: number;
     isTwoFactorAuthenticationEnabled: boolean;
-    stats: Object;
+    stats: UserStats;
 }
