@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { computed, ref } from "vue";
+	import { ref } from "vue";
 	import { user } from "../user";
 	import { useRoute } from "vue-router";
 	import Button from "./ui/Button.vue"

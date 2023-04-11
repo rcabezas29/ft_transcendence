@@ -1,17 +1,31 @@
 <script setup lang="ts">
 
 	import { ref } from 'vue'; 
-	import { currentChat, chatIsChannel } from '../currentChat';
+	import { currentChat, unsetCurrentChat } from '../currentChat';
 
 	import ChatFriendsSection from "../components/chat/ChatFriendsSection.vue";
 	import ChatChannelsSection from "../components/chat/ChatChannelsSection.vue";
 	import ChatMessages from "@/components/chat/ChatMessages.vue";
-	import ChatChannelUserList from '@/components/chat/ChatChannelUserList.vue';
+	import ChannelInfo from '@/components/chat/ChannelInfo.vue';
+	import ChatMessagesHeader from '@/components/chat/ChatMessagesHeader.vue';
 
 	const chatOpened = ref(false);
-
 	function toggleChatWindow() {
 		chatOpened.value = !chatOpened.value;
+	}
+
+	const channelInfoOpened = ref(false);
+	function channelInfoOn() {
+		channelInfoOpened.value = true;
+	}
+
+	function channelInfoOff() {
+		channelInfoOpened.value = false;
+	}
+
+	function closeCurrentChat() {
+		unsetCurrentChat();
+		channelInfoOff();
 	}
 
 </script>
@@ -27,11 +41,10 @@
 				<ChatChannelsSection />
 			</div>
 
-			<div v-if="currentChat" class="chat-open">
-				<ChatMessages />
-				<!--
-				<ChatChannelUserList v-if="chatIsChannel(currentChat)"/>
-				-->
+			<div class="chat-open" v-if="currentChat">
+				<ChatMessagesHeader @close="closeCurrentChat" @channel-info="channelInfoOn"/>
+				<ChatMessages v-if="!channelInfoOpened"/>
+				<ChannelInfo v-else @close="channelInfoOff"/>
 			</div>
 		</div>
 		
@@ -40,7 +53,6 @@
 </template>
 
 <style scoped>
-
 	.chat-container {
 		box-sizing: border-box;
 		position: fixed;
@@ -78,7 +90,12 @@
 	}
 	
 	.chat-open {
+		box-sizing: border-box;
 		width: 100%;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 	}
 
 
