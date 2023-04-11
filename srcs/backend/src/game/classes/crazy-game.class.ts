@@ -117,6 +117,9 @@ export default class CrazyGame extends Game {
                         ball.direction,
                         wall.orientation,
                     );
+                    ball.hitBox.position.y <= 0 ?
+                        ball.hitBox.position.y = 0 :
+                        ball.hitBox.position.y = 200 - ball.hitBox.bounds.y;
                 }
             })
         });

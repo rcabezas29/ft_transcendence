@@ -187,6 +187,9 @@ export default class Game {
                     this.ball.direction,
                     wall.orientation,
                 );
+                this.ball.hitBox.position.y <= 0 ?
+                    this.ball.hitBox.position.y = 0 :
+                    this.ball.hitBox.position.y = 200 - this.ball.hitBox.bounds.y;
             }
         });
         this.table.goals.forEach((goal, index) => {
