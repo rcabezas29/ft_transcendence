@@ -22,14 +22,17 @@
 			CHAT.EXE
 		</div>
 		<div class="chat-body" v-if="chatOpened">
-			<div>
+			<div class="chats-list">
 				<ChatFriendsSection />
 				<ChatChannelsSection />
 			</div>
+				<!--
+
 			<div v-if="currentChat" class="chat-messages-container">
 				<ChatMessages />
 				<ChatChannelUserList v-if="chatIsChannel(currentChat)"/>
 			</div>
+				-->
 		</div>
 		
 	</div>
@@ -44,6 +47,9 @@
 		bottom: 0;
 		margin-left: -24px;
 		width: 100%;
+		display: flex;
+		flex-direction: column;
+		background-color: #27aad6;
 	}
 
 	.chat-header {
@@ -57,6 +63,13 @@
 		display: flex;
 		border: 4px solid #4BFE65;
 		border-top: none;
+		background-color: #08150C;
+		max-height: 450px;
+		overflow-y: scroll;
+	}
+
+	.chats-list {
+		width: 100%;
 	}
 
 	.chat-messages-container {

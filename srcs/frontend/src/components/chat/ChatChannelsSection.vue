@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { channelController } from '@/channelController';
-import ChatAllChannelsList from './ChatAllChannelsList.vue';
 import type { Channel } from '@/interfaces';
 import { chatIsChannel, currentChat } from '@/currentChat';
 
@@ -9,16 +8,7 @@ function handleClick(e: Event, channel: string) {
 	channelController.setCurrentChat(channel);
 }
 
-const channelNameInput = ref("");
-
 const newPassword = ref("");
-
-function createChat(e: Event) {
-	if (channelNameInput.value.length == 0)
-		return;
-	channelController.createChannel(channelNameInput.value);
-	channelNameInput.value = "";
-}
 
 function leaveChannel(e: Event, channel: string): void {
 	channelController.leaveChannel(channel);
@@ -52,39 +42,30 @@ const showPasswordForm = computed(() => {
 </script>
 
 <template>
-	<div>
-		<div class="chat-divider">
-			My Channels
-		</div>
-		<div>
-			<form @submit.prevent="createChat">
-				New channel:
-				<input type="text" v-model="channelNameInput">
-				<button>Create</button>
-			</form>
-		</div>
-		<div class="chat-section">
-			<div @click="(e: Event) => handleClick(e, channel.name)" v-for="channel in channels" :key="channel.name" class="chat-card">
+	<div class="chat-section">
+		<div @click="(e: Event) => handleClick(e, channel.name)" v-for="channel in channels" :key="channel.name" class="chat-card">
+			
+			<div class="chat-card-info">
+				<div class="chat-card-avatar">
+					<img src="@/assets/group_avatar.jpg"/>
+				</div>
 				<div class="chat-card-name">
 					{{ channel.name }}
 				</div>
-				<button @click.stop="(e: Event) => leaveChannel(e, channel.name)">Leave channel</button>
-				<div class="chat-card-notification" :class="{'chat-card-notification-on': channel.chat!.notification}"></div>
 			</div>
-			<div v-if="showPasswordForm" class="password-form">
-				<form @submit.prevent="(e) => setPassword(e, currentChat!.target as string)">
-					<input type="text" placeholder="enter new password" v-model="newPassword">
-					<button>Set Password for {{ currentChat!.target as string }} </button>
-				</form>
-				<button @click="(e) => unsetPassword(e, currentChat!.target as string)">
-					Unset Password for {{ currentChat!.target as string }}
-				</button>
-			</div>
+
+			<button @click.stop="(e: Event) => leaveChannel(e, channel.name)">Leave channel</button>
+			<div class="chat-card-notification" :class="{'chat-card-notification-on': channel.chat!.notification}"></div>
 		</div>
-		<div class="chat-divider">
-			All Channels
+		<div v-if="showPasswordForm" class="password-form">
+			<form @submit.prevent="(e) => setPassword(e, currentChat!.target as string)">
+				<input type="text" placeholder="enter new password" v-model="newPassword">
+				<button>Set Password for {{ currentChat!.target as string }} </button>
+			</form>
+			<button @click="(e) => unsetPassword(e, currentChat!.target as string)">
+				Unset Password for {{ currentChat!.target as string }}
+			</button>
 		</div>
-		<ChatAllChannelsList />
 	</div>
 </template>
 
