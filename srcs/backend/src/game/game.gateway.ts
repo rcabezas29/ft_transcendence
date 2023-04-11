@@ -54,7 +54,7 @@ export class GameGateway implements OnGatewayInit {
       players.user2Id,
     );
     user1.socket.emit('challenge-accepted');
-    this.gameService.createGame(user1, user2);
+    this.gameService.createGame(user1, user2, GameSelection.Original);
   }
 
   @SubscribeMessage('ongoing-games')

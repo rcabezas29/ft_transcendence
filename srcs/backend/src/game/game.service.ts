@@ -6,6 +6,14 @@ import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
 import Game from './classes/game.class';
 import CrazyGame from './classes/crazy-game.class';
+import { PowerUpsGame } from './classes/powerups-game.class';
+
+enum GameSelection {
+  Original,
+  SuperCool,
+  Obstacles,
+  Crazy,
+}
 
 @Injectable()
 export class GameService {
@@ -18,8 +26,18 @@ export class GameService {
     private gatewayManagerService: GatewayManagerService
     ) {}
 
-  createGame(user1: GatewayUser, user2: GatewayUser) {
-    const game = new CrazyGame(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
+  createGame(user1: GatewayUser, user2: GatewayUser, gameSelection: GameSelection) {
+
+    let game: Game;
+    if (gameSelection === GameSelection.Original) {
+      game = new Game(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
+    } else if (gameSelection === GameSelection.SuperCool) {
+      game = new PowerUpsGame(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
+    } else if (gameSelection === GameSelection.Obstacles) {
+      game = new CrazyGame(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService); // to change when fully implemented
+    } else if (gameSelection === GameSelection.Crazy) {
+      game = new CrazyGame(user1, user2, this.server, this.usersService, this.matchHistoryService, this.gatewayManagerService);
+    }
     game.setStartGameCallback((gameName: string) => this.onStartGame(gameName));
     game.setEndGameCallback((gameName: string) => this.onEndGame(gameName));
     this.ongoingGames.push(game);

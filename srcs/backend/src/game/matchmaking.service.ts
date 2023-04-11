@@ -54,7 +54,7 @@ export class MatchmakingService {
 
 	@Cron(CronExpression.EVERY_5_SECONDS)
 	matchmakingCron() {
-		this.queues.forEach((usersQueue) => {
+		this.queues.forEach((usersQueue, queueIndex) => {
 			if (usersQueue.length < 2)
 				return ;
 			const user1 = usersQueue[0];
@@ -62,7 +62,7 @@ export class MatchmakingService {
 			const user2 = this.findAdversaryFor(user1, usersQueue);
 			const user2Index = usersQueue.findIndex((user) => user.id === user2.id);
 			usersQueue.splice(user2Index, 1);
-			this.gameService.createGame(user1, user2);
+			this.gameService.createGame(user1, user2, queueIndex);
 		});
 	}
 
