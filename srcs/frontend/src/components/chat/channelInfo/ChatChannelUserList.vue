@@ -31,7 +31,6 @@ const currentChannel = computed(() => {
 .container {
 	height: 100%;
 	display: flex;
-	/*background-color: #f21ad2;*/
 }
 
 

@@ -5,8 +5,10 @@ import { channelController } from '../../../channelController';
 import ChatChannelUserList from '@/components/chat/channelInfo/ChatChannelUserList.vue';
 import CrossIcon from "../../icons/CrossIcon.vue";
 import ChannelInfoButtons from './ChannelInfoButtons.vue';
-import { computed, ref, watch } from 'vue';
-import Button from "../../ui/Button.vue";
+import { computed, ref } from 'vue';
+import BanSettingsScreen from "./BanSettingsScreen.vue";
+import MuteSettingsScreen from "./MuteSettingsScreen.vue";
+import ChannelPwdSettingsScreen from "./ChannelPwdSettingsScreen.vue";
 
 const emit = defineEmits(["close"]);
 
@@ -18,34 +20,6 @@ function closeInfo() {
 const currentChannel = computed(() => {
     return channelController.channels[currentChat.value!.target as string];
 })
-
-const amountOfBanTime = ref("");
-const amountOfMuteTime = ref("");
-
-function banUser(): void {
-	if (!channelController.userSelected)
-		return;
-
-	channelController.banUser(channelController.userSelected, currentChannel.value.name, amountOfBanTime.value);
-	amountOfBanTime.value = "";
-}
-
-function muteUser(): void {
-	if (!channelController.userSelected)
-		return;
-	
-	channelController.muteUser(channelController.userSelected, currentChannel.value.name, amountOfMuteTime.value);
-	amountOfMuteTime.value = "";
-}
-
-function toggleAdmin(): void {
-	if (!channelController.userSelected)
-		return;
-	if (!channelController.userIsChannelAdmin(currentChannel.value, channelController.userSelected))
-		channelController.makeChannelAdmin(channelController.userSelected, currentChannel.value.name);
-	else
-		channelController.removeChannelAdmin(channelController.userSelected, currentChannel.value.name);
-}
 
 const banSettingsOpened = ref<boolean>(false);
 function toggleBanScreen(): void {
@@ -62,19 +36,18 @@ function togglePasswordScreen(): void {
 	passwordSettingsOpened.value = !passwordSettingsOpened.value;
 }
 
-const newPassword = ref<string>("");
-function setPassword(e: Event, channel: string): void {
-	channelController.setPassword(newPassword.value, channel);
-	newPassword.value = "";
-}
-
-function unsetPassword(e: Event, channel: string): void {
-	channelController.unsetPassword(channel);
-}
-
 function leaveChannel(channel: string): void {
 	channelController.leaveChannel(channel);
     closeInfo();
+}
+
+function toggleAdmin(): void {
+	if (!channelController.userSelected)
+		return;
+	if (!channelController.userIsChannelAdmin(currentChannel.value, channelController.userSelected))
+		channelController.makeChannelAdmin(channelController.userSelected, currentChannel.value.name);
+	else
+		channelController.removeChannelAdmin(channelController.userSelected, currentChannel.value.name);
 }
 
 </script>
@@ -90,28 +63,13 @@ function leaveChannel(channel: string): void {
             </div>
             <div class="info-body">
                 <div class="temporary-settings-screen" v-if="banSettingsOpened && channelController.userIsChannelAdmin(currentChannel)">
-                    <form @submit.prevent="banUser">
-                        <input type="text" placeholder="Amount of time in seconds" v-model="amountOfBanTime">
-                        <button>Ban</button>
-                    </form>
-                    <Button @click="toggleBanScreen">CANCEL</Button>
+                    <BanSettingsScreen @close-ban-settings="toggleBanScreen"/>
                 </div>
                 <div class="temporary-settings-screen" v-else-if="muteSettingsOpened && channelController.userIsChannelAdmin(currentChannel)">
-                    <form @submit.prevent="muteUser">
-                        <input type="text" placeholder="Amount of time in seconds" v-model="amountOfMuteTime">
-                        <button>Mute</button>
-                    </form>
-                    <Button @click="toggleMuteScreen">CANCEL</Button>
+                    <MuteSettingsScreen @close-mute-settings="toggleMuteScreen"/>
                 </div>
                 <div class="temporary-settings-screen" v-else-if="passwordSettingsOpened && channelController.userIsChannelOwner(currentChannel)">
-                    <form @submit.prevent="(e) => setPassword(e, currentChat!.target as string)">
-                        <input type="text" placeholder="enter new password" v-model="newPassword">
-                        <button>Set Password for {{ currentChat!.target as string }} </button>
-                    </form>
-                    <button @click="(e) => unsetPassword(e, currentChat!.target as string)">
-                        Unset Password for {{ currentChat!.target as string }}
-                    </button>
-                    <Button @click="togglePasswordScreen">CANCEL</Button>
+                    <ChannelPwdSettingsScreen @close-pwd-settings="togglePasswordScreen"/>
                 </div>
                 <div class="channel-info" v-else>
                     <ChatChannelUserList class="info-section user-list"/>
@@ -177,20 +135,17 @@ function leaveChannel(channel: string): void {
     .info-body {
         width: 100%;
         height: 100%;
-        /*background-color: #ae1af2;*/
     }
 
     .channel-info {
         display: flex;
         width: 100%;
         height: 100%;
-        /*background-color: #1a2cf2;*/
     }
 
     .temporary-settings-screen {
         display: flex;
         width: 100%;
-        /*background-color: #c7f21a;*/
     }
 
     .info-section {
