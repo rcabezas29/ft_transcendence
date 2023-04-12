@@ -107,7 +107,10 @@ export default class Game {
         );
         this.serveBall(Math.floor(Math.random() * 2));
         this.instancePaddles();
-        this.server.to(this.name).emit('start-game');
+        this.server.to(this.name).emit('start-game', {
+            user1: this.players[0].user.username,
+            user2: this.players[1].user.username,
+        });
         this.players.forEach((player, playerIndex) => {
             player.user.socket.on('move', (movementIndex: number, pressed: boolean) => {
                 this.playerActions[playerIndex][movementIndex].input = pressed;

@@ -7,6 +7,18 @@ import type {
 } from "./interfaces/update-game.interface";
 import { user } from "./user";
 
+interface ScoreBoard {
+  user1Name: string;
+  user2Name: string;
+  user1Score: number;
+  user2Score: number;
+}
+
+interface PlayersUsernames {
+  user1: string;
+  user2: string;
+}
+
 export enum GameState {
   None,
   Searching,
@@ -45,13 +57,20 @@ class GameController {
   public timestamp: number = 0;
   public gameRenderer: null | GameRenderer = null;
   public gameSelection : GameSelection = GameSelection.Original;
-
+  public scoreBoard: ScoreBoard = {
+    user1Name: "",
+    user2Name: "",
+    user1Score: 0,
+    user2Score: 0,
+  };
+  
   setEventHandlers(): void {
     user.socket?.on("game-found", (adversaryName: string) => {
+      console.log('game-found');
       this.gameFound(adversaryName);
     });
-    user.socket?.on("start-game", () => {
-      this.startGame();
+    user.socket?.on("start-game", (playersNames: PlayersUsernames) => {
+      this.startGame(playersNames);
     });
     user.socket?.on("end-game", (gameResult: GameResult) => {
       this.endGame(gameResult);
@@ -60,9 +79,14 @@ class GameController {
       this.updateGame(gamePayload);
     });
     user.socket?.on("rejoin-game", () => {
-      this.startGame();
+      this.startGame({
+        user1: this.scoreBoard.user1Name,
+        user2: this.scoreBoard.user2Name,
+      });
     });
   }
+
+  getScoreBoard() : ScoreBoard { return this.scoreBoard; }
 
   searchGame() {
     user.socket?.emit("search-game", this.gameSelection);
@@ -74,8 +98,10 @@ class GameController {
     this.state = GameState.Ready;
   }
 
-  startGame() {
+  startGame(playersNames: PlayersUsernames) {
     this.state = GameState.Playing;
+    this.scoreBoard.user1Name = playersNames.user1;
+    this.scoreBoard.user2Name = playersNames.user2;
     gameActions[MappedKeys[Moves.Up]] = up;
     gameActions[MappedKeys[Moves.Down]] = down;
     window.addEventListener("keydown", (e) => {
@@ -107,6 +133,8 @@ class GameController {
 
   updateGame(gamePayload: UpdateGamePayload) {
     this.timestamp = new Date(gamePayload.currentTime).getTime();
+    this.scoreBoard.user1Score = gamePayload.score[0];
+    this.scoreBoard.user2Score = gamePayload.score[1];
     this.gameRenderer!.drawFrame(gamePayload);
   }
 
@@ -156,8 +184,7 @@ class GameRenderer {
     const balls: GameObject[] = payload.balls;
     const paddles: Paddle[] = payload.paddles;
     const powerups: GameObject[] = payload.powerups;
-    this.canvas.fillStyle = "white";
-    this.canvas.fillText(`${payload.score[0]} - ${payload.score[1]}`, 200, 20);
+    this.canvas.fillStyle = "#D9D9D9";
     balls.forEach((ball) => {
       this.canvas.fillRect(
         ball.hitBox.position.x,
