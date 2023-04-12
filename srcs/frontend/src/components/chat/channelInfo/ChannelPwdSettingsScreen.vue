@@ -40,7 +40,7 @@ function closePasswordSettings(): void {
                 <Button type="submit" class="button" :selected="true">
                     SAVE
                 </Button>
-                <Button type="button" class="button" @click="unsetPassword" :selected="true">
+                <Button type="button" class="button" v-if="currentChannel.isPrivate" @click="unsetPassword" :selected="true">
                     UNSET PASSWORD
                 </Button>
                 <Button type="button" class="button" @click="closePasswordSettings">
@@ -54,16 +54,7 @@ function closePasswordSettings(): void {
 <style scoped>
     @import "./channelSettingsScreensStyles.scss";
 
-.text-input {
-    height: 30%;
-}
-
-.buttons {
-    height: 70%;
-}
-
-.button {
-    padding: 12px 30px;
-}
-
+    .button {
+        padding: 12px 30px;
+    }
 </style>

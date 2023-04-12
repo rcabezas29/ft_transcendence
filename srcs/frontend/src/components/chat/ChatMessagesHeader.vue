@@ -33,6 +33,7 @@ const chatAvatar = computed(() => {
 function goToProfile() {
 	if (!currentChat.value)
 		return;
+	//TODO: redirect to user profile
 	console.log(`REDIRECT TO USER PROFILE WITH ID: ${(<ChatUser>currentChat.value.target).id}`)
 }
 
