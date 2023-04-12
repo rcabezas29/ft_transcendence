@@ -2,7 +2,6 @@
 	import { onBeforeMount, onBeforeUnmount, ref, type Ref } from 'vue';
 	import { user } from "../../user"
 	import router from "../../router"
-import path from 'path';
 
 	//FIXME: find better name and move the interface from here
 	interface Game {
@@ -50,7 +49,42 @@ import path from 'path';
 </script>
 
 <template>
-	<h1>Ongoing </h1>
+
+	<div class="ongoin-matches">
+
+		<div class="match-exterior-container">
+			
+			<div class="match-interior-container">
+
+				<div class="player player-left">
+					<span class="player-name">player name</span>
+					<div class="player-img">
+						<img id="user-image" :src="user.avatarImageURL" />
+					</div>
+					<div class="player-score">
+						<span>1</span>
+					</div>
+				</div>
+
+				<div class="vs-block">
+					<span>vs</span>
+				</div>
+
+				<div class="player player-right">
+					<div class="player-score">
+						<span>1</span>
+					</div>
+					<div class="player-img">
+						<img id="user-image" :src="user.avatarImageURL" />
+					</div>
+					<span class="player-name">player name</span>
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
 
 	<li v-for="game in ongoingGames">
 		{{ game.name }} | {{ game.player1 }} vs {{ game.player2 }} |
@@ -59,6 +93,64 @@ import path from 'path';
 </template>
 
 <style scoped>
+
+	.match-exterior-container {
+		border: 1px solid #4BFE65;
+		height: 50px;
+	}
+
+	.match-interior-container {
+		margin: auto;
+		display: flex;
+		width: fit-content;
+	}
+
+	.player {
+		display: flex;
+		align-items: center;
+		height: 50px;
+	}
+
+	.player-img img {
+		width: 40px;
+		height: 40px;
+	}
+
+	.player-left .player-img {
+		margin-right: 20px;
+	}
+
+	.player-right .player-img {
+		margin-left: 20px;
+	}
+
+	.player-left .player-name {
+		margin-right: 20px;
+	}
+
+	.player-right .player-name {
+		margin-left: 20px;
+	}
+
+	.player-score {
+		background-color: #4BFE65;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		box-sizing: border-box;
+		padding: 24px;
+		color: black;
+		height: 50px;
+	}
+
+	.vs-block {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		padding: 24px;
+		height: 50px;
+	}
 
 
 </style>
