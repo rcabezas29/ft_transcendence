@@ -3,11 +3,12 @@
 	import { onBeforeMount, ref } from "vue";
 	import { user } from "../../user"
 	import Table from "../ui/Table.vue"
-	import FriendSearchBar from "@/components/friends/FriendSearchBar.vue";
+	import type { UserData } from "@/interfaces";
+	import { computed } from "@vue/reactivity";
+	import TextInputField from "../ui/TextInputField.vue";
 
 
-	async function getUsers() {
-
+	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch("http://localhost:3000/users", {
 			headers: {
 				"Authorization": `Bearer ${user.token}`
@@ -18,14 +19,23 @@
 			return null;
 		}
 
-		return await usersRequest.json()
+		const users: UserData[] = await usersRequest.json();
+
+		return users;
 	}
 
-	const users = ref([])
+	const users = ref<UserData[] | null>([]);
+	const input = ref<string>("");
+	const filteredUsers = computed(() => {
+		if (users.value == null)
+			return [];
+
+		return users.value?.filter( (user) => user.username.toLowerCase().includes(input.value.toLowerCase()) );
+	});
 
 	onBeforeMount(async () => {
-		users.value = await getUsers()
-		users.value.sort((e1, e2) => e2["elo"] - e1["elo"])
+		users.value = await getUsers();
+		users.value!.sort((e1, e2) => e2.elo - e1.elo);
 	})
 
 </script>
@@ -33,7 +43,7 @@
 <template>
 
 	<div class="search-bar">
-		<FriendSearchBar/>
+		<TextInputField v-model="input" placeholderText="SEARCH PEOPLE..."/>
 	</div>
 	
 	<Table class="users-table">
@@ -48,10 +58,10 @@
 			</tr>
 		</template>
 		<template #body>
-			<tr v-for="userRow in users">
+			<tr v-for="(userRow, index) in filteredUsers">
 				<td>
 					<div class="table-square">
-						<span>1</span>
+						<span>{{ index + 1 }}</span>
 					</div>
 				</td>
 				<td>
@@ -64,16 +74,21 @@
 						</span>
 					</div>
 				</td>
-				<td>{{ userRow["elo"] }}</td>
-				<td>123123</td>
-				<td>123123</td>
-				<td>12</td>
+				<td>{{ userRow.elo }}</td>
+				<td>{{ userRow.stats.wonGames }}</td>
+				<td>{{ userRow.stats.lostGames }}</td>
+				<td>{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
 			</tr>
+			
 		</template>
 	</Table>
+	<div v-if="input && filteredUsers.length === 0">
+		<p>No users found!</p>
+	</div>
 </template>
 
 <style scoped>
+
 	.users-table {
 		margin-top: 24px;
 	}
@@ -97,6 +112,10 @@
 	.table-user-img img {
 		width: 36px;
 		height: 36px;
+	}
+
+	.table-username {
+		margin-left: 12px;
 	}
 
 </style>
