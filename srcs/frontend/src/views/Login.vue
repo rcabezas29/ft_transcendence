@@ -93,4 +93,8 @@
 	form {
 		padding: 32px;
 	}
+
+	input {
+        margin-bottom: 14px;
+	}
 </style>

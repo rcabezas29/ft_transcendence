@@ -67,15 +67,8 @@ watch(input, async () => {
 <style scoped>
 
 .search-bar input {
-    width: 100%;
-    border: 1px solid #4BFE65;
-    background-color: #08150C;
-    color: #B3F9D7;
     height: 60px;
-    box-sizing: border-box;
-    padding: 0 24px;
     font-size: 18px;
-    font-family: vp-pixel;
 }
 
 .user-item {

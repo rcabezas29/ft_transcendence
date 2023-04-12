@@ -84,7 +84,7 @@
 		    <p>Since this is your first time...</p>
 			<label>Choose a display username:</label>
             <div class="username-section">
-                <TextInputField v-model="username" placeholderText="DISPLAY USERNAME..."/>
+                <TextInputField class="text-input" v-model="username" placeholderText="DISPLAY USERNAME..."/>
             </div>
 			
 			<label>Crop your avatar image or upload a new one:</label>
@@ -163,5 +163,9 @@
         display: block;
         border: 4px solid #1E9052;
         padding: 8px;
+    }
+
+    .text-input {
+        margin-bottom: 18px;
     }
 </style>

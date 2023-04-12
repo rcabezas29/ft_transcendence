@@ -1,5 +1,9 @@
 <script setup lang="ts">
 	import { channelController } from '@/channelController';
+	import ChatAllChannelsList from '@/components/chat/ChatAllChannelsList.vue';
+	import { ref } from 'vue';
+
+	const channelNameInput = ref("");
 
 	function joinChannel(channelName: string) {
 		const channel = channelController.channels[channelName];
@@ -15,11 +19,20 @@
 		channelController.joinChannel(channelName, password);
 	}
 
+	function createChat(e: Event) {
+		if (channelNameInput.value.length == 0)
+			return;
+		channelController.createChannel(channelNameInput.value);
+		channelNameInput.value = "";
+	}
 
 </script>
 
 <template>
 	<h2>Channels</h2>
+
+	<!-- use COMPONENT? -->
+	<ChatAllChannelsList />
 
 	<li v-for="channel in channelController.channels">
 		{{ channel.name }} 
@@ -34,6 +47,14 @@
 			Already joined
 		</span>
 	</li>
+
+	<div>
+		<form @submit.prevent="createChat">
+			New channel:
+			<input type="text" v-model="channelNameInput">
+			<button>Create</button>
+		</form>
+	</div>
 
 </template>
 

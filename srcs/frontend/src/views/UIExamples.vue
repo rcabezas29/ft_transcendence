@@ -133,6 +133,7 @@ import { computed } from "@vue/reactivity";
 		It admits some other personalisations using props
 	-->
 	<TextInputField bg-color="#ff77b8" border-color="#0099b8" placeholder-text="THIS IS A PINK/BLUE TEXT FIELD!"/>
+	<br>
 
 	<hr>
 	<!---------------------------------------------------------------------------------------->

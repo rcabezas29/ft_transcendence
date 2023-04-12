@@ -56,12 +56,6 @@ const routes = [
 		beforeEnter: authenticationGuard
 	},
 	{
-		name: 'chat',
-		path: '/chat',
-		component: Chat,
-		beforeEnter: authenticationGuard
-	},
-	{
 		name: 'game',
 		path: '/game',
 		component: Game,
