@@ -4,6 +4,7 @@ import { currentChat } from '@/currentChat'
 import { channelController } from '../../../channelController';
 import { computed, ref } from 'vue';
 import Button from "../../ui/Button.vue";
+import TextInputField from '@/components/ui/TextInputField.vue';
 
 const emit = defineEmits(["close-pwd-settings"]);
 
@@ -15,10 +16,12 @@ const newPassword = ref<string>("");
 function setPassword(): void {
 	channelController.setPassword(newPassword.value, currentChannel.value.name);
 	newPassword.value = "";
+    emit("close-pwd-settings");
 }
 
 function unsetPassword(): void {
 	channelController.unsetPassword(currentChannel.value.name);
+    emit("close-pwd-settings");
 }
 
 function closePasswordSettings(): void {
@@ -28,16 +31,39 @@ function closePasswordSettings(): void {
 </script>
 
 <template>
-    <form @submit.prevent="setPassword">
-        <input type="text" placeholder="enter new password" v-model="newPassword">
-        <button>Set Password for {{ currentChannel.name }} </button>
-    </form>
-    <button @click="unsetPassword">
-        Unset Password for {{ currentChannel.name }}
-    </button>
-    <Button @click="closePasswordSettings">CANCEL</Button>
+    <div class="container">
+        <form @submit.prevent="setPassword">
+            <div class="text-input"> 
+                <TextInputField placeholder-text="enter new password..." v-model="newPassword"/>
+            </div>
+            <div class="buttons">
+                <Button type="submit" class="button" :selected="true">
+                    SAVE
+                </Button>
+                <Button type="button" class="button" @click="unsetPassword" :selected="true">
+                    UNSET PASSWORD
+                </Button>
+                <Button type="button" class="button" @click="closePasswordSettings">
+                    CANCEL
+                </Button>
+            </div>
+        </form>
+    </div>
 </template>
 
 <style scoped>
+    @import "./channelSettingsScreensStyles.scss";
+
+.text-input {
+    height: 30%;
+}
+
+.buttons {
+    height: 70%;
+}
+
+.button {
+    padding: 12px 30px;
+}
 
 </style>

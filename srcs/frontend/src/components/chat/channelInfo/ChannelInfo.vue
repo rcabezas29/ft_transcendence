@@ -146,6 +146,7 @@ function toggleAdmin(): void {
     .temporary-settings-screen {
         display: flex;
         width: 100%;
+        height: 100%;
     }
 
     .info-section {
