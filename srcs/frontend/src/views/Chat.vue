@@ -6,8 +6,9 @@
 	import ChatFriendsSection from "../components/chat/ChatFriendsSection.vue";
 	import ChatChannelsSection from "../components/chat/ChatChannelsSection.vue";
 	import ChatMessages from "@/components/chat/ChatMessages.vue";
-	import ChannelInfo from '@/components/chat/ChannelInfo.vue';
+	import ChannelInfo from '@/components/chat/channelInfo/ChannelInfo.vue';
 	import ChatMessagesHeader from '@/components/chat/ChatMessagesHeader.vue';
+	import { channelController } from '@/channelController';
 
 	const chatOpened = ref(false);
 	function toggleChatWindow() {
@@ -26,6 +27,7 @@
 	function closeCurrentChat() {
 		unsetCurrentChat();
 		channelInfoOff();
+		channelController.userSelected = null;
 	}
 
 </script>

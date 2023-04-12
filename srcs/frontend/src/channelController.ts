@@ -50,6 +50,7 @@ type ChannelMap = {
 
 class ChannelController {
 	public channels: ChannelMap = {};
+	public userSelected: ChatUser | null = null;
 
 	setEventsHandlers() {
         user.socket?.on('all-channels', (payload: ChannelPayload[]) => {this.onAllChannels(payload)});
@@ -324,6 +325,18 @@ class ChannelController {
             this.channels[channelName].chat = newChat;
         }
     }
+
+	selectUser(user: ChatUser): void {
+		this.userSelected = user;
+	}
+	
+	unselectUser(): void {
+		this.userSelected = null;
+	}
+	
+	isUserSelected(user: ChatUser): boolean {
+		return (user === this.userSelected);
+	}
 }
 
 export const channelController = reactive<ChannelController>(new ChannelController());
