@@ -45,15 +45,20 @@ export class MatchmakingService {
 		requestor.elo = user.elo;
 		requestor.color = gameCustomization.paddleColor;
 
+		for (let i : number = 0; i < this.queues.length; i++) {
+			let queue : GatewayUser[] = this.queues[i];
+			if (queue.find((player) => player.id === requestor.id) !== undefined) {
+				console.log('player already in a queue');
+				return ;
+			}
+		}
+
 		if (gameCustomization.gameSelection === GameSelection.Original) {
-			if (this.originalQueue.find((user) => user.id === requestor.id) === undefined)
-				this.originalQueue.push(requestor);
+			this.originalQueue.push(requestor);
 		} else if (gameCustomization.gameSelection === GameSelection.SuperCool) {
-			if (this.supercoolQueue.find((user) => user.id === requestor.id) === undefined)
-				this.supercoolQueue.push(requestor);
+			this.supercoolQueue.push(requestor);
 		} else if (gameCustomization.gameSelection === GameSelection.Crazy) {
-			if (this.crazyQueue.find((user) => user.id === requestor.id) === undefined)
-				this.crazyQueue.push(requestor);
+			this.crazyQueue.push(requestor);
 		}
 	}
 
