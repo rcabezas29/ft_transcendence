@@ -143,44 +143,74 @@
 
 <style scoped>
 
+	.container {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.header {
+		box-sizing: border-box;
+		width: 100%;
+		display: flex;
+		/*flex-direction: column;*/
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+	}
+
+	.header-image {
+		box-sizing: border-box;
+		display: flex;
+		justify-content: center;
+		width: 50%;
+	}
+
+	.header-image img {
+		box-sizing: border-box;
+		border: 4px solid #1E9052;
+        padding: 8px;
+		width: 100%;
+	}
+
+	.header-buttons {
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		width: 50%;
+		height: 100%;
+		justify-content: space-between;
+		align-items: space-between;
+		gap: 10px;
+		/*margin-top: 20px;*/
+
+	}
+
+	.header-buttons button {
+		padding: 10px 20px;
+	}
+
 	.header-editing-buttons {
 		display: flex;
-		gap: 10px;
+		flex-direction: column;
 	}
 
 	.header-editing-buttons > * {
 		width: 100%;
 	}
 
-	.header-buttons {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-around;
-		gap: 10px;
-		margin-top: 20px;
-	}
+	.avatar-section {
+        display: flex;
+        /*width: 40%;*/
+    }
 
-	.header {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
+	.avatar-section input[type="file"]::file-selector-button {
+		padding: 10px 20px;
 	}
 
 	.form {
 		margin-top: 30px;
 	}
-
-	.header-image img {
-		width: 50%;
-		border: 4px solid #1E9052;
-        padding: 8px;
-	}
-
-	.avatar-section {
-        display: flex;
-        width: 40%;
-    }
 
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
@@ -192,9 +222,15 @@
 		.header-buttons {
 			margin: 0;
 			margin-left: 20px;
+			width: 300px;
 		}
 
-		.header-image img {
+		.header-editing-buttons {
+			flex-direction: row;
+		}
+
+		.header-image {
+			justify-content: flex-start;
 			width: 150px;
 			height: 150px;
 		}
