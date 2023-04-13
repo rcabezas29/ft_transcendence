@@ -110,6 +110,6 @@ function toggleAdmin(): void {
 }
 
 .user-selected {
-	background-color: grey;
+	background-color: Gray;
 }
 </style>

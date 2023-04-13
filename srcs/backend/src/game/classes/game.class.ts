@@ -36,6 +36,7 @@ export default class Game {
 
     ball: GameObject;
     paddles: Paddle[];
+    paddleColors: string[] = [];
     table: Table;
     
     movements: Move[] = [];
@@ -64,6 +65,9 @@ export default class Game {
         }
         this.players.push(player1interface);
         this.players.push(player2interface);
+
+        this.paddleColors.push(player1.color);
+        this.paddleColors.push(player2.color);
 
         this.name = this.players[0].user.username + '_game_' + this.players[1].user.username;
         this.table = new Table();
@@ -211,12 +215,14 @@ export default class Game {
             this.table.goals[0].orientation,
             30,
             this.table.area,
+            this.paddleColors[0],
         );
         this.paddles[1] = new Paddle(
             new Vector2(400 - 40, 100),
             this.table.goals[1].orientation,
             30,
             this.table.area,
+            this.paddleColors[1],
         );
     }
     

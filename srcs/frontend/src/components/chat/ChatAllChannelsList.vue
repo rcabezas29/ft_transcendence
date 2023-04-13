@@ -41,7 +41,7 @@ function joinChannel(): void {
 	}
 
 	.channel-selected {
-		background-color: grey;
+		background-color: Gray;
 	}
 
 	.private-channel-indicator {

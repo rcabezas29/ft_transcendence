@@ -7,6 +7,17 @@ import type {
 } from "./interfaces/update-game.interface";
 import { user } from "./user";
 
+enum    PaddleColorSelection {
+  Gray = "#D9D9D9",
+  Orange = "#D64B24",
+  Sky = "#45D7E7",
+  Violet = "#8589EA",
+  Pink = "#EC3F74",
+  Burgundy = "#893168",
+  Green = "#0A8754",
+  Yellow = "#E7D352",
+}
+
 interface ScoreBoard {
   user1Name: string;
   user2Name: string;
@@ -17,6 +28,11 @@ interface ScoreBoard {
 interface PlayersUsernames {
   user1: string;
   user2: string;
+}
+
+interface GameCustomization {
+  gameSelection: GameSelection;
+  paddleColor: PaddleColorSelection;
 }
 
 export enum GameState {
@@ -57,6 +73,7 @@ class GameController {
   public timestamp: number = 0;
   public gameRenderer: null | GameRenderer = null;
   public gameSelection : GameSelection = GameSelection.Original;
+  public paddleColor : PaddleColorSelection = PaddleColorSelection.Gray;
   public scoreBoard: ScoreBoard = {
     user1Name: "",
     user2Name: "",
@@ -89,7 +106,10 @@ class GameController {
   getScoreBoard() : ScoreBoard { return this.scoreBoard; }
 
   searchGame() {
-    user.socket?.emit("search-game", this.gameSelection);
+    user.socket?.emit("search-game", {
+      gameSelection: this.gameSelection,
+      paddleColor : this.paddleColor,
+    });
     this.state = GameState.Searching;
   }
 
@@ -191,9 +211,10 @@ class GameRenderer {
         ball.hitBox.position.y,
         ball.hitBox.bounds.x,
         ball.hitBox.bounds.y
-      );
-    })
-    paddles.forEach((paddle: Paddle) => {
+        );
+    });
+      paddles.forEach((paddle: Paddle) => {
+      this.canvas.fillStyle = paddle.color;
       this.canvas.fillRect(
         paddle.hitBox.position.x,
         paddle.hitBox.position.y,
