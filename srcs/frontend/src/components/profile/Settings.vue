@@ -5,20 +5,22 @@
 	import TextInputField from "../ui/TextInputField.vue";
 	import type { UserData } from "@/interfaces";
 	import AvatarCropper from "../AvatarCropper.vue";
-
+    import FileUploadButton from "../ui/FileUploadButton.vue";
 
 	const userData: Ref<UserData | null> = ref(null);
 	const editMode: Ref<boolean> = ref(false);
 	const usernameInput: Ref<string> = ref("");
 	const passwordInput: Ref<string> = ref("");
 	const errorMessage: Ref<string[]> = ref([]);
-	const cropperImg = ref<string | null>(null);
-	const avatarImage = ref<Blob | null>(null);
-	const imagePreview = computed(() => {
-		if (avatarImage.value)
-			return URL.createObjectURL(avatarImage.value);
-		return "";
-	})
+
+	const cropperImgURL = ref<string>(user.avatarImageURL);
+    const avatarImageURL = ref<string>(user.avatarImageURL);
+    const croppedAvatarImage = ref<Blob | null>(null);
+    const imagePreviewURL = computed(() => {
+        if (croppedAvatarImage.value)
+            return URL.createObjectURL(croppedAvatarImage.value);
+        return user.avatarImageURL;
+    })
 
 	onBeforeMount(async () => {
 		userData.value = await user.fetchUserData();
@@ -31,8 +33,9 @@
 	function stopEditProfile() {
 		usernameInput.value = "";
 		passwordInput.value = "";
-		avatarImage.value = null;
-		//cancelAvatarPreview();
+		croppedAvatarImage.value = null;
+		cropperImgURL.value = user.avatarImageURL;
+    	avatarImageURL.value = user.avatarImageURL;
 		errorMessage.value = [];
 		editMode.value = false;
 	}
@@ -45,8 +48,8 @@
 
 		if (usernameInput.value.length > 0)
 			usernameUpdated = await user.updateUsername(usernameInput.value);
-		if (avatarImage.value)
-			avatarUpdated = await user.updateAvatar(avatarImage.value);
+		if (croppedAvatarImage.value)
+			avatarUpdated = await user.updateAvatar(croppedAvatarImage.value);
 		if (passwordInput.value.length > 0)
 			passwordUpdated = await user.updatePassword(passwordInput.value);
 
@@ -66,28 +69,37 @@
 		userData.value = await user.fetchUserData();
 	}
 
-	function loadAvatarPreview(e: any) {
-		const image = e.target.files[0];
-		if (!image)
-			return;
-
-		const reader = new FileReader();
-		reader.onload = function(event) {
-			if (!event.target)
-				return;
-				cropperImg.value = event.target.result as string | null;
-		};
-		reader.readAsDataURL(image);
+	const cropperVisible = ref<boolean>(false);
+    function openCropper() {
+		if (editMode.value)
+			cropperVisible.value = true;
 	}
 
-	function updateAvatar(imageBlob: Blob) {
-		avatarImage.value = imageBlob;
-		cropperImg.value = null;
+    function closeCropper() {
+		cropperVisible.value = false;
 	}
 
-	function cancelAvatarPreview() {
-		cropperImg.value = null;
-	}
+	function loadImage(imageBlob: Blob) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            if (!event.target || !event.target.result)
+                return;
+            cropperImgURL.value = event.target.result.toString();
+            openCropper();
+        };
+        reader.readAsDataURL(imageBlob);
+    }
+
+    function updateAvatar(imageBlob: Blob) {
+        avatarImageURL.value = cropperImgURL.value;
+        croppedAvatarImage.value = imageBlob;
+		closeCropper();
+    }
+
+    function cancelCropper() {
+        cropperImgURL.value = avatarImageURL.value;
+		closeCropper();
+    }
 
 </script>
 
@@ -95,7 +107,7 @@
 	<div class="container">
 		<div class="header">
 			<div class="header-image">
-				<img :src="user.avatarImageURL" alt="" srcset="">
+				<img :src="imagePreviewURL" @click="openCropper" alt="" srcset="">
 			</div>
 			<div class="header-buttons">
 				<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
@@ -107,7 +119,10 @@
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
 					<Button v-if="editMode" @click="stopEditProfile">CANCEL</Button>
 				</div>
-				<Button v-if="editMode" @click="stopEditProfile">CHANGE PROFILE PICTURE</Button>
+				<div class="avatar-section" v-if="editMode">
+					<AvatarCropper v-if="cropperImgURL && cropperVisible" :visible="cropperVisible" :avatar-url="cropperImgURL" @cancel="cancelCropper" @crop="updateAvatar"/>
+					<FileUploadButton bg-color="#1E9052" @new-file="loadImage"/>
+				</div>
 			</div>
 		</div>
 		<div>
@@ -130,6 +145,7 @@
 
 	.header-editing-buttons {
 		display: flex;
+		gap: 10px;
 	}
 
 	.header-editing-buttons > * {
@@ -154,6 +170,17 @@
 	.form {
 		margin-top: 30px;
 	}
+
+	.header-image img {
+		width: 50%;
+		border: 4px solid #1E9052;
+        padding: 8px;
+	}
+
+	.avatar-section {
+        display: flex;
+        width: 40%;
+    }
 
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
