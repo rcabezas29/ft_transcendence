@@ -1,18 +1,27 @@
 .chat-section {
-    width: 300px;
+    width: 100%;
 }
 
 .chat-card {
-    border: 1px solid black;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 30px;
+    height: 50px;
     padding: 10px;
 }
 
-.chat-card-selected {
-    background-color: lightgray;
+.chat-card:hover {
+    background-color: #4BFE65;
+    color: #08150C;
+}
+
+.chat-card:hover img {
+    border-color: #08150C;
+}
+
+.chat-card-info {
+    display: flex;
+    align-items: center;
 }
 
 .chat-card-notification {
@@ -21,10 +30,12 @@
 }
 
 .chat-card-notification-on {
-    background-color: red;
+    background-color: #EC3F74;
 }
 
-.chat-divider {
-    margin: 15px 0 5px 0;
-    font-weight: bold;
+.chat-card-avatar > img {
+    border: 2px solid #4BFE65;
+    padding: 2px;
+    width: 50px;
+    margin-right: 10px;
 }

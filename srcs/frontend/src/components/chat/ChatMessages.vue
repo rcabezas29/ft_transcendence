@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { type Ref, ref, onUpdated } from 'vue'; 
+import { type Ref, ref, onUpdated, onMounted } from 'vue'; 
 import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
-import type { ChatUser } from '../../interfaces';
 import { channelController } from '@/channelController';
 
 const messageInput: Ref<string> = ref<string>("");
@@ -22,75 +21,76 @@ function	challengeThroughChat() {
 }
 
 function scrollDownChatMessages() {
-	const elem = document.querySelector(".chat-messages-container");
+	const elem = document.querySelector(".chat-messages");
 	if (elem)
 		elem.scrollTop = elem.scrollHeight;
-}
-
-function getChatName(): string {
-	if (currentChat.value) {
-		if (chatIsChannel(currentChat.value))
-			return currentChat.value.target as string;
-		else if (chatIsDirectMessage(currentChat.value))
-			return (<ChatUser>currentChat.value.target).username;
-	}
-	return ""
 }
 
 onUpdated(() => {
 	scrollDownChatMessages();
 })
 
+onMounted(() => {
+	scrollDownChatMessages();
+})
+
 </script>
 
 <template>
-	<div>
-		<div class="chat-messages-container">
-			<div class="chat-container-title">
-				{{ getChatName() }}
-				<button v-if="chatIsDirectMessage(currentChat!)" v-on:click="challengeThroughChat()">Challenge</button>
+	<button v-if="chatIsDirectMessage(currentChat!)" v-on:click="challengeThroughChat()">Challenge</button>
+
+	<div class="chat-messages">
+		<div v-for="message in currentChat!.messages" class="message">
+			<div class="chat-message-username">
+				{{ `${message.from}:` }}
 			</div>
-			<div v-for="message in currentChat!.messages" class="chat-message-container">
-				<div class="chat-message-username">
-					{{ message.from }}
-				</div>
-				<div class="chat-message">
-					{{ message.message }}
-				</div>
+			<div class="chat-message">
+				{{ message.message }}
 			</div>
 		</div>
-		<form @submit.prevent="onSubmit" class="chat-message-input">
-			<input type="text" v-model="messageInput"/>
-			<button type="submit" >Send</button>
-		</form>
 	</div>
-	
+
+	<form @submit.prevent="onSubmit" class="chat-message-input">
+		<input type="text" v-model="messageInput" placeholder="$>"/>
+	</form>
 </template>
 
 <style scoped>
-	.chat-messages-container {
-		border: 1px solid black;
-		margin-left: 10px;
-		width: 300px;
-		height: 300px;
-		overflow-y: scroll; 
+	.chat-messages {
+		box-sizing: border-box;
+		overflow-y: scroll;
+		height: 100%;
+		width: 100%;
+        padding: 0 24px;
 	}
 
-	.chat-message-container {
-		margin: 4px 0;
+	.message {
+		display: flex;
 	}
 
 	.chat-message-username {
-		font-weight: bold;
+		color: #1E9052;
+		margin-right: 10px;
 	}
 
-	.chat-container-title {
-		font-weight: bold;
-		border-bottom: 5px solid black;
-		margin-bottom: 20px;
+	.chat-message {
+		color: #B3F9D7;
+		overflow-wrap: anywhere;
 	}
 
 	.chat-message-input {
-		margin-left: 10px;
+		width: 100%;
+	}
+
+	.chat-message-input input {
+		box-sizing: border-box;
+        font-family: vp-pixel;
+		background-color: #08150C;
+        color: #B3F9D7;
+		border: none;
+        border-top: 4px solid #4BFE65;
+		width: 100%;
+        height: 38px;
+        padding: 0 24px;
 	}
 </style>
