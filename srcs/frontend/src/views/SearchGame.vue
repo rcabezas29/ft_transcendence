@@ -3,6 +3,12 @@
 import { gameController, GameState } from "@/gameController";
 import Button from '@/components/ui/Button.vue';
 import { GameSelection } from "@/interfaces/game-selection";
+import PaddleColorSelector from "@/components/PaddleColorSelector.vue";
+
+interface GameCustomization {
+  gameSelection: GameSelection;
+  paddleColor: string;
+}
 
 function findGame() {
   gameController.searchGame();
@@ -22,10 +28,12 @@ function  changeGameSelection(gameSelection : GameSelection) {
           <Button @click="changeGameSelection(GameSelection.SuperCool)" :selected="gameController.gameSelection === GameSelection.SuperCool">SUPER COOL</Button>
           <Button @click="changeGameSelection(GameSelection.Crazy)" :selected="gameController.gameSelection === GameSelection.Crazy">CRAZY</Button>
         </div>
+        <h2>PADDLE COLOR</h2>
+        <PaddleColorSelector/>
     
         Status: <span>{{ gameController.state }}</span>
     
-        <Button v-if="gameController.state !== GameState.Playing"  @click="findGame"> SEARCH GAME</Button>
+        <Button v-if="gameController.state !== GameState.Playing"  @click="findGame">SEARCH GAME</Button>
     </div>
 </template>
 

@@ -6,5 +6,6 @@ export interface GatewayUser {
 	socket: Socket,
 	token: string,
 	elo?: number,
-	isGaming: boolean
+	isGaming: boolean,
+	color: string,
 }

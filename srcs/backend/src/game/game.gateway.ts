@@ -16,6 +16,22 @@ interface ChallengePlayers {
   user2Id: number,
 }
 
+enum    PaddleColorSelection {
+  Gray = "#D9D9D9",
+  Orange = "#D64B24",
+  Sky = "#45D7E7",
+  Violet = "#8589EA",
+  Pink = "#EC3F74",
+  Burgundy = "#893168",
+  Green = "#0A8754",
+  Yellow = "#E7D352",
+}
+
+interface GameCustomization {
+  gameSelection: GameSelection;
+  paddleColor: PaddleColorSelection;
+}
+
 @WebSocketGateway()
 export class GameGateway implements OnGatewayInit {
   @WebSocketServer()
@@ -32,11 +48,11 @@ export class GameGateway implements OnGatewayInit {
   }
 
   @SubscribeMessage('search-game')
-  handleMessage(client: any, gameSelection: GameSelection): void {
+  handleMessage(client: any, gameCustomization: GameCustomization): void {
     const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(
       client.id,
     );
-    this.matchmakingService.searchGame(user, gameSelection);
+    this.matchmakingService.searchGame(user, gameCustomization);
   }
 
   @SubscribeMessage('accept-challenge')

@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { GatewayUser } from "src/gateway-manager/interfaces";
 import { Vector2 } from './vector2';
-import { GameObject, Paddle } from './game-object';
+import { GameObject } from './game-object';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
@@ -41,7 +41,10 @@ export default class CrazyGame extends Game {
         this.serveBall(Math.floor(Math.random() * 2));
         this.timeSinceLastBall = new Date();
         this.instancePaddles();
-        this.server.to(this.name).emit('start-game');
+        this.server.to(this.name).emit('start-game', {
+            user1: this.players[0].user.username,
+            user2: this.players[1].user.username,
+        });
         this.players.forEach((player, playerIndex) => {
             player.user.socket.on('move', (movementIndex: number, pressed: boolean) => {
                 this.playerActions[playerIndex][movementIndex].input = pressed;
