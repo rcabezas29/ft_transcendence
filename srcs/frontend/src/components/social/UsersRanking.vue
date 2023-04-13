@@ -52,9 +52,9 @@
 				<th>#</th>
 				<th>user</th>
 				<th>elo</th>
-				<th>wins</th>
-				<th>losses</th>
-				<th>W/L</th>
+				<th class="mobile-hidden">wins</th>
+				<th class="mobile-hidden">losses</th>
+				<th class="mobile-hidden">W/L</th>
 			</tr>
 		</template>
 		<template #body>
@@ -75,9 +75,9 @@
 					</div>
 				</td>
 				<td>{{ userRow.elo }}</td>
-				<td>{{ userRow.stats.wonGames }}</td>
-				<td>{{ userRow.stats.lostGames }}</td>
-				<td>{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
+				<td class="mobile-hidden">{{ userRow.stats.wonGames }}</td>
+				<td class="mobile-hidden">{{ userRow.stats.lostGames }}</td>
+				<td class="mobile-hidden">{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
 			</tr>
 			
 		</template>
@@ -116,6 +116,23 @@
 
 	.table-username {
 		margin-left: 12px;
+	}
+
+	.mobile-hidden {
+		display: none;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.multiview-body {
+			padding: 34px;
+			flex: 1;
+		}
+
+		.mobile-hidden {
+			display: table-cell;
+		}
+	
 	}
 
 </style>

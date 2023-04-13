@@ -111,25 +111,17 @@
 		height: 50px;
 	}
 
+	.player-img {
+		display: flex;
+	}
+
 	.player-img img {
-		width: 40px;
-		height: 40px;
+		width: 50px;
+		height: 50px;
 	}
 
-	.player-left .player-img {
-		margin-right: 20px;
-	}
-
-	.player-right .player-img {
-		margin-left: 20px;
-	}
-
-	.player-left .player-name {
-		margin-right: 20px;
-	}
-
-	.player-right .player-name {
-		margin-left: 20px;
+	.player-name {
+		display: none;
 	}
 
 	.player-score {
@@ -150,6 +142,29 @@
 		box-sizing: border-box;
 		padding: 24px;
 		height: 50px;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.player-name {
+			display: block;
+		}
+
+		.player-left .player-img {
+			margin-right: 20px;
+		}
+
+		.player-right .player-img {
+			margin-left: 20px;
+		}
+
+		.player-left .player-name {
+			margin-right: 20px;
+		}
+
+		.player-right .player-name {
+			margin-left: 20px;
+		}
 	}
 
 

@@ -39,7 +39,13 @@
 		outline-width: 1px;
 	}
 
+	table tbody tr td {
+		padding: 0 12px;
+	}
+
 	table tbody tr td:nth-child(1) {
 		width: 70px;
+		padding: 0;
 	}
+
 </style>

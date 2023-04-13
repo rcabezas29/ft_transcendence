@@ -40,8 +40,16 @@
 	}
 
 	.multiview-body {
-		padding: 34px;
+		padding: 14px;
 		flex: 1;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.multiview-body {
+			padding: 34px;
+			flex: 1;
+		}
 	}
 
 </style>
