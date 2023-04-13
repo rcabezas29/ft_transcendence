@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from "vue";
-import { useRoute } from "vue-router";
 import { user } from '../user';
 import TwoFactorAuthenticationSetup from '../components/TwoFactorAuthenticationSetup.vue';
 import AvatarCropper from '../components/AvatarCropper.vue';

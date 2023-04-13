@@ -10,7 +10,8 @@
 	const userData: Ref<UserData | null> = ref(null);
 	const editMode: Ref<boolean> = ref(false);
 	const usernameInput: Ref<string> = ref("");
-	const errorMessage: Ref<string> = ref("");
+	const passwordInput: Ref<string> = ref("");
+	const errorMessage: Ref<string[]> = ref([]);
 	const cropperImg = ref<string | null>(null);
 	const avatarImage = ref<Blob | null>(null);
 	const imagePreview = computed(() => {
@@ -27,30 +28,41 @@
 		editMode.value = true;
 	}
 	
-	function cancelEditProfile() {
+	function stopEditProfile() {
+		usernameInput.value = "";
+		passwordInput.value = "";
+		avatarImage.value = null;
+		//cancelAvatarPreview();
+		errorMessage.value = [];
 		editMode.value = false;
 	}
 
 	async function saveProfileChanges() {
+		errorMessage.value = [];
+		let usernameUpdated: boolean = true;
+		let avatarUpdated: boolean = true;
+		let passwordUpdated: boolean = true;
 
-		if (usernameInput.value.length < 3 ) {
-			errorMessage.value = "Username must be longer than 2 characters";
-			return; 
-		}
+		if (usernameInput.value.length > 0)
+			usernameUpdated = await user.updateUsername(usernameInput.value);
+		if (avatarImage.value)
+			avatarUpdated = await user.updateAvatar(avatarImage.value);
+		if (passwordInput.value.length > 0)
+			passwordUpdated = await user.updatePassword(passwordInput.value);
 
-		const usernameUpdated: boolean = await user.updateUsername(usernameInput.value);
+		if (usernameUpdated)
+			user.notifyOfUserChange();
 
-		console.log(usernameUpdated);
-
-		if (!usernameUpdated)
-		{
-			errorMessage.value = "Username already exists";
+		if (!usernameUpdated || !avatarUpdated || !passwordUpdated) {
+			if (!usernameUpdated)
+				errorMessage.value.push("error while updating username");
+			if (!avatarUpdated)
+				errorMessage.value.push("error while updating avatar");
+			if (!passwordUpdated)
+				errorMessage.value.push("error while updating password");
 			return;
 		}
-
-		errorMessage.value = "";
-		editMode.value = false;
-
+		stopEditProfile();
 		userData.value = await user.fetchUserData();
 	}
 
@@ -93,20 +105,23 @@
 
 				<div class="header-editing-buttons">
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
-					<Button v-if="editMode" @click="cancelEditProfile">CANCEL</Button>
+					<Button v-if="editMode" @click="stopEditProfile">CANCEL</Button>
 				</div>
-				<Button v-if="editMode" @click="cancelEditProfile">CHANGE PROFILE PICTURE</Button>
+				<Button v-if="editMode" @click="stopEditProfile">CHANGE PROFILE PICTURE</Button>
 			</div>
 		</div>
 		<div>
-			<span class="error-message">{{ errorMessage }}</span>
+			<span class="error-message" v-if="errorMessage.length > 0">{{ errorMessage }}</span>
 		</div>
 		<div class="form">
 			<TextInputField v-if="!editMode" placeholder-text="USERNAME" :modelValue="userData?.username" readonly/>
 			<TextInputField v-if="editMode" v-model="usernameInput" placeholder-text="NEW USERNAME" />
 
-			<TextInputField v-if="!editMode" vplaceholder-text="INTRA USERNAME" :modelValue="userData?.intraUsername" readonly/>
+			<TextInputField v-if="!editMode" placeholder-text="INTRA USERNAME" :modelValue="userData?.intraUsername" readonly/>
 			<TextInputField v-if="!editMode" placeholder-text="EMAIL" :modelValue="userData?.email" readonly/>
+
+			<TextInputField v-if="editMode" v-model="passwordInput" placeholder-text="NEW PASSWORD" />
+
 		</div>
 	</div>
 </template>
