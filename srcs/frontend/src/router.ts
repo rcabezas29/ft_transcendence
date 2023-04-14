@@ -30,6 +30,7 @@ const routes = [
 		name: 'index',
 		path: '/',
 		component: Index,
+		beforeEnter: loggedUserGuard
 	},
 	{
 		name: 'login',

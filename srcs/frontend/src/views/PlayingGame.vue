@@ -17,7 +17,7 @@ onMounted(() => {
 });
 
 function returnToHome() {
-	router.replace('/');
+	gameController.state = GameState.None;
 }
 
 </script>
