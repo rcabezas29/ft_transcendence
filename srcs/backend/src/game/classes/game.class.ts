@@ -13,7 +13,7 @@ import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 100;
-const WIN_SCORE = 7;
+const WIN_SCORE = 1;
 const GAME_DURATION = 200; // in seconds (?)
 
 // TODO: calculate from game-canvas size

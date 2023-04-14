@@ -5,6 +5,7 @@ import { GameState } from "@/gameController";
 import Button from '@/components/ui/Button.vue';
 import ScoreBoard from "@/components/ScoreBoard.vue";
 import GameBoard from "@/components/ui/GameBoard.vue";
+import router from "../router"
 
 const canvasRef = ref<HTMLCanvasElement>();
 
@@ -14,6 +15,11 @@ onBeforeMount(() => {
 onMounted(() => {
   gameController.initCanvas(canvasRef.value!.getContext("2d")!);
 });
+
+function returnToHome() {
+	router.replace('/');
+}
+
 </script>
 
 <template>
@@ -25,6 +31,7 @@ onMounted(() => {
 
 		Status: <span>{{ gameController.state }}</span>
 		<Button v-if="gameController.state === GameState.Playing" @click="gameController.endGamePrematurely">STOP GAME</Button>
+		<Button v-if="gameController.state === GameState.End" @click="returnToHome">RETURN TO HOME</Button>
 	</GameBoard>
 
 </template>
