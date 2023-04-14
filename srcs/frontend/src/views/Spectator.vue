@@ -6,6 +6,7 @@
 	import router from "../router"
 	import Button from '@/components/ui/Button.vue';
 	import GameBoard from '@/components/ui/GameBoard.vue';
+	import ScoreBoard from '@/components/ScoreBoard.vue';
 
 	const route = useRoute();
 	const matchId: Ref<string> = ref<string>("");
@@ -36,16 +37,18 @@
 	}
 
 	function leaveGame() {
+		user.socket?.emit("spectate-leave", matchId.value);
 		router.replace("/")
 	}
 
 </script>
 
 <template>
-	<h1>Spectator view | Match id: {{ matchId }}</h1>
+	<h1>SPECTATING</h1>
 	
 	<GameBoard>
 		<canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
+		<ScoreBoard/>
 		<Button @click="leaveGame">LEAVE GAME</Button>
 	</GameBoard>
 
@@ -54,16 +57,8 @@
 <style scoped>
 
 	.pong-board {
-	display: block;
-	background-color: black;
-	}
-
-	/* Everything bigger than 850px */
-	@media only screen and (min-width: 850px) {
-		.chat-container {
-			max-width: 500px;
-			margin-left: 0;
-		}
+		display: block;
+		background-color: black;
 	}
 
 </style>

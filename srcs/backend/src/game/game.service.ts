@@ -92,6 +92,17 @@ export class GameService {
     spectator.socket.join(gameName);
   }
 
+
+  deleteSpectatorFromGame(spectator: GatewayUser, gameName: string) {
+    const gameIndex = this.ongoingGames.findIndex((game) => game.name == gameName);
+    if (gameIndex == -1) {
+      spectator.socket.emit("spectate-game", false);
+      return;
+    }
+    delete this.ongoingGames[gameIndex];
+    spectator.socket.leave(gameName);
+  }
+
   findGameByPlayerUserId(playerId: number): Game {
     const game: Game = this.ongoingGames.find((game) =>
       (game.players[0].user.id === playerId || game.players[1].user.id === playerId)
