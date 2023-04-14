@@ -38,9 +38,14 @@ function  changeGameSelection(gameSelection : GameSelection) {
 </template>
 
 <style scoped>
-.mode-selector {
-  display: flex;
-  justify-content: space-around;
+
+@media only screen and (min-width: 850px) {
+
+	.mode-selector {
+		display: flex;
+		justify-content: space-around;
+	}
+
 }
 
 </style>
