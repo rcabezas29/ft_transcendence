@@ -222,16 +222,20 @@ class GameRenderer {
         paddle.hitBox.bounds.y
       );
     });
-    powerups.forEach((powerup: GameObject) => {
-      this.canvas.globalAlpha = 0.2;
-      this.canvas.fillRect(
-        powerup.hitBox.position.x,
-        powerup.hitBox.position.y,
-        powerup.hitBox.bounds.x,
-        powerup.hitBox.bounds.y
-      );
-      this.canvas.globalAlpha = 1.0;
-    })
+
+	if (powerups) {
+		powerups.forEach((powerup: GameObject) => {
+			this.canvas.globalAlpha = 0.2;
+			this.canvas.fillRect(
+				powerup.hitBox.position.x,
+				powerup.hitBox.position.y,
+				powerup.hitBox.bounds.x,
+				powerup.hitBox.bounds.y
+			);
+			this.canvas.globalAlpha = 1.0;
+		})
+	}
+   
   }
 }
 

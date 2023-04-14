@@ -90,6 +90,13 @@ export class GameService {
     }
     this.ongoingGames[gameIndex].viwers.push(spectator);
     spectator.socket.join(gameName);
+	
+	const gamePlayers = {
+		player1: this.ongoingGames[gameIndex].players[0].user.username,
+		player2: this.ongoingGames[gameIndex].players[1].user.username
+	};
+
+	spectator.socket.emit("spectate-game-players", gamePlayers);
   }
 
 
@@ -99,7 +106,14 @@ export class GameService {
       spectator.socket.emit("spectate-game", false);
       return;
     }
-    delete this.ongoingGames[gameIndex];
+    
+	const viwerIndex: number = this.ongoingGames[gameIndex].viwers.findIndex(viwer => {
+		if (viwer.id == spectator.id)
+			return viwer;
+	})
+
+	delete this.ongoingGames[gameIndex].viwers[viwerIndex];
+
     spectator.socket.leave(gameName);
   }
 

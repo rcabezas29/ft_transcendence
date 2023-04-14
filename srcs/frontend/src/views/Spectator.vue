@@ -8,6 +8,11 @@
 	import GameBoard from '@/components/ui/GameBoard.vue';
 	import ScoreBoard from '@/components/ScoreBoard.vue';
 
+	interface GamePlayers {
+		player1: string;
+		player2: string;
+	}
+
 	const route = useRoute();
 	const matchId: Ref<string> = ref<string>("");
 	const canvasRef = ref<HTMLCanvasElement>();
@@ -21,6 +26,7 @@
 		console.log("Mounted with matchId: ", matchId.value)
 
 		user.socket?.on("spectate-game", spectate);
+		user.socket?.on("spectate-game-players", setPlayers);
 		user.socket?.emit("spectate-game", matchId.value);
 
 		gameController.initCanvas(canvasRef.value!.getContext("2d")!);
@@ -34,6 +40,12 @@
 			return
 		}
 
+	}
+
+	function setPlayers(players: GamePlayers) {
+		console.log("set players")
+		gameController.scoreBoard.user1Name = players.player1
+		gameController.scoreBoard.user2Name = players.player2
 	}
 
 	function leaveGame() {
