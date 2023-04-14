@@ -4,6 +4,8 @@
 	import { gameController } from '../gameController';
 	import { user } from "../user"
 	import router from "../router"
+	import Button from '@/components/ui/Button.vue';
+	import GameBoard from '@/components/ui/GameBoard.vue';
 
 	const route = useRoute();
 	const matchId: Ref<string> = ref<string>("");
@@ -23,10 +25,6 @@
 		gameController.initCanvas(canvasRef.value!.getContext("2d")!);
 	})
 
-	onUnmounted(() => {
-		//TODO: delete spectate-game event handler
-	})
-
 	function spectate(gameExists: boolean) {
 		console.log("Spectator view: ", gameExists);
 		
@@ -37,14 +35,35 @@
 
 	}
 
+	function leaveGame() {
+		router.replace("/")
+	}
+
 </script>
 
 <template>
 	<h1>Spectator view | Match id: {{ matchId }}</h1>
+	
+	<GameBoard>
+		<canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
+		<Button @click="leaveGame">LEAVE GAME</Button>
+	</GameBoard>
 
-	<canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
 </template>
 
 <style scoped>
+
+	.pong-board {
+	display: block;
+	background-color: black;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.chat-container {
+			max-width: 500px;
+			margin-left: 0;
+		}
+	}
 
 </style>
