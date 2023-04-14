@@ -52,12 +52,12 @@
 
 	<div class="ongoin-matches">
 
-		<div class="match-exterior-container">
+		<div class="match-exterior-container" v-for="game in ongoingGames" @click="watchGame(game.name)">
 			
 			<div class="match-interior-container">
 
 				<div class="player player-left">
-					<span class="player-name">player name</span>
+					<span class="player-name">{{ game.player1 }}</span>
 					<div class="player-img">
 						<img id="user-image" :src="user.avatarImageURL" />
 					</div>
@@ -77,19 +77,18 @@
 					<div class="player-img">
 						<img id="user-image" :src="user.avatarImageURL" />
 					</div>
-					<span class="player-name">player name</span>
+					<span class="player-name">{{ game.player2 }}</span>
 				</div>
 
 			</div>
 
 		</div>
 
-	</div>
+		<div v-if="ongoingGames.length == 0">
+			NOBODY IS PLAYING RIGHT NOW :(
+		</div>
 
-	<li v-for="game in ongoingGames">
-		{{ game.name }} | {{ game.player1 }} vs {{ game.player2 }} |
-		<button @click="watchGame(game.name)">Watch</button>
-	</li>
+	</div>
 </template>
 
 <style scoped>
