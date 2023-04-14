@@ -31,17 +31,20 @@ export class Paddle extends GameObject {
     bounceDirections: Vector2[] = [];
     gameArea: HitBox;
     sectionLength: number;
+    color: string;
   
     constructor(
       position: Vector2,
       orientation: Vector2,
       length: number,
       gameArea: HitBox,
+      color: string
     ) {
       const width: number = orientation.x ? 5 : length;
       const height: number = orientation.y ? 5 : length;
   
       super(position, orientation, new Vector2(width, height), PADDLE_SPEED);
+      this.color = color;
   
       let angleDifference: number = Math.PI / 6;
       if (orientation.x) angleDifference *= orientation.x;
