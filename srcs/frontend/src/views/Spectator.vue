@@ -33,10 +33,8 @@
 	})
 
 	function spectate(gameExists: boolean) {
-		console.log("Spectator view: ", gameExists);
-		
 		if (!gameExists) {
-			router.push("index")
+			router.push("/game")
 			return
 		}
 
@@ -50,7 +48,8 @@
 
 	function leaveGame() {
 		user.socket?.emit("spectate-leave", matchId.value);
-		router.replace("/")
+		router.push("/game")
+		console.log("entra");
 	}
 
 </script>
