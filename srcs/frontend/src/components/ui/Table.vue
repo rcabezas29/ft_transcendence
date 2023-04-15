@@ -48,4 +48,13 @@
 		padding: 0;
 	}
 
+	tbody tr {
+		cursor: pointer;
+	}
+
+	tbody tr:hover {
+		background-color: #4BFE65;
+		color: black
+	}
+
 </style>
