@@ -3,16 +3,19 @@
 	import { user } from "../../user"
 	import router from "../../router"
 
-	//FIXME: find better name and move the interface from here
-	interface Game {
+	interface OngoingGame {
 		name: string;
 		player1: string;
+		player1Id: number;
+		player1AvatarURL: string;
 		player2: string;
+		player2Id: number;
+		player2AvatarURL: string;
 	}
 
-	const ongoingGames: Ref<Game[]> = ref([]);
+	const ongoingGames: Ref<OngoingGame[]> = ref([]);
 
-	function onNewGame(game: Game) {
+	function onNewGame(game: OngoingGame) {
 		ongoingGames.value.push(game);
 	}
 
@@ -22,7 +25,11 @@
 			ongoingGames.value.splice(gameIndex, 1);
 	}
 
-	function fetchOngoingGames(games: Game[]) {
+	function fetchOngoingGames(games: OngoingGame[]) {
+		games.map(game => {
+			game.player1AvatarURL = `http://localhost:3000/users/avatar/${game.player1Id}`
+			game.player2AvatarURL = `http://localhost:3000/users/avatar/${game.player2Id}`
+		})
 		ongoingGames.value = games;
 	}
 
@@ -59,7 +66,7 @@
 				<div class="player player-left">
 					<span class="player-name">{{ game.player1 }}</span>
 					<div class="player-img">
-						<img id="user-image" :src="user.avatarImageURL" />
+						<img id="user-image" :src="game.player1AvatarURL" />
 					</div>
 					<div class="player-score">
 						<span>1</span>
@@ -75,7 +82,7 @@
 						<span>1</span>
 					</div>
 					<div class="player-img">
-						<img id="user-image" :src="user.avatarImageURL" />
+						<img id="user-image" :src="game.player2AvatarURL" />
 					</div>
 					<span class="player-name">{{ game.player2 }}</span>
 				</div>

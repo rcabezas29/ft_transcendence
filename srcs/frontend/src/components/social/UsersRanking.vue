@@ -20,6 +20,9 @@
 		}
 
 		const users: UserData[] = await usersRequest.json();
+		users.map(user => {
+			user.avatarURL = `http://localhost:3000/users/avatar/${user.id}`
+		})
 
 		return users;
 	}
@@ -67,10 +70,10 @@
 				<td>
 					<div class="table-user">
 						<span class="table-user-img">
-							<img :src=user.avatarImageURL />
+							<img :src=userRow.avatarURL />
 						</span>
 						<span class="table-username">
-							{{ userRow["username"] }}
+							{{ userRow.username }}
 						</span>
 					</div>
 				</td>

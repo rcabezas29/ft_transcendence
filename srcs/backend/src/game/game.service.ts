@@ -58,7 +58,9 @@ export class GameService {
       return {
         name: game.name,
         player1: game.players[0].user.username,
-        player2: game.players[1].user.username
+        player1Id: game.players[0].user.id,
+        player2: game.players[1].user.username,
+        player2Id: game.players[1].user.id,
       }
     });
 
