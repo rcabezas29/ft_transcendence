@@ -8,24 +8,21 @@
 		player1: string;
 		player1Id: number;
 		player1AvatarURL: string;
+		player1Score: number;
 		player2: string;
 		player2Id: number;
 		player2AvatarURL: string;
+		player2Score: number;
 	}
 
 	const ongoingGames: Ref<OngoingGame[]> = ref([]);
 
 	function fetchOngoingGames(games: OngoingGame[]) {
-
-		console.log("new games!")
-
 		games.map(game => {
 			game.player1AvatarURL = `http://localhost:3000/users/avatar/${game.player1Id}`
 			game.player2AvatarURL = `http://localhost:3000/users/avatar/${game.player2Id}`
 		})
 		ongoingGames.value = games;
-
-		console.log(ongoingGames.value);
 	}
 
 	function watchGame(gameName: string) {
@@ -63,7 +60,7 @@
 						<img id="user-image" :src="game.player1AvatarURL" />
 					</div>
 					<div class="player-score">
-						<span>1</span>
+						<span>{{ game.player1Score }}</span>
 					</div>
 				</div>
 
@@ -73,7 +70,7 @@
 
 				<div class="player player-right">
 					<div class="player-score">
-						<span>1</span>
+						<span>{{ game.player2Score }}</span>
 					</div>
 					<div class="player-img">
 						<img id="user-image" :src="game.player2AvatarURL" />
