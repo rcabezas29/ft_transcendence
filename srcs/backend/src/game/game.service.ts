@@ -39,12 +39,14 @@ export class GameService {
   onStartGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameStart(game.players[0].user.id, game.players[1].user.id);
+	this.sendOngoingMatchesToAllUsers();
   }
 
   onEndGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameEnd(game.players[0].user.id, game.players[1].user.id);
-    this.deleteGameFromOngoingGames(gameName);
+	this.deleteGameFromOngoingGames(gameName);
+	this.sendOngoingMatchesToAllUsers();
   }
 
   private deleteGameFromOngoingGames(gameName: string): void {
@@ -53,18 +55,26 @@ export class GameService {
       this.ongoingGames.splice(gameIndex, 1);
   }
 
-  sendOngoingMatchesToUser(client: GatewayUser) {
-    const games = this.ongoingGames.map((game) => {
-      return {
-        name: game.name,
-        player1: game.players[0].user.username,
-        player1Id: game.players[0].user.id,
-        player2: game.players[1].user.username,
-        player2Id: game.players[1].user.id,
-      }
-    });
+  public getOngoingMatches() {
+	const games = this.ongoingGames.map((game) => {
+		return {
+			name: game.name,
+			player1: game.players[0].user.username,
+			player1Id: game.players[0].user.id,
+			player2: game.players[1].user.username,
+			player2Id: game.players[1].user.id,
+		}
+	});
 
-    client.socket.emit("ongoing-games", games)
+	return games;
+  }
+
+  sendOngoingMatchesToUser(client: GatewayUser) {
+    client.socket.emit("ongoing-games", this.getOngoingMatches());
+  }
+
+  sendOngoingMatchesToAllUsers() {
+	this.server.emit("ongoing-games", this.getOngoingMatches());
   }
 
   isPlayerInAGame(playerId: number): boolean {

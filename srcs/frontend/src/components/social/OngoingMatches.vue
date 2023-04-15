@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { onBeforeMount, onBeforeUnmount, ref, type Ref } from 'vue';
+	import { onBeforeMount, onBeforeUnmount, ref, type Ref, computed } from 'vue';
 	import { user } from "../../user"
 	import router from "../../router"
 
@@ -15,22 +15,17 @@
 
 	const ongoingGames: Ref<OngoingGame[]> = ref([]);
 
-	function onNewGame(game: OngoingGame) {
-		ongoingGames.value.push(game);
-	}
-
-	function onEndGame(gameName: string) {
-		const gameIndex = ongoingGames.value.findIndex(game => game.name == gameName);
-		if (gameIndex != -1)
-			ongoingGames.value.splice(gameIndex, 1);
-	}
-
 	function fetchOngoingGames(games: OngoingGame[]) {
+
+		console.log("new games!")
+
 		games.map(game => {
 			game.player1AvatarURL = `http://localhost:3000/users/avatar/${game.player1Id}`
 			game.player2AvatarURL = `http://localhost:3000/users/avatar/${game.player2Id}`
 		})
 		ongoingGames.value = games;
+
+		console.log(ongoingGames.value);
 	}
 
 	function watchGame(gameName: string) {
@@ -43,8 +38,7 @@
 	onBeforeMount(() => {
 		user.socket?.on("ongoing-games", (games) => { fetchOngoingGames(games) });
 		user.socket?.emit("ongoing-games");
-		user.socket?.on("spectator-new-game", (game) => { onNewGame(game) });
-		user.socket?.on("spectator-end-game", (gameId) => { onEndGame(gameId) });
+
 	})
 
 	onBeforeUnmount(() => {
