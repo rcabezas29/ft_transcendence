@@ -6,6 +6,8 @@
 	import type { UserData } from "@/interfaces";
 	import AvatarCropper from "../AvatarCropper.vue";
     import FileUploadButton from "../ui/FileUploadButton.vue";
+	import router from "@/router";
+	import Modal from "../ui/Modal.vue";
 
 	const userData: Ref<UserData | null> = ref(null);
 	const editMode: Ref<boolean> = ref(false);
@@ -101,6 +103,31 @@
 		closeCropper();
     }
 
+	async function deleteUserAccount() {
+		const httpResponse = await fetch(`http://localhost:3000/users/${user.id}`, {
+			method: "DELETE",
+			headers: {
+				"Authorization": `Bearer ${user.token}`,
+			},
+		});
+
+		if (httpResponse.status != 200) {
+			console.log("error while deleting user");
+			return;
+		}
+		user.logout();
+		router.replace({ "name": "login" });
+	}
+
+	let deleteAccountModalVisible = ref<boolean>(false);
+	function openDeleteAccountModal() {
+		deleteAccountModalVisible.value = true;
+	}
+
+	function closeDeleteAccountModal() {
+		deleteAccountModalVisible.value = false;
+	}
+
 </script>
 
 <template>
@@ -108,6 +135,9 @@
 		<div class="header">
 			<div class="header-image">
 				<img :src="imagePreviewURL" @click="openCropper" alt="" srcset="">
+				<div class="overlay" v-if="editMode">
+					<div class="text">CROP THIS PHOTO</div>
+				</div>
 			</div>
 			<div class="header-buttons">
 				<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
@@ -137,6 +167,18 @@
 
 			<TextInputField v-if="editMode" v-model="passwordInput" placeholder-text="NEW PASSWORD" />
 
+			<Button v-if="editMode" type="button" @click="openDeleteAccountModal" border-color="#EC3F74">DELETE MY ACCOUNT</Button>
+			<Modal :visible="deleteAccountModalVisible" @close="closeDeleteAccountModal" title="WARNING">
+				<p class="modal-p">
+					This action will permanently delete your account on PongHub.
+					<br>
+					Are you sure you want to continue?
+				</p>
+				<div class="delete-account-modal-buttons">
+					<Button style="width: 30%" @click="deleteUserAccount" border-color="#EC3F74">CONFIRM</Button>
+					<Button style="width: 30%" @click="closeDeleteAccountModal">CANCEL</Button>
+				</div>
+			</Modal>
 		</div>
 	</div>
 </template>
@@ -153,7 +195,6 @@
 		box-sizing: border-box;
 		width: 100%;
 		display: flex;
-		/*flex-direction: column;*/
 		align-items: center;
 		justify-content: space-between;
 		gap: 10px;
@@ -164,6 +205,7 @@
 		display: flex;
 		justify-content: center;
 		width: 50%;
+		position: relative;
 	}
 
 	.header-image img {
@@ -173,17 +215,30 @@
 		width: 100%;
 	}
 
+	.overlay {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		opacity: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		padding: 12px;
+		background-color: #08150C;
+	}
+	.header-image:hover .overlay {
+		opacity: 0.8;
+	}
+
 	.header-buttons {
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		width: 50%;
-		height: 100%;
-		justify-content: space-between;
-		align-items: space-between;
 		gap: 10px;
-		/*margin-top: 20px;*/
-
 	}
 
 	.header-buttons button {
@@ -193,6 +248,7 @@
 	.header-editing-buttons {
 		display: flex;
 		flex-direction: column;
+		gap: 4px;
 	}
 
 	.header-editing-buttons > * {
@@ -201,7 +257,6 @@
 
 	.avatar-section {
         display: flex;
-        /*width: 40%;*/
     }
 
 	.avatar-section input[type="file"]::file-selector-button {
@@ -210,6 +265,11 @@
 
 	.form {
 		margin-top: 30px;
+	}
+
+	.delete-account-modal-buttons {
+		display: flex;
+		justify-content: space-around;
 	}
 
 	/* Everything bigger than 850px */
