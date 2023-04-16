@@ -8,6 +8,7 @@
     import FileUploadButton from "../ui/FileUploadButton.vue";
 	import router from "@/router";
 	import Modal from "../ui/Modal.vue";
+	import TwoFactorAuthenticationSetup from '../2fa/TwoFactorAuthenticationSetup.vue';
 
 	const userData: Ref<UserData | null> = ref(null);
 	const editMode: Ref<boolean> = ref(false);
@@ -104,18 +105,7 @@
     }
 
 	async function deleteUserAccount() {
-		const httpResponse = await fetch(`http://localhost:3000/users/${user.id}`, {
-			method: "DELETE",
-			headers: {
-				"Authorization": `Bearer ${user.token}`,
-			},
-		});
-
-		if (httpResponse.status != 200) {
-			console.log("error while deleting user");
-			return;
-		}
-		user.logout();
+		await user.deleteAccount();
 		router.replace({ "name": "login" });
 	}
 
@@ -141,10 +131,8 @@
 			</div>
 			<div class="header-buttons">
 				<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
-				<Button v-if="!editMode" :selected="userData?.isTwoFactorAuthenticationEnabled">
-					{{ userData?.isTwoFactorAuthenticationEnabled ? "2FA ENABLED" : "2FA DISABLED"}}
-				</Button>
-
+				<TwoFactorAuthenticationSetup v-if="!editMode"/>
+				
 				<div class="header-editing-buttons">
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
 					<Button v-if="editMode" @click="stopEditProfile">CANCEL</Button>
@@ -169,14 +157,14 @@
 
 			<Button v-if="editMode" type="button" @click="openDeleteAccountModal" border-color="#EC3F74">DELETE MY ACCOUNT</Button>
 			<Modal :visible="deleteAccountModalVisible" @close="closeDeleteAccountModal" title="WARNING">
-				<p class="modal-p">
+				<p>
 					This action will permanently delete your account on PongHub.
 					<br>
 					Are you sure you want to continue?
 				</p>
 				<div class="delete-account-modal-buttons">
-					<Button style="width: 30%" @click="deleteUserAccount" border-color="#EC3F74">CONFIRM</Button>
-					<Button style="width: 30%" @click="closeDeleteAccountModal">CANCEL</Button>
+					<Button @click="deleteUserAccount" border-color="#EC3F74">CONFIRM</Button>
+					<Button @click="closeDeleteAccountModal">CANCEL</Button>
 				</div>
 			</Modal>
 		</div>
@@ -269,7 +257,11 @@
 
 	.delete-account-modal-buttons {
 		display: flex;
-		justify-content: space-around;
+		flex-direction: column;
+		align-items: center;
+		/*justify-content: space-around;*/
+		width: 100%;
+		gap: 10px;
 	}
 
 	/* Everything bigger than 850px */
@@ -285,7 +277,7 @@
 			width: 300px;
 		}
 
-		.header-editing-buttons {
+		.header-editing-buttons, .delete-account-modal-buttons {
 			flex-direction: row;
 		}
 

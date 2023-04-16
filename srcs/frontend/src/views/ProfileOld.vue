@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from "vue";
 import { user } from '../user';
-import TwoFactorAuthenticationSetup from '../components/TwoFactorAuthenticationSetup.vue';
+import TwoFactorAuthenticationSetup from '../components/2fa/TwoFactorAuthenticationSetup.vue';
 import AvatarCropper from '../components/AvatarCropper.vue';
 import type { UserData } from "@/interfaces";
 import Button from "../components/ui/Button.vue";
