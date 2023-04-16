@@ -39,12 +39,14 @@ export class GameService {
   onStartGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameStart(game.players[0].user.id, game.players[1].user.id);
+	this.sendOngoingMatchesToAllUsers();
   }
 
   onEndGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameEnd(game.players[0].user.id, game.players[1].user.id);
-    this.deleteGameFromOngoingGames(gameName);
+	this.deleteGameFromOngoingGames(gameName);
+	this.sendOngoingMatchesToAllUsers();
   }
 
   private deleteGameFromOngoingGames(gameName: string): void {
@@ -53,16 +55,28 @@ export class GameService {
       this.ongoingGames.splice(gameIndex, 1);
   }
 
-  sendOngoingMatchesToUser(client: GatewayUser) {
-    const games = this.ongoingGames.map((game) => {
-      return {
-        name: game.name,
-        player1: game.players[0].user.username,
-        player2: game.players[1].user.username
-      }
-    });
+  public getOngoingMatches() {
+	const games = this.ongoingGames.map((game) => {
+		return {
+			name: game.name,
+			player1: game.players[0].user.username,
+			player1Id: game.players[0].user.id,
+			player1Score: game.players[0].score,
+			player2: game.players[1].user.username,
+			player2Id: game.players[1].user.id,
+			player2Score: game.players[0].score,
+		}
+	});
 
-    client.socket.emit("ongoing-games", games)
+	return games;
+  }
+
+  sendOngoingMatchesToUser(client: GatewayUser) {
+    client.socket.emit("ongoing-games", this.getOngoingMatches());
+  }
+
+  sendOngoingMatchesToAllUsers() {
+	this.server.emit("ongoing-games", this.getOngoingMatches());
   }
 
   isPlayerInAGame(playerId: number): boolean {
@@ -90,6 +104,31 @@ export class GameService {
     }
     this.ongoingGames[gameIndex].viwers.push(spectator);
     spectator.socket.join(gameName);
+	
+	const gamePlayers = {
+		player1: this.ongoingGames[gameIndex].players[0].user.username,
+		player2: this.ongoingGames[gameIndex].players[1].user.username
+	};
+
+	spectator.socket.emit("spectate-game-players", gamePlayers);
+  }
+
+
+  deleteSpectatorFromGame(spectator: GatewayUser, gameName: string) {
+    const gameIndex = this.ongoingGames.findIndex((game) => game.name == gameName);
+    if (gameIndex == -1) {
+      spectator.socket.emit("spectate-game", false);
+      return;
+    }
+    
+	const viwerIndex: number = this.ongoingGames[gameIndex].viwers.findIndex(viwer => {
+		if (viwer.id == spectator.id)
+			return viwer;
+	})
+
+	delete this.ongoingGames[gameIndex].viwers[viwerIndex];
+
+    spectator.socket.leave(gameName);
   }
 
   findGameByPlayerUserId(playerId: number): Game {

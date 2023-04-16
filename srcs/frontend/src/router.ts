@@ -30,6 +30,7 @@ const routes = [
 		name: 'index',
 		path: '/',
 		component: Index,
+		beforeEnter: loggedUserGuard
 	},
 	{
 		name: 'login',
@@ -53,12 +54,6 @@ const routes = [
 		name: 'home',
 		path: '/home',
 		component: Home,
-		beforeEnter: authenticationGuard
-	},
-	{
-		name: 'chat',
-		path: '/chat',
-		component: Chat,
 		beforeEnter: authenticationGuard
 	},
 	{

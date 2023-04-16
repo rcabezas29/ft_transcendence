@@ -49,7 +49,7 @@
 	}
 
 	.dev-bar {
-		background-color: grey;
+		background-color: Gray;
 		width: 100%;
 	}
 

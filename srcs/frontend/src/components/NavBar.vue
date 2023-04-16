@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { computed, ref } from "vue";
+	import { ref } from "vue";
 	import { user } from "../user";
 	import { useRoute } from "vue-router";
 	import Button from "./ui/Button.vue"
@@ -22,15 +22,15 @@
 <template>
 	<div class="nav-header">
 		<div class="nav-buttons" :class="{ hiddenMenu: menuClosed}">
-			<router-link to="game">
+			<router-link to="/game">
 				<Button @click="closeMenu()" :selected="route.path == '/game'">PONG.EXE</Button>
 			</router-link>
 
-			<router-link to="social">
+			<router-link to="/social">
 				<Button @click="closeMenu()" :selected="route.path == '/social'">SOCIAL</Button>
 			</router-link>
 
-			<router-link to="profile">
+			<router-link to="/profile">
 				<Button @click="closeMenu()" :selected="route.path == '/profile'">PROFILE</Button>
 			</router-link>
 		</div>

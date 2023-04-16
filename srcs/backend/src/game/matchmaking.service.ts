@@ -6,6 +6,22 @@ import { UsersService } from 'src/users/users.service';
 import { GameService } from './game.service';
 import { GameSelection } from './interfaces/game-selection.interface';
 
+enum    PaddleColorSelection {
+	Gray = "#D9D9D9",
+	Orange = "#D64B24",
+	Sky = "#45D7E7",
+	Violet = "#8589EA",
+	Pink = "#EC3F74",
+	Burgundy = "#893168",
+	Green = "#0A8754",
+	Yellow = "#E7D352",
+}
+  
+interface GameCustomization {
+	gameSelection: GameSelection;
+	paddleColor: PaddleColorSelection;
+}
+
 @Injectable()
 export class MatchmakingService {
 
@@ -24,20 +40,25 @@ export class MatchmakingService {
 		this.queues.push(this.crazyQueue);
 	}
 
-	async searchGame(requestor: GatewayUser, gameSelection: GameSelection) {
-		console.log("User: ", requestor.id, "- searchGame ", gameSelection);
+	async searchGame(requestor: GatewayUser, gameCustomization: GameCustomization) {
 		const user: User = await this.usersService.findOneById(requestor.id);
 		requestor.elo = user.elo;
+		requestor.color = gameCustomization.paddleColor;
 
-		if (gameSelection === GameSelection.Original) {
-			if (this.originalQueue.find((user) => user.id === requestor.id) === undefined)
-				this.originalQueue.push(requestor);
-		} else if (gameSelection === GameSelection.SuperCool) {
-			if (this.supercoolQueue.find((user) => user.id === requestor.id) === undefined)
-				this.supercoolQueue.push(requestor);
-		} else if (gameSelection === GameSelection.Crazy) {
-			if (this.crazyQueue.find((user) => user.id === requestor.id) === undefined)
-				this.crazyQueue.push(requestor);
+		for (let i : number = 0; i < this.queues.length; i++) {
+			let queue : GatewayUser[] = this.queues[i];
+			if (queue.find((player) => player.id === requestor.id) !== undefined) {
+				console.log('player already in a queue');
+				return ;
+			}
+		}
+
+		if (gameCustomization.gameSelection === GameSelection.Original) {
+			this.originalQueue.push(requestor);
+		} else if (gameCustomization.gameSelection === GameSelection.SuperCool) {
+			this.supercoolQueue.push(requestor);
+		} else if (gameCustomization.gameSelection === GameSelection.Crazy) {
+			this.crazyQueue.push(requestor);
 		}
 	}
 

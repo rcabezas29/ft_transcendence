@@ -101,14 +101,6 @@
 	}
 
 	input {
-		font-family: vp-pixel;
-		color: #B3F9D7;
-		border: 1px solid #1E9052;
-		background-color: #222035;
-		height: 38px;
-		width: 100%;
-		padding: 0 24px;
-		box-sizing: border-box;
 		margin-bottom: 14px;
 	}
 </style>

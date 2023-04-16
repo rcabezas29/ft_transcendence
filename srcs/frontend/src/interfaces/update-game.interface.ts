@@ -19,6 +19,7 @@ export interface Paddle extends GameObject {
   bounceDirections: Vector2[];
   gameArea: HitBox;
   sectionLength: number;
+  color: string;
 }
 
 export interface UpdateGamePayload {

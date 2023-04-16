@@ -47,7 +47,8 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 			token: clientToken,
 			username: user.username,
 			elo: user.elo,
-			isGaming: false
+			isGaming: false,
+			color: "",
 		}
 
 		const userExists = this.gatewayManagerService.getClientByUserId(gatewayUser.id);

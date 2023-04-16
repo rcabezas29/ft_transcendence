@@ -13,7 +13,7 @@ import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 100;
-const WIN_SCORE = 7;
+const WIN_SCORE = 1;
 const GAME_DURATION = 200; // in seconds (?)
 
 // TODO: calculate from game-canvas size
@@ -36,6 +36,7 @@ export default class Game {
 
     ball: GameObject;
     paddles: Paddle[];
+    paddleColors: string[] = [];
     table: Table;
     
     movements: Move[] = [];
@@ -64,6 +65,9 @@ export default class Game {
         }
         this.players.push(player1interface);
         this.players.push(player2interface);
+
+        this.paddleColors.push(player1.color);
+        this.paddleColors.push(player2.color);
 
         this.name = this.players[0].user.username + '_game_' + this.players[1].user.username;
         this.table = new Table();
@@ -107,7 +111,10 @@ export default class Game {
         );
         this.serveBall(Math.floor(Math.random() * 2));
         this.instancePaddles();
-        this.server.to(this.name).emit('start-game');
+        this.server.to(this.name).emit('start-game', {
+            user1: this.players[0].user.username,
+            user2: this.players[1].user.username,
+        });
         this.players.forEach((player, playerIndex) => {
             player.user.socket.on('move', (movementIndex: number, pressed: boolean) => {
                 this.playerActions[playerIndex][movementIndex].input = pressed;
@@ -208,12 +215,14 @@ export default class Game {
             this.table.goals[0].orientation,
             30,
             this.table.area,
+            this.paddleColors[0],
         );
         this.paddles[1] = new Paddle(
             new Vector2(400 - 40, 100),
             this.table.goals[1].orientation,
             30,
             this.table.area,
+            this.paddleColors[1],
         );
     }
     
