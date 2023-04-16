@@ -255,11 +255,14 @@
 		margin-top: 30px;
 	}
 
+	.form input {
+        margin-bottom: 14px;
+	}
+
 	.delete-account-modal-buttons {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		/*justify-content: space-around;*/
 		width: 100%;
 		gap: 10px;
 	}
