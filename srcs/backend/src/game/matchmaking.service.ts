@@ -62,6 +62,17 @@ export class MatchmakingService {
 		}
 	}
 
+	cancelSearch(playerToRemove: GatewayUser) {
+		this.queues.forEach((queue) => {
+			const index = queue.indexOf(playerToRemove);
+			if (index != -1) {
+				console.log('Removing player from queue');
+				playerToRemove.socket.emit('removed-from-queue');
+				queue.splice(index, 1);
+			}
+		});
+	}
+
 	@Cron(CronExpression.EVERY_5_SECONDS)
 	matchmakingCron() {
 		this.queues.forEach((usersQueue, queueIndex) => {

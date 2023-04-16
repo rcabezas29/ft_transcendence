@@ -55,6 +55,12 @@ export class GameGateway implements OnGatewayInit {
     this.matchmakingService.searchGame(user, gameCustomization);
   }
 
+  @SubscribeMessage('cancel-search')
+  cancelSearch(client: Socket) {
+    const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    this.matchmakingService.cancelSearch(user);
+  }
+
   @SubscribeMessage('accept-challenge')
   challengeGame(client: Socket, players: ChallengePlayers) {
     const user1: GatewayUser = this.gatewayManagerService.getClientByUserId(

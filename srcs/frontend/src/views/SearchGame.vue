@@ -28,6 +28,7 @@ function openModal() {
 
 function closeModal() {
   searchGameModalVisible.value = false;
+  gameController.cancelSearch();
 }
 
 function cancelSearchGame() {

@@ -95,6 +95,9 @@ class GameController {
     user.socket?.on("update-game", (gamePayload) => {
       this.updateGame(gamePayload);
     });
+    user.socket?.on("removed-from-queue", () => {
+      this.state = GameState.None;
+    });
     user.socket?.on("rejoin-game", () => {
       this.startGame({
         user1: this.scoreBoard.user1Name,
@@ -111,6 +114,10 @@ class GameController {
       paddleColor : this.paddleColor,
     });
     this.state = GameState.Searching;
+  }
+
+  cancelSearch() {
+    user.socket?.emit('cancel-search');
   }
 
   gameFound(adversaryName: string) {
