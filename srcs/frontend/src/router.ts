@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import Index  from './components/Index.vue';
 import Login from './views/Login.vue';
-import Chat from './views/Chat.vue';
 import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
 import Oauth from './components/Oauth.vue';
