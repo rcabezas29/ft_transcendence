@@ -41,7 +41,7 @@
 			<div class="user-info">
 				<div class="user-stats">
 					<div>{{ user.username }}</div>
-					<div>elo: 69</div>
+					<div>elo: {{ user.elo }}</div>
 				</div>
 				<div class="user-image">
 					<img :src=user.avatarImageURL />

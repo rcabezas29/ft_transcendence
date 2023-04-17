@@ -11,6 +11,7 @@ import type { JwtPayload, UserData } from './interfaces';
 interface FetchedUser {
 	id: number;
 	username: string;
+	elo: number;
 }
 
 class User {
@@ -21,6 +22,7 @@ class User {
 	public id: number = -1;
 	public username: string = '';
 	public avatarImageURL: string = '';
+	public elo : number = 0;
 
 	private isLogged: boolean = false;
 	private onLogoutCallbacks: Function[] = [];
@@ -43,6 +45,7 @@ class User {
 
 			const fetchedUser: FetchedUser = userData;
 			this.username = fetchedUser.username;
+			this.elo = fetchedUser.elo;
 			this.avatarImageURL = `http://localhost:3000/users/avatar/${this.id}`;
 
 		} catch (error) {
