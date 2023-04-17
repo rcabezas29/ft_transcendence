@@ -124,8 +124,8 @@
 	<div class="container">
 		<div class="header">
 			<div class="header-image">
-				<img :src="imagePreviewURL" @click="openCropper" alt="" srcset="">
-				<div class="overlay" v-if="editMode">
+				<img :src="imagePreviewURL" alt="" srcset="">
+				<div class="overlay" v-if="editMode" @click="openCropper">
 					<div class="text">CROP THIS PHOTO</div>
 				</div>
 			</div>
@@ -244,11 +244,16 @@
 	}
 
 	.avatar-section {
+		box-sizing: border-box;
         display: flex;
+		flex-direction: column;
+		width: 100%;
     }
 
 	.avatar-section input[type="file"]::file-selector-button {
+		box-sizing: border-box;
 		padding: 10px 20px;
+		width: 100%;
 	}
 
 	.form {
