@@ -9,7 +9,7 @@ import TextInputField from "../ui/TextInputField.vue";
 
 interface Props {
 	title?: string,
-	stat?: string
+	stat?: string | number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -43,6 +43,7 @@ const props = withDefaults(defineProps<Props>(), {
 .BoxTitle {
 	font-size: 1.5em;
 	padding: 1em;
+	align-content: center;
 }
 
 .BoxStat {

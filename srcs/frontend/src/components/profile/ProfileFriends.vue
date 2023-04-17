@@ -9,6 +9,22 @@
 	import TextInputField from "../ui/TextInputField.vue";
 
 
+	// async function getUsers(): Promise<UserData[] | null> {
+	// 	const usersRequest = await fetch("http://localhost:3000/users", {
+	// 		headers: {
+	// 			"Authorization": `Bearer ${user.token}`
+	// 		}
+	// 	});
+
+	// 	if (usersRequest.status != 200) {
+	// 		return null;
+	// 	}
+
+	// 	const users: UserData[] = await usersRequest.json();
+
+	// 	return users;
+	// }
+
 	async function getCurrentUser(){
 		const usersRequest = await fetch(`http://localhost:3000/users/${user.id}`, {
 			headers: {
@@ -26,14 +42,19 @@
 	}
 
 	console.log(user.token);
-	console.log(user.id);
 	
 
-	// async function totalLosses() {
-	// 	const users = await getCurrentUser();
-	// 	const losses = users?.filter(user => user.stats.lostGames > 0);
-	// 	return losses?.length;
-	// }
+	async function totalWins() {
+		const user = await getCurrentUser();
+		const wins = users?.filter(user => user.stats.wonGames > 0);
+		return wins?.length;
+	}
+
+	async function totalLosses() {
+		const users = await getCurrentUser();
+		const losses = users?.filter(user => user.stats.lostGames > 0);
+		return losses?.length;
+	}
 
 	// async function winsLosses() {
 	// 	const wins: number = await totalWins();
@@ -42,22 +63,19 @@
 	// 	return wL;
 	// }
 
-	// async function scoredGoals() {
-	// 	const users = await getCurrentUser();
-	// 	const goals = users?.map(user => user.stats.);
-	// 	return goals;
-	// }
-	async function totalWins() {
-		const currentUser = await getCurrentUser();
-		return currentUser?.stats.wins;
+	async function scoredGoals() {
+		const users = await getCurrentUser();
+		const goals = users?.map(user => user.stats.scoredGoals >);
+		return goals;
 	}
 	
 
 </script>
 
 <template>
+	<!-- Square boxes with a title and info of the profile separated by equal spacing an responsive-->
 	<div class="SquareStatsGrid">
-		<StatBox title="WINS" :stat="totalWins()"/>
+		<StatBox title="WINS" stat="1000000000"/>
 		<StatBox title="LOSSES" stat="1000"/>
 		<StatBox title="W/L" stat="1000"/>
 		<StatBox title="SCORED GOALS" stat="1000"/>
@@ -69,16 +87,5 @@
 </template>
 
 <style scoped>
-	.StatSquare{
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 4px solid #4BFE65;
-		padding: 4px;
-	}
-	.SquareStatsGrid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		grid-gap: 1rem;
-	}
+
 </style>
