@@ -40,9 +40,9 @@ export class ChatGateway {
 	}
 
 	@SubscribeMessage("create-channel")
-	createChannel(client: Socket, channelName: string): void {
+	createChannel(client: Socket, payload: PasswordChannelPayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.createChannel(channelName, user);
+		this.channelsService.createChannel(payload, user);
 	}
 
 	@SubscribeMessage("join-channel")

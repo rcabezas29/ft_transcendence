@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
 	import { onBeforeMount, ref } from "vue";
-	import { user } from "../../user"
-	import Table from "../ui/Table.vue"
+	import { user } from "../../user";
+	import Table from "../ui/Table.vue";
 	import type { UserData } from "@/interfaces";
 	import { computed } from "@vue/reactivity";
 	import TextInputField from "../ui/TextInputField.vue";
