@@ -27,6 +27,21 @@ export class GameObject {
 
 const PADDLE_SPEED = 400; // in px per second;
 
+export class PowerUp extends GameObject {
+    type: number;
+
+    constructor(
+      position: Vector2,
+      orientation: Vector2,
+      bounds: Vector2,
+      speed: number,
+      type: number,
+      ) {
+        super(position, orientation, bounds, speed);
+        this.type = type;
+    }
+}
+
 export class Paddle extends GameObject {
     bounceDirections: Vector2[] = [];
     gameArea: HitBox;

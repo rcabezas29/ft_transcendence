@@ -4,6 +4,7 @@ import type {
   GameObject,
   Paddle,
   UpdateGamePayload,
+  PowerUp,
 } from "./interfaces/update-game.interface";
 import { user } from "./user";
 
@@ -231,15 +232,29 @@ class GameRenderer {
     });
 
 	if (powerups) {
-		powerups.forEach((powerup: GameObject) => {
+		powerups.forEach((powerup: PowerUp) => {
 			this.canvas.globalAlpha = 0.2;
+      if (powerup.type == 0) {
+        this.canvas.fillStyle = "#E7D352";
+      } else if (powerup.type == 1) {
+        this.canvas.fillStyle = "#D64B24";
+      } else if (powerup.type == 2) {
+        this.canvas.fillStyle = "#45D7E7";
+      } else if (powerup.type == 3) {
+        this.canvas.fillStyle = "#0A8754";
+      }
+
 			this.canvas.fillRect(
 				powerup.hitBox.position.x,
 				powerup.hitBox.position.y,
 				powerup.hitBox.bounds.x,
 				powerup.hitBox.bounds.y
 			);
+      this.canvas.fillStyle = "black";
+      this.canvas.font = "30px sans-serif";
+      this.canvas.fillText(`?`, powerup.hitBox.position.x + powerup.hitBox.bounds.x / 3, powerup.hitBox.position.y + powerup.hitBox.bounds.y - (powerup.hitBox.bounds.y / 4));
 			this.canvas.globalAlpha = 1.0;
+      this.canvas.font = "10px sans-serif";
 		})
 	}
    
