@@ -69,17 +69,18 @@ class ChannelController {
 		user.socket?.on('wrong-password', (channelName: ChannelName) => this.onWrongPassword(channelName));
 	}
 
-	createChannel(name: ChannelName): void {
-		if (name in this.channels)
-			return this.alertError('channel name already in use. Choose a different one');
-		user.socket?.emit('create-channel', name);
+	createChannel(channelName: ChannelName, password: string = ""): boolean {
+		if (channelName in this.channels)
+			return false;
+
+		const payload: PasswordChannelPayload = { password, channelName };
+		user.socket?.emit('create-channel', payload);
+		return true;
 	}
 
-	joinChannel(channelName: ChannelName, password: string): void {
+	joinChannel(channelName: ChannelName, password: string = ""): void {
 		if (this.userIsMemberOfChannel(channelName))
 			return;
-		if (this.channels[channelName].isPrivate && password.length === 0)
-			return this.alertError(`please enter a password to join private channel ${channelName}'`);
 			
 		const payload: PasswordChannelPayload = { password, channelName };
 		user.socket?.emit('join-channel', payload);

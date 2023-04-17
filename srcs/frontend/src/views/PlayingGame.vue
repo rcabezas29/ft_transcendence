@@ -4,6 +4,8 @@ import { onBeforeMount, onMounted, ref } from "vue";
 import { GameState } from "@/gameController";
 import Button from '@/components/ui/Button.vue';
 import ScoreBoard from "@/components/ScoreBoard.vue";
+import GameBoard from "@/components/ui/GameBoard.vue";
+import router from "../router"
 
 const canvasRef = ref<HTMLCanvasElement>();
 
@@ -13,17 +15,25 @@ onBeforeMount(() => {
 onMounted(() => {
   gameController.initCanvas(canvasRef.value!.getContext("2d")!);
 });
+
+function returnToHome() {
+	gameController.state = GameState.None;
+}
+
 </script>
 
 <template>
     <h3>PONG.EXE</h3>
-    <div class="game-board">
-        <canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
-        <ScoreBoard/>
     
-        Status: <span>{{ gameController.state }}</span>
-        <Button v-if="gameController.state === GameState.Playing" @click="gameController.endGamePrematurely">STOP GAME</Button>
-    </div>
+	<GameBoard>
+		<canvas ref="canvasRef" class="pong-board" height="400" width="800"> </canvas>
+		<ScoreBoard/>
+
+		Status: <span>{{ gameController.state }}</span>
+		<Button v-if="gameController.state === GameState.Playing" @click="gameController.endGamePrematurely">STOP GAME</Button>
+		<Button v-if="gameController.state === GameState.End" @click="returnToHome">RETURN TO HOME</Button>
+	</GameBoard>
+
 </template>
 
 <style scoped>
@@ -32,14 +42,6 @@ onMounted(() => {
   background-color: black;
 }
 
-.game-board {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background-image: linear-gradient(0deg, #1e9052 29.17%, #08150c 29.17%, #08150c 50%, #1e9052 50%, #1e9052 79.17%, #08150c 79.17%, #08150c 100%);
-    background-size: 24.00px 24.00px;
-    padding: 10%;
-}
 
 h3 {
   text-align: center;

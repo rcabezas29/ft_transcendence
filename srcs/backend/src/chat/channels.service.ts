@@ -54,11 +54,14 @@ export class ChannelsService {
 		return null;
 	}
 
-	createChannel(channelName: string, owner: GatewayUser): void {
+	createChannel(payload: PasswordChannelPayload, owner: GatewayUser): void {
+		const { channelName, password } = payload;
 		if (this.getChannelbyName(channelName))
 			return;
 
 		const newChannel: Channel = new Channel(channelName, owner);
+		if (password != "")
+			newChannel.setPassword(payload.password);
 
 		this.channels.push(newChannel);
 		owner.socket.emit('channel-created', this.channelToChannelPayload(newChannel));

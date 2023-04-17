@@ -1,9 +1,11 @@
 <script setup lang="ts">
-
+	import router from '@/router';
+	
+	router.replace('/game')
 </script>
 
 <template>
-	HOME PAGE
+
 </template>
 
 <style scoped>

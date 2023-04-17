@@ -9,6 +9,7 @@ export interface UserData {
 	intraUsername: string;
     email: string;
     avatar: string;
+	avatarURL?: string;
     elo: number;
     isTwoFactorAuthenticationEnabled: boolean;
     stats: UserStats;

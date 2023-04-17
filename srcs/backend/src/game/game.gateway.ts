@@ -55,6 +55,12 @@ export class GameGateway implements OnGatewayInit {
     this.matchmakingService.searchGame(user, gameCustomization);
   }
 
+  @SubscribeMessage('cancel-search')
+  cancelSearch(client: Socket) {
+    const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    this.matchmakingService.cancelSearch(user);
+  }
+
   @SubscribeMessage('accept-challenge')
   challengeGame(client: Socket, players: ChallengePlayers) {
     const user1: GatewayUser = this.gatewayManagerService.getClientByUserId(
@@ -91,6 +97,12 @@ export class GameGateway implements OnGatewayInit {
   spectateGame(client: Socket, gameName: string) {
 	let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 	this.gameService.joinSpectatorToGame(spectator, gameName);
+  }
+
+  @SubscribeMessage('spectate-leave')
+  spectateLeave(client: Socket, gameName: string) {
+	let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+	this.gameService.deleteSpectatorFromGame(spectator, gameName);
   }
 
   @SubscribeMessage('end-game-prematurely')

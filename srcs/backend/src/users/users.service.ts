@@ -180,7 +180,7 @@ export class UsersService {
   }
 
   async anonimizeUser(id: number) {
-    const newUsername: string = this.generateRandomString(15);
+    const newUsername: string = Date.now() + this.generateRandomString(5);
 
     const updateUserDto: UpdateUserDto = {
       username: newUsername,

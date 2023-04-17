@@ -2,13 +2,12 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import Index  from './components/Index.vue';
 import Login from './views/Login.vue';
-import Chat from './views/Chat.vue';
 import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
 import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
 import Friends from './views/Friends.vue';
-import TwoFactorAuthentication from './components/TwoFactorAuthentication.vue';
+import TwoFactorAuthentication from './components/2fa/TwoFactorAuthentication.vue';
 import Social from './views/Social.vue'
 import Profile from './views/Profile.vue';
 import FirstTimeLogin from './views/FirstTimeLogin.vue';
@@ -30,6 +29,7 @@ const routes = [
 		name: 'index',
 		path: '/',
 		component: Index,
+		beforeEnter: loggedUserGuard
 	},
 	{
 		name: 'login',

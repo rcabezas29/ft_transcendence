@@ -28,6 +28,7 @@
 		border-left: 4px solid #4BFE65;
 		height: 60px;
 		width: 100%;
+		text-align: center;
 	}
 
 	.multiview-tab:first-child {

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
 	import { onBeforeMount, ref } from "vue";
-	import { user } from "../../user"
-	import Table from "../ui/Table.vue"
+	import { user } from "../../user";
+	import Table from "../ui/Table.vue";
 	import type { UserData } from "@/interfaces";
 	import { computed } from "@vue/reactivity";
 	import TextInputField from "../ui/TextInputField.vue";
@@ -20,6 +20,9 @@
 		}
 
 		const users: UserData[] = await usersRequest.json();
+		users.map(user => {
+			user.avatarURL = `http://localhost:3000/users/avatar/${user.id}`
+		})
 
 		return users;
 	}
@@ -52,9 +55,9 @@
 				<th>#</th>
 				<th>user</th>
 				<th>elo</th>
-				<th>wins</th>
-				<th>losses</th>
-				<th>W/L</th>
+				<th class="mobile-hidden">wins</th>
+				<th class="mobile-hidden">losses</th>
+				<th class="mobile-hidden">W/L</th>
 			</tr>
 		</template>
 		<template #body>
@@ -67,17 +70,17 @@
 				<td>
 					<div class="table-user">
 						<span class="table-user-img">
-							<img :src=user.avatarImageURL />
+							<img :src=userRow.avatarURL />
 						</span>
 						<span class="table-username">
-							{{ userRow["username"] }}
+							{{ userRow.username }}
 						</span>
 					</div>
 				</td>
 				<td>{{ userRow.elo }}</td>
-				<td>{{ userRow.stats.wonGames }}</td>
-				<td>{{ userRow.stats.lostGames }}</td>
-				<td>{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
+				<td class="mobile-hidden">{{ userRow.stats.wonGames }}</td>
+				<td class="mobile-hidden">{{ userRow.stats.lostGames }}</td>
+				<td class="mobile-hidden">{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
 			</tr>
 			
 		</template>
@@ -116,6 +119,23 @@
 
 	.table-username {
 		margin-left: 12px;
+	}
+
+	.mobile-hidden {
+		display: none;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.multiview-body {
+			padding: 34px;
+			flex: 1;
+		}
+
+		.mobile-hidden {
+			display: table-cell;
+		}
+	
 	}
 
 </style>

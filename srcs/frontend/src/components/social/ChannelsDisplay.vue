@@ -1,68 +1,221 @@
 <script setup lang="ts">
 	import { channelController } from '@/channelController';
-	import ChatAllChannelsList from '@/components/chat/ChatAllChannelsList.vue';
 	import { ref } from 'vue';
+	import Table from "../ui/Table.vue";
+	import LockIcon from "../icons/LockIcon.vue";
+	import Button from "../ui/Button.vue";
+	import Modal from "../ui/Modal.vue";
+	import TextInputField from "../ui/TextInputField.vue";
+	import type { Channel } from "../../interfaces";
 
-	const channelNameInput = ref("");
+	const newChannelNameInput = ref("");
+	const newChannelPasswordInput = ref("");
+	const insertedPassword = ref("");
+	const errorMessage = ref("");
 
-	function joinChannel(channelName: string) {
-		const channel = channelController.channels[channelName];
-		let password: string = "";
-		if (channel.isPrivate) {
-			const insertedPassword: string | null = prompt("Insert channel password")
-			if (insertedPassword != null)
-				password = insertedPassword
-			else
-				password = ""
-		}
+	const createChannelModalVisible = ref<boolean>(false);
+	function openCreateChannelModal() {
+		createChannelModalVisible.value = true;
+	}
 
-		channelController.joinChannel(channelName, password);
+	function closeCreateChannelModal() {
+		createChannelModalVisible.value = false;
+		newChannelNameInput.value = "";
+		newChannelPasswordInput.value = "";
+		errorMessage.value = "";
 	}
 
 	function createChat(e: Event) {
-		if (channelNameInput.value.length == 0)
+		if (newChannelNameInput.value.length == 0) {
+			errorMessage.value = "please enter a name for the new channel";
 			return;
-		channelController.createChannel(channelNameInput.value);
-		channelNameInput.value = "";
+		}
+		if (!channelController.createChannel(newChannelNameInput.value, newChannelPasswordInput.value)) {
+			errorMessage.value = "channel name already in use. Choose a different one";
+			return;
+		}
+		closeCreateChannelModal();
+	}
+
+	
+	const passwordModalVisible = ref<boolean>(false);
+	const passwordModalChannelName = ref<string>("");
+	function openPasswordModal(channelName: string) {
+		passwordModalVisible.value = true;
+		passwordModalChannelName.value = channelName;
+	}
+
+	function closePasswordModal() {
+		passwordModalVisible.value = false;
+		insertedPassword.value = "";
+		errorMessage.value = "";
+		passwordModalChannelName.value = "";
+	}
+
+	function handleJoinClick(channel: Channel) {
+		if (channel.isPrivate) {
+			openPasswordModal(channel.name);
+		} else {
+			channelController.joinChannel(channel.name);
+		}
+	}
+
+	function joinWithPassword() {
+		if (insertedPassword.value.length == 0) {
+			errorMessage.value = `insert password to join private channel ${passwordModalChannelName.value}`;
+			return;
+		}
+		channelController.joinChannel(passwordModalChannelName.value, insertedPassword.value);
+		closePasswordModal();
 	}
 
 </script>
 
 <template>
-	<h2>Channels</h2>
+	<Table class="channels-table">
+		<template #head>
+			<tr>
+				<th>is_private</th>
+				<th>channel_name</th>
+				<th class="mobile-hidden">#participants</th>
+				<th class="mobile-hidden">owner</th>
+				<th class="join-column"></th>
+			</tr>
+		</template>
+		<template #body>
+			<tr v-for="channel in channelController.channels" :key="channel.name">
+				<td class="table-square">
+					<LockIcon v-if="channel.isPrivate" fill-colour="#B3F9D7"/>
+				</td>
+				<td>
+					<span>{{ channel.name }}</span>
+				</td>
+				<td class="mobile-hidden">
+					<span>{{ channel.users.length }}</span>
+				</td>
+				<td class="mobile-hidden">
+					<span>{{ channel.owner.username }}</span>
+				</td>
+				<td style="padding: 0px">
+					<Button class="join-button" @click="() => handleJoinClick(channel)" v-if="!channelController.userIsMemberOfChannel(channel.name)" :selected="true">
+						JOIN
+					</Button>
+					<Modal :visible="passwordModalVisible" @close="closePasswordModal" :title="`JOIN PRIVATE CHANNEL ${passwordModalChannelName}`">
+						<p class="errorMessage">{{ errorMessage }}</p>
 
-	<!-- use COMPONENT? -->
-	<ChatAllChannelsList />
+						<TextInputField type="password" v-model="insertedPassword" placeholder-text="ENTER CHANNEL PASSWORD" />
 
-	<li v-for="channel in channelController.channels">
-		{{ channel.name }} 
-		
-		<button
-			@click="() => joinChannel(channel.name)"
-			v-if="!channelController.userIsMemberOfChannel(channel.name)"
-		>
-			Join channel
-		</button>
-		<span v-else="channelController.userIsMemberOfChannel(channel.name)">
-			Already joined
-		</span>
-	</li>
+						<div class="modal-buttons">
+							<Button @click="() => joinWithPassword()" :selected="true">JOIN</Button>
+							<Button @click="closePasswordModal">CANCEL</Button>
+						</div>
+					</Modal>
+				</td>
+			</tr>	
+		</template>
+	</Table>
 
-	<div>
-		<form @submit.prevent="createChat">
-			New channel:
-			<input type="text" v-model="channelNameInput">
-			<button>Create</button>
-		</form>
+	<div v-if="Object.keys(channelController.channels).length === 0">
+		There are no channels yet... Would you like to create one? :)
 	</div>
 
+	<div class="channel-creation">
+		<Button class="create-button" @click="openCreateChannelModal" :selected="true">
+			CREATE NEW CHANNEL
+		</Button>
+		<Modal :visible="createChannelModalVisible" @close="closeCreateChannelModal" title="CREATE NEW CHANNEL">
+			<p class="errorMessage">{{ errorMessage }}</p>
+
+			<p>Enter channel name:</p>
+			<TextInputField v-model="newChannelNameInput" placeholder-text="CHANNEL NAME" />
+			<p>Enter channel password (optional):</p>
+			<TextInputField type="password" v-model="newChannelPasswordInput" placeholder-text="CHANNEL PASSWORD (OPTIONAL)" />
+
+			<div class="modal-buttons">
+				<Button @click="createChat" :selected="true">CREATE</Button>
+				<Button @click="closeCreateChannelModal">CANCEL</Button>
+			</div>
+		</Modal>
+	</div>
 </template>
 
 <style scoped>
 
-	li {
-		border: 1px solid black;
-		width: fit-content;
+	.channels-table {
+		width: 100%;
+	}
+
+	.table-square {
+		width: 50px;
+		height: 50px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: 12px;
+	}
+
+	.mobile-hidden {
+		display: none;
+	}
+
+	tbody tr {
+		cursor: default;
+	}
+
+	tbody tr:hover {
+		background-color: #08150C;
+		color: #B3F9D7;
+	}
+
+	.join-button {
+		width: 100%;
+		height: 50px;
+		padding: 10px 10px;
+		cursor: pointer;
+	}
+
+	.join-button:hover, .create-button:hover {
+		background-color: #08150C;
+		color: #B3F9D7;
+	}
+
+	.channel-creation {
+		margin-top: 24px;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.modal-buttons {
+		box-sizing: border-box;
+		margin-top: 24px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		gap: 10px;
+		padding: 0px 36px;
+	}
+
+	.errorMessage {
+		color: red;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.mobile-hidden {
+			display: table-cell;
+		}
+
+		.create-button {
+			max-width: 300px;
+		}
+
+		.create-channel-modal-buttons {
+			flex-direction: row;
+			justify-content: center;
+		}
 	}
 
 </style>

@@ -81,7 +81,8 @@
 
 	.form-buttons {
 		display: flex;
-		gap: 24px
+		flex-direction: column;
+		gap: 14px
 	}
 
 	.button-42 {
@@ -96,5 +97,12 @@
 
 	input {
         margin-bottom: 14px;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.form-buttons {
+			flex-direction: row;
+		}
 	}
 </style>

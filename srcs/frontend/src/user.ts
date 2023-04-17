@@ -11,6 +11,7 @@ import type { JwtPayload, UserData } from './interfaces';
 interface FetchedUser {
 	id: number;
 	username: string;
+	elo: number;
 }
 
 class User {
@@ -21,6 +22,7 @@ class User {
 	public id: number = -1;
 	public username: string = '';
 	public avatarImageURL: string = '';
+	public elo : number = 0;
 
 	private isLogged: boolean = false;
 	private onLogoutCallbacks: Function[] = [];
@@ -43,6 +45,7 @@ class User {
 
 			const fetchedUser: FetchedUser = userData;
 			this.username = fetchedUser.username;
+			this.elo = fetchedUser.elo;
 			this.avatarImageURL = `http://localhost:3000/users/avatar/${this.id}`;
 
 		} catch (error) {
@@ -223,6 +226,34 @@ class User {
 		return true;
 	}
 
+	async turnOffTwoFactorAuth(): Promise<boolean> {
+		const httpResponse = await fetch('http://localhost:3000/2fa/turn-off', {
+			method: "POST",
+			headers: {
+				"Authorization": `Bearer ${user.token}`
+			}
+		});
+		if (httpResponse.status != 200) {
+			return false;
+		}
+		return true;
+	}
+
+	async turnOnTwoFactorAuth(code: string): Promise<boolean> {
+		const httpResponse = await fetch('http://localhost:3000/2fa/turn-on', {
+			method: "POST",
+			headers: {
+				"Authorization": `Bearer ${user.token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({twoFactorAuthenticationCode: code})
+		});
+		if (httpResponse.status != 200) {
+			return false;
+		}
+		return true;
+	}
+
 	async fetchUserData(): Promise<UserData | null> {
 		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
 			method: "GET",
@@ -305,6 +336,21 @@ class User {
 
 	notifyOfUserChange() {
 		this.socket?.emit("user-updated");
+	}
+
+	async deleteAccount() {
+		const httpResponse = await fetch(`http://localhost:3000/users/${user.id}`, {
+			method: "DELETE",
+			headers: {
+				"Authorization": `Bearer ${this.token}`,
+			},
+		});
+
+		if (httpResponse.status != 200) {
+			console.log("error while deleting user");
+			return;
+		}
+		this.logout();
 	}
 }
 

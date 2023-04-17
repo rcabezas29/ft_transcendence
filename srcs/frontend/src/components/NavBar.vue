@@ -22,15 +22,15 @@
 <template>
 	<div class="nav-header">
 		<div class="nav-buttons" :class="{ hiddenMenu: menuClosed}">
-			<router-link to="game">
+			<router-link to="/game">
 				<Button @click="closeMenu()" :selected="route.path == '/game'">PONG.EXE</Button>
 			</router-link>
 
-			<router-link to="social">
+			<router-link to="/social">
 				<Button @click="closeMenu()" :selected="route.path == '/social'">SOCIAL</Button>
 			</router-link>
 
-			<router-link to="profile">
+			<router-link to="/profile">
 				<Button @click="closeMenu()" :selected="route.path == '/profile'">PROFILE</Button>
 			</router-link>
 		</div>
@@ -41,7 +41,7 @@
 			<div class="user-info">
 				<div class="user-stats">
 					<div>{{ user.username }}</div>
-					<div>elo: 69</div>
+					<div>elo: {{ user.elo }}</div>
 				</div>
 				<div class="user-image">
 					<img :src=user.avatarImageURL />

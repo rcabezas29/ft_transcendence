@@ -34,7 +34,7 @@ function closePasswordSettings(): void {
     <div class="container">
         <form @submit.prevent="setPassword">
             <div class="text-input"> 
-                <TextInputField placeholder-text="enter new password..." v-model="newPassword"/>
+                <TextInputField type="password" placeholder-text="enter new password..." v-model="newPassword"/>
             </div>
             <div class="buttons">
                 <Button type="submit" class="button" :selected="true">
