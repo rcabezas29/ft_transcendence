@@ -11,6 +11,7 @@ import type { JwtPayload, UserData } from './interfaces';
 interface FetchedUser {
 	id: number;
 	username: string;
+	elo: number;
 }
 
 class User {
