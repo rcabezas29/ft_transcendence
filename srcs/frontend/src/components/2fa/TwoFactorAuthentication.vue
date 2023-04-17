@@ -19,6 +19,11 @@ async function secondFactorAuthenticate() {
     }
 	router.replace({ "name": "home"});
 }
+
+function moveToLogin() {
+    router.push("login");
+}
+
 </script>
 
 <template>
@@ -32,12 +37,15 @@ async function secondFactorAuthenticate() {
             <div class="error-message">
                 {{ errorMessage }}
             </div>
-            <Button class="submit-button" type="submit" @click="">AUTHENTICATE</Button>
+            <div class="form-buttons">
+				<Button type="button" @click="moveToLogin">GO BACK TO LOGIN</Button>
+                <Button type="submit" :selected="true" @click="">AUTHENTICATE</Button>
+			</div>
 		</form>
 	</div>
 </template>
 
-<style>
+<style scoped>
     .form-container {
 		max-width: 700px;
 		margin: auto;
@@ -57,15 +65,26 @@ async function secondFactorAuthenticate() {
 		box-sizing: border-box;
 	}
 
+    .form-buttons {
+		display: flex;
+        flex-direction: column;
+		margin-top: 24px;
+		gap: 24px
+	}
+
     form {
 		padding: 32px;
 	}
 
-    .submit-button {
-		margin-top: 24px;
-    }
-
     .error-message {
         color: red;
     }
+
+    /* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+        .form-buttons {
+            flex-direction: row;
+        }
+	}
+
 </style>

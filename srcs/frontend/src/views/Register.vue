@@ -59,7 +59,7 @@
 				<Button type="button" @click="moveToLogin">LOGIN</Button>
 				<Button type="submit" :selected="true" @click="handleSubmit">REGISTER</Button>
 			</div>
-			<Button type="button" @click="loginWithIntra" class="button-42">REGISTER WITH 42 INTRA</Button>
+			<Button type="button" @click="loginWithIntra" class="button-42">LOGIN WITH 42 INTRA</Button>
 		</form>
 	</div>
 </template>
@@ -87,7 +87,8 @@
 
 	.form-buttons {
 		display: flex;
-		gap: 24px
+		flex-direction: column;
+		gap: 14px
 	}
 
 	.button-42 {
@@ -102,5 +103,12 @@
 
 	input {
 		margin-bottom: 14px;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.form-buttons {
+			flex-direction: row;
+		}
 	}
 </style>
