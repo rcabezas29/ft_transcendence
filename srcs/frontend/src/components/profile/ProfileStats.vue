@@ -9,7 +9,6 @@
 	import TextInputField from "../ui/TextInputField.vue";
 
 
-
 	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch("http://localhost:3000/users", {
 			headers: {
@@ -26,18 +25,44 @@
 		return users;
 	}
 
-	// async function getWins(): Promise<UserData[] | null> {
-	// 	users.value = await getUsers();
-	// 	const wins: UserData[] = users.value?.keys;
-	// 	return wins;
+	async function getCurrentUser(){
+		const users = await getUsers();
+		const currentUser = users?.filter(user => user.id == user.id);
+		return currentUser;
+	}
+
+	async function totalWins() {
+		const users = await getCurrentUser();
+		const wins = users?.filter(user => user.stats.wonGames > 0);
+		return wins?.length;
+	}
+
+	async function totalLosses() {
+		const users = await getCurrentUser();
+		const losses = users?.filter(user => user.stats.lostGames > 0);
+		return losses?.length;
+	}
+
+	// async function winsLosses() {
+	// 	const wins: number = await totalWins();
+	// 	const losses: number = await totalLosses();
+	// 	const wL = wins / losses;
+	// 	return wL;
 	// }
+
+	// async function scoredGoals() {
+	// 	const users = await getCurrentUser();
+	// 	const goals = users?.map(user => user.stats.);
+	// 	return goals;
+	// }
+	
 
 </script>
 
 <template>
 	<!-- Square boxes with a title and info of the profile separated by equal spacing an responsive-->
 	<div class="SquareStatsGrid">
-		<StatBox title="WINS" stat="1000"/>
+		<StatBox title="WINS" stat="{{totalWins().toString()}}"/>
 		<StatBox title="LOSSES" stat="1000"/>
 		<StatBox title="W/L" stat="1000"/>
 		<StatBox title="SCORED GOALS" stat="1000"/>

@@ -109,6 +109,7 @@ import router from "@/router";
 //     userData.value = await user.fetchUserData();
 // })
 
+
 const multiViewElement = ref(1);
 function multiviewShowElement(index: number) {
     multiViewElement.value = index;
