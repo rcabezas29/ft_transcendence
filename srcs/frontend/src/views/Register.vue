@@ -20,12 +20,10 @@
 		}
 
 		const loginRet = await user.login(email.value, password.value);
-		if (!loginRet.loggedSuccessfully)
-		{
+		if (!loginRet.loggedSuccessfully) {
 			message.value = loginRet.response.message;
 			return;
 		}
-
 		const accessToken = loginRet.response.access_token;
 
 		user.auth(accessToken);
@@ -57,7 +55,7 @@
 			<label :class="messageClass">{{ message }}</label>
 			<div class="form-buttons">
 				<Button type="button" @click="moveToLogin">LOGIN</Button>
-				<Button type="submit" :selected="true" @click="handleSubmit">REGISTER</Button>
+				<Button type="submit" :selected="true">REGISTER</Button>
 			</div>
 			<Button type="button" @click="loginWithIntra" class="button-42">LOGIN WITH 42 INTRA</Button>
 		</form>
@@ -103,6 +101,10 @@
 
 	input {
 		margin-bottom: 14px;
+	}
+
+	.error-message {
+		color: red;
 	}
 
 	/* Everything bigger than 850px */
