@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
 	<div class="StatSquare">
 		<div class="BoxTitle">
-			{{ title }}
+			{{ title }}<br>
 		</div>
 		<div class="BoxStat">
 			{{ stat }}
@@ -33,6 +33,7 @@ const props = withDefaults(defineProps<Props>(), {
 <style scoped>
 .StatSquare {
 	display: flex;
+	width: justify-content;
 	align-items: center;
 	justify-content: center;
 	border: 4px solid #4BFE65;
@@ -41,9 +42,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 .BoxTitle {
 	font-size: 1.5em;
+	padding: 1em;
 }
 
 .BoxStat {
 	font-size: 1em;
+	padding-top: 3em;
+	padding-bottom: 1em;
+	position: absolute;
 }
 </style>

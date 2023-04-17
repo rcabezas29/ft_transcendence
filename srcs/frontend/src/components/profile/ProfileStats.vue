@@ -9,6 +9,7 @@
 	import TextInputField from "../ui/TextInputField.vue";
 
 
+
 	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch("http://localhost:3000/users", {
 			headers: {
@@ -25,27 +26,26 @@
 		return users;
 	}
 
-	const users = ref<UserData[] | null>([]);
-	const input = ref<string>("");
-	const filteredUsers = computed(() => {
-		if (users.value == null)
-			return [];
-
-		return users.value?.filter( (user) => user.username.toLowerCase().includes(input.value.toLowerCase()) );
-	});
-
-	onBeforeMount(async () => {
-		users.value = await getUsers();
-		users.value!.sort((e1, e2) => e2.elo - e1.elo);
-	})
+	// async function getWins(): Promise<UserData[] | null> {
+	// 	users.value = await getUsers();
+	// 	const wins: UserData[] = users.value?.keys;
+	// 	return wins;
+	// }
 
 </script>
 
 <template>
 	<!-- Square boxes with a title and info of the profile separated by equal spacing an responsive-->
 	<div class="SquareStatsGrid">
-		<StatBox title="ELO" stat="1000"/>
+		<StatBox title="WINS" stat="1000"/>
+		<StatBox title="LOSSES" stat="1000"/>
+		<StatBox title="W/L" stat="1000"/>
+		<StatBox title="SCORED GOALS" stat="1000"/>
+		<StatBox title="RECEIVED GOALS" stat="1000"/>
+		<StatBox title="TOTAL MATCHES" stat="1000"/>
+		<StatBox title="S/R" stat="1000"/>
 	</div>
+
 </template>
 
 <style scoped>
