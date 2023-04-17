@@ -25,7 +25,7 @@ export class GameObject {
     }
 }
 
-const PADDLE_SPEED = 200; // in px per second;
+const PADDLE_SPEED = 400; // in px per second;
 
 export class Paddle extends GameObject {
     bounceDirections: Vector2[] = [];
@@ -40,8 +40,8 @@ export class Paddle extends GameObject {
       gameArea: HitBox,
       color: string
     ) {
-      const width: number = orientation.x ? 5 : length;
-      const height: number = orientation.y ? 5 : length;
+      const width: number = orientation.x ? 10 : length;
+      const height: number = orientation.y ? 10 : length;
   
       super(position, orientation, new Vector2(width, height), PADDLE_SPEED);
       this.color = color;

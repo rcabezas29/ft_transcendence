@@ -187,22 +187,22 @@ class GameRenderer {
 
   clearCanvas() {
     this.canvas.fillStyle = "black";
-    this.canvas.fillRect(0, 0, 400, 200);
+    this.canvas.fillRect(0, 0, 800, 400);
   }
 
   winGame() {
     this.canvas.fillStyle = "white";
-    this.canvas.fillText(`WIN!!`, 200, 100);
+    this.canvas.fillText(`WIN!!`, 400, 200);
   }
 
   loseGame() {
     this.canvas.fillStyle = "white";
-    this.canvas.fillText(`LOSE :(`, 200, 100);
+    this.canvas.fillText(`LOSE :(`, 400, 200);
   }
 
   tieGame() {
     this.canvas.fillStyle = "white";
-    this.canvas.fillText(`DRAW :|`, 200, 100);
+    this.canvas.fillText(`DRAW :|`, 400, 200);
   }
 
   drawFrame(payload: UpdateGamePayload) {

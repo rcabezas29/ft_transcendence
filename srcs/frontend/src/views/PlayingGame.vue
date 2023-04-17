@@ -26,7 +26,7 @@ function returnToHome() {
     <h3>PONG.EXE</h3>
     
 	<GameBoard>
-		<canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
+		<canvas ref="canvasRef" class="pong-board" height="400" width="800"> </canvas>
 		<ScoreBoard/>
 
 		Status: <span>{{ gameController.state }}</span>

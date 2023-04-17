@@ -9,7 +9,7 @@ import Game from './game.class';
 
 const GAME_DURATION = 200; // in seconds
 
-const MAX_BALL_SPEED = 450;
+const MAX_BALL_SPEED = 700;
 
 export class PowerUpsGame extends Game {
     powerups: GameObject[] = [];
@@ -58,10 +58,10 @@ export class PowerUpsGame extends Game {
         } else if (result === 3) {
             if (this.ball.direction.x < 0) {
                 console.log('Increased 1');
-                this.paddles[1].hitBox.bounds.y += 10;
+                this.paddles[1].hitBox.bounds.y += 20;
             } else {
                 console.log('Increased 0');
-                this.paddles[0].hitBox.bounds.y += 10;
+                this.paddles[0].hitBox.bounds.y += 20;
             }
         }
     }
@@ -84,9 +84,9 @@ export class PowerUpsGame extends Game {
         }
         if (this.checkIfTimeToPowerUp(now)) {
             this.powerups.push(new GameObject(
-                new Vector2(200 - 10, Math.random() * 150 + 25),
+                new Vector2(400 - 20, Math.random() * 350 + 50),
                 new Vector2(0, 0),
-                new Vector2(20, 20),
+                new Vector2(40, 40),
                 0,
             ));
         }
