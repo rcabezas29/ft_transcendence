@@ -6,10 +6,13 @@ import ProfileStats from "@/components/profile/ProfileStats.vue";
 // import AvatarCropper from '../components/AvatarCropper.vue';
 // import type { UserData } from "@/interfaces";
 // import Button from "../components/ui/Button.vue";
+import FriendsList from "@/components/friends/FriendsList.vue";
 import MultiView from "../components/ui/MultiView.vue"
 import MultiViewTab from "../components/ui/MultiViewTab.vue"
+import Settings from "@/components/profile/Settings.vue";
 
 import router from "@/router";
+import type SettingsVue from "@/components/profile/Settings.vue";
 
 // const username = ref<string>('');
 // const password = ref<string>('');
@@ -145,10 +148,10 @@ function isSelected(index: number) {
 				<ProfileStats />
 			</div>
 			<div v-else-if="multiViewElement == 3">
-				<ProfileStats />
+				<FriendsList />
 			</div>
             <div v-else-if="multiViewElement == 4">
-                <ProfileStats />
+                <Settings />
             </div>
 		</template>
 	</MultiView>
