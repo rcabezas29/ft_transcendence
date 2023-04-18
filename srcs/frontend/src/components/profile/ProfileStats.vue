@@ -1,84 +1,65 @@
 <script setup lang="ts">
+  import { onBeforeMount, ref } from "vue";
+  import { user } from "../../user";
+  import StatBox from "./StatBox.vue";
+  import Table from "../ui/Table.vue";
+  import type { UserData } from "@/interfaces";
+  import { computed } from "@vue/reactivity";
+  import TextInputField from "../ui/TextInputField.vue";
 
-	import { onBeforeMount, ref } from "vue";
-	import { user } from "../../user"
-	import StatBox from "./StatBox.vue";
-	import Table from "../ui/Table.vue"
-	import type { UserData } from "@/interfaces";
-	import { computed } from "@vue/reactivity";
-	import TextInputField from "../ui/TextInputField.vue";
+  let currentUser: UserData | null = null;
 
+  onBeforeMount(async () => {
+    currentUser = await getCurrentUser();
+  });
 
-	async function getCurrentUser(){
-		const usersRequest = await fetch(`http://localhost:3000/users/${user.id}`, {
-			headers: {
-				"Authorization": `Bearer ${user.token}`
-			}
-		});
+  async function getCurrentUser() {
+    const usersRequest = await fetch(`http://localhost:3000/users/${user.id}`, {
+      headers: {
+        "Authorization": `Bearer ${user.token}`
+      }
+    });
 
-		if (usersRequest.status != 200) {
-			return null;
-		}
+    if (usersRequest.status != 200) {
+      return null;
+    }
 
-		const usernameUpdateOk: UserData[] = await usersRequest.json();
+    const userData: UserData = await usersRequest.json();
+    return userData;
+  }
 
-		return user;
-	}
-
-	console.log(user.token);
-	console.log(user.id);
-	
-
-	// async function totalLosses() {
-	// 	const users = await getCurrentUser();
-	// 	const losses = users?.filter(user => user.stats.lostGames > 0);
-	// 	return losses?.length;
-	// }
-
-	// async function winsLosses() {
-	// 	const wins: number = await totalWins();
-	// 	const losses: number = await totalLosses();
-	// 	const wL = wins / losses;
-	// 	return wL;
-	// }
-
-	// async function scoredGoals() {
-	// 	const users = await getCurrentUser();
-	// 	const goals = users?.map(user => user.stats.);
-	// 	return goals;
-	// }
-	async function totalWins() {
-		const currentUser = await getCurrentUser();
-		return currentUser?.stats.wins;
-	}
-	
-
+  const totalWins = computed(() => currentUser?.stats.wins ?? 0);
+  const totalLosses = computed(() => currentUser?.stats.lostGames ?? 0);
+  const winLossRatio = computed(() => totalWins.value / totalLosses.value);
+  const scoredGoals = computed(() => currentUser?.stats.scoredGoals ?? 0);
+  const receivedGoals = computed(() => currentUser?.stats.receivedGoals ?? 0);
+  const totalMatches = computed(() => totalWins.value + totalLosses.value);
+  const scoreRatio = computed(() => scoredGoals.value / receivedGoals.value);
 </script>
 
 <template>
-	<div class="SquareStatsGrid">
-		<StatBox title="WINS" :stat="totalWins()"/>
-		<StatBox title="LOSSES" stat="1000"/>
-		<StatBox title="W/L" stat="1000"/>
-		<StatBox title="SCORED GOALS" stat="1000"/>
-		<StatBox title="RECEIVED GOALS" stat="1000"/>
-		<StatBox title="TOTAL MATCHES" stat="1000"/>
-		<StatBox title="S/R" stat="1000"/>
-	</div>
-
+  <div class="SquareStatsGrid">
+    <StatBox title="WINS" :stat="totalWins"/>
+    <StatBox title="LOSSES" :stat="totalLosses"/>
+    <StatBox title="W/L" :stat="winLossRatio"/>
+    <StatBox title="SCORED GOALS" :stat="scoredGoals"/>
+    <StatBox title="RECEIVED GOALS" :stat="receivedGoals"/>
+    <StatBox title="TOTAL MATCHES" :stat="totalMatches"/>
+    <StatBox title="S/R" :stat="scoreRatio"/>
+  </div>
 </template>
 
 <style scoped>
-	.StatSquare{
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 4px solid #4BFE65;
-		padding: 4px;
-	}
-	.SquareStatsGrid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		grid-gap: 1rem;
-	}
+  .StatSquare{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid #4BFE65;
+    padding: 4px;
+  }
+  .SquareStatsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 1rem;
+  }
 </style>
