@@ -28,7 +28,7 @@
     return userData;
   }
 
-  const totalWins = computed(() => currentUser?.stats.wins ?? 0);
+  const totalWins = computed(() => currentUser?.stats.wonGames ?? 0);
   const totalLosses = computed(() => currentUser?.stats.lostGames ?? 0);
   const winLossRatio = computed(() => totalWins.value / totalLosses.value);
   const scoredGoals = computed(() => currentUser?.stats.scoredGoals ?? 0);

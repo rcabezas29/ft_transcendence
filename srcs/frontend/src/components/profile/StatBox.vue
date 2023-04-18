@@ -27,19 +27,13 @@
 
 <style scoped>
 .StatSquare {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 4px solid #4BFE65;
-  padding: 4px;
-  width: 100%;
-  height: 0;
-  padding-bottom: 100%;
-  position: relative;
+display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 24px;
 }
 
 .BoxContent {
-  position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
