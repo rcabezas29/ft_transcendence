@@ -150,13 +150,15 @@ class GameController {
     this.state = GameState.End;
     this.timestamp = 0;
     this.gameRenderer?.clearCanvas();
+    let result : string = "";
     if (gameResult === GameResult.Win) {
-      this.gameRenderer?.winGame();
+      result = "win";
     } else if (gameResult === GameResult.Lose) {
-      this.gameRenderer?.loseGame();
+      result = "lose";
     } else {
-      this.gameRenderer?.tieGame();
+      result = "draw";
     }
+    this.gameRenderer?.gameEnding(result);
   }
 
   updateGame(gamePayload: UpdateGamePayload) {
@@ -191,19 +193,31 @@ class GameRenderer {
     this.canvas.fillRect(0, 0, 800, 400);
   }
 
-  winGame() {
+  gameEnding(result : string) {
+    this.canvas.textAlign = "center";
+    this.canvas.font = "30px vp-pixel";
     this.canvas.fillStyle = "white";
-    this.canvas.fillText(`WIN!!`, 400, 200);
+    this.canvas.fillText(`GAME OVER`, 400, 150);
+    this.canvas.font = "20px vp-pixel";
+    if (result === 'win') {
+      this.winGame();
+    } else if (result === 'lose') {
+      this.loseGame();
+    } else if (result === 'draw') {
+      this.tieGame();
+    }
+  }
+
+  winGame() {
+    this.canvas.fillText(`YOU WIN :)`, 400, 250);
   }
 
   loseGame() {
-    this.canvas.fillStyle = "white";
-    this.canvas.fillText(`LOSE :(`, 400, 200);
+    this.canvas.fillText(`YOU LOSE :(`, 400, 250);
   }
 
   tieGame() {
-    this.canvas.fillStyle = "white";
-    this.canvas.fillText(`DRAW :|`, 400, 200);
+    this.canvas.fillText(`DRAW :|`, 400, 250);
   }
 
   drawFrame(payload: UpdateGamePayload) {
@@ -211,7 +225,7 @@ class GameRenderer {
 
     const balls: GameObject[] = payload.balls;
     const paddles: Paddle[] = payload.paddles;
-    const powerups: GameObject[] = payload.powerups;
+    const powerups: PowerUp[] = payload.powerups;
     this.canvas.fillStyle = "#D9D9D9";
     balls.forEach((ball) => {
       this.canvas.fillRect(
