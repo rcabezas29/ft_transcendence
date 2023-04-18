@@ -112,9 +112,9 @@
 					</Modal>
 				</td>
 			</tr>
-			<div v-if="Object.keys(channelController.channels).length === 0">
+			<td colspan="2" v-if="Object.keys(channelController.channels).length === 0">
 				There are no channels yet... Would you like to create one? :)
-			</div>
+			</td>
 		</template>
 	</Table>
 
@@ -179,7 +179,9 @@
 	}
 
 	.channel-creation {
+		box-sizing: border-box;
 		margin-top: 24px;
+		padding: 0px 8px;
 		width: 100%;
 		display: flex;
 		flex-direction: column;

@@ -6,6 +6,7 @@ import type {
   UpdateGamePayload,
   PowerUp,
 } from "./interfaces/update-game.interface";
+import type { UserData } from "./interfaces";
 import { user } from "./user";
 
 enum    PaddleColorSelection {
@@ -159,6 +160,14 @@ class GameController {
       result = "draw";
     }
     this.gameRenderer?.gameEnding(result);
+
+    user.fetchUserData().then((userData: UserData | null) => {
+      if (!userData) {
+        console.log('error fetching user data on game end');
+        return ;
+      }
+      user.elo = userData?.elo;
+    });
   }
 
   updateGame(gamePayload: UpdateGamePayload) {
