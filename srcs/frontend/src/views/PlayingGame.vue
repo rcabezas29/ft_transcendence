@@ -29,7 +29,6 @@ function returnToHome() {
 		<canvas ref="canvasRef" class="pong-board" height="400" width="800"> </canvas>
 		<ScoreBoard/>
 
-		Status: <span>{{ gameController.state }}</span>
 		<Button v-if="gameController.state === GameState.Playing" @click="gameController.endGamePrematurely">STOP GAME</Button>
 		<Button v-if="gameController.state === GameState.End" @click="returnToHome">RETURN TO HOME</Button>
 	</GameBoard>

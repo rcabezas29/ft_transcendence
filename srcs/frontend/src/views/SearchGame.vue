@@ -57,8 +57,6 @@ function cancelSearchGame() {
         <h2>PADDLE COLOR</h2>
         <PaddleColorSelector/>
     
-        Status: <span>{{ gameController.state }}</span>
-    
         <Button v-if="gameController.state !== GameState.Playing"  @click="() => {findGame(); openModal()}">SEARCH GAME</Button>
     </div>
 </template>
