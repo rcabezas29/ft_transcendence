@@ -53,7 +53,13 @@
 				<Button type="button" @click="moveToRegister">REGISTER</Button>
 				<Button type="submit" :selected="true" @click="handleSubmit">LOGIN</Button>
 			</div>
-			<Button type="button" @click="loginWithIntra" class="button-42">LOG WITH 42 INTRA</Button>
+			<Button type="button" @click="loginWithIntra" class="button-42">
+				<div class="login-text">
+					LOGIN WITH
+					<img src="../assets/42Logo.svg" alt="42Logo"  width="22" height="22">
+					INTRA
+				</div>
+			</Button>
 		</form>
 	</div>
 </template>
@@ -97,6 +103,16 @@
 
 	input {
         margin-bottom: 14px;
+	}
+
+	.login-text {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.login-text img {
+		margin: 0px 8px;
 	}
 
 	/* Everything bigger than 850px */

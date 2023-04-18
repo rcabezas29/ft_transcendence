@@ -15,6 +15,10 @@ export interface GameObject {
   speed: number;
 }
 
+export interface PowerUp extends GameObject {
+  type: number;
+}
+
 export interface Paddle extends GameObject {
   bounceDirections: Vector2[];
   gameArea: HitBox;

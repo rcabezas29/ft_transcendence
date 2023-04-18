@@ -15,7 +15,7 @@ const users = ref<UserInfo[]>([]);
 
 async function filteredList() {
     if (input.value.length > 0) {
-        const httpResponse = await fetch(`http://localhost:3000/users/search/${input.value}`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/search/${input.value}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${user.token}`

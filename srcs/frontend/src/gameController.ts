@@ -4,7 +4,9 @@ import type {
   GameObject,
   Paddle,
   UpdateGamePayload,
+  PowerUp,
 } from "./interfaces/update-game.interface";
+import type { UserData } from "./interfaces";
 import { user } from "./user";
 
 enum    PaddleColorSelection {
@@ -149,13 +151,23 @@ class GameController {
     this.state = GameState.End;
     this.timestamp = 0;
     this.gameRenderer?.clearCanvas();
+    let result : string = "";
     if (gameResult === GameResult.Win) {
-      this.gameRenderer?.winGame();
+      result = "win";
     } else if (gameResult === GameResult.Lose) {
-      this.gameRenderer?.loseGame();
+      result = "lose";
     } else {
-      this.gameRenderer?.tieGame();
+      result = "draw";
     }
+    this.gameRenderer?.gameEnding(result);
+
+    user.fetchUserData().then((userData: UserData | null) => {
+      if (!userData) {
+        console.log('error fetching user data on game end');
+        return ;
+      }
+      user.elo = userData?.elo;
+    });
   }
 
   updateGame(gamePayload: UpdateGamePayload) {
@@ -190,19 +202,31 @@ class GameRenderer {
     this.canvas.fillRect(0, 0, 800, 400);
   }
 
-  winGame() {
+  gameEnding(result : string) {
+    this.canvas.textAlign = "center";
+    this.canvas.font = "30px vp-pixel";
     this.canvas.fillStyle = "white";
-    this.canvas.fillText(`WIN!!`, 400, 200);
+    this.canvas.fillText(`GAME OVER`, 400, 150);
+    this.canvas.font = "20px vp-pixel";
+    if (result === 'win') {
+      this.winGame();
+    } else if (result === 'lose') {
+      this.loseGame();
+    } else if (result === 'draw') {
+      this.tieGame();
+    }
+  }
+
+  winGame() {
+    this.canvas.fillText(`YOU WIN :)`, 400, 250);
   }
 
   loseGame() {
-    this.canvas.fillStyle = "white";
-    this.canvas.fillText(`LOSE :(`, 400, 200);
+    this.canvas.fillText(`YOU LOSE :(`, 400, 250);
   }
 
   tieGame() {
-    this.canvas.fillStyle = "white";
-    this.canvas.fillText(`DRAW :|`, 400, 200);
+    this.canvas.fillText(`DRAW :|`, 400, 250);
   }
 
   drawFrame(payload: UpdateGamePayload) {
@@ -210,7 +234,7 @@ class GameRenderer {
 
     const balls: GameObject[] = payload.balls;
     const paddles: Paddle[] = payload.paddles;
-    const powerups: GameObject[] = payload.powerups;
+    const powerups: PowerUp[] = payload.powerups;
     this.canvas.fillStyle = "#D9D9D9";
     balls.forEach((ball) => {
       this.canvas.fillRect(
@@ -231,15 +255,29 @@ class GameRenderer {
     });
 
 	if (powerups) {
-		powerups.forEach((powerup: GameObject) => {
+		powerups.forEach((powerup: PowerUp) => {
 			this.canvas.globalAlpha = 0.2;
+      if (powerup.type == 0) {
+        this.canvas.fillStyle = "#E7D352";
+      } else if (powerup.type == 1) {
+        this.canvas.fillStyle = "#D64B24";
+      } else if (powerup.type == 2) {
+        this.canvas.fillStyle = "#45D7E7";
+      } else if (powerup.type == 3) {
+        this.canvas.fillStyle = "#0A8754";
+      }
+
 			this.canvas.fillRect(
 				powerup.hitBox.position.x,
 				powerup.hitBox.position.y,
 				powerup.hitBox.bounds.x,
 				powerup.hitBox.bounds.y
 			);
+      this.canvas.fillStyle = "black";
+      this.canvas.font = "30px sans-serif";
+      this.canvas.fillText(`?`, powerup.hitBox.position.x + powerup.hitBox.bounds.x / 3, powerup.hitBox.position.y + powerup.hitBox.bounds.y - (powerup.hitBox.bounds.y / 4));
 			this.canvas.globalAlpha = 1.0;
+      this.canvas.font = "10px sans-serif";
 		})
 	}
    

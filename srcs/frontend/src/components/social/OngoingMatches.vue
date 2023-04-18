@@ -19,8 +19,8 @@
 
 	function fetchOngoingGames(games: OngoingGame[]) {
 		games.map(game => {
-			game.player1AvatarURL = `http://localhost:3000/users/avatar/${game.player1Id}`
-			game.player2AvatarURL = `http://localhost:3000/users/avatar/${game.player2Id}`
+			game.player1AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player1Id}`
+			game.player2AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player2Id}`
 		})
 		ongoingGames.value = games;
 	}

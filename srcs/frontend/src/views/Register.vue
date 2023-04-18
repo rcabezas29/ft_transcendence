@@ -57,7 +57,13 @@
 				<Button type="button" @click="moveToLogin">LOGIN</Button>
 				<Button type="submit" :selected="true">REGISTER</Button>
 			</div>
-			<Button type="button" @click="loginWithIntra" class="button-42">LOGIN WITH 42 INTRA</Button>
+			<Button type="button" @click="loginWithIntra" class="button-42">
+				<div class="login-text">
+					LOGIN WITH
+					<img src="../assets/42Logo.svg" alt="42Logo"  width="22" height="22">
+					INTRA
+				</div>
+			</Button>
 		</form>
 	</div>
 </template>
@@ -105,6 +111,16 @@
 
 	.error-message {
 		color: red;
+	}
+
+	.login-text {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.login-text img {
+		margin: 0px 8px;
 	}
 
 	/* Everything bigger than 850px */

@@ -32,6 +32,7 @@
 		min-height: 100%;
 		display: flex;
 		flex-direction: column;
+		height: 100%;
 	}
 
 	.multiview-header {
@@ -42,6 +43,7 @@
 	.multiview-body {
 		padding: 14px;
 		flex: 1;
+		overflow-y: auto;
 	}
 
 	/* Everything bigger than 850px */
