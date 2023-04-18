@@ -237,7 +237,7 @@ class FriendsController {
         if (!userId)
             return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friendships`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/friendships`, {
             method: "POST",
             headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -260,7 +260,7 @@ class FriendsController {
         if (!friend)
             return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/accept-request`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/friendships/${friend.friendshipId}/accept-request`, {
             method: "PATCH",
             headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -278,7 +278,7 @@ class FriendsController {
         if (!friend)
             return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/deny-request`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/friendships/${friend.friendshipId}/deny-request`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${user.token}`,
@@ -296,7 +296,7 @@ class FriendsController {
         if (!friend)
              return;
 
-        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/friendships/${friend.friendshipId}`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${user.token}`,
@@ -314,7 +314,7 @@ class FriendsController {
         if (!friend)
             return;
     
-        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/block`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/friendships/${friend.friendshipId}/block`, {
             method: "PATCH",
             headers: {
                 "Authorization": `Bearer ${user.token}`,
@@ -332,7 +332,7 @@ class FriendsController {
         if (!friend)
             return;
     
-        const httpResponse = await fetch(`http://localhost:3000/friendships/${friend.friendshipId}/unblock`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/friendships/${friend.friendshipId}/unblock`, {
             method: "PATCH",
             headers: {
                 "Authorization": `Bearer ${user.token}`,
@@ -346,7 +346,7 @@ class FriendsController {
     }
 
     private async fetchFriends() {
-        const httpResponse = await fetch(`http://localhost:3000/users/${user.id}/friends`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${user.id}/friends`, {
             method: "GET",
             headers: {
 				"Authorization": `Bearer ${user.token}`
@@ -392,7 +392,7 @@ class FriendsController {
     }
 
     private async checkFriendRequestDirection(friendshipId: number): Promise<FriendRequestDirection | null> {
-        const httpResponse = await fetch(`http://localhost:3000/friendships/${friendshipId}/request-direction`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/friendships/${friendshipId}/request-direction`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${user.token}`
@@ -407,7 +407,7 @@ class FriendsController {
     }
 
     private async checkBlockDirection(friendshipId: number): Promise<BlockDirection | null> {
-        const httpResponse = await fetch(`http://localhost:3000/friendships/${friendshipId}/block-direction`, {
+        const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/friendships/${friendshipId}/block-direction`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${user.token}`

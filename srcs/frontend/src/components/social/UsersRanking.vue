@@ -9,7 +9,7 @@
 
 
 	async function getUsers(): Promise<UserData[] | null> {
-		const usersRequest = await fetch("http://localhost:3000/users", {
+		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
 			headers: {
 				"Authorization": `Bearer ${user.token}`
 			}
@@ -21,7 +21,7 @@
 
 		const users: UserData[] = await usersRequest.json();
 		users.map(user => {
-			user.avatarURL = `http://localhost:3000/users/avatar/${user.id}`
+			user.avatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${user.id}`
 		})
 
 		return users;
