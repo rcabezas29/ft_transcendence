@@ -3,7 +3,7 @@
 </script>
 
 <template>
-	<div class="users-table">
+	<div class="table-container">
 		<table>
 			<thead>
 				<slot name="head"></slot>
@@ -16,6 +16,14 @@
 </template>
 
 <style>
+
+	.table-container {
+		box-sizing: border-box;
+		height: 100%;
+		overflow-y: scroll;
+		padding: 0px 8px;
+	}
+
 	table {
 		width: 100%;
 		text-align: left;
@@ -27,6 +35,8 @@
 		outline-style: solid;
 		outline-width: 1px;
 		background-color: #1E9052;
+		position: sticky;
+		top: 0;
 	}
 
 	table thead tr th {

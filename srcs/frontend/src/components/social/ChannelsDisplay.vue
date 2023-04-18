@@ -111,13 +111,12 @@
 						</div>
 					</Modal>
 				</td>
-			</tr>	
+			</tr>
+			<div v-if="Object.keys(channelController.channels).length === 0">
+				There are no channels yet... Would you like to create one? :)
+			</div>
 		</template>
 	</Table>
-
-	<div v-if="Object.keys(channelController.channels).length === 0">
-		There are no channels yet... Would you like to create one? :)
-	</div>
 
 	<div class="channel-creation">
 		<Button class="create-button" @click="openCreateChannelModal" :selected="true">

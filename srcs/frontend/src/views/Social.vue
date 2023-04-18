@@ -18,7 +18,7 @@
 </script>
 
 <template>
-	<MultiView class="multi-view">
+	<MultiView>
 		<template #tabs>
 			<MultiViewTab @click="() => { multiviewShowElement(1)}" :selected="isSelected(1)">
 				PEOPLE
@@ -32,13 +32,13 @@
 		</template>
 
 		<template #body>
-			<div v-if="multiViewElement == 1">
+			<div v-if="multiViewElement == 1" class="multi-view-element">
 				<UsersRanking/>
 			</div>
-			<div v-else-if="multiViewElement == 2">
+			<div v-else-if="multiViewElement == 2" class="multi-view-element">
 				<OngoingMatchesVue/>	
 			</div>
-			<div v-else-if="multiViewElement == 3">
+			<div v-else-if="multiViewElement == 3" class="multi-view-element">
 				<ChannelsDisplay/>
 			</div>
 		</template>
@@ -47,6 +47,10 @@
 </template>
 
 <style scoped>
-
+.multi-view-element {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
 
 </style>

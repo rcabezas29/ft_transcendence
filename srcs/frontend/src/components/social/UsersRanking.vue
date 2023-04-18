@@ -82,15 +82,19 @@
 				<td class="mobile-hidden">{{ userRow.stats.lostGames }}</td>
 				<td class="mobile-hidden">{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
 			</tr>
+			<div v-if="input && filteredUsers.length === 0">
+				<p>No users found!</p>
+			</div>
 			
 		</template>
 	</Table>
-	<div v-if="input && filteredUsers.length === 0">
-		<p>No users found!</p>
-	</div>
+	
 </template>
 
 <style scoped>
+	.search-bar {
+		padding: 0px 8px;
+	}
 
 	.users-table {
 		margin-top: 24px;
@@ -127,10 +131,6 @@
 
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
-		.multiview-body {
-			padding: 34px;
-			flex: 1;
-		}
 
 		.mobile-hidden {
 			display: table-cell;
