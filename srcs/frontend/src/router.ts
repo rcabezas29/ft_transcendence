@@ -14,6 +14,7 @@ import FirstTimeLogin from './views/FirstTimeLogin.vue';
 import Spectator from './views/Spectator.vue';
 import UIExamples from './views/UIExamples.vue'
 import NotFound from './views/NotFound.vue'
+import Help from "./views/Help.vue";
 
 import {
 	authenticationGuard,
@@ -105,6 +106,11 @@ const routes = [
 		name: "not-found",
 		path: "/:pathMatch(.*)*",
 		component: NotFound
+	},
+	{
+		name: "help",
+		path: "/help",
+		component: Help,
 	}
 ];
 

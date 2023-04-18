@@ -5,11 +5,11 @@
 	import Button from "../components/ui/Button.vue";
 	import TextInputField from "../components/ui/TextInputField.vue";
 
-	const username = ref("");
-	const email = ref("");
-	const password = ref("");
-	const message = ref("");
-	const messageClass = ref("error-message");
+	const username = ref<string>("");
+	const email = ref<string>("");
+	const password = ref<string>("");
+	const message = ref<string>("");
+	const messageClass = ref<string>("error-message");
 
 	async function handleSubmit(e: Event) {
 		const { registeredSuccessfully, response } = await user.register(username.value, email.value, password.value);
