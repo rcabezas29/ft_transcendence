@@ -10,6 +10,7 @@ import FriendsList from "@/components/friends/FriendsList.vue";
 import MultiView from "../components/ui/MultiView.vue"
 import MultiViewTab from "../components/ui/MultiViewTab.vue"
 import Settings from "@/components/profile/Settings.vue";
+import MatchHistory from "@/components/profile/MatchHistory.vue";
 
 import router from "@/router";
 import type SettingsVue from "@/components/profile/Settings.vue";
@@ -145,7 +146,7 @@ function isSelected(index: number) {
 				<ProfileStats />
 			</div>
 			<div v-else-if="multiViewElement == 2">
-				<ProfileStats />
+				<MatchHistory />
 			</div>
 			<div v-else-if="multiViewElement == 3">
 				<FriendsList />
