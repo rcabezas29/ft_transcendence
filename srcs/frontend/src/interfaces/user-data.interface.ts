@@ -1,6 +1,9 @@
 export interface UserStats {
 	wonGames: number;
 	lostGames: number;
+    drawGames: number;
+    scoredGoals: number;
+    receivedGoals: number;
 }
 
 export interface UserData {

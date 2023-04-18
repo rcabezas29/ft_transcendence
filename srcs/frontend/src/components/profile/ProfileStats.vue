@@ -26,7 +26,7 @@
 
     const userData: UserData = await usersRequest.json();
     return userData;
-  }
+}
 
   const totalWins = computed(() => currentUser?.stats.wonGames ?? 0);
   const totalLosses = computed(() => currentUser?.stats.lostGames ?? 0);
