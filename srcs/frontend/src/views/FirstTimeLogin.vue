@@ -8,7 +8,7 @@
     import TextInputField from "../components/ui/TextInputField.vue";
 
     const username = ref("");
-    const intraAvatarURL: string = `http://localhost:3000/users/avatar/${user.id}`;
+    const intraAvatarURL: string = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${user.id}`;
 
     const cropperImgURL = ref<string>(intraAvatarURL);
     const avatarImageURL = ref<string>(intraAvatarURL);

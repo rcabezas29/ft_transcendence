@@ -25,7 +25,7 @@ const chatAvatar = computed(() => {
 		if (chatIsChannel(currentChat.value))
 			return groupAvatar;
 		else if (chatIsDirectMessage(currentChat.value))
-			return `http://localhost:3000/users/avatar/${(<ChatUser>currentChat.value.target).id}`;
+			return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${(<ChatUser>currentChat.value.target).id}`;
 	}
 	return "";
 })

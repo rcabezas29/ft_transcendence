@@ -15,7 +15,7 @@ const messageClass = ref<string>('error-message');
 const twoFactorAuthenticationCode = ref<string>('');
 
 async function generateTwoFactorAuthSecret() {
-    const httpResponse = await fetch('http://localhost:3000/2fa/generate', {
+    const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/2fa/generate`, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${user.token}`

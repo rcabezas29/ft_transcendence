@@ -86,7 +86,7 @@ async function saveChanges() {
 }
 
 async function deleteUserAccount() {
-    const httpResponse = await fetch(`http://localhost:3000/users/${user.id}`, {
+    const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${user.id}`, {
         method: "DELETE",
         headers: {
             "Authorization": `Bearer ${user.token}`,
