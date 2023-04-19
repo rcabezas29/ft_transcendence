@@ -1,4 +1,5 @@
 import { GatewayUser } from "src/gateway-manager/interfaces/gateway-user.interface";
+import { Message } from "./interfaces";
 
 type UserId = number;
 
@@ -17,6 +18,7 @@ export default class Channel {
 	private _bannedUsers: UserIdSanctionMap = {};
 	private _mutedUsers: UserIdSanctionMap = {};
 	private _password: string = null;
+	private _messages: Message[] = [];
 
 	constructor(name: string, owner: GatewayUser) {
 		this._name = name;
@@ -91,6 +93,23 @@ export default class Channel {
 		return false;
 	}
 
+	replaceUser(replacedUser: GatewayUser, replacementUser: GatewayUser): void {
+		if (!this.hasUser(replacedUser))
+			return;
+
+		this._users = this._users.filter((u) => u != replacedUser);
+		this.addUser(replacementUser);
+
+		if (this._owner == replacedUser) {
+			this.setOwner(replacementUser);
+		}
+
+		if (this.userIsAdmin(replacedUser)) {
+			this.unsetAdmin(replacedUser);
+			this.setAdmin(replacementUser);
+		}
+	}
+
 	userIsAdmin(user: GatewayUser): boolean {
 		if (this._admins.find((u) => u == user))
 			return true;
@@ -129,6 +148,10 @@ export default class Channel {
 		return 0;
 	}
 
+	addMessage(message: Message): void {
+		this._messages.push(message);
+	}
+
 	get name(): string {
 		return this._name;
 	}
@@ -155,5 +178,9 @@ export default class Channel {
 
 	get password(): string {
 		return this._password;
+	}
+
+	get messages(): Message[] {
+		return this._messages;
 	}
 }

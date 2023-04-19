@@ -213,7 +213,7 @@
 			max-width: 300px;
 		}
 
-		.create-channel-modal-buttons {
+		.channel-creation .modal-buttons {
 			flex-direction: row;
 			justify-content: center;
 		}

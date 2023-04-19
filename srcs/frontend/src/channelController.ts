@@ -9,6 +9,7 @@ interface ChannelPayload {
 	owner: ChatUser;
 	admins: ChatUser[];
 	isPrivate: boolean;
+	messages: Message[];
 }
 
 interface UserChannelPayload {
@@ -43,6 +44,11 @@ interface PasswordBoolChannelPayload {
 	channelName: ChannelName
 }
 
+interface ChannelUserPayload {
+	channel: ChannelPayload;
+	username: string;
+}
+
 type ChannelName = string;
 type ChannelMap = {
 	[id: ChannelName]: Channel;
@@ -56,11 +62,11 @@ class ChannelController {
         user.socket?.on('all-channels', (payload: ChannelPayload[]) => {this.onAllChannels(payload)});
 		user.socket?.on('channel-created', (channel: ChannelPayload) => this.onChannelCreated(channel));
 		user.socket?.on('new-channel', (channel: ChannelPayload) => this.onNewChannel(channel));
-		user.socket?.on('channel-joined', (channelName: ChannelName) => this.onChannelJoined(channelName));
+		user.socket?.on('channel-joined', (channel: ChannelPayload) => this.onChannelJoined(channel));
 		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
 		user.socket?.on('deleted-channel', (channelName: ChannelName) => this.onDeletedChannel(channelName));
 		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
-		user.socket?.on('user-left', (channel: ChannelPayload) => this.onUserLeft(channel));
+		user.socket?.on('user-left', (payload: ChannelUserPayload) => this.onUserLeft(payload));
 		user.socket?.on('channel-message', (message: ChannelMessagePayload) => this.receiveChannelMessage(message));
 		user.socket?.on('user-banned', (payload: TimeUserChannelPayload) => this.onUserBanned(payload));
 		user.socket?.on('user-muted', (payload: TimeUserChannelPayload) => this.onUserMuted(payload));
@@ -197,6 +203,12 @@ class ChannelController {
 	private onAllChannels(payload: ChannelPayload[]): void {
 		payload.forEach((channel) => {
 			this.channels[channel.name] = {...channel, chat: null};
+			if (this.userIsMemberOfChannel(channel.name)) {
+				this.appendChatToMap(channel.name);
+				channel.messages.forEach((message) => {
+					this.channels[channel.name].chat!.messages.push(message);
+				})
+			}
 		});
 	}
 
@@ -209,14 +221,19 @@ class ChannelController {
 		this.channels[channel.name] = {...channel, chat: null};
 	}
 
-	private onChannelJoined(name: ChannelName): void {
-		this.channels[name].users.push({id: user.id, username: user.username});
-		this.appendChatToMap(name);
+	private onChannelJoined(channel: ChannelPayload): void {
+		this.channels[channel.name].users.push({id: user.id, username: user.username});
+		this.appendChatToMap(channel.name);
+
+		channel.messages.forEach((message) => {
+			this.channels[channel.name].chat!.messages.push(message);
+		})
 	}
 
 	private onNewUserJoined(newUserPayload: UserChannelPayload): void {
 		const {channelName, user} = newUserPayload;
 		this.channels[channelName].users.push(user);
+		//this.addMessageToChannelChat(channelName, `#${channelName}`, `user <${user.username}> joined the channel.`);
 	}
 
 	private onDeletedChannel(channelName: ChannelName): void {
@@ -231,8 +248,10 @@ class ChannelController {
 			currentChat.value = null;
 	}
 
-	private onUserLeft(channel: ChannelPayload): void {
+	private onUserLeft(payload: ChannelUserPayload): void {
+		const { channel, username } = payload;
 		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
+		//this.addMessageToChannelChat(channel.name, `#${channel.name}`, `user <${username}> left the channel.`);
 	}
 
 	private receiveChannelMessage(payload: ChannelMessagePayload): void {
@@ -306,8 +325,7 @@ class ChannelController {
         }
 
         const chat: Chat | null = channel.chat;
-        if (chat)
-		{
+        if (chat) {
 			chat.messages.push(newMessage);
 			if (chat !== currentChat.value)
 				chat.notification = true;
@@ -315,8 +333,7 @@ class ChannelController {
 	}
 
 	private appendChatToMap(channelName: ChannelName): void {
-        if (this.channels && !this.channels[channelName].chat)
-        {
+        if (this.channels && !this.channels[channelName].chat) {
             const newChat: Chat = {
                 target: channelName,
                 messages: [],

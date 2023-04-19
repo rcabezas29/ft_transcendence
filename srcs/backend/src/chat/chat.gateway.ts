@@ -48,13 +48,27 @@ export class ChatGateway {
 	@SubscribeMessage("join-channel")
 	joinChannel(client: Socket, payload: PasswordChannelPayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.userJoinChannel(user, payload);
+		const joined: boolean = this.channelsService.userJoinChannel(user, payload);
+		if (joined) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName,
+				this.gatewayManagerGateway.server,
+				`user <${user.username}> joined the channel.`
+			);
+		}
 	}
 
 	@SubscribeMessage("leave-channel")
 	leaveChannel(client: Socket, channelName: string): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.userLeaveChannel(user, channelName, this.gatewayManagerGateway.server);
+		const left: boolean = this.channelsService.userLeaveChannel(user, channelName, this.gatewayManagerGateway.server);
+		if (left) {
+			this.channelsService.sendServerMessageToChannel(
+				channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${user.username}> left the channel.`
+			);
+		}
 	}
 
 	@SubscribeMessage("ban-user")
