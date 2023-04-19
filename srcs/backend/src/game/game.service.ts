@@ -56,19 +56,19 @@ export class GameService {
   }
 
   public getOngoingMatches() {
-	const games = this.ongoingGames.map((game) => {
-		return {
-			name: game.name,
-			player1: game.players[0].user.username,
-			player1Id: game.players[0].user.id,
-			player1Score: game.players[0].score,
-			player2: game.players[1].user.username,
-			player2Id: game.players[1].user.id,
-			player2Score: game.players[0].score,
-		}
-	});
+    const games = this.ongoingGames.map((game) => {
+      return {
+        name: game.name,
+        player1: game.players[0].user.username,
+        player1Id: game.players[0].user.id,
+        player1Score: game.players[0].score,
+        player2: game.players[1].user.username,
+        player2Id: game.players[1].user.id,
+        player2Score: game.players[1].score,
+      }
+    });
 
-	return games;
+    return games;
   }
 
   sendOngoingMatchesToUser(client: GatewayUser) {

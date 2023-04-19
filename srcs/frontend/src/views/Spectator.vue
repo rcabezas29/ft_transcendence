@@ -58,7 +58,7 @@
 	<h1>SPECTATING</h1>
 	
 	<GameBoard>
-		<canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
+		<canvas ref="canvasRef" class="pong-board" height="400" width="800"> </canvas>
 		<ScoreBoard/>
 		<Button @click="leaveGame">LEAVE GAME</Button>
 	</GameBoard>
