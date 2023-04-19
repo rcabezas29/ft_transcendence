@@ -22,6 +22,11 @@ interface ChannelPayload {
 	isPrivate: boolean;
 }
 
+interface ChannelUserPayload {
+	channel: ChannelPayload;
+	username: string;
+}
+
 @Injectable()
 export class ChannelsService {
 	
@@ -42,8 +47,10 @@ export class ChannelsService {
 
 	onDisconnection(client: GatewayUser, server: Server): void {
 		this.channels.forEach((channel) => {
-			if (this.deleteChannelIfWillBeEmpty(client, channel, server) === false)
-				this.removeUserFromChannel(client, channel);
+			if (channel.users.find((user) => user.id == client.id)){
+				if (this.deleteChannelIfWillBeEmpty(client, channel, server) === false)
+					this.removeUserFromChannel(client, channel);
+			}
 		});
 	}
 
@@ -238,7 +245,12 @@ export class ChannelsService {
 	private removeUserFromChannel(user: GatewayUser, channel: Channel): void {
 		channel.removeUser(user);
 		user.socket.emit('channel-left', this.channelToChannelPayload(channel));
-		user.socket.to(channel.name).emit('user-left', this.channelToChannelPayload(channel));
+
+		const payload: ChannelUserPayload = {
+			channel: this.channelToChannelPayload(channel),
+			username: user.username
+		}
+		user.socket.to(channel.name).emit('user-left', payload);
 	}
 
 	private deleteChannelIfWillBeEmpty(user: GatewayUser, channel: Channel, server: Server): boolean {

@@ -43,6 +43,11 @@ interface PasswordBoolChannelPayload {
 	channelName: ChannelName
 }
 
+interface ChannelUserPayload {
+	channel: ChannelPayload;
+	username: string;
+}
+
 type ChannelName = string;
 type ChannelMap = {
 	[id: ChannelName]: Channel;
@@ -60,7 +65,7 @@ class ChannelController {
 		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
 		user.socket?.on('deleted-channel', (channelName: ChannelName) => this.onDeletedChannel(channelName));
 		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
-		user.socket?.on('user-left', (channel: ChannelPayload) => this.onUserLeft(channel));
+		user.socket?.on('user-left', (payload: ChannelUserPayload) => this.onUserLeft(payload));
 		user.socket?.on('channel-message', (message: ChannelMessagePayload) => this.receiveChannelMessage(message));
 		user.socket?.on('user-banned', (payload: TimeUserChannelPayload) => this.onUserBanned(payload));
 		user.socket?.on('user-muted', (payload: TimeUserChannelPayload) => this.onUserMuted(payload));
@@ -217,6 +222,7 @@ class ChannelController {
 	private onNewUserJoined(newUserPayload: UserChannelPayload): void {
 		const {channelName, user} = newUserPayload;
 		this.channels[channelName].users.push(user);
+		this.addMessageToChannelChat(channelName, `#${channelName}`, `user <${user.username}> joined the channel.`);
 	}
 
 	private onDeletedChannel(channelName: ChannelName): void {
@@ -231,8 +237,10 @@ class ChannelController {
 			currentChat.value = null;
 	}
 
-	private onUserLeft(channel: ChannelPayload): void {
+	private onUserLeft(payload: ChannelUserPayload): void {
+		const { channel, username } = payload;
 		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
+		this.addMessageToChannelChat(channel.name, `#${channel.name}`, `user <${username}> left the channel.`);
 	}
 
 	private receiveChannelMessage(payload: ChannelMessagePayload): void {
