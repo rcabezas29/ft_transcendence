@@ -74,12 +74,18 @@ function cancelSearchGame() {
   justify-content: space-between;
 }
 
+.mode-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 @media only screen and (min-width: 850px) {
 
 	.mode-selector {
 		display: flex;
+    flex-direction: row;
 		justify-content: space-around;
-    gap: 10px;
 	}
 
 }

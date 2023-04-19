@@ -39,14 +39,14 @@ export class GameService {
   onStartGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameStart(game.players[0].user.id, game.players[1].user.id);
-	this.sendOngoingMatchesToAllUsers();
+	  this.sendOngoingMatchesToAllUsers();
   }
 
   onEndGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameEnd(game.players[0].user.id, game.players[1].user.id);
-	this.deleteGameFromOngoingGames(gameName);
-	this.sendOngoingMatchesToAllUsers();
+    this.deleteGameFromOngoingGames(gameName);
+    this.sendOngoingMatchesToAllUsers();
   }
 
   private deleteGameFromOngoingGames(gameName: string): void {
@@ -76,7 +76,7 @@ export class GameService {
   }
 
   sendOngoingMatchesToAllUsers() {
-	this.server.emit("ongoing-games", this.getOngoingMatches());
+	  this.server.emit("ongoing-games", this.getOngoingMatches());
   }
 
   isPlayerInAGame(playerId: number): boolean {

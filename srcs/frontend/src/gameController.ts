@@ -161,13 +161,7 @@ class GameController {
     }
     this.gameRenderer?.gameEnding(result);
 
-    user.fetchUserData().then((userData: UserData | null) => {
-      if (!userData) {
-        console.log('error fetching user data on game end');
-        return ;
-      }
-      user.elo = userData?.elo;
-    });
+    this.updateUserElo();
   }
 
   updateGame(gamePayload: UpdateGamePayload) {
@@ -187,6 +181,16 @@ class GameController {
 
   endGamePrematurely() {
     user.socket?.emit('end-game-prematurely');
+  }
+
+  private updateUserElo() {
+    user.fetchUserData().then((userData: UserData | null) => {
+      if (!userData) {
+        console.log('error fetching user data on game end');
+        return ;
+      }
+      user.elo = userData.elo;
+    });
   }
 }
 
