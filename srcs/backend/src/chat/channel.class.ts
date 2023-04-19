@@ -91,6 +91,23 @@ export default class Channel {
 		return false;
 	}
 
+	replaceUser(replacedUser: GatewayUser, replacementUser: GatewayUser): void {
+		if (!this.hasUser(replacedUser))
+			return;
+
+		this._users = this._users.filter((u) => u != replacedUser);
+		this.addUser(replacementUser);
+
+		if (this._owner == replacedUser) {
+			this.setOwner(replacementUser);
+		}
+
+		if (this.userIsAdmin(replacedUser)) {
+			this.unsetAdmin(replacedUser);
+			this.setAdmin(replacementUser);
+		}
+	}
+
 	userIsAdmin(user: GatewayUser): boolean {
 		if (this._admins.find((u) => u == user))
 			return true;

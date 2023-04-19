@@ -41,17 +41,24 @@ export class ChannelsService {
 	}
 	
     onNewConnection(client: GatewayUser): void {
+		this.channels.forEach((channel) => {
+			const userInChannel = channel.users.find((u) => u.id == client.id);
+			if (userInChannel) {
+				channel.replaceUser(userInChannel, client);
+				client.socket.join(channel.name);
+			}
+		})
 		const channelsPayload: ChannelPayload[] = this.channels.map(channel => this.channelToChannelPayload(channel));
 		client.socket.emit('all-channels', channelsPayload);
 	}
 
 	onDisconnection(client: GatewayUser, server: Server): void {
-		this.channels.forEach((channel) => {
+		/*this.channels.forEach((channel) => {
 			if (channel.users.find((user) => user.id == client.id)){
 				if (this.deleteChannelIfWillBeEmpty(client, channel, server) === false)
 					this.removeUserFromChannel(client, channel);
 			}
-		});
+		});*/
 	}
 
 	getChannelbyName(channelName: string): Channel | null {

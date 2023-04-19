@@ -202,6 +202,11 @@ class ChannelController {
 	private onAllChannels(payload: ChannelPayload[]): void {
 		payload.forEach((channel) => {
 			this.channels[channel.name] = {...channel, chat: null};
+			if (this.userIsMemberOfChannel(channel.name)) {
+				//TODO: mandar chat con mensajes
+				//chat = channel.chat;
+				this.appendChatToMap(channel.name);
+			}
 		});
 	}
 
