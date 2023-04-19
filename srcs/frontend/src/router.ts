@@ -15,12 +15,14 @@ import Spectator from './views/Spectator.vue';
 import UIExamples from './views/UIExamples.vue'
 import NotFound from './views/NotFound.vue'
 import Help from "./views/Help.vue";
+import Admin from "./views/Admin.vue";
 
 import {
 	authenticationGuard,
 	firstFactorAuthenticationGuard,
 	firstLoginGuard,
-	loggedUserGuard
+	loggedUserGuard,
+	adminGuard
 } from './guards/index';
 
 import { user } from './user';
@@ -95,23 +97,32 @@ const routes = [
 	{
 		name: 'spectate',
 		path: '/spectate/:matchId',
-		component: Spectator
+		component: Spectator,
+		beforeEnter: authenticationGuard
 	},
 	{
 		name: 'uiexamples',
 		path: '/uiexamples',
-		component: UIExamples
+		component: UIExamples,
+		beforeEnter: authenticationGuard
+	},
+	{
+		name: "help",
+		path: "/help",
+		component: Help,
+		beforeEnter: authenticationGuard
+	},
+	{
+		name: "admin",
+		path: "/admin",
+		component: Admin,
+		beforeEnter: [authenticationGuard, adminGuard]
 	},
 	{
 		name: "not-found",
 		path: "/:pathMatch(.*)*",
 		component: NotFound
 	},
-	{
-		name: "help",
-		path: "/help",
-		component: Help,
-	}
 ];
 
 const router = createRouter({

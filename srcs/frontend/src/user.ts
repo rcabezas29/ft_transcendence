@@ -7,11 +7,13 @@ import { channelController } from './channelController';
 import { gameController } from './gameController';
 import { friendsController } from './friendsController';
 import type { JwtPayload, UserData } from './interfaces';
+import { UserRole } from './interfaces/user-data.interface';
 
 interface FetchedUser {
 	id: number;
 	username: string;
 	elo: number;
+	role: UserRole;
 }
 
 class User {
@@ -23,6 +25,7 @@ class User {
 	public username: string = '';
 	public avatarImageURL: string = '';
 	public elo : number = 0;
+	public role: UserRole = UserRole.USER;
 
 	private isLogged: boolean = false;
 	private onLogoutCallbacks: Function[] = [];
@@ -47,6 +50,7 @@ class User {
 			this.username = fetchedUser.username;
 			this.elo = fetchedUser.elo;
 			this.avatarImageURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${this.id}`;
+			this.role = fetchedUser.role;
 
 		} catch (error) {
 			console.log(error, 'error from decoding token');
@@ -113,6 +117,18 @@ class User {
 			window.location.href = `${authorizeURL as string}&scope=public&state=${stateString}`;
 		else
 			console.log("INTRA_API_AUTHORIZE_URL environment variable unset");
+	}
+
+	makeAdmin() {
+		this.role = UserRole.ADMIN;
+	}
+
+	isAdmin() {
+		return this.role == UserRole.ADMIN || this.role == UserRole.OWNER;
+	}
+
+	isOwner() {
+		return this.role == UserRole.OWNER;
 	}
 
 	onConnect(): void {

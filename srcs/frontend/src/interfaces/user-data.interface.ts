@@ -3,6 +3,12 @@ export interface UserStats {
 	lostGames: number;
 }
 
+export enum UserRole {
+	USER = "user",
+	ADMIN = "admin",
+	OWNER = "owner"
+}
+
 export interface UserData {
     id: number;
     username: string;
@@ -13,4 +19,5 @@ export interface UserData {
     elo: number;
     isTwoFactorAuthenticationEnabled: boolean;
     stats: UserStats;
+	role: UserRole
 }
