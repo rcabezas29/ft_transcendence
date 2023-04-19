@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { Stats } from 'src/stats/entities/stats.entity';
+import { UserRole } from '../interfaces/user-roles';
 import {
   Entity,
   Column,
@@ -46,4 +47,7 @@ export class User {
     eager: true
   })
   stats: Stats;
+
+  @Column({ default: UserRole.USER })
+  role: UserRole;
 }
