@@ -9,6 +9,7 @@ interface ChannelPayload {
 	owner: ChatUser;
 	admins: ChatUser[];
 	isPrivate: boolean;
+	messages: Message[];
 }
 
 interface UserChannelPayload {
@@ -61,7 +62,7 @@ class ChannelController {
         user.socket?.on('all-channels', (payload: ChannelPayload[]) => {this.onAllChannels(payload)});
 		user.socket?.on('channel-created', (channel: ChannelPayload) => this.onChannelCreated(channel));
 		user.socket?.on('new-channel', (channel: ChannelPayload) => this.onNewChannel(channel));
-		user.socket?.on('channel-joined', (channelName: ChannelName) => this.onChannelJoined(channelName));
+		user.socket?.on('channel-joined', (channel: ChannelPayload) => this.onChannelJoined(channel));
 		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
 		user.socket?.on('deleted-channel', (channelName: ChannelName) => this.onDeletedChannel(channelName));
 		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
@@ -203,9 +204,10 @@ class ChannelController {
 		payload.forEach((channel) => {
 			this.channels[channel.name] = {...channel, chat: null};
 			if (this.userIsMemberOfChannel(channel.name)) {
-				//TODO: mandar chat con mensajes
-				//chat = channel.chat;
 				this.appendChatToMap(channel.name);
+				channel.messages.forEach((message) => {
+					this.channels[channel.name].chat!.messages.push(message);
+				})
 			}
 		});
 	}
@@ -219,15 +221,19 @@ class ChannelController {
 		this.channels[channel.name] = {...channel, chat: null};
 	}
 
-	private onChannelJoined(name: ChannelName): void {
-		this.channels[name].users.push({id: user.id, username: user.username});
-		this.appendChatToMap(name);
+	private onChannelJoined(channel: ChannelPayload): void {
+		this.channels[channel.name].users.push({id: user.id, username: user.username});
+		this.appendChatToMap(channel.name);
+
+		channel.messages.forEach((message) => {
+			this.channels[channel.name].chat!.messages.push(message);
+		})
 	}
 
 	private onNewUserJoined(newUserPayload: UserChannelPayload): void {
 		const {channelName, user} = newUserPayload;
 		this.channels[channelName].users.push(user);
-		this.addMessageToChannelChat(channelName, `#${channelName}`, `user <${user.username}> joined the channel.`);
+		//this.addMessageToChannelChat(channelName, `#${channelName}`, `user <${user.username}> joined the channel.`);
 	}
 
 	private onDeletedChannel(channelName: ChannelName): void {
@@ -245,7 +251,7 @@ class ChannelController {
 	private onUserLeft(payload: ChannelUserPayload): void {
 		const { channel, username } = payload;
 		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
-		this.addMessageToChannelChat(channel.name, `#${channel.name}`, `user <${username}> left the channel.`);
+		//this.addMessageToChannelChat(channel.name, `#${channel.name}`, `user <${username}> left the channel.`);
 	}
 
 	private receiveChannelMessage(payload: ChannelMessagePayload): void {
@@ -319,8 +325,7 @@ class ChannelController {
         }
 
         const chat: Chat | null = channel.chat;
-        if (chat)
-		{
+        if (chat) {
 			chat.messages.push(newMessage);
 			if (chat !== currentChat.value)
 				chat.notification = true;
@@ -328,8 +333,7 @@ class ChannelController {
 	}
 
 	private appendChatToMap(channelName: ChannelName): void {
-        if (this.channels && !this.channels[channelName].chat)
-        {
+        if (this.channels && !this.channels[channelName].chat) {
             const newChat: Chat = {
                 target: channelName,
                 messages: [],

@@ -1,4 +1,5 @@
 import { GatewayUser } from "src/gateway-manager/interfaces/gateway-user.interface";
+import { Message } from "./interfaces";
 
 type UserId = number;
 
@@ -17,6 +18,7 @@ export default class Channel {
 	private _bannedUsers: UserIdSanctionMap = {};
 	private _mutedUsers: UserIdSanctionMap = {};
 	private _password: string = null;
+	private _messages: Message[] = [];
 
 	constructor(name: string, owner: GatewayUser) {
 		this._name = name;
@@ -146,6 +148,10 @@ export default class Channel {
 		return 0;
 	}
 
+	addMessage(message: Message): void {
+		this._messages.push(message);
+	}
+
 	get name(): string {
 		return this._name;
 	}
@@ -172,5 +178,9 @@ export default class Channel {
 
 	get password(): string {
 		return this._password;
+	}
+
+	get messages(): Message[] {
+		return this._messages;
 	}
 }

@@ -5,6 +5,7 @@ import { ChatService } from "./chat.service";
 import Channel from "./channel.class";
 import { ChannelMessagePayload,
 	ChatUser,
+	Message,
 	PasswordBoolChannelPayload,
 	PasswordChannelPayload,
 	TimeUserChannelPayload,
@@ -20,6 +21,7 @@ interface ChannelPayload {
 	owner: ChatUser;
 	admins: ChatUser[];
 	isPrivate: boolean;
+	messages: Message[];
 }
 
 interface ChannelUserPayload {
@@ -86,15 +88,15 @@ export class ChannelsService {
 		owner.socket.broadcast.emit('new-channel', channelPayload);
 	}
 
-	userJoinChannel(user: GatewayUser, payload: PasswordChannelPayload): void {
+	userJoinChannel(user: GatewayUser, payload: PasswordChannelPayload): boolean {
 		const channel: Channel = this.getChannelbyName(payload.channelName);
 		if (!channel)
-			return;
+			return false;
 
 		if (channel.password != null && payload.password !== channel.password)
 		{
 			user.socket.emit('wrong-password', payload.channelName);
-			return;
+			return false;
 		}
 
 		if (user.id in channel.bannedUsers)
@@ -108,30 +110,36 @@ export class ChannelsService {
 			if (remainingTime > 0)
 			{
 				user.socket.emit('user-banned', clientPayload);
-				return;
+				return false;
 			}
 		}
 
 		channel.addUser(user);
 		user.socket.join(payload.channelName);
-		user.socket.emit('channel-joined', payload.channelName);
+
+		const channelPayload: ChannelPayload = this.channelToChannelPayload(channel);
+		user.socket.emit('channel-joined', channelPayload);
 
 		const newUserPayload: UserChannelPayload = {
 			user: this.chatService.gatewayUserToChatUser(user),
 			channelName: payload.channelName
 		}
 		user.socket.to(payload.channelName).emit('new-user-joined', newUserPayload);
+
+		return true;
 	}
 
-	userLeaveChannel(user: GatewayUser, channelName: string, server: Server): void {
+	userLeaveChannel(user: GatewayUser, channelName: string, server: Server): boolean {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel || !channel.hasUser(user))
-			return;
+			return false;
 
 		if (this.deleteChannelIfWillBeEmpty(user, channel, server) === false)
 			this.removeUserFromChannel(user, channel);
 
 		user.socket.leave(channelName);
+		
+		return true;
 	}
 
 	channelMessage(fromUser: GatewayUser, payload: ChannelMessagePayload): void {
@@ -155,6 +163,7 @@ export class ChannelsService {
 		}
 
 		payload.from = fromUser.username;
+		channel.addMessage({message: payload.message, from: payload.from});
 		fromUser.socket.to(payload.channel).emit("channel-message", payload);
 	}
 
@@ -249,6 +258,20 @@ export class ChannelsService {
 		server.emit('password-updated', clientPayload)
 	}
 
+	sendServerMessageToChannel(channelName: string, server: Server, message: string): void {
+		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel)
+			return ;
+
+		const payload: ChannelMessagePayload = {
+			channel: channelName,
+			from: `#${channelName} server`,
+			message
+		}
+		channel.addMessage({message, from: payload.from});
+		server.to(channelName).emit("channel-message", payload);
+	}
+
 	private removeUserFromChannel(user: GatewayUser, channel: Channel): void {
 		channel.removeUser(user);
 		user.socket.emit('channel-left', this.channelToChannelPayload(channel));
@@ -276,7 +299,8 @@ export class ChannelsService {
 			users: channel.users.map((user) => this.chatService.gatewayUserToChatUser(user)),
 			owner: this.chatService.gatewayUserToChatUser(channel.owner),
 			admins: channel.admins.map((user) => this.chatService.gatewayUserToChatUser(user)),
-			isPrivate: channel.password === null ? false : true
+			isPrivate: channel.password === null ? false : true,
+			messages: channel.messages
 		};
 		return payload;
 	}
