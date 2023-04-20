@@ -109,16 +109,12 @@
 	}
 
 	.player-img {
-		display: flex;
+		display: none;
 	}
 
 	.player-img img {
 		width: 50px;
 		height: 50px;
-	}
-
-	.player-name {
-		display: none;
 	}
 
 	.player-score {
@@ -130,6 +126,7 @@
 		padding: 24px;
 		color: black;
 		height: 50px;
+		width: 50px;
 	}
 
 	.vs-block {
@@ -140,11 +137,17 @@
 		padding: 24px;
 		height: 50px;
 	}
+	.player-name {
+		display: block;
+		width: 75px;
+		text-align: center;
+	}
 
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
-		.player-name {
-			display: block;
+
+		.player-img {
+			display: flex;
 		}
 
 		.player-left .player-img {
@@ -163,6 +166,5 @@
 			margin-left: 20px;
 		}
 	}
-
 
 </style>

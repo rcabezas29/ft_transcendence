@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateMatchHistoryDto } from './dto/create-match-history.dto';
 import { MatchHistory } from './entity/match-history.entity';
@@ -19,11 +20,11 @@ export class MatchHistoryService {
         }
     }
 
-    findByUser(userId: number): Promise<MatchHistory[]> {
+    findByUser(user: User): Promise<MatchHistory[]> {
         return this.matchHistoryRepository.find({
             where: [
-                { user1Id: userId },
-                { user2Id: userId },
+                { user1: user },
+                { user2: user },
             ]
         });
     }

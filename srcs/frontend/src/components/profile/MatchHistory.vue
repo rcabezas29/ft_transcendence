@@ -1,66 +1,52 @@
 <script setup lang="ts">
-	import { onBeforeMount, onBeforeUnmount, ref, type Ref, computed } from 'vue';
-	import { user } from "../../user"
-	import router from "../../router"
-
-	interface OngoingGame {
-		name: string;
-		player1: string;
-		player1Id: number;
-		player1AvatarURL: string;
-		player1Score: number;
-		player2: string;
-		player2Id: number;
-		player2AvatarURL: string;
-		player2Score: number;
+	import { onBeforeMount, ref, type Ref } from 'vue';
+	import { user } from "../../user";
+	import type { UserData } from "../../interfaces/user-data.interface";
+	
+	interface MatchHistory {
+		id: number;
+		user1: UserData;
+		user2: UserData;
+		winner: number;
+		loser: number;
+		score: number[];
 	}
 
-	const ongoingGames: Ref<OngoingGame[]> = ref([]);
+	const matchHistory: Ref<MatchHistory[] | null> = ref(null);
+	
+	onBeforeMount(async () => {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/match-history/${user.id}`, {
+			method: "GET",
+			headers: {
+				"Authorization": `Bearer ${user.token}`,
+			}
+		});
 
-	function fetchOngoingGames(games: OngoingGame[]) {
-		games.map(game => {
-			game.player1AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player1Id}`
-			game.player2AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player2Id}`
-		})
-		ongoingGames.value = games;
-	}
-
-	function watchGame(gameName: string) {
-		router.push({
-			name: "spectate",
-			params: { matchId: gameName }
-		})
-	}
-
-	onBeforeMount(() => {
-		user.socket?.on("ongoing-games", (games) => { fetchOngoingGames(games) });
-		user.socket?.emit("ongoing-games");
-
+		matchHistory.value = await httpResponse.json();
+		console.log(matchHistory.value);
 	})
 
-	onBeforeUnmount(() => {
-		user.socket?.off("spectator-new-game");
-		user.socket?.off("spectator-end-game");
-		user.socket?.off("ongoing-games");
-	})
+	function getUserImageUrl(userId: number) {
+		return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${userId}`;
+	}
 
 </script>
 
 <template>
 
-	<div class="ongoin-matches">
+	<div>
 
-		<div class="match-exterior-container" v-for="game in ongoingGames" @click="watchGame(game.name)">
+		<div class="match-exterior-container" v-for="match in matchHistory">
 			
 			<div class="match-interior-container">
 
 				<div class="player player-left">
-					<span class="player-name">{{ game.player1 }}</span>
+					<span class="player-name">{{match.user1.username}}</span>
 					<div class="player-img">
-						<img id="user-image" :src="game.player1AvatarURL" />
+						<img id="user-image" :src="getUserImageUrl(match.user1.id)" />
 					</div>
 					<div class="player-score">
-						<span>{{ game.player1Score }}</span>
+						<span>{{match.score[0]}}</span>
 					</div>
 				</div>
 
@@ -70,20 +56,20 @@
 
 				<div class="player player-right">
 					<div class="player-score">
-						<span>{{ game.player2Score }}</span>
+						<span>{{match.score[1]}}</span>
 					</div>
 					<div class="player-img">
-						<img id="user-image" :src="game.player2AvatarURL" />
+						<img id="user-image" :src="getUserImageUrl(match.user2.id)"/>
 					</div>
-					<span class="player-name">{{ game.player2 }}</span>
+					<span class="player-name">{{match.user2.username}}</span>
 				</div>
 
 			</div>
 
 		</div>
 
-		<div v-if="ongoingGames.length == 0">
-			NOBODY IS PLAYING RIGHT NOW :(
+		<div v-if="matchHistory?.length == 0">
+			NO MATCHES PLAYED
 		</div>
 
 	</div>
@@ -109,16 +95,12 @@
 	}
 
 	.player-img {
-		display: flex;
+		display: none;
 	}
 
 	.player-img img {
 		width: 50px;
 		height: 50px;
-	}
-
-	.player-name {
-		display: none;
 	}
 
 	.player-score {
@@ -130,6 +112,7 @@
 		padding: 24px;
 		color: black;
 		height: 50px;
+		width: 50px;
 	}
 
 	.vs-block {
@@ -140,11 +123,17 @@
 		padding: 24px;
 		height: 50px;
 	}
+	.player-name {
+		display: block;
+		width: 75px;
+		text-align: center;
+	}
 
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
-		.player-name {
-			display: block;
+
+		.player-img {
+			display: flex;
 		}
 
 		.player-left .player-img {
