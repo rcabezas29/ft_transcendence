@@ -41,6 +41,13 @@ function leaveChannel(channel: string): void {
     closeInfo();
 }
 
+function kickUser(): void {
+	if (!channelController.userSelected)
+		return;
+
+	channelController.kickUser(channelController.userSelected, currentChannel.value.name);
+}
+
 function toggleAdmin(): void {
 	if (!channelController.userSelected)
 		return;
@@ -78,6 +85,7 @@ function toggleAdmin(): void {
                         @password="togglePasswordScreen"
                         @mute="toggleMuteScreen"
                         @ban="toggleBanScreen"
+                        @kick="kickUser"
                         @admin="toggleAdmin"
                     />
                 </div>

@@ -75,14 +75,42 @@ export class ChatGateway {
 	banUser(client: Socket, payload: TimeUserChannelPayload): void {
 		const banner: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const banned: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
-		this.channelsService.banUser(banner, banned, payload.channelName, payload.time, this.gatewayManagerGateway.server);
+		const bannedOK: boolean = this.channelsService.banUser(banner, banned, payload.channelName, payload.time, this.gatewayManagerGateway.server);
+		if (bannedOK) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${payload.user.username}> was banned for ${payload.time} seconds.`
+			);
+		}
 	}
 
 	@SubscribeMessage("mute-user")
 	muteUser(client: Socket, payload: TimeUserChannelPayload): void {
 		const muter: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const muted: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
-		this.channelsService.muteUser(muter, muted, payload.channelName, payload.time);
+		const mutedOk: boolean = this.channelsService.muteUser(muter, muted, payload.channelName, payload.time);
+		if (mutedOk) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${payload.user.username}> was muted for ${payload.time} seconds.`
+			);
+		}
+	}
+
+	@SubscribeMessage("kick-user")
+	kickUser(client: Socket, payload: UserChannelPayload): void {
+		const kicker: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		const kicked: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
+		const kickedOk: boolean = this.channelsService.kickUser(kicker, kicked, payload.channelName, this.gatewayManagerGateway.server);
+		if (kickedOk) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${payload.user.username}> was kicked from the channel.`
+			);
+		}
 	}
 
 	@SubscribeMessage("set-admin")

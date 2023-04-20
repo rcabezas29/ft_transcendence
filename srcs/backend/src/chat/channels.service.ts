@@ -167,12 +167,12 @@ export class ChannelsService {
 		fromUser.socket.to(payload.channel).emit("channel-message", payload);
 	}
 
-	banUser(bannerUser: GatewayUser, bannedUser: GatewayUser, channelName: string, time: number, server: Server): void {
+	banUser(bannerUser: GatewayUser, bannedUser: GatewayUser, channelName: string, time: number, server: Server): boolean {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
-			return;
+			return false;
 		if (!channel.userIsAdmin(bannerUser) || !channel.hasUser(bannerUser) || !channel.hasUser(bannedUser))
-			return;
+			return false;
 
 		channel.banUser(bannedUser, time);
 
@@ -180,16 +180,35 @@ export class ChannelsService {
 			this.removeUserFromChannel(bannedUser, channel);
 		
 		bannedUser.socket.leave(channelName);
+
+		return true;
 	}
 
-	muteUser(muterUser: GatewayUser, mutedUser: GatewayUser, channelName: string, time: number): void {
+	muteUser(muterUser: GatewayUser, mutedUser: GatewayUser, channelName: string, time: number): boolean {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
-			return;
+			return false;
 		if (!channel.userIsAdmin(muterUser) || !channel.hasUser(muterUser) || !channel.hasUser(mutedUser))
-			return;
+			return false;
 
 		channel.muteUser(mutedUser, time);
+
+		return true;
+	}
+
+	kickUser(kickerUser: GatewayUser, kickedUser: GatewayUser, channelName: string, server: Server): boolean {
+		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel)
+			return false;
+		if (!channel.userIsAdmin(kickerUser) || !channel.hasUser(kickerUser) || !channel.hasUser(kickedUser))
+			return false;
+
+		if (this.deleteChannelIfWillBeEmpty(kickedUser, channel, server) === false)
+			this.removeUserFromChannel(kickedUser, channel);
+		
+		kickedUser.socket.leave(channelName);
+
+		return true;
 	}
 
 	setAdmin(user: GatewayUser, newAdmin: GatewayUser, channelName: string, server: Server): void {
