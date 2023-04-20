@@ -44,6 +44,7 @@ interface PasswordBoolChannelPayload {
 	channelName: ChannelName
 }
 
+//TODO: diferencia con UserChannelPayload?
 interface ChannelUserPayload {
 	channel: ChannelPayload;
 	username: string;
@@ -150,6 +151,23 @@ class ChannelController {
 			channelName: channelName
 		}
 		user.socket?.emit('mute-user', payload);
+	}
+
+	kickUser(kickedUser: ChatUser, channelName: ChannelName): void {
+		if (!this.userIsChannelAdmin(this.channels[channelName]))
+			return this.alertError('you are not allowed to kick users');
+
+		if (kickedUser.id == user.id)
+			return this.alertError('you cannot kick yourself!');
+
+		if (this.userIsChannelOwner(this.channels[channelName], kickedUser))
+			return this.alertError('the channel owner is untouchable!');
+
+		const payload: UserChannelPayload = {
+			user: kickedUser,
+			channelName: channelName
+		}
+		user.socket?.emit('kick-user', payload);
 	}
 
 	makeChannelAdmin(newAdmin: ChatUser, channelName: ChannelName): void {

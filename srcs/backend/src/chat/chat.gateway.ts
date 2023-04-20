@@ -85,6 +85,20 @@ export class ChatGateway {
 		this.channelsService.muteUser(muter, muted, payload.channelName, payload.time);
 	}
 
+	@SubscribeMessage("kick-user")
+	kickUser(client: Socket, payload: UserChannelPayload): void {
+		const kicker: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		const kicked: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
+		const kickedOk: boolean = this.channelsService.kickUser(kicker, kicked, payload.channelName, this.gatewayManagerGateway.server);
+		if (kickedOk) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${payload.user.username}> was kicked from the channel.`
+			);
+		}
+	}
+
 	@SubscribeMessage("set-admin")
 	setAdmin(client: Socket, payload: UserChannelPayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);

@@ -192,6 +192,21 @@ export class ChannelsService {
 		channel.muteUser(mutedUser, time);
 	}
 
+	kickUser(kickerUser: GatewayUser, kickedUser: GatewayUser, channelName: string, server: Server): boolean {
+		const channel: Channel = this.getChannelbyName(channelName);
+		if (!channel)
+			return false;
+		if (!channel.userIsAdmin(kickerUser) || !channel.hasUser(kickerUser) || !channel.hasUser(kickedUser))
+			return false;
+
+		if (this.deleteChannelIfWillBeEmpty(kickedUser, channel, server) === false)
+			this.removeUserFromChannel(kickedUser, channel);
+		
+		kickedUser.socket.leave(channelName);
+
+		return true;
+	}
+
 	setAdmin(user: GatewayUser, newAdmin: GatewayUser, channelName: string, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
