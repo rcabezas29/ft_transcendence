@@ -7,7 +7,7 @@
 	import { computed } from "@vue/reactivity";
 	import TextInputField from "../ui/TextInputField.vue";
 	import Button from "../ui/Button.vue";
-import { UserRole } from "@/interfaces/user-data.interface";
+	import { UserRole } from "@/interfaces/user-data.interface";
 
 	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
@@ -41,10 +41,14 @@ import { UserRole } from "@/interfaces/user-data.interface";
 		users.value = await getUsers();
 	})
 
-
 	function userIsAdmin(user: UserData) {
 		return user.role == UserRole.ADMIN || user.role == UserRole.OWNER;
 	}
+
+	function makeAdmin(user: UserData) {
+		console.log("making admin")
+	}
+
 </script>
 
 <template>
@@ -81,7 +85,7 @@ import { UserRole } from "@/interfaces/user-data.interface";
 				</td>
 				<td>{{ userRow.role }}</td>
 				<td >
-					<a href="#" v-if="!userIsAdmin(userRow)">Promote to admin</a>
+					<a href="#" v-if="!userIsAdmin(userRow)" @click="makeAdmin(userRow)">Promote to admin</a>
 				</td>
 			</tr>
 			<td colspan="2" v-if="input && filteredUsers.length === 0">

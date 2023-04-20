@@ -1,18 +1,38 @@
 <script setup lang="ts">
+import { channelController } from '@/channelController';
+import { onMounted, onUpdated } from 'vue';
 
+
+const props = defineProps({
+	channelName: String
+});
+
+const channel = channelController.channels[props.channelName!];
+
+function scrollDownChatMessages() {
+	const elem = document.querySelector(".chat-messages");
+	if (elem)
+		elem.scrollTop = elem.scrollHeight;
+}
+
+onUpdated(() => {
+	scrollDownChatMessages();
+})
+
+onMounted(() => {
+	scrollDownChatMessages();
+})
 
 </script>
 
 <template>
-	<button>Challenge</button>
-
 	<div class="chat-messages">
-		<div class="message">
+		<div v-for="message in channel.chat?.messages" class="message">
 			<div class="chat-message-username">
-				pepe:
+				{{ `${message.from}:` }}
 			</div>
 			<div class="chat-message">
-				hola que tal
+				{{ message.message }}
 			</div>
 		</div>
 	</div>
@@ -22,9 +42,9 @@
 	.chat-messages {
 		box-sizing: border-box;
 		overflow-y: scroll;
-		height: 100%;
 		width: 100%;
         padding: 0 24px;
+		height: 450px;
 	}
 
 	.message {

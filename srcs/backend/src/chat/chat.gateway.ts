@@ -138,4 +138,10 @@ export class ChatGateway {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		this.channelsService.unsetPassword(user, channelName, this.gatewayManagerGateway.server);
 	}
+
+	@SubscribeMessage("delete-channel")
+	deleteChannel(client: Socket, channelName: string): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		this.channelsService.deleteChannel(user, channelName, this.gatewayManagerGateway.server);
+	}
 }

@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { UserFriend } from 'src/users/interfaces/user-friend.interface';
+import { UserRole } from 'src/users/interfaces/user-roles';
 import { UsersService } from 'src/users/users.service';
 import { ConnectedFriendsPayload, GatewayUser } from './interfaces';
 
@@ -111,4 +112,13 @@ export class GatewayManagerService {
 		if (user)
 			user.isGaming = false;
 	}
+
+	clientIsAdmin(client: GatewayUser) {
+		return (client.role == UserRole.ADMIN || client.role == UserRole.OWNER)
+	}
+
+	getAllAdminClients(): GatewayUser[] {
+		return this.users.filter((user) => this.clientIsAdmin(user));
+	}
+
 }

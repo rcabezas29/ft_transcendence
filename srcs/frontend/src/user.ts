@@ -118,16 +118,16 @@ class User {
 		else
 			console.log("INTRA_API_AUTHORIZE_URL environment variable unset");
 	}
-
-	makeAdmin() {
+/*
+	makeWebsiteAdmin() {
 		this.role = UserRole.ADMIN;
 	}
-
-	isAdmin() {
+*/
+	isWebsiteAdmin() {
 		return this.role == UserRole.ADMIN || this.role == UserRole.OWNER;
 	}
 
-	isOwner() {
+	isWebsiteOwner() {
 		return this.role == UserRole.OWNER;
 	}
 

@@ -1,7 +1,7 @@
 import { user } from "../user";
 
 export async function adminGuard(to, from, next) {
-	if (!user.isAdmin())
+	if (!user.isWebsiteAdmin())
 		next({name: "home"});
 	else next();
 }

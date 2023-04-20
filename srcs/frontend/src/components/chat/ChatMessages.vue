@@ -16,7 +16,7 @@ function onSubmit(e: Event) {
 	messageInput.value = "";
 }
 
-function	challengeThroughChat() {
+function challengeThroughChat() {
 	directMessageController.sendChallenge();
 }
 

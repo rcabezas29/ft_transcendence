@@ -2,7 +2,7 @@
 	import { ref } from 'vue'
 	import { user } from "../user";
 	import AllUsersTable from '../components/admin/AllUsersTable.vue'
-	import Chat from '../components/admin/Chat.vue'
+	import ChannelsManagement from '../components/admin/ChannelsManagement.vue'
 	import MultiView from '../components/ui/MultiView.vue';
 	import MultiViewTab from '../components/ui/MultiViewTab.vue';
 
@@ -21,10 +21,10 @@
 	<MultiView class="multi-view">
 		<template #tabs>
 			<MultiViewTab @click="() => { multiviewShowElement(1)}" :selected="isSelected(1)">
-				Users
+				MANAGE USERS
 			</MultiViewTab>
 			<MultiViewTab @click="() => { multiviewShowElement(2)}" :selected="isSelected(2)">
-				Chat
+				MANAGE CHANNELS
 			</MultiViewTab>
 		</template>
 
@@ -33,7 +33,7 @@
 				<AllUsersTable/>
 			</div>
 			<div v-else-if="multiViewElement == 2">
-				<Chat/>
+				<ChannelsManagement/>
 			</div>
 		</template>
 	</MultiView>

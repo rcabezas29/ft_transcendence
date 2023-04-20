@@ -239,7 +239,7 @@ export class UsersService {
   }
 
   async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
-    if (!this.findOneById(userId))
+    if (!(await this.findOneById(userId)))
       throw new NotFoundException();
 
     return this.usersRepository.update(userId, {
@@ -248,7 +248,7 @@ export class UsersService {
   }
 
   async turnOnTwoFactorAuthentication(userId: number) {
-    if (!this.findOneById(userId))
+    if (!(await this.findOneById(userId)))
       throw new NotFoundException();
 
     return this.usersRepository.update(userId, {
@@ -257,7 +257,7 @@ export class UsersService {
   }
 
   async turnOffTwoFactorAuthentication(userId: number) {
-    if (!this.findOneById(userId))
+    if (!(await this.findOneById(userId)))
       throw new NotFoundException();
 
     return this.usersRepository.update(userId, {
@@ -272,6 +272,22 @@ export class UsersService {
       u.username.toLowerCase().includes(username.toLowerCase())
     );
   }
+/*
+  async userRoleIsAdmin(userId: number): Promise<boolean> {
+    const user: User = await this.findOneById(userId);
+    if (!user)
+      return false;
+
+    return (user.role == UserRole.ADMIN || user.role == UserRole.OWNER);
+  }
+
+  async userRoleIsOwner(userId: number): Promise<boolean> {
+    const user: User = await this.findOneById(userId);
+    if (!user)
+      return false;
+
+    return (user.role == UserRole.OWNER);
+  }*/
 
   private generateRandomString(length: number): string {
     let result = '';
