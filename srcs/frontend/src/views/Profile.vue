@@ -1,30 +1,24 @@
 <script setup lang="ts">
-	import { onMounted, ref } from 'vue';
-	import { useRoute } from 'vue-router';
-	import MultiView from '@/components/ui/MultiView.vue';
-	import MultiViewTab from '@/components/ui/MultiViewTab.vue';
-	import Settings from "@/components/profile/Settings.vue";
+import {ref } from "vue";
+import ProfileStats from "@/components/profile/ProfileStats.vue";
+import FriendsList from "@/components/friends/FriendsList.vue";
+import MultiView from "../components/ui/MultiView.vue"
+import MultiViewTab from "../components/ui/MultiViewTab.vue"
+import Settings from "@/components/profile/Settings.vue";
+import MatchHistory from "@/components/profile/MatchHistory.vue";
 
-	const route = useRoute();
-	
-	const multiViewElement = ref(1);
-	function multiviewShowElement(index: number) {
-		multiViewElement.value = index;
-	}
+const multiViewElement = ref(1);
+function multiviewShowElement(index: number) {
+    multiViewElement.value = index;
+}
 
-	function isSelected(index: number) {
-		return multiViewElement.value == index;
-	}
-
-	onMounted(() => {
-		const username: string = route.params.username as string;
-		console.log("username", username);
-	})
+function isSelected(index: number) {
+    return multiViewElement.value == index;
+}
 
 </script>
-
 <template>
-	<MultiView class="multi-view">
+    <MultiView class="multi-view">
 		<template #tabs>
 			<MultiViewTab @click="() => { multiviewShowElement(1)}" :selected="isSelected(1)">
 				STATS
@@ -42,20 +36,21 @@
 
 		<template #body>
 			<div v-if="multiViewElement == 1">
-				Stats
+				<ProfileStats />
 			</div>
 			<div v-else-if="multiViewElement == 2">
-				MatchHistory
+				<MatchHistory />
 			</div>
 			<div v-else-if="multiViewElement == 3">
-				Friends
+				<FriendsList />
 			</div>
-			<div v-else-if="multiViewElement == 4">
-				<Settings/>
-			</div>
+            <div v-else-if="multiViewElement == 4">
+                <Settings />
+            </div>
 		</template>
 	</MultiView>
 </template>
+
 
 <style scoped>
 
