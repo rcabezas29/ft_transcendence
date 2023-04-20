@@ -6,8 +6,9 @@
 	import type { Channel } from "@/interfaces";
 	import Button from "../ui/Button.vue";
 	import CrossIcon from "../icons/CrossIcon.vue";
-	import ChannelMessages from "./ChannelMessages.vue";
+	import ChannelMessages from "./channels/ChannelMessages.vue";
 	import Modal from "../ui/Modal.vue";
+	import ChannelUsersManagement from "./channels/ChannelUsersManagement.vue";
 
 	const selectedChannel = ref<Channel | null>(null);
 	function selectChannel(channel: Channel): void {
@@ -29,6 +30,15 @@
 
 	function channelChatOff() {
 		channelChatOpened.value = false;
+	}
+
+	const manageUsersModalOpened = ref<boolean>(false);
+	function manageUsersOn() {
+		manageUsersModalOpened.value = true;
+	}
+
+	function manageUsersOff() {
+		manageUsersModalOpened.value = false;
 	}
 
 	const currentChannelName = computed<string>(() => {
@@ -69,7 +79,7 @@
 						<Button class="row-button" :selected="true" @click.stop="channelChatOn">
 							VIEW CHAT
 						</Button>
-						<Button class="row-button" :selected="true">
+						<Button class="row-button" :selected="true" @click.stop="manageUsersOn">
 							MANAGE USERS
 						</Button>
 						<Button class="row-button" :selected="true" @click.stop="() => channelController.deleteChannel(channel.name)">
@@ -91,23 +101,9 @@
 		<ChannelMessages :channel-name="currentChannelName"/>
 	</Modal>
 
-	<!--
-
-	<div>
-		delete this -> <button @click="toggleChat">Open chat</button>
-	</div>
-
-	<div v-if="!chatOpened">
-		<ChatChannelsSection/>
-	</div>
-	<div v-else>
-		<ChatMessagesHeader />
-		<ChatMessages/>
-		<ChannelInfo/>
-	</div>
-
-	<ChannelInfo/>
-	-->
+	<Modal :visible="manageUsersModalOpened" @close="manageUsersOff" title="USERS MANAGEMENT">
+		<ChannelUsersManagement :channel-name="currentChannelName" @close="manageUsersOff"/>
+	</Modal>
 
 </template>
 

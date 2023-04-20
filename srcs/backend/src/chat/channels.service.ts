@@ -33,7 +33,6 @@ export class ChannelsService {
         private gatewayManagerService: GatewayManagerService,
     ) {
         this.gatewayManagerService.addOnNewConnectionCallback((client: GatewayUser) => this.onNewConnection(client));
-        this.gatewayManagerService.addOnDisconnectionCallback((client: GatewayUser, server: Server) => this.onDisconnection(client, server));
 	}
 	
     onNewConnection(client: GatewayUser): void {
@@ -42,21 +41,12 @@ export class ChannelsService {
 			if (userInChannel) {
 				channel.replaceUser(userInChannel, client);
 				client.socket.join(channel.name);
-			} else if (this.gatewayManagerService.clientIsAdmin(client)) {
+			} else if (this.gatewayManagerService.clientIsWebsiteAdmin(client)) {
 				client.socket.join(channel.name);
 			}
 		})
 		const channelsPayload: ChannelPayload[] = this.channels.map(channel => this.channelToChannelPayload(channel));
 		client.socket.emit('all-channels', channelsPayload);
-	}
-
-	onDisconnection(client: GatewayUser, server: Server): void {
-		/*this.channels.forEach((channel) => {
-			if (channel.users.find((user) => user.id == client.id)){
-				if (this.deleteChannelIfWillBeEmpty(client, channel, server) === false)
-					this.removeUserFromChannel(client, channel);
-			}
-		});*/
 	}
 
 	getChannelbyName(channelName: string): Channel | null {
@@ -80,7 +70,7 @@ export class ChannelsService {
 
 		owner.socket.join(channelName);
 
-		const admins: GatewayUser[] = this.gatewayManagerService.getAllAdminClients();
+		const admins: GatewayUser[] = this.gatewayManagerService.getAllWebsiteAdminClients();
 		admins.forEach((admin) => {
 			admin.socket.join(channelName);
 		})
@@ -132,8 +122,12 @@ export class ChannelsService {
 		if (!channel || !channel.hasUser(user))
 			return false;
 
-		if (this.deleteChannelIfWillBeEmpty(user, channel, server) === false)
-			this.removeUserFromChannel(user, channel);
+		this.removeUserFromChannel(user, channel);
+
+		if (channel.users.length == 0) {
+			this.deleteChannel(channel.name, server);
+			return false;
+		}
 
 		this.userLeaveSocketRoom(user, channelName);
 		
@@ -165,15 +159,22 @@ export class ChannelsService {
 
 	banUser(bannerUser: GatewayUser, bannedUser: GatewayUser, channelName: string, time: number, server: Server): boolean {
 		const channel: Channel = this.getChannelbyName(channelName);
-		if (!channel)
+		if (!channel || !channel.hasUser(bannedUser))
 			return false;
-		if (!channel.userIsAdmin(bannerUser) || !channel.hasUser(bannerUser) || !channel.hasUser(bannedUser))
-			return false;
+
+		if (!this.gatewayManagerService.clientIsWebsiteAdmin(bannerUser)) {
+			if (!channel.userIsAdmin(bannerUser) || !channel.hasUser(bannerUser))
+				return false;
+		}
 
 		channel.banUser(bannedUser, time);
 
-		if (this.deleteChannelIfWillBeEmpty(bannedUser, channel, server) === false)
-			this.removeUserFromChannel(bannedUser, channel);
+		this.removeUserFromChannel(bannedUser, channel);
+
+		if (channel.users.length == 0) {
+			this.deleteChannel(channel.name, server);
+			return false;
+		}
 		
 		this.userLeaveSocketRoom(bannedUser, channelName);
 
@@ -182,11 +183,14 @@ export class ChannelsService {
 
 	muteUser(muterUser: GatewayUser, mutedUser: GatewayUser, channelName: string, time: number): boolean {
 		const channel: Channel = this.getChannelbyName(channelName);
-		if (!channel)
-			return false;
-		if (!channel.userIsAdmin(muterUser) || !channel.hasUser(muterUser) || !channel.hasUser(mutedUser))
+		if (!channel || !channel.hasUser(mutedUser))
 			return false;
 
+		if (!this.gatewayManagerService.clientIsWebsiteAdmin(muterUser)) {
+			if (!channel.userIsAdmin(muterUser) || !channel.hasUser(muterUser))
+				return false;
+		}
+		
 		channel.muteUser(mutedUser, time);
 
 		return true;
@@ -194,14 +198,21 @@ export class ChannelsService {
 
 	kickUser(kickerUser: GatewayUser, kickedUser: GatewayUser, channelName: string, server: Server): boolean {
 		const channel: Channel = this.getChannelbyName(channelName);
-		if (!channel)
-			return false;
-		if (!channel.userIsAdmin(kickerUser) || !channel.hasUser(kickerUser) || !channel.hasUser(kickedUser))
+		if (!channel || !channel.hasUser(kickedUser))
 			return false;
 
-		if (this.deleteChannelIfWillBeEmpty(kickedUser, channel, server) === false)
-			this.removeUserFromChannel(kickedUser, channel);
-		
+		if (!this.gatewayManagerService.clientIsWebsiteAdmin(kickerUser)) {
+			if (!channel.userIsAdmin(kickerUser) || !channel.hasUser(kickerUser))
+				return false;
+		}
+
+		this.removeUserFromChannel(kickedUser, channel);
+
+		if (channel.users.length == 0) {
+			this.deleteChannel(channel.name, server);
+			return false;
+		}
+
 		this.userLeaveSocketRoom(kickedUser, channelName);
 
 		return true;
@@ -209,10 +220,13 @@ export class ChannelsService {
 
 	setAdmin(user: GatewayUser, newAdmin: GatewayUser, channelName: string, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
-		if (!channel)
+		if (!channel || !channel.hasUser(newAdmin))
 			return;
-		if (user != channel.owner || !channel.hasUser(user) || !channel.hasUser(newAdmin))
-			return;
+
+		if (!this.gatewayManagerService.clientIsWebsiteAdmin(user)) {
+			if (user != channel.owner || !channel.hasUser(user))
+				return;
+		}
 
 		channel.setAdmin(newAdmin);
 
@@ -226,10 +240,13 @@ export class ChannelsService {
 
 	unsetAdmin(user: GatewayUser, admin: GatewayUser, channelName: string, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
-		if (!channel)
+		if (!channel || !channel.hasUser(admin))
 			return;
-		if (user != channel.owner || !channel.hasUser(user) || !channel.hasUser(admin))
-			return;
+
+		if (!this.gatewayManagerService.clientIsWebsiteAdmin(user)) {
+			if (user != channel.owner || !channel.hasUser(user))
+				return;
+		}
 		
 		channel.unsetAdmin(admin);
 
@@ -273,18 +290,16 @@ export class ChannelsService {
 		server.emit('password-updated', clientPayload)
 	}
 
-	deleteChannel(user: GatewayUser, channelName: string, server: Server): void {
+	deleteChannel(channelName: string, server: Server): void {
 		const channel: Channel = this.getChannelbyName(channelName);
 		if (!channel)
 			return;
-		if (!this.gatewayManagerService.clientIsAdmin(user))
-			return;
 
 		channel.users.forEach((user) => {
-			user.socket.leave(channelName);
+			user.socket.leave(channel.name);
 		})
-		this.channels = this.channels.filter((c) => c.name != channelName);
-		server.emit('deleted-channel', channelName)
+		this.channels = this.channels.filter((c) => c.name != channel.name);
+		server.emit('deleted-channel', channel.name);
 	}
 
 	sendServerMessageToChannel(channelName: string, server: Server, message: string): void {
@@ -309,16 +324,6 @@ export class ChannelsService {
 		user.socket.to(channel.name).emit('user-left', payload);
 	}
 
-	private deleteChannelIfWillBeEmpty(user: GatewayUser, channel: Channel, server: Server): boolean {
-		if (channel.owner == user && channel.users.length == 1)
-		{
-			this.deleteChannel(user, channel.name, server);
-			return true;
-		}
-		return false;
-	}
-
-
 	private channelToChannelPayload(channel: Channel): ChannelPayload {
 		const payload: ChannelPayload = {
 			name: channel.name,
@@ -332,7 +337,8 @@ export class ChannelsService {
 	}
 	
 	private userLeaveSocketRoom(user: GatewayUser, channelName: string): void {
-		if (!this.gatewayManagerService.clientIsAdmin(user))
+		if (!this.gatewayManagerService.clientIsWebsiteAdmin(user))
 			user.socket.leave(channelName);
 	}
+
 }

@@ -104,15 +104,17 @@ class ChannelController {
     }
 
 	banUser(bannedUser: ChatUser, channelName: ChannelName, time: string): void {
-		if (!this.userIsChannelAdmin(this.channels[channelName]))
-			return this.alertError('you are not allowed to ban users');
+		if (!user.isWebsiteAdmin()) {
+			if (!this.userIsChannelAdmin(this.channels[channelName]))
+				return this.alertError('you are not allowed to ban users');
+			
+			if (bannedUser.id == user.id)
+				return this.alertError('you cannot ban yourself!');
+
+			if (this.userIsChannelOwner(this.channels[channelName], bannedUser))
+				return this.alertError('the channel owner is untouchable!');
+		}
 		
-		if (bannedUser.id == user.id)
-			return this.alertError('you cannot ban yourself!');
-
-		if (this.userIsChannelOwner(this.channels[channelName], bannedUser))
-			return this.alertError('the channel owner is untouchable!');
-
 		const banTime: number = +time;
 		if (banTime === 0 || isNaN(banTime))
 			return this.alertError('please insert a valid number (ban time)');
@@ -126,14 +128,16 @@ class ChannelController {
 	}
 
 	muteUser(mutedUser: ChatUser, channelName: ChannelName, time: string): void {
-		if (!this.userIsChannelAdmin(this.channels[channelName]))
-			return this.alertError('you are not allowed to mute users');
+		if (!user.isWebsiteAdmin()) {
+			if (!this.userIsChannelAdmin(this.channels[channelName]))
+				return this.alertError('you are not allowed to mute users');
 
-		if (mutedUser.id == user.id)
-			return this.alertError('you cannot mute yourself!');
+			if (mutedUser.id == user.id)
+				return this.alertError('you cannot mute yourself!');
 
-		if (this.userIsChannelOwner(this.channels[channelName], mutedUser))
-			return this.alertError('the channel owner is untouchable!');
+			if (this.userIsChannelOwner(this.channels[channelName], mutedUser))
+				return this.alertError('the channel owner is untouchable!');
+		}
 
 		const muteTime: number = +time;
 		if (muteTime === 0 || isNaN(muteTime))
@@ -148,15 +152,17 @@ class ChannelController {
 	}
 
 	kickUser(kickedUser: ChatUser, channelName: ChannelName): void {
-		if (!this.userIsChannelAdmin(this.channels[channelName]))
-			return this.alertError('you are not allowed to kick users');
+		if (!user.isWebsiteAdmin()) {
+			if (!this.userIsChannelAdmin(this.channels[channelName]))
+				return this.alertError('you are not allowed to kick users');
 
-		if (kickedUser.id == user.id)
-			return this.alertError('you cannot kick yourself!');
+			if (kickedUser.id == user.id)
+				return this.alertError('you cannot kick yourself!');
 
-		if (this.userIsChannelOwner(this.channels[channelName], kickedUser))
-			return this.alertError('the channel owner is untouchable!');
-
+			if (this.userIsChannelOwner(this.channels[channelName], kickedUser))
+				return this.alertError('the channel owner is untouchable!');
+		}
+		
 		const payload: UserChannelPayload = {
 			user: kickedUser,
 			channelName: channelName
@@ -165,28 +171,32 @@ class ChannelController {
 	}
 
 	makeChannelAdmin(newAdmin: ChatUser, channelName: ChannelName): void {
-		if (this.userIsChannelAdmin(this.channels[channelName], newAdmin))
-			return;
+		if (!user.isWebsiteAdmin()) {
+			if (this.userIsChannelAdmin(this.channels[channelName], newAdmin))
+				return;
 
-		if (!this.userIsChannelOwner(this.channels[channelName]))
-			return this.alertError('you are not allowed to manage channel administrators');
-		
-		if (this.userIsChannelOwner(this.channels[channelName], newAdmin))
-			return this.alertError('the channel owner is untouchable!');
+			if (!this.userIsChannelOwner(this.channels[channelName]))
+				return this.alertError('you are not allowed to manage channel administrators');
+			
+			if (this.userIsChannelOwner(this.channels[channelName], newAdmin))
+				return this.alertError('the channel owner is untouchable!');
+		}
 
 		const payload: UserChannelPayload = { user: newAdmin, channelName };
 		user.socket?.emit('set-admin', payload);
 	}
 
 	removeChannelAdmin(admin: ChatUser, channelName: ChannelName): void {
-		if (!this.userIsChannelAdmin(this.channels[channelName], admin))
-			return;
+		if (!user.isWebsiteAdmin()) {
+			if (!this.userIsChannelAdmin(this.channels[channelName], admin))
+				return;
 
-		if (!this.userIsChannelOwner(this.channels[channelName]))
-			return this.alertError('you are not allowed to manage channel administrators');
-		
-		if (this.userIsChannelOwner(this.channels[channelName], admin))
-			return this.alertError('the channel owner is untouchable!');
+			if (!this.userIsChannelOwner(this.channels[channelName]))
+				return this.alertError('you are not allowed to manage channel administrators');
+			
+			if (this.userIsChannelOwner(this.channels[channelName], admin))
+				return this.alertError('the channel owner is untouchable!');
+		}
 
 		const payload: UserChannelPayload = { user: admin, channelName };
 		user.socket?.emit('unset-admin', payload);
@@ -259,6 +269,7 @@ class ChannelController {
 	}
 
 	private onDeletedChannel(channelName: ChannelName): void {
+		console.log("DEETED")
 		delete(this.channels[channelName]);
 		if (currentChat.value?.target === channelName)
 			currentChat.value = null;

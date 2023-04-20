@@ -113,12 +113,12 @@ export class GatewayManagerService {
 			user.isGaming = false;
 	}
 
-	clientIsAdmin(client: GatewayUser) {
+	clientIsWebsiteAdmin(client: GatewayUser) {
 		return (client.role == UserRole.ADMIN || client.role == UserRole.OWNER)
 	}
 
-	getAllAdminClients(): GatewayUser[] {
-		return this.users.filter((user) => this.clientIsAdmin(user));
+	getAllWebsiteAdminClients(): GatewayUser[] {
+		return this.users.filter((user) => this.clientIsWebsiteAdmin(user));
 	}
 
 }

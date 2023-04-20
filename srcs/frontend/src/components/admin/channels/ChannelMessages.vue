@@ -2,7 +2,6 @@
 import { channelController } from '@/channelController';
 import { onMounted, onUpdated } from 'vue';
 
-
 const props = defineProps({
 	channelName: String
 });
@@ -59,21 +58,5 @@ onMounted(() => {
 	.chat-message {
 		color: #B3F9D7;
 		overflow-wrap: anywhere;
-	}
-
-	.chat-message-input {
-		width: 100%;
-	}
-
-	.chat-message-input input {
-		box-sizing: border-box;
-        font-family: vp-pixel;
-		background-color: #08150C;
-        color: #B3F9D7;
-		border: none;
-        border-top: 4px solid #4BFE65;
-		width: 100%;
-        height: 38px;
-        padding: 0 24px;
 	}
 </style>

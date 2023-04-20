@@ -1,27 +1,25 @@
 <script setup lang="ts">
-import { chatIsChannel, currentChat } from '@/currentChat';
-import { computed } from '@vue/reactivity';
 import { channelController } from '../../../channelController';
 
-const currentChannel = computed(() => {
-	return channelController.channels[currentChat.value!.target as string];
-})
+const props = defineProps({
+	channelName: String
+});
+
+const channel = channelController.channels[props.channelName!];
 
 </script>
 
 <template>
-	<div class="container" v-if="currentChat && chatIsChannel(currentChat)">
-		<div v-for="user in channelController.channels[currentChat.target as string].users" @click="() => channelController.selectUser(user)" :key="user.id">
-			<div class="channel-user-card" :class="{'user-selected': channelController.isUserSelected(user)}">
-				<div class="channel-user-username">
-					{{ user.username }}
-				</div>
-				<div v-if="channelController.userIsChannelOwner(currentChannel, user)" class="user-role">
-					(owner)
-				</div>
-				<div v-else-if="channelController.userIsChannelAdmin(currentChannel, user)" class="user-role">
-					(admin)
-				</div>
+	<div class="container">
+		<div v-for="user in channelController.channels[channel.name].users" class="channel-user-card" :class="{'user-selected': channelController.isUserSelected(user)}" @click="() => channelController.selectUser(user)" :key="user.id">
+			<div class="channel-user-username">
+				{{ user.username }}
+			</div>
+			<div v-if="channelController.userIsChannelOwner(channel, user)" class="user-role">
+				(owner)
+			</div>
+			<div v-else-if="channelController.userIsChannelAdmin(channel, user)" class="user-role">
+				(admin)
 			</div>
 		</div>
 	</div>
@@ -33,11 +31,11 @@ const currentChannel = computed(() => {
 	display: flex;
 }
 
-
 .channel-user-card {
 	padding: 8px 16px;
 	display: flex;
 	justify-content: flex-start;
+	cursor: pointer;
 }
 
 .user-role {

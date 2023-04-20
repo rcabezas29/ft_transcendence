@@ -142,6 +142,8 @@ export class ChatGateway {
 	@SubscribeMessage("delete-channel")
 	deleteChannel(client: Socket, channelName: string): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.deleteChannel(user, channelName, this.gatewayManagerGateway.server);
+		if (!this.gatewayManagerService.clientIsWebsiteAdmin(user))
+			return;
+		this.channelsService.deleteChannel(channelName, this.gatewayManagerGateway.server);
 	}
 }

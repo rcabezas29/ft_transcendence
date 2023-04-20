@@ -79,7 +79,7 @@ function toggleAdmin(): void {
                     <ChannelPwdSettingsScreen @close-pwd-settings="togglePasswordScreen"/>
                 </div>
                 <div class="channel-info" v-else>
-                    <ChatChannelUserList class="info-section user-list"/>
+                    <ChatChannelUserList class="info-section user-list" :channel-name="currentChannel.name"/>
                     <ChannelInfoButtons class="info-section action-buttons"
                         @leave="leaveChannel(currentChannel.name)"
                         @password="togglePasswordScreen"
