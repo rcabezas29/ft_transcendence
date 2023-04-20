@@ -1,11 +1,13 @@
 import * as bcrypt from 'bcrypt';
 import { FriendshipStatus } from 'src/friendships/entities/friendship.entity';
+import { UserRole } from 'src/users/interfaces/user-roles';
 
 interface SeedUser {
     email: string;
     username: string;
     password: string;
 	avatar: string;
+	role?: UserRole;
 }
 
 interface SeedFriendship {
@@ -21,6 +23,13 @@ interface SeedData {
 
 export const initialData: SeedData = {
     users: [
+		{
+            email: 'owner@admin.com',
+            username: 'owner',
+			avatar: "default_avatar.jpg",
+            password: bcrypt.hashSync('1234', 10),
+			role: UserRole.OWNER
+        },
         {
             email: 'user1@example.com',
             username: 'user1',
