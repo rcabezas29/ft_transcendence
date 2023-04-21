@@ -48,9 +48,9 @@
 
 <template>
 
-	<div class="ongoin-matches">
+	<div class="ongoing-matches">
 
-		<div class="match-exterior-container" v-for="game in ongoingGames" @click="watchGame(game.name)">
+		<div class="match-exterior-container" v-for="game in ongoingGames"  v-if="!ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)" @click="watchGame(game.name)">
 			
 			<div class="match-interior-container">
 
@@ -82,7 +82,7 @@
 
 		</div>
 
-		<div v-if="ongoingGames.length == 0">
+		<div v-if="ongoingGames.length == 0 || ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)">
 			NOBODY IS PLAYING RIGHT NOW :(
 		</div>
 

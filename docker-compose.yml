@@ -69,13 +69,16 @@ services:
     environment:
       - WORK_PATH=/app
   nginx:
-    image: 'nginx:stable'
+    build:
+      context: ./requirements/nginx
+      dockerfile: Dockerfile
     container_name: nginx
+    depends_on:
+      - frontend
     restart: always
     ports:
       - 80:80
       - 443:443
-
 
 volumes:
     database_volume:

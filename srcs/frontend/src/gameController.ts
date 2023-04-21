@@ -100,7 +100,9 @@ class GameController {
     user.socket?.on("removed-from-queue", () => {
       this.state = GameState.None;
     });
-    user.socket?.on("rejoin-game", () => {
+    user.socket?.on("rejoin-game", (players : PlayersUsernames) => {
+      this.scoreBoard.user1Name = players.user1;
+      this.scoreBoard.user2Name = players.user2;
       this.startGame({
         user1: this.scoreBoard.user1Name,
         user2: this.scoreBoard.user2Name,
