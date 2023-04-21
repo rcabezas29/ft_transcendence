@@ -4,6 +4,7 @@ import { chatIsChannel, currentChat } from '@/currentChat';
 import { computed } from '@vue/reactivity';
 import { channelController } from '../../../channelController';
 import Button from "../../ui/Button.vue";
+import { user } from "@/user";
 
 const emit = defineEmits(["leave", "ban", "kick", "mute", "password", "profile", "admin"]);
 
@@ -45,7 +46,7 @@ function manageAdmin(): void {
 
 <template>
     <div v-if="currentChat && chatIsChannel(currentChat)">
-        <div class="buttons-section generic-buttons" v-if="!channelController.userSelected">
+        <div class="buttons-section generic-buttons" v-if="!channelController.userSelected || channelController.userSelected.id == user.id">
             <Button class="button" @click="managePassword" v-if="channelController.userIsChannelOwner(currentChannel)" :selected="true">
                 MANAGE PASSWORD
             </Button>

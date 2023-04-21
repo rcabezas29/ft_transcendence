@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { channelController } from '../../../channelController';
 
-const props = defineProps({
-	channelName: String
-});
+const props = defineProps<{
+    channelName: string
+}>()
 
 const channel = channelController.channels[props.channelName!];
 

@@ -4,24 +4,16 @@ import { GatewayUser } from "src/gateway-manager/interfaces/gateway-user.interfa
 import { ChatService } from "./chat.service";
 import Channel from "./channel.class";
 import { ChannelMessagePayload,
+	ChannelPayload,
 	ChatUser,
-	Message,
 	PasswordBoolChannelPayload,
 	PasswordChannelPayload,
 	TimeUserChannelPayload,
 	UserArrayChannelPayload,
-	UserChannelPayload
+	UserChannelNamePayload,
+	UserIdChannelPayload
 } from "./interfaces";
 import { Server } from 'socket.io';
-
-interface ChannelPayload {
-	name: string;
-	users: ChatUser[];
-	owner: ChatUser;
-	admins: ChatUser[];
-	isPrivate: boolean;
-	messages: Message[];
-}
 
 @Injectable()
 export class ChannelsService {
@@ -108,7 +100,7 @@ export class ChannelsService {
 		const channelPayload: ChannelPayload = this.channelToChannelPayload(channel);
 		user.socket.emit('channel-joined', channelPayload);
 
-		const newUserPayload: UserChannelPayload = {
+		const newUserPayload: UserChannelNamePayload = {
 			user: this.chatService.gatewayUserToChatUser(user),
 			channelName: payload.channelName
 		}
@@ -318,9 +310,15 @@ export class ChannelsService {
 
 	private removeUserFromChannel(user: GatewayUser, channel: Channel): void {
 		channel.removeUser(user);
-		user.socket.emit('channel-left', this.channelToChannelPayload(channel));
 
-		const payload: ChannelPayload = this.channelToChannelPayload(channel);
+		const channelPayload: ChannelPayload = this.channelToChannelPayload(channel);
+
+		user.socket.emit('channel-left', channelPayload);
+
+		const payload: UserIdChannelPayload = {
+			userId: user.id,
+			channel: channelPayload
+		}
 		user.socket.to(channel.name).emit('user-left', payload);
 	}
 

@@ -1,16 +1,17 @@
 <script setup lang="ts">
 
-import { currentChat } from '@/currentChat'
 import { channelController } from '../../../channelController';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import Button from "../../ui/Button.vue";
 import TextInputField from '@/components/ui/TextInputField.vue';
 
 const emit = defineEmits(["close-mute-settings"]);
 
-const currentChannel = computed(() => {
-    return channelController.channels[currentChat.value!.target as string];
-})
+const props = defineProps<{
+    channelName: string
+}>()
+
+const channel = channelController.channels[props.channelName!];
 
 const amountOfMuteTime = ref("");
 
@@ -18,7 +19,7 @@ function muteUser(): void {
 	if (!channelController.userSelected)
 		return;
 	
-	channelController.muteUser(channelController.userSelected, currentChannel.value.name, amountOfMuteTime.value);
+	channelController.muteUser(channelController.userSelected, channel.name, amountOfMuteTime.value);
 	amountOfMuteTime.value = "";
     emit("close-mute-settings");
 }

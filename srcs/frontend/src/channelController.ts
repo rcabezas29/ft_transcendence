@@ -12,9 +12,14 @@ interface ChannelPayload {
 	messages: Message[];
 }
 
-interface UserChannelPayload {
+interface UserChannelNamePayload {
 	user: ChatUser,
 	channelName: ChannelName
+}
+
+interface UserIdChannelPayload {
+	userId: number,
+	channel: ChannelPayload
 }
 
 interface UserArrayChannelPayload {
@@ -58,10 +63,10 @@ class ChannelController {
 		user.socket?.on('channel-created', (channel: ChannelPayload) => this.onChannelCreated(channel));
 		user.socket?.on('new-channel', (channel: ChannelPayload) => this.onNewChannel(channel));
 		user.socket?.on('channel-joined', (channel: ChannelPayload) => this.onChannelJoined(channel));
-		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
+		user.socket?.on('new-user-joined', (newUserPayload: UserChannelNamePayload) => this.onNewUserJoined(newUserPayload));
 		user.socket?.on('deleted-channel', (channelName: ChannelName) => this.onDeletedChannel(channelName));
 		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
-		user.socket?.on('user-left', (payload: ChannelPayload) => this.onUserLeft(payload));
+		user.socket?.on('user-left', (payload: UserIdChannelPayload) => this.onUserLeft(payload));
 		user.socket?.on('channel-message', (message: ChannelMessagePayload) => this.receiveChannelMessage(message));
 		user.socket?.on('user-banned', (payload: TimeUserChannelPayload) => this.onUserBanned(payload));
 		user.socket?.on('user-muted', (payload: TimeUserChannelPayload) => this.onUserMuted(payload));
@@ -163,7 +168,7 @@ class ChannelController {
 				return this.alertError('the channel owner is untouchable!');
 		}
 		
-		const payload: UserChannelPayload = {
+		const payload: UserChannelNamePayload = {
 			user: kickedUser,
 			channelName: channelName
 		}
@@ -182,7 +187,7 @@ class ChannelController {
 				return this.alertError('the channel owner is untouchable!');
 		}
 
-		const payload: UserChannelPayload = { user: newAdmin, channelName };
+		const payload: UserChannelNamePayload = { user: newAdmin, channelName };
 		user.socket?.emit('set-admin', payload);
 	}
 
@@ -198,7 +203,7 @@ class ChannelController {
 				return this.alertError('the channel owner is untouchable!');
 		}
 
-		const payload: UserChannelPayload = { user: admin, channelName };
+		const payload: UserChannelNamePayload = { user: admin, channelName };
 		user.socket?.emit('unset-admin', payload);
 	}
 
@@ -263,13 +268,12 @@ class ChannelController {
 		}
 	}
 
-	private onNewUserJoined(newUserPayload: UserChannelPayload): void {
+	private onNewUserJoined(newUserPayload: UserChannelNamePayload): void {
 		const {channelName, user} = newUserPayload;
 		this.channels[channelName].users.push(user);
 	}
 
 	private onDeletedChannel(channelName: ChannelName): void {
-		console.log("DEETED")
 		delete(this.channels[channelName]);
 		if (currentChat.value?.target === channelName)
 			currentChat.value = null;
@@ -284,8 +288,12 @@ class ChannelController {
 			currentChat.value = null;
 	}
 
-	private onUserLeft(channel: ChannelPayload): void {
+	private onUserLeft(payload: UserIdChannelPayload): void {
+		const { channel, userId } = { ...payload };
 		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
+		
+		if (this.userSelected && userId == this.userSelected.id)
+			this.userSelected = null;
 	}
 
 	private receiveChannelMessage(payload: ChannelMessagePayload): void {

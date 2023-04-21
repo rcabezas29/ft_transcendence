@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { computed, ref } from "vue";
+	import { computed, ref, watch } from "vue";
 	import { channelController } from '@/channelController';
 	import Table from "../ui/Table.vue";
 	import LockIcon from "../icons/LockIcon.vue";
@@ -16,7 +16,9 @@
 	}
 
 	function unselectChannel():void {
-		selectedChannel.value = null;
+		if (!channelChatOpened.value && !manageUsersModalOpened.value) {
+			selectedChannel.value = null;
+		}
 	}
 
 	function isChannelSelected(channel: Channel): boolean {
@@ -30,6 +32,7 @@
 
 	function channelChatOff() {
 		channelChatOpened.value = false;
+		unselectChannel();
 	}
 
 	const manageUsersModalOpened = ref<boolean>(false);
@@ -39,12 +42,20 @@
 
 	function manageUsersOff() {
 		manageUsersModalOpened.value = false;
+		unselectChannel();
 	}
 
 	const currentChannelName = computed<string>(() => {
 		if (selectedChannel.value)
 			return selectedChannel.value.name;
 		return "";
+	});
+
+	watch(channelController.channels, () => {
+		if (!(currentChannelName.value in channelController.channels)) {
+			channelChatOff();
+			manageUsersOff();
+		}
 	});
 
 </script>

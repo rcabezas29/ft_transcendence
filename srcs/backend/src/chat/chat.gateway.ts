@@ -9,7 +9,7 @@ import { ChannelMessagePayload,
 	DirectMessagePayload,
 	PasswordChannelPayload,
 	TimeUserChannelPayload,
-	UserChannelPayload
+	UserChannelNamePayload
 } from './interfaces';
 
 @WebSocketGateway({cors: true})
@@ -100,7 +100,7 @@ export class ChatGateway {
 	}
 
 	@SubscribeMessage("kick-user")
-	kickUser(client: Socket, payload: UserChannelPayload): void {
+	kickUser(client: Socket, payload: UserChannelNamePayload): void {
 		const kicker: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const kicked: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
 		const kickedOk: boolean = this.channelsService.kickUser(kicker, kicked, payload.channelName, this.gatewayManagerGateway.server);
@@ -114,14 +114,14 @@ export class ChatGateway {
 	}
 
 	@SubscribeMessage("set-admin")
-	setAdmin(client: Socket, payload: UserChannelPayload): void {
+	setAdmin(client: Socket, payload: UserChannelNamePayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const newAdmin: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
 		this.channelsService.setAdmin(user, newAdmin, payload.channelName, this.gatewayManagerGateway.server);
 	}
 
 	@SubscribeMessage("unset-admin")
-	unsetAdmin(client: Socket, payload: UserChannelPayload): void {
+	unsetAdmin(client: Socket, payload: UserChannelNamePayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const admin: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
 		this.channelsService.unsetAdmin(user, admin, payload.channelName, this.gatewayManagerGateway.server);

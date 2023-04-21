@@ -13,7 +13,6 @@
 	const emit = defineEmits(["close"]);
 
 	function closeModal() {
-		console.log("close modal inside");
 		emit("close");
 	}
 
