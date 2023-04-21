@@ -118,6 +118,11 @@
 		deleteAccountModalVisible.value = false;
 	}
 
+	function logoutUser(): void {
+		user.logout();
+		router.replace({ "name": "login" });
+	}
+
 </script>
 
 <template>
@@ -132,6 +137,7 @@
 			<div class="header-buttons">
 				<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
 				<TwoFactorAuthenticationSetup v-if="!editMode"/>
+				<Button @click="logoutUser" v-if="user.checkIsLogged()" class="logout-button">LOGOUT</Button>
 				
 				<div class="header-editing-buttons">
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
@@ -270,6 +276,11 @@
 		align-items: center;
 		width: 100%;
 		gap: 10px;
+	}
+
+	.logout-button:hover {
+		color: #B3F9D7;
+		background-color: #1E9052;
 	}
 
 	/* Everything bigger than 850px */
