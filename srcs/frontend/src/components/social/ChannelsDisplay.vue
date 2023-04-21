@@ -125,15 +125,18 @@
 		<Modal :visible="createChannelModalVisible" @close="closeCreateChannelModal" title="CREATE NEW CHANNEL">
 			<p class="errorMessage">{{ errorMessage }}</p>
 
-			<p>Enter channel name:</p>
-			<TextInputField v-model="newChannelNameInput" placeholder-text="CHANNEL NAME" />
-			<p>Enter channel password (optional):</p>
-			<TextInputField type="password" v-model="newChannelPasswordInput" placeholder-text="CHANNEL PASSWORD (OPTIONAL)" />
+			<form @submit.prevent="createChat">
+				<p>Enter channel name:</p>
+				<TextInputField v-model="newChannelNameInput" placeholder-text="CHANNEL NAME" />
+				<p>Enter channel password (optional):</p>
+				<TextInputField type="password" v-model="newChannelPasswordInput" placeholder-text="CHANNEL PASSWORD (OPTIONAL)" />
 
-			<div class="modal-buttons">
-				<Button @click="createChat" :selected="true">CREATE</Button>
-				<Button @click="closeCreateChannelModal">CANCEL</Button>
-			</div>
+				<div class="modal-buttons">
+					<Button type="submit" :selected="true">CREATE</Button>
+					<Button type="button" @click="closeCreateChannelModal">CANCEL</Button>
+				</div>
+			</form>
+			
 		</Modal>
 	</div>
 </template>
