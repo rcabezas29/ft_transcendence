@@ -20,6 +20,7 @@ import { Stats } from 'src/stats/entities/stats.entity';
 import { FilesService } from 'src/files/files.service';
 import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
 import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 @Injectable()
 export class UsersService {
@@ -161,6 +162,21 @@ export class UsersService {
       throw new BadRequestException('Failed to update user');
     }
     throw new NotFoundException();
+  }
+
+  async updateRole(id: number, newRoleDto: UpdateUserRoleDto) {
+      const userToUpdate = { id, ...newRoleDto };
+
+      try {
+        const user = await this.usersRepository.preload(userToUpdate);
+        if (user) {
+          const res = await this.usersRepository.save(user);
+          return res;
+        }
+      } catch (e) {
+        throw new BadRequestException('Failed to update user role');
+      }
+      throw new NotFoundException();
   }
 
   async updateStats(userId: number, newStats: UpdateStatsDto) {

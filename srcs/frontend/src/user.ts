@@ -8,6 +8,7 @@ import { gameController } from './gameController';
 import { friendsController } from './friendsController';
 import type { JwtPayload, UserData } from './interfaces';
 import { UserRole } from './interfaces/user-data.interface';
+import router from './router';
 
 interface FetchedUser {
 	id: number;
@@ -66,6 +67,8 @@ class User {
 				this.socket.on("connect", () => { this.onConnect(); });
 				this.socket.on("disconnect", () => { this.onDisconnect(); });
 				this.socket.on("alreadyConnected", () => { this.onAlreadyConnected(); });
+				this.socket.on("website-admin", () => { this.makeWebsiteAdmin(); });
+				this.socket.on("remove-website-admin", () => { this.removeWebsiteAdmin(); });
 			}
 		}
 	}
@@ -118,11 +121,16 @@ class User {
 		else
 			console.log("INTRA_API_AUTHORIZE_URL environment variable unset");
 	}
-/*
+
 	makeWebsiteAdmin() {
 		this.role = UserRole.ADMIN;
 	}
-*/
+
+	removeWebsiteAdmin() {
+		this.role = UserRole.USER;
+		router.replace({ "name": "home" });
+	}
+
 	isWebsiteAdmin() {
 		return this.role == UserRole.ADMIN || this.role == UserRole.OWNER;
 	}

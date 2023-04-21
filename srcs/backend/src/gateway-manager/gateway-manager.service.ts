@@ -98,7 +98,23 @@ export class GatewayManagerService {
 	async onUserUpdated(client: GatewayUser) {
 		const user: User = await this.usersService.findOneById(client.id);
 		const { id, username } = user;
+
+		client.username = username;
+
 		client.socket.broadcast.emit("user-updated", { id, username });
+	}
+
+	onUserRoleUpdated(userId: number, newRole: UserRole) {
+		const adminGatewayUser = this.getClientByUserId(userId);
+		if (!adminGatewayUser)
+			return;
+
+		adminGatewayUser.role = newRole;
+
+		if (newRole == UserRole.ADMIN)
+			adminGatewayUser.socket.emit("website-admin");
+		else if (newRole == UserRole.USER)
+			adminGatewayUser.socket.emit("remove-website-admin");
 	}
 
 	setGatewayUserGamingStatus(id: number) {

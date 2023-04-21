@@ -45,8 +45,50 @@
 		return user.role == UserRole.ADMIN || user.role == UserRole.OWNER;
 	}
 
-	function makeAdmin(user: UserData) {
-		console.log("making admin")
+	async function makeWebsiteAdmin(selectedUser: UserData) {
+		if (!user.isWebsiteOwner() || selectedUser.role != UserRole.USER)
+			return;
+
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/role/${selectedUser.id}`, {
+			method: "PATCH",
+			headers: {
+				"Authorization": `Bearer ${user.token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({role: UserRole.ADMIN})
+		});
+
+		if (httpResponse.status != 200) {
+			console.log("error while making admin");
+			return;
+		}
+
+		user.socket?.emit("new-website-admin", selectedUser.id);
+		const updatedUser = users.value?.find((u) => u.id == selectedUser.id);
+		updatedUser!.role = UserRole.ADMIN;
+	}
+
+	async function removeWebsiteAdmin(selectedUser: UserData) {
+		if (!user.isWebsiteOwner() || selectedUser.role != UserRole.ADMIN)
+			return;
+
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/role/${selectedUser.id}`, {
+			method: "PATCH",
+			headers: {
+				"Authorization": `Bearer ${user.token}`,
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({role: UserRole.USER})
+		});
+
+		if (httpResponse.status != 200) {
+			console.log("error while removing admin");
+			return;
+		}
+
+		user.socket?.emit("remove-website-admin", selectedUser.id);
+		const updatedUser = users.value?.find((u) => u.id == selectedUser.id);
+		updatedUser!.role = UserRole.USER;
 	}
 
 </script>
@@ -84,8 +126,11 @@
 					</div>
 				</td>
 				<td>{{ userRow.role }}</td>
-				<td >
-					<a href="#" v-if="!userIsAdmin(userRow)" @click="makeAdmin(userRow)">Promote to admin</a>
+				<td>
+					<div v-if="user.isWebsiteOwner()">
+						<button v-if="!userIsAdmin(userRow)" @click="makeWebsiteAdmin(userRow)">Promote to admin</button>
+						<button v-else @click="removeWebsiteAdmin(userRow)">Remove admin</button>
+					</div>
 				</td>
 			</tr>
 			<td colspan="2" v-if="input && filteredUsers.length === 0">

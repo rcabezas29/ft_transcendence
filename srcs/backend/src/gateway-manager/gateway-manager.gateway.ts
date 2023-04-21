@@ -11,6 +11,7 @@ import { GatewayUser } from './interfaces/gateway-user.interface';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { UserRole } from 'src/users/interfaces/user-roles';
 
 @WebSocketGateway({cors: true})
 export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -83,5 +84,15 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 		if (!gatewayUser)
 			return;
 		this.gatewayManagerService.onUserUpdated(gatewayUser);
+	}
+
+	@SubscribeMessage("new-website-admin")
+	notifyOfNewWebsiteAdmin(client: Socket, newAdminUserId: number): void {
+		this.gatewayManagerService.onUserRoleUpdated(newAdminUserId, UserRole.ADMIN);
+	}
+
+	@SubscribeMessage("remove-website-admin")
+	notifyOfWebsiteAdminRemoval(client: Socket, adminUserId: number): void {
+		this.gatewayManagerService.onUserRoleUpdated(adminUserId, UserRole.USER);
 	}
 }

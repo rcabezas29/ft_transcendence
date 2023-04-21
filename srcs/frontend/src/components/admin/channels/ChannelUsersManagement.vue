@@ -87,10 +87,7 @@ function viewProfile(): void {
                     </Button>
                 </div>
             </div>
-            <!--
-                en lugar de este mensaje, hacer que se desactiven los botones?
-            -->
-            <div v-else>Select a user</div>
+            <div v-else class="info-section no-user-selected">SELECT A USER</div>
         </div>
 
         
@@ -165,6 +162,11 @@ function viewProfile(): void {
 	padding: 14px 30px;
 	border-width: 1px;
 	height: 50px;
+}
+
+.no-user-selected {
+    align-items: center;
+    justify-content: center;
 }
 
 /* Everything bigger than 850px */
