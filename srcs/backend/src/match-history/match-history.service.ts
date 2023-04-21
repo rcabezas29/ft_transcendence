@@ -20,11 +20,11 @@ export class MatchHistoryService {
         }
     }
 
-    findByUser(user: User): Promise<MatchHistory[]> {
-        return this.matchHistoryRepository.find({
+    async findByUser(userId: number): Promise<MatchHistory[]> {
+		return await this.matchHistoryRepository.find({
             where: [
-                { user1: user },
-                { user2: user },
+                { user1Id: userId },
+                { user2Id: userId },
             ]
         });
     }

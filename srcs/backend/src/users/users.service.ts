@@ -304,8 +304,18 @@ export class UsersService {
     return result;
   }
 
-  async getUserMatchHistory(id: number): Promise<MatchHistory[]> {
-	const user: User = await this.findOneById(id);
-	return await this.mathcHistoryService.findByUser(user);
+  async getUserMatchHistory(id: number) {
+	const history: MatchHistory[] = await this.mathcHistoryService.findByUser(id);
+	const historyWithUsers = await Promise.all(history.map(async (h) => {
+		const user1: User = await this.findOneById(h.user1Id);
+		const user2: User = await this.findOneById(h.user2Id);
+
+		h["username1"] = user1.username;
+		h["username2"] = user2.username;
+
+		return h;
+	}));
+
+	return historyWithUsers;
   }
 }

@@ -6,16 +6,12 @@ export class MatchHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, {
-	  eager: true
-  })
-  user1: User;
+  @Column()
+  user1Id: number;
 
-  @ManyToOne(() => User, {
-	  eager: true
-  })
-  user2: User;
-
+  @Column()
+  user2Id: number;
+  
   @Column({nullable: true})
   winner: number;
 

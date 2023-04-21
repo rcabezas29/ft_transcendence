@@ -5,11 +5,13 @@
 	
 	interface MatchHistory {
 		id: number;
-		user1: UserData;
-		user2: UserData;
+		user1Id: number;
+		user2Id: number;
 		winner: number;
 		loser: number;
 		score: number[];
+		username1: string;
+		username2: string;
 	}
 
 	const matchHistory: Ref<MatchHistory[] | null> = ref(null);
@@ -41,9 +43,9 @@
 			<div class="match-interior-container">
 
 				<div class="player player-left">
-					<span class="player-name">{{match.user1.username}}</span>
+					<span class="player-name">{{match.username1}}</span>
 					<div class="player-img">
-						<img id="user-image" :src="getUserImageUrl(match.user1.id)" />
+						<img id="user-image" :src="getUserImageUrl(match.user1Id)" />
 					</div>
 					<div class="player-score">
 						<span>{{match.score[0]}}</span>
@@ -59,9 +61,9 @@
 						<span>{{match.score[1]}}</span>
 					</div>
 					<div class="player-img">
-						<img id="user-image" :src="getUserImageUrl(match.user2.id)"/>
+						<img id="user-image" :src="getUserImageUrl(match.user2Id)"/>
 					</div>
-					<span class="player-name">{{match.user2.username}}</span>
+					<span class="player-name">{{match.username2}}</span>
 				</div>
 
 			</div>
