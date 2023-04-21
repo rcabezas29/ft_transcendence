@@ -91,7 +91,10 @@ export class GameService {
     for (const game of this.ongoingGames) {
       if (this.isPlayerInAGame(player.id)) {
         game.rejoinPlayer(player);
-        player.socket.emit('rejoin-game');
+        player.socket.emit('rejoin-game', {
+          user1: game.players[0].user.username,
+          user2: game.players[1].user.username,
+        });
       }
     }
   }
