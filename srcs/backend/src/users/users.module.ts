@@ -7,6 +7,7 @@ import { FriendshipsModule } from 'src/friendships/friendships.module';
 import { StatsModule } from 'src/stats/stats.module';
 import { FilesModule } from 'src/files/files.module';
 import { PasswordUtilsModule } from 'src/password-utils/password-utils.module';
+import { MatchHistoryModule } from 'src/match-history/match-history.module';
 
 @Module({
   controllers: [UsersController],
@@ -16,7 +17,8 @@ import { PasswordUtilsModule } from 'src/password-utils/password-utils.module';
     FriendshipsModule,
     StatsModule,
     FilesModule,
-    PasswordUtilsModule
+    PasswordUtilsModule,
+	MatchHistoryModule
   ],
   exports: [UsersService, TypeOrmModule],
 })
