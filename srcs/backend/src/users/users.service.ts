@@ -21,6 +21,8 @@ import { FilesService } from 'src/files/files.service';
 import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
 import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { MatchHistoryService } from 'src/match-history/match-history.service';
+import { MatchHistory } from 'src/match-history/entity/match-history.entity';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +31,7 @@ export class UsersService {
     private readonly statsService: StatsService,
     private readonly filesService: FilesService,
     private readonly passwordUtilsService: PasswordUtilsService,
+	private readonly mathcHistoryService: MatchHistoryService,
 
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -315,5 +318,20 @@ export class UsersService {
       counter += 1;
     }
     return result;
+  }
+
+  async getUserMatchHistory(id: number) {
+    const history: MatchHistory[] = await this.mathcHistoryService.findByUser(id);
+    const historyWithUsers = await Promise.all(history.map(async (h) => {
+      const user1: User = await this.findOneById(h.user1Id);
+      const user2: User = await this.findOneById(h.user2Id);
+
+      h["username1"] = user1.username;
+      h["username2"] = user2.username;
+
+      return h;
+    }));
+
+    return historyWithUsers;
   }
 }

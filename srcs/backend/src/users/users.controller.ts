@@ -74,4 +74,10 @@ export class UsersController {
   findUsernameMatches(@Param('username') usernameSegment: string) {
     return this.usersService.findUsernameMatches(usernameSegment);
   }
+
+  @UseGuards(JwtTwoFactorGuard)
+  @Get('match-history/:id')
+  getUserMatchHistory(@Param('id', ParseIntPipe) id: number) {
+	return this.usersService.getUserMatchHistory(id);
+  }
 }
