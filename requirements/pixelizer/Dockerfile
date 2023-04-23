@@ -1,5 +1,7 @@
 FROM drogonframework/drogon
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get -y update
 RUN apt-get -y install build-essential make xorg imagemagick libasan5 libx11-dev
 
