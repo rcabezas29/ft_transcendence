@@ -1,6 +1,26 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
+import { user } from "../../user";
+import type { UserData } from "@/interfaces";
+import type { freemem } from "os";
+
+
+
+async function getUser(friendId: any) {
+    const usersRequest = await fetch(`http://localhost:3000/users/${friendId}`, {
+      headers: {
+        "Authorization": `Bearer ${user.token}`
+      }
+    });
+
+    if (usersRequest.status != 200) {
+      return null;
+    }
+
+    const userData: UserData = await usersRequest.json();
+    return userData;
+}
 
 function isOnline(friend: any): boolean {
     return friend.status === FriendStatus.online;
@@ -10,9 +30,16 @@ function isGaming(friend: any): boolean {
     return friend.status === FriendStatus.gaming;
 }
 
+function sendFriendRequest() {
+  const userId = 2;
+  
+  friendsController.sendFriendRequest(userId);
+}
+
 const activeFriends = computed(() => {
     return friendsController.getActiveFriends();
 })
+
 
 const blockedFriends = ref<Friend[]>([]);
 const sentFriendRequests = ref<Friend[]>([]);
@@ -40,6 +67,7 @@ watch(friendsController, () => {
     });
 })
 
+
 </script>
 
 <template>
@@ -48,10 +76,13 @@ watch(friendsController, () => {
             <h2>FRIENDS REQUESTS</h2>
         </div>
         <div class="friends-subsection">
-            <div class="friend-request" v-for="friend in receivedFriendRequests" :key="friend.userId">
-                <span>{{ friend.username }}</span>
-                <button @click="() => friendsController.acceptFriendRequest(friend.userId)">Accept</button>
-                <button @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>
+            <div class="friend-request" v-for="(friend, index) in receivedFriendRequests" :key="friend.userId">
+                <div class="row-number-box">{{ index + 1 }}</div>
+                <img :src="friend.userImage" class="user-image" alt="User Image">{{ friend.username }}
+                <div class="friend-request-buttons">
+                    <button class="friend-request-bt" @click="() => friendsController.acceptFriendRequest(friend.userId)">Accept</button>
+                    <button class="friend-request-bt" @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>
+                </div>
             </div>
         </div>
         <div class="title-bar">
@@ -62,10 +93,12 @@ watch(friendsController, () => {
                 <span>{{ friend.username }} ({{ friend.status }})</span>
                 <div class="friend-status"
                     :class="{ 'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
-                <button @click="() => friendsController.blockUser(friend.userId)">Block</button>
-                <button @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
+                <button class="no" @click="() => friendsController.blockUser(friend.userId)">Block</button>
+                <button class="no" @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
             </div>
         </div>
+        <button @click="() => sendFriendRequest()">Enviar solicitud de amistad</button>
+
     </div>
 </template>
 
@@ -80,13 +113,6 @@ watch(friendsController, () => {
 }
 
 .title-bar {
-    /* width: 100%;
-        background-color: #1E9052;
-        border-color: #4BFE65;
-        color: white;
-        padding: 0.5rem;
-        text-align: center;
-        font-size: 1.25rem; */
     box-sizing: border-box;
     font-size: 0.6rem;
     text-align: center;
@@ -102,13 +128,39 @@ watch(friendsController, () => {
 .active-friend,
 .friend-request {
     display: flex;
+    flex-grow: 1;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
+    /* width: 100%; */
     padding: 0.5rem;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
+    background-color: #08150c;
+    border: 0.1em solid #4BFE65;
     box-sizing: border-box;
     margin-bottom: 0
+}
+.friend-request-bt {
+    flex-grow: 2;
+    padding: 0.2rem;
+    color: #b3f9d7;
+    background: #08150c;
+    border: 0.1em solid #4BFE65;
+}
+
+.row-number-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    background-color: #4BFE65;
+    color: #08150c;
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.friend-request-bt:hover {
+    background-color: #4BFE65;
+    color: #08150c;
 }
 </style>
