@@ -3,6 +3,8 @@ import { type Ref, ref, onUpdated, onMounted } from 'vue';
 import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
 import { channelController } from '@/channelController';
+import router from '@/router';
+import Button from '@/components/ui/Button.vue';
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -16,7 +18,7 @@ function onSubmit(e: Event) {
 	messageInput.value = "";
 }
 
-function	challengeThroughChat() {
+function challengeThroughChat() {
 	directMessageController.sendChallenge();
 }
 
@@ -28,16 +30,25 @@ function scrollDownChatMessages() {
 
 onUpdated(() => {
 	scrollDownChatMessages();
-})
+});
 
 onMounted(() => {
 	scrollDownChatMessages();
-})
+});
+
+function	acceptChallenge(friendId: number) {
+	directMessageController.acceptChallenge(friendId);
+	router.replace('game');
+}
+
+function	refuseChallenge(friendId: number) {
+	directMessageController.refuseChallenge(friendId);
+}
 
 </script>
 
 <template>
-	<button v-if="chatIsDirectMessage(currentChat!)" v-on:click="challengeThroughChat()">Challenge</button>
+	<Button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">Challenge</Button>
 
 	<div class="chat-messages">
 		<div v-for="message in currentChat!.messages" class="message">
@@ -46,6 +57,13 @@ onMounted(() => {
 			</div>
 			<div class="chat-message">
 				{{ message.message }}
+			</div>
+		</div>
+		<div class="challenge-request" v-if="currentChat?.challenge">
+			<p>{{ currentChat.target.username }} challenged you</p>
+			<div class="choice-buttons">
+				<Button @click="acceptChallenge(currentChat.target.id)">Accept</Button>
+				<Button @click="refuseChallenge(currentChat.target.id)">Refuse</Button>
 			</div>
 		</div>
 	</div>
@@ -92,5 +110,18 @@ onMounted(() => {
 		width: 100%;
         height: 38px;
         padding: 0 24px;
+	}
+
+	.challenge-request {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		border: solid 1px #4BFE65;
+		margin: 5%;
+		background-color: #1E9052;
+	}
+
+	.choice-buttons {
+		display: flex;
 	}
 </style>

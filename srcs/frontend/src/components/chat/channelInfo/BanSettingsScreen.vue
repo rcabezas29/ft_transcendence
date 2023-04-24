@@ -1,16 +1,17 @@
 <script setup lang="ts">
 
-import { currentChat } from '@/currentChat'
 import { channelController } from '../../../channelController';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import Button from "../../ui/Button.vue";
 import TextInputField from '@/components/ui/TextInputField.vue';
 
 const emit = defineEmits(["close-ban-settings"]);
 
-const currentChannel = computed(() => {
-    return channelController.channels[currentChat.value!.target as string];
-})
+const props = defineProps<{
+    channelName: string
+}>()
+
+const channel = channelController.channels[props.channelName!];
 
 const amountOfBanTime = ref("");
 
@@ -18,7 +19,7 @@ function banUser(): void {
 	if (!channelController.userSelected)
 		return;
 
-	channelController.banUser(channelController.userSelected, currentChannel.value.name, amountOfBanTime.value);
+	channelController.banUser(channelController.userSelected, channel.name, amountOfBanTime.value);
 	amountOfBanTime.value = "";
     emit("close-ban-settings");
 }
@@ -45,7 +46,6 @@ function closeBanSettings(): void {
             </div>
         </form>
     </div>
-   
 </template>
 
 <style scoped>

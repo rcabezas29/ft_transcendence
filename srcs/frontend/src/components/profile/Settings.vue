@@ -118,20 +118,26 @@
 		deleteAccountModalVisible.value = false;
 	}
 
+	function logoutUser(): void {
+		user.logout();
+		router.replace({ "name": "login" });
+	}
+
 </script>
 
 <template>
 	<div class="container">
 		<div class="header">
 			<div class="header-image">
-				<img :src="imagePreviewURL" @click="openCropper" alt="" srcset="">
-				<div class="overlay" v-if="editMode">
+				<img :src="imagePreviewURL" alt="" srcset="">
+				<div class="overlay" v-if="editMode" @click="openCropper">
 					<div class="text">CROP THIS PHOTO</div>
 				</div>
 			</div>
 			<div class="header-buttons">
 				<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
 				<TwoFactorAuthenticationSetup v-if="!editMode"/>
+				<Button @click="logoutUser" v-if="user.checkIsLogged()" class="logout-button">LOGOUT</Button>
 				
 				<div class="header-editing-buttons">
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
@@ -244,11 +250,16 @@
 	}
 
 	.avatar-section {
+		box-sizing: border-box;
         display: flex;
+		flex-direction: column;
+		width: 100%;
     }
 
 	.avatar-section input[type="file"]::file-selector-button {
+		box-sizing: border-box;
 		padding: 10px 20px;
+		width: 100%;
 	}
 
 	.form {
@@ -265,6 +276,11 @@
 		align-items: center;
 		width: 100%;
 		gap: 10px;
+	}
+
+	.logout-button:hover {
+		color: #B3F9D7;
+		background-color: #1E9052;
 	}
 
 	/* Everything bigger than 850px */

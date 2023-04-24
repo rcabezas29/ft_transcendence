@@ -5,11 +5,11 @@
 	import Button from "../components/ui/Button.vue";
 	import TextInputField from "../components/ui/TextInputField.vue";
 
-	const username = ref("");
-	const email = ref("");
-	const password = ref("");
-	const message = ref("");
-	const messageClass = ref("error-message");
+	const username = ref<string>("");
+	const email = ref<string>("");
+	const password = ref<string>("");
+	const message = ref<string>("");
+	const messageClass = ref<string>("error-message");
 
 	async function handleSubmit(e: Event) {
 		const { registeredSuccessfully, response } = await user.register(username.value, email.value, password.value);
@@ -20,12 +20,10 @@
 		}
 
 		const loginRet = await user.login(email.value, password.value);
-		if (!loginRet.loggedSuccessfully)
-		{
+		if (!loginRet.loggedSuccessfully) {
 			message.value = loginRet.response.message;
 			return;
 		}
-
 		const accessToken = loginRet.response.access_token;
 
 		user.auth(accessToken);
@@ -57,9 +55,15 @@
 			<label :class="messageClass">{{ message }}</label>
 			<div class="form-buttons">
 				<Button type="button" @click="moveToLogin">LOGIN</Button>
-				<Button type="submit" :selected="true" @click="handleSubmit">REGISTER</Button>
+				<Button type="submit" :selected="true">REGISTER</Button>
 			</div>
-			<Button type="button" @click="loginWithIntra" class="button-42">REGISTER WITH 42 INTRA</Button>
+			<Button type="button" @click="loginWithIntra" class="button-42">
+				<div class="login-text">
+					LOGIN WITH
+					<img src="../assets/42Logo.svg" alt="42Logo"  width="22" height="22">
+					INTRA
+				</div>
+			</Button>
 		</form>
 	</div>
 </template>
@@ -87,7 +91,8 @@
 
 	.form-buttons {
 		display: flex;
-		gap: 24px
+		flex-direction: column;
+		gap: 14px
 	}
 
 	.button-42 {
@@ -102,5 +107,26 @@
 
 	input {
 		margin-bottom: 14px;
+	}
+
+	.error-message {
+		color: red;
+	}
+
+	.login-text {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.login-text img {
+		margin: 0px 8px;
+	}
+
+	/* Everything bigger than 850px */
+	@media only screen and (min-width: 850px) {
+		.form-buttons {
+			flex-direction: row;
+		}
 	}
 </style>

@@ -7,10 +7,13 @@ import { channelController } from './channelController';
 import { gameController } from './gameController';
 import { friendsController } from './friendsController';
 import type { JwtPayload, UserData } from './interfaces';
+import { UserRole } from './interfaces/user-data.interface';
 
 interface FetchedUser {
 	id: number;
 	username: string;
+	elo: number;
+	role: UserRole;
 }
 
 class User {
@@ -21,6 +24,8 @@ class User {
 	public id: number = -1;
 	public username: string = '';
 	public avatarImageURL: string = '';
+	public elo : number = 0;
+	public role: UserRole = UserRole.USER;
 
 	private isLogged: boolean = false;
 	private onLogoutCallbacks: Function[] = [];
@@ -43,7 +48,9 @@ class User {
 
 			const fetchedUser: FetchedUser = userData;
 			this.username = fetchedUser.username;
-			this.avatarImageURL = `http://localhost:3000/users/avatar/${this.id}`;
+			this.elo = fetchedUser.elo;
+			this.avatarImageURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${this.id}`;
+			this.role = fetchedUser.role;
 
 		} catch (error) {
 			console.log(error, 'error from decoding token');
@@ -55,7 +62,7 @@ class User {
 			this.isLogged = true;
 
 			if (!this.socket) {
-				this.socket = io("http://localhost:3000/", {auth: {token: access_token}});
+				this.socket = io(`${import.meta.env.VITE_BACKEND_URL}/`, {auth: {token: access_token}});
 				this.socket.on("connect", () => { this.onConnect(); });
 				this.socket.on("disconnect", () => { this.onDisconnect(); });
 				this.socket.on("alreadyConnected", () => { this.onAlreadyConnected(); });
@@ -66,7 +73,7 @@ class User {
 	async register(username: string, email: string, password: string) {
 		const createUser = { username, email, password };
 
-		const httpResponse = await fetch("http://localhost:3000/auth/register", {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
@@ -86,7 +93,7 @@ class User {
 	async login(email: string, password: string) {
 		const loginUser = { email, password };
 
-		const httpResponse = await fetch("http://localhost:3000/auth/login", {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
@@ -111,6 +118,18 @@ class User {
 		else
 			console.log("INTRA_API_AUTHORIZE_URL environment variable unset");
 	}
+/*
+	makeWebsiteAdmin() {
+		this.role = UserRole.ADMIN;
+	}
+*/
+	isWebsiteAdmin() {
+		return this.role == UserRole.ADMIN || this.role == UserRole.OWNER;
+	}
+
+	isWebsiteOwner() {
+		return this.role == UserRole.OWNER;
+	}
 
 	onConnect(): void {
 		this.socketId = this.socket?.id;
@@ -129,7 +148,7 @@ class User {
 	}
 
 	async validateToken(token: string): Promise<boolean> {
-		const httpResponse = await fetch("http://localhost:3000/auth/validate", {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/validate`, {
 			method: "GET",
 			headers: {
 				"Authorization": `Bearer ${token}`,
@@ -181,7 +200,7 @@ class User {
 	}
 
 	async isTwoFactorAuthenticationEnabled(): Promise<boolean> {
-		const httpResponse = await fetch('http://localhost:3000/2fa/is-enabled', {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/2fa/is-enabled`, {
 			method: "GET",
 			headers: {
 				"Authorization": `Bearer ${this.token}`
@@ -207,7 +226,7 @@ class User {
 		if (!this.token)
 			return false;
 
-		const httpResponse = await fetch('http://localhost:3000/2fa/authenticate', {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/2fa/authenticate`, {
 			method: "POST",
 			headers: {
 				"Authorization": `Bearer ${this.token}`,
@@ -224,7 +243,7 @@ class User {
 	}
 
 	async turnOffTwoFactorAuth(): Promise<boolean> {
-		const httpResponse = await fetch('http://localhost:3000/2fa/turn-off', {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/2fa/turn-off`, {
 			method: "POST",
 			headers: {
 				"Authorization": `Bearer ${user.token}`
@@ -237,7 +256,7 @@ class User {
 	}
 
 	async turnOnTwoFactorAuth(code: string): Promise<boolean> {
-		const httpResponse = await fetch('http://localhost:3000/2fa/turn-on', {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/2fa/turn-on`, {
 			method: "POST",
 			headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -252,7 +271,7 @@ class User {
 	}
 
 	async fetchUserData(): Promise<UserData | null> {
-		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${this.id}`, {
 			method: "GET",
 			headers: {
 				"Authorization": `Bearer ${this.token}`
@@ -268,7 +287,7 @@ class User {
 	}
 
 	async updateUsername(newUsername: string): Promise<boolean> {
-		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${this.id}`, {
 			method: "PATCH",
 			headers: {
 				"Authorization": `Bearer ${this.token}`,
@@ -285,7 +304,7 @@ class User {
 	}
 
 	async updatePassword(newPassword: string): Promise<boolean> {
-		const httpResponse = await fetch(`http://localhost:3000/users/${this.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${this.id}`, {
 			method: "PATCH",
 			headers: {
 				"Authorization": `Bearer ${this.token}`,
@@ -304,7 +323,7 @@ class User {
 		const formData: FormData = new FormData();
 		formData.append("file", image, "file");
 	
-		const httpResponse = await fetch(`http://localhost:3000/users/avatar/${user.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/avatar/${user.id}`, {
 			method: "POST",
 			headers: {
 				"Authorization": `Bearer ${this.token}`,
@@ -336,7 +355,7 @@ class User {
 	}
 
 	async deleteAccount() {
-		const httpResponse = await fetch(`http://localhost:3000/users/${user.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${user.id}`, {
 			method: "DELETE",
 			headers: {
 				"Authorization": `Bearer ${this.token}`,

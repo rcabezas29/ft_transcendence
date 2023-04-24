@@ -21,7 +21,7 @@ onBeforeMount(async () => {
 	searchParams.append('code', code);
 	searchParams.append('state', state);
 
-	const httpResponse = await fetch('http://localhost:3000/auth/oauth?' + searchParams);
+	const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/oauth?${searchParams}`);
 	if (httpResponse.status != 200) {
 		router.replace({ "name": "login" })
 		return;

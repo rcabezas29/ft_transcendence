@@ -6,25 +6,25 @@ export class Table {
     goals: Array<HitBox>;
     area: HitBox;
   
-    constructor(/* config info */) {
+    constructor() {
       this.walls = new Array<HitBox>();
       this.goals = new Array<HitBox>();
       this.area = new HitBox(
         new Vector2(0, 0),
         new Vector2(1, 0),
-        new Vector2(400, 200),
+        new Vector2(800, 400),
       );
       this.walls.push(
-        new HitBox(new Vector2(0, -40), new Vector2(0, -1), new Vector2(400, 40)),
+        new HitBox(new Vector2(0, -40), new Vector2(0, -1), new Vector2(800, 40)),
       );
       this.walls.push(
-        new HitBox(new Vector2(0, 200), new Vector2(0, 1), new Vector2(400, 40)),
+        new HitBox(new Vector2(0, 400), new Vector2(0, 1), new Vector2(800, 40)),
       );
       this.goals.push(
-        new HitBox(new Vector2(-40, 0), new Vector2(1, 0), new Vector2(40, 200)),
+        new HitBox(new Vector2(-40, 0), new Vector2(1, 0), new Vector2(40, 400)),
       );
       this.goals.push(
-        new HitBox(new Vector2(400, 0), new Vector2(-1, 0), new Vector2(40, 200)),
+        new HitBox(new Vector2(800, 0), new Vector2(-1, 0), new Vector2(40, 400)),
       );
     }
   

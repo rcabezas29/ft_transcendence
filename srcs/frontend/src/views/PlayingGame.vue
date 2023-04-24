@@ -23,27 +23,32 @@ function returnToHome() {
 </script>
 
 <template>
-    <h3>PONG.EXE</h3>
-    
-	<GameBoard>
-		<canvas ref="canvasRef" class="pong-board" height="200" width="400"> </canvas>
-		<ScoreBoard/>
+  <div class="container">
+    <div class="title">PONG.EXE</div>
 
-		Status: <span>{{ gameController.state }}</span>
-		<Button v-if="gameController.state === GameState.Playing" @click="gameController.endGamePrematurely">STOP GAME</Button>
-		<Button v-if="gameController.state === GameState.End" @click="returnToHome">RETURN TO HOME</Button>
-	</GameBoard>
+    <GameBoard>
+      <canvas ref="canvasRef" class="pong-board" height="400" width="800"> </canvas>
+      <ScoreBoard/>
 
+      <Button v-if="gameController.state === GameState.Playing" @click="gameController.endGamePrematurely">STOP GAME</Button>
+      <Button v-if="gameController.state === GameState.End" @click="returnToHome">RETURN TO HOME</Button>
+    </GameBoard>
+  </div>
 </template>
 
 <style scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .pong-board {
   display: block;
   background-color: black;
 }
 
-
-h3 {
+.title {
   text-align: center;
   margin-top: 1px;
 }

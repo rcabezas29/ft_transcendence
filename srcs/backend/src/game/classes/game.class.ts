@@ -12,15 +12,15 @@ import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
-const INITIAL_BALL_SPEED = 100;
-const WIN_SCORE = 1;
+const INITIAL_BALL_SPEED = 200;
+const WIN_SCORE = 7;
 const GAME_DURATION = 200; // in seconds (?)
 
 // TODO: calculate from game-canvas size
-const BALL_START_POSITION_X = 200;
-const BALL_START_POSITION_Y = 100;
+const BALL_START_POSITION_X = 400;
+const BALL_START_POSITION_Y = 200;
 
-const MAX_BALL_SPEED = 450;
+const MAX_BALL_SPEED = 700;
 
 type Move = (playerIndex: number, deltaTime: number) => void;
 type gameAction = { move: Move; input: boolean };
@@ -104,9 +104,9 @@ export default class Game {
     
     start() {
         this.ball = new GameObject(
-            new Vector2(200, 100),
+            new Vector2(400, 200),
             new Vector2(0, 0),
-            new Vector2(5, 5),
+            new Vector2(10, 10),
             INITIAL_BALL_SPEED,
         );
         this.serveBall(Math.floor(Math.random() * 2));
@@ -196,7 +196,7 @@ export default class Game {
                 );
                 this.ball.hitBox.position.y <= 0 ?
                     this.ball.hitBox.position.y = 0 :
-                    this.ball.hitBox.position.y = 200 - this.ball.hitBox.bounds.y;
+                    this.ball.hitBox.position.y = 400 - this.ball.hitBox.bounds.y;
             }
         });
         this.table.goals.forEach((goal, index) => {
@@ -211,16 +211,16 @@ export default class Game {
     protected instancePaddles() {
         this.paddles = [];
         this.paddles[0] = new Paddle(
-            new Vector2(40, 100),
+            new Vector2(80, 200),
             this.table.goals[0].orientation,
-            30,
+            60,
             this.table.area,
             this.paddleColors[0],
         );
         this.paddles[1] = new Paddle(
-            new Vector2(400 - 40, 100),
+            new Vector2(800 - 80, 200),
             this.table.goals[1].orientation,
-            30,
+            60,
             this.table.area,
             this.paddleColors[1],
         );

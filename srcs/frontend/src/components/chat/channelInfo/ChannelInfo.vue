@@ -41,6 +41,13 @@ function leaveChannel(channel: string): void {
     closeInfo();
 }
 
+function kickUser(): void {
+	if (!channelController.userSelected)
+		return;
+
+	channelController.kickUser(channelController.userSelected, currentChannel.value.name);
+}
+
 function toggleAdmin(): void {
 	if (!channelController.userSelected)
 		return;
@@ -63,21 +70,22 @@ function toggleAdmin(): void {
             </div>
             <div class="info-body">
                 <div class="temporary-settings-screen" v-if="banSettingsOpened && channelController.userIsChannelAdmin(currentChannel)">
-                    <BanSettingsScreen @close-ban-settings="toggleBanScreen"/>
+                    <BanSettingsScreen @close-ban-settings="toggleBanScreen" :channel-name="currentChannel.name"/>
                 </div>
                 <div class="temporary-settings-screen" v-else-if="muteSettingsOpened && channelController.userIsChannelAdmin(currentChannel)">
-                    <MuteSettingsScreen @close-mute-settings="toggleMuteScreen"/>
+                    <MuteSettingsScreen @close-mute-settings="toggleMuteScreen" :channel-name="currentChannel.name"/>
                 </div>
                 <div class="temporary-settings-screen" v-else-if="passwordSettingsOpened && channelController.userIsChannelOwner(currentChannel)">
                     <ChannelPwdSettingsScreen @close-pwd-settings="togglePasswordScreen"/>
                 </div>
                 <div class="channel-info" v-else>
-                    <ChatChannelUserList class="info-section user-list"/>
+                    <ChatChannelUserList class="info-section user-list" :channel-name="currentChannel.name"/>
                     <ChannelInfoButtons class="info-section action-buttons"
                         @leave="leaveChannel(currentChannel.name)"
                         @password="togglePasswordScreen"
                         @mute="toggleMuteScreen"
                         @ban="toggleBanScreen"
+                        @kick="kickUser"
                         @admin="toggleAdmin"
                     />
                 </div>

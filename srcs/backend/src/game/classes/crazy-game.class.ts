@@ -9,13 +9,13 @@ import Game from './game.class';
 
 const FPS = 60;
 const FRAME_TIME = 1 / FPS;
-const INITIAL_BALL_SPEED = 100;
+const INITIAL_BALL_SPEED = 200;
 
 // TODO: calculate from game-canvas size
-const BALL_START_POSITION_X = 200;
-const BALL_START_POSITION_Y = 100;
+const BALL_START_POSITION_X = 400;
+const BALL_START_POSITION_Y = 200;
 
-const MAX_BALL_SPEED = 450;
+const MAX_BALL_SPEED = 700;
 
 export default class CrazyGame extends Game {
     balls: GameObject[] = [];
@@ -33,9 +33,9 @@ export default class CrazyGame extends Game {
 
     start() {
         this.balls.push(new GameObject(
-            new Vector2(200, 100),
+            new Vector2(400, 200),
             new Vector2(0, 0),
-            new Vector2(5, 5),
+            new Vector2(10, 10),
             INITIAL_BALL_SPEED,
         ));
         this.serveBall(Math.floor(Math.random() * 2));
@@ -122,7 +122,7 @@ export default class CrazyGame extends Game {
                     );
                     ball.hitBox.position.y <= 0 ?
                         ball.hitBox.position.y = 0 :
-                        ball.hitBox.position.y = 200 - ball.hitBox.bounds.y;
+                        ball.hitBox.position.y = 400 - ball.hitBox.bounds.y;
                 }
             })
         });
@@ -159,9 +159,9 @@ export default class CrazyGame extends Game {
         if (this.checkIfTimeForNewBall(now)) {
             console.log('Serving new Ball');
             this.balls.push(new GameObject(
-                    new Vector2(200, 100),
+                    new Vector2(400, 200),
                     new Vector2(0, 0),
-                    new Vector2(5, 5),
+                    new Vector2(10, 10),
                     INITIAL_BALL_SPEED,
                 ));
             this.serveNewBall(Math.floor(Math.random() * 2), this.balls.length - 1);

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 
 	import { onBeforeMount, ref } from "vue";
-	import { user } from "../../user"
-	import Table from "../ui/Table.vue"
+	import { user } from "../../user";
+	import Table from "../ui/Table.vue";
 	import type { UserData } from "@/interfaces";
 	import { computed } from "@vue/reactivity";
 	import TextInputField from "../ui/TextInputField.vue";
 
 
 	async function getUsers(): Promise<UserData[] | null> {
-		const usersRequest = await fetch("http://localhost:3000/users", {
+		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
 			headers: {
 				"Authorization": `Bearer ${user.token}`
 			}
@@ -21,7 +21,7 @@
 
 		const users: UserData[] = await usersRequest.json();
 		users.map(user => {
-			user.avatarURL = `http://localhost:3000/users/avatar/${user.id}`
+			user.avatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${user.id}`
 		})
 
 		return users;
@@ -82,15 +82,23 @@
 				<td class="mobile-hidden">{{ userRow.stats.lostGames }}</td>
 				<td class="mobile-hidden">{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
 			</tr>
+			<td colspan="2" v-if="input && filteredUsers.length === 0">
+				<p>No users found!</p>
+			</td>
 			
 		</template>
 	</Table>
-	<div v-if="input && filteredUsers.length === 0">
-		<p>No users found!</p>
-	</div>
+	
 </template>
 
 <style scoped>
+	.search-bar {
+		padding: 0px 8px;
+	}
+
+	.search-bar input {
+		height: 46px;
+	}
 
 	.users-table {
 		margin-top: 24px;
@@ -127,10 +135,6 @@
 
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
-		.multiview-body {
-			padding: 34px;
-			flex: 1;
-		}
 
 		.mobile-hidden {
 			display: table-cell;

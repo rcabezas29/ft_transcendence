@@ -39,14 +39,14 @@ export class GameService {
   onStartGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameStart(game.players[0].user.id, game.players[1].user.id);
-	this.sendOngoingMatchesToAllUsers();
+	  this.sendOngoingMatchesToAllUsers();
   }
 
   onEndGame(gameName: string) {
     const game: Game = this.findGameByGameName(gameName);
     this.notifyFriendsOfGameEnd(game.players[0].user.id, game.players[1].user.id);
-	this.deleteGameFromOngoingGames(gameName);
-	this.sendOngoingMatchesToAllUsers();
+    this.deleteGameFromOngoingGames(gameName);
+    this.sendOngoingMatchesToAllUsers();
   }
 
   private deleteGameFromOngoingGames(gameName: string): void {
@@ -56,19 +56,19 @@ export class GameService {
   }
 
   public getOngoingMatches() {
-	const games = this.ongoingGames.map((game) => {
-		return {
-			name: game.name,
-			player1: game.players[0].user.username,
-			player1Id: game.players[0].user.id,
-			player1Score: game.players[0].score,
-			player2: game.players[1].user.username,
-			player2Id: game.players[1].user.id,
-			player2Score: game.players[0].score,
-		}
-	});
+    const games = this.ongoingGames.map((game) => {
+      return {
+        name: game.name,
+        player1: game.players[0].user.username,
+        player1Id: game.players[0].user.id,
+        player1Score: game.players[0].score,
+        player2: game.players[1].user.username,
+        player2Id: game.players[1].user.id,
+        player2Score: game.players[1].score,
+      }
+    });
 
-	return games;
+    return games;
   }
 
   sendOngoingMatchesToUser(client: GatewayUser) {
@@ -76,7 +76,7 @@ export class GameService {
   }
 
   sendOngoingMatchesToAllUsers() {
-	this.server.emit("ongoing-games", this.getOngoingMatches());
+	  this.server.emit("ongoing-games", this.getOngoingMatches());
   }
 
   isPlayerInAGame(playerId: number): boolean {
@@ -91,7 +91,10 @@ export class GameService {
     for (const game of this.ongoingGames) {
       if (this.isPlayerInAGame(player.id)) {
         game.rejoinPlayer(player);
-        player.socket.emit('rejoin-game');
+        player.socket.emit('rejoin-game', {
+          user1: game.players[0].user.username,
+          user2: game.players[1].user.username,
+        });
       }
     }
   }

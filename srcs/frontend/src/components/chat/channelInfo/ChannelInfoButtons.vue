@@ -4,8 +4,9 @@ import { chatIsChannel, currentChat } from '@/currentChat';
 import { computed } from '@vue/reactivity';
 import { channelController } from '../../../channelController';
 import Button from "../../ui/Button.vue";
+import { user } from "@/user";
 
-const emit = defineEmits(["leave", "ban", "mute", "password", "profile", "admin"]);
+const emit = defineEmits(["leave", "ban", "kick", "mute", "password", "profile", "admin"]);
 
 const currentChannel = computed(() => {
 	return channelController.channels[currentChat.value!.target as string];
@@ -33,6 +34,10 @@ function manageBan(): void {
 	emit("ban");
 }
 
+function manageKick(): void {
+    emit("kick");
+}
+
 function manageAdmin(): void {
 	emit("admin");
 }
@@ -41,7 +46,7 @@ function manageAdmin(): void {
 
 <template>
     <div v-if="currentChat && chatIsChannel(currentChat)">
-        <div class="buttons-section generic-buttons" v-if="!channelController.userSelected">
+        <div class="buttons-section generic-buttons" v-if="!channelController.userSelected || channelController.userSelected.id == user.id">
             <Button class="button" @click="managePassword" v-if="channelController.userIsChannelOwner(currentChannel)" :selected="true">
                 MANAGE PASSWORD
             </Button>
@@ -59,6 +64,9 @@ function manageAdmin(): void {
             <Button class="button" @click="manageBan" v-if="channelController.userIsChannelAdmin(currentChannel)" :selected="true">
                 BAN
             </Button>
+            <Button class="button" @click="manageKick" v-if="channelController.userIsChannelAdmin(currentChannel)" :selected="true">
+                KICK
+            </Button>
             <Button class="button" @click="manageAdmin" v-if="channelController.userIsChannelOwner(currentChannel)" :selected="true">
                 MAKE/REMOVE ADMIN
             </Button>
@@ -74,7 +82,7 @@ function manageAdmin(): void {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 20px 30px;
+	padding: 14px 30px;
 	border-width: 1px;
 }
 
@@ -90,7 +98,7 @@ function manageAdmin(): void {
 }
 
 .user-specific-buttons .button {
-	height: 42px;
+	height: 38px;
 }
 
 </style>

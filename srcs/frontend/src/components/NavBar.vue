@@ -33,6 +33,10 @@
 			<router-link to="/profile">
 				<Button @click="closeMenu()" :selected="route.path == '/profile'">PROFILE</Button>
 			</router-link>
+
+			<router-link to="/help">
+				<Button @click="closeMenu()" :selected="route.path == '/help'">HELP</Button>
+			</router-link>
 		</div>
 		<div class="right-nav-container">
 			<div class="hamburger-menu">
@@ -41,7 +45,7 @@
 			<div class="user-info">
 				<div class="user-stats">
 					<div>{{ user.username }}</div>
-					<div>elo: 69</div>
+					<div>elo: {{ user.elo }}</div>
 				</div>
 				<div class="user-image">
 					<img :src=user.avatarImageURL />

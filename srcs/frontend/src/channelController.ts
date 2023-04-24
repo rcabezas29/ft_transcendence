@@ -9,11 +9,17 @@ interface ChannelPayload {
 	owner: ChatUser;
 	admins: ChatUser[];
 	isPrivate: boolean;
+	messages: Message[];
 }
 
-interface UserChannelPayload {
+interface UserChannelNamePayload {
 	user: ChatUser,
 	channelName: ChannelName
+}
+
+interface UserIdChannelPayload {
+	userId: number,
+	channel: ChannelPayload
 }
 
 interface UserArrayChannelPayload {
@@ -56,11 +62,11 @@ class ChannelController {
         user.socket?.on('all-channels', (payload: ChannelPayload[]) => {this.onAllChannels(payload)});
 		user.socket?.on('channel-created', (channel: ChannelPayload) => this.onChannelCreated(channel));
 		user.socket?.on('new-channel', (channel: ChannelPayload) => this.onNewChannel(channel));
-		user.socket?.on('channel-joined', (channelName: ChannelName) => this.onChannelJoined(channelName));
-		user.socket?.on('new-user-joined', (newUserPayload: UserChannelPayload) => this.onNewUserJoined(newUserPayload));
+		user.socket?.on('channel-joined', (channel: ChannelPayload) => this.onChannelJoined(channel));
+		user.socket?.on('new-user-joined', (newUserPayload: UserChannelNamePayload) => this.onNewUserJoined(newUserPayload));
 		user.socket?.on('deleted-channel', (channelName: ChannelName) => this.onDeletedChannel(channelName));
 		user.socket?.on('channel-left', (channel: ChannelPayload) => this.onChannelLeft(channel));
-		user.socket?.on('user-left', (channel: ChannelPayload) => this.onUserLeft(channel));
+		user.socket?.on('user-left', (payload: UserIdChannelPayload) => this.onUserLeft(payload));
 		user.socket?.on('channel-message', (message: ChannelMessagePayload) => this.receiveChannelMessage(message));
 		user.socket?.on('user-banned', (payload: TimeUserChannelPayload) => this.onUserBanned(payload));
 		user.socket?.on('user-muted', (payload: TimeUserChannelPayload) => this.onUserMuted(payload));
@@ -69,17 +75,18 @@ class ChannelController {
 		user.socket?.on('wrong-password', (channelName: ChannelName) => this.onWrongPassword(channelName));
 	}
 
-	createChannel(name: ChannelName): void {
-		if (name in this.channels)
-			return this.alertError('channel name already in use. Choose a different one');
-		user.socket?.emit('create-channel', name);
+	createChannel(channelName: ChannelName, password: string = ""): boolean {
+		if (channelName in this.channels)
+			return false;
+
+		const payload: PasswordChannelPayload = { password, channelName };
+		user.socket?.emit('create-channel', payload);
+		return true;
 	}
 
-	joinChannel(channelName: ChannelName, password: string): void {
+	joinChannel(channelName: ChannelName, password: string = ""): void {
 		if (this.userIsMemberOfChannel(channelName))
 			return;
-		if (this.channels[channelName].isPrivate && password.length === 0)
-			return this.alertError(`please enter a password to join private channel ${channelName}'`);
 			
 		const payload: PasswordChannelPayload = { password, channelName };
 		user.socket?.emit('join-channel', payload);
@@ -102,15 +109,17 @@ class ChannelController {
     }
 
 	banUser(bannedUser: ChatUser, channelName: ChannelName, time: string): void {
-		if (!this.userIsChannelAdmin(this.channels[channelName]))
-			return this.alertError('you are not allowed to ban users');
+		if (!user.isWebsiteAdmin()) {
+			if (!this.userIsChannelAdmin(this.channels[channelName]))
+				return this.alertError('you are not allowed to ban users');
+			
+			if (bannedUser.id == user.id)
+				return this.alertError('you cannot ban yourself!');
+
+			if (this.userIsChannelOwner(this.channels[channelName], bannedUser))
+				return this.alertError('the channel owner is untouchable!');
+		}
 		
-		if (bannedUser.id == user.id)
-			return this.alertError('you cannot ban yourself!');
-
-		if (this.userIsChannelOwner(this.channels[channelName], bannedUser))
-			return this.alertError('the channel owner is untouchable!');
-
 		const banTime: number = +time;
 		if (banTime === 0 || isNaN(banTime))
 			return this.alertError('please insert a valid number (ban time)');
@@ -124,14 +133,16 @@ class ChannelController {
 	}
 
 	muteUser(mutedUser: ChatUser, channelName: ChannelName, time: string): void {
-		if (!this.userIsChannelAdmin(this.channels[channelName]))
-			return this.alertError('you are not allowed to mute users');
+		if (!user.isWebsiteAdmin()) {
+			if (!this.userIsChannelAdmin(this.channels[channelName]))
+				return this.alertError('you are not allowed to mute users');
 
-		if (mutedUser.id == user.id)
-			return this.alertError('you cannot mute yourself!');
+			if (mutedUser.id == user.id)
+				return this.alertError('you cannot mute yourself!');
 
-		if (this.userIsChannelOwner(this.channels[channelName], mutedUser))
-			return this.alertError('the channel owner is untouchable!');
+			if (this.userIsChannelOwner(this.channels[channelName], mutedUser))
+				return this.alertError('the channel owner is untouchable!');
+		}
 
 		const muteTime: number = +time;
 		if (muteTime === 0 || isNaN(muteTime))
@@ -145,31 +156,54 @@ class ChannelController {
 		user.socket?.emit('mute-user', payload);
 	}
 
-	makeChannelAdmin(newAdmin: ChatUser, channelName: ChannelName): void {
-		if (this.userIsChannelAdmin(this.channels[channelName], newAdmin))
-			return;
+	kickUser(kickedUser: ChatUser, channelName: ChannelName): void {
+		if (!user.isWebsiteAdmin()) {
+			if (!this.userIsChannelAdmin(this.channels[channelName]))
+				return this.alertError('you are not allowed to kick users');
 
-		if (!this.userIsChannelOwner(this.channels[channelName]))
-			return this.alertError('you are not allowed to manage channel administrators');
+			if (kickedUser.id == user.id)
+				return this.alertError('you cannot kick yourself!');
+
+			if (this.userIsChannelOwner(this.channels[channelName], kickedUser))
+				return this.alertError('the channel owner is untouchable!');
+		}
 		
-		if (this.userIsChannelOwner(this.channels[channelName], newAdmin))
-			return this.alertError('the channel owner is untouchable!');
+		const payload: UserChannelNamePayload = {
+			user: kickedUser,
+			channelName: channelName
+		}
+		user.socket?.emit('kick-user', payload);
+	}
 
-		const payload: UserChannelPayload = { user: newAdmin, channelName };
+	makeChannelAdmin(newAdmin: ChatUser, channelName: ChannelName): void {
+		if (!user.isWebsiteAdmin()) {
+			if (this.userIsChannelAdmin(this.channels[channelName], newAdmin))
+				return;
+
+			if (!this.userIsChannelOwner(this.channels[channelName]))
+				return this.alertError('you are not allowed to manage channel administrators');
+			
+			if (this.userIsChannelOwner(this.channels[channelName], newAdmin))
+				return this.alertError('the channel owner is untouchable!');
+		}
+
+		const payload: UserChannelNamePayload = { user: newAdmin, channelName };
 		user.socket?.emit('set-admin', payload);
 	}
 
 	removeChannelAdmin(admin: ChatUser, channelName: ChannelName): void {
-		if (!this.userIsChannelAdmin(this.channels[channelName], admin))
-			return;
+		if (!user.isWebsiteAdmin()) {
+			if (!this.userIsChannelAdmin(this.channels[channelName], admin))
+				return;
 
-		if (!this.userIsChannelOwner(this.channels[channelName]))
-			return this.alertError('you are not allowed to manage channel administrators');
-		
-		if (this.userIsChannelOwner(this.channels[channelName], admin))
-			return this.alertError('the channel owner is untouchable!');
+			if (!this.userIsChannelOwner(this.channels[channelName]))
+				return this.alertError('you are not allowed to manage channel administrators');
+			
+			if (this.userIsChannelOwner(this.channels[channelName], admin))
+				return this.alertError('the channel owner is untouchable!');
+		}
 
-		const payload: UserChannelPayload = { user: admin, channelName };
+		const payload: UserChannelNamePayload = { user: admin, channelName };
 		user.socket?.emit('unset-admin', payload);
 	}
 
@@ -193,9 +227,22 @@ class ChannelController {
 		user.socket?.emit('unset-password', channelName);
 	}
 
+	deleteChannel(channelName: string): void {
+		if (!user.isWebsiteAdmin())
+			return this.alertError('you are not allowed to delete channels');
+
+		user.socket?.emit('delete-channel', channelName);
+	}
+
 	private onAllChannels(payload: ChannelPayload[]): void {
 		payload.forEach((channel) => {
 			this.channels[channel.name] = {...channel, chat: null};
+			if (this.userIsMemberOfChannel(channel.name) || user.isWebsiteAdmin()) {
+				this.appendChatToMap(channel.name);
+				channel.messages.forEach((message) => {
+					this.channels[channel.name].chat!.messages.push(message);
+				})
+			}
 		});
 	}
 
@@ -206,14 +253,22 @@ class ChannelController {
 
 	private onNewChannel(channel: ChannelPayload): void {
 		this.channels[channel.name] = {...channel, chat: null};
+		if (user.isWebsiteAdmin()) {
+			this.appendChatToMap(channel.name);
+		}
 	}
 
-	private onChannelJoined(name: ChannelName): void {
-		this.channels[name].users.push({id: user.id, username: user.username});
-		this.appendChatToMap(name);
+	private onChannelJoined(channel: ChannelPayload): void {
+		this.channels[channel.name].users.push({id: user.id, username: user.username});
+		if (!this.channels[channel.name].chat) {
+			this.appendChatToMap(channel.name);
+			channel.messages.forEach((message) => {
+				this.channels[channel.name].chat!.messages.push(message);
+			});
+		}
 	}
 
-	private onNewUserJoined(newUserPayload: UserChannelPayload): void {
+	private onNewUserJoined(newUserPayload: UserChannelNamePayload): void {
 		const {channelName, user} = newUserPayload;
 		this.channels[channelName].users.push(user);
 	}
@@ -225,13 +280,20 @@ class ChannelController {
 	}
 
 	private onChannelLeft(channel: ChannelPayload): void {
-		this.channels[channel.name] = {...channel, chat: null};
+		if (user.isWebsiteAdmin())
+			this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
+		else
+			this.channels[channel.name] = {...channel, chat: null};
 		if (currentChat.value?.target === channel.name)
 			currentChat.value = null;
 	}
 
-	private onUserLeft(channel: ChannelPayload): void {
+	private onUserLeft(payload: UserIdChannelPayload): void {
+		const { channel, userId } = { ...payload };
 		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
+		
+		if (this.userSelected && userId == this.userSelected.id)
+			this.userSelected = null;
 	}
 
 	private receiveChannelMessage(payload: ChannelMessagePayload): void {
@@ -305,8 +367,7 @@ class ChannelController {
         }
 
         const chat: Chat | null = channel.chat;
-        if (chat)
-		{
+        if (chat) {
 			chat.messages.push(newMessage);
 			if (chat !== currentChat.value)
 				chat.notification = true;
@@ -314,8 +375,7 @@ class ChannelController {
 	}
 
 	private appendChatToMap(channelName: ChannelName): void {
-        if (this.channels && !this.channels[channelName].chat)
-        {
+        if (this.channels[channelName] && !this.channels[channelName].chat) {
             const newChat: Chat = {
                 target: channelName,
                 messages: [],

@@ -12,7 +12,6 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard, JwtTwoFactorGuard, UserGuard } from 'src/auth/guards';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,11 +19,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
 
   @UseGuards(JwtTwoFactorGuard)
   @Get()
@@ -72,5 +66,11 @@ export class UsersController {
   @Get('search/:username')
   findUsernameMatches(@Param('username') usernameSegment: string) {
     return this.usersService.findUsernameMatches(usernameSegment);
+  }
+
+  @UseGuards(JwtTwoFactorGuard)
+  @Get('match-history/:id')
+  getUserMatchHistory(@Param('id', ParseIntPipe) id: number) {
+	return this.usersService.getUserMatchHistory(id);
   }
 }

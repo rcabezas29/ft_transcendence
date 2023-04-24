@@ -19,8 +19,8 @@
 
 	function fetchOngoingGames(games: OngoingGame[]) {
 		games.map(game => {
-			game.player1AvatarURL = `http://localhost:3000/users/avatar/${game.player1Id}`
-			game.player2AvatarURL = `http://localhost:3000/users/avatar/${game.player2Id}`
+			game.player1AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player1Id}`
+			game.player2AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player2Id}`
 		})
 		ongoingGames.value = games;
 	}
@@ -48,9 +48,9 @@
 
 <template>
 
-	<div class="ongoin-matches">
+	<div class="ongoing-matches">
 
-		<div class="match-exterior-container" v-for="game in ongoingGames" @click="watchGame(game.name)">
+		<div class="match-exterior-container" v-for="game in ongoingGames"  v-if="!ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)" @click="watchGame(game.name)">
 			
 			<div class="match-interior-container">
 
@@ -82,7 +82,7 @@
 
 		</div>
 
-		<div v-if="ongoingGames.length == 0">
+		<div v-if="ongoingGames.length == 0 || ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)">
 			NOBODY IS PLAYING RIGHT NOW :(
 		</div>
 
@@ -109,16 +109,12 @@
 	}
 
 	.player-img {
-		display: flex;
+		display: none;
 	}
 
 	.player-img img {
 		width: 50px;
 		height: 50px;
-	}
-
-	.player-name {
-		display: none;
 	}
 
 	.player-score {
@@ -130,6 +126,7 @@
 		padding: 24px;
 		color: black;
 		height: 50px;
+		width: 50px;
 	}
 
 	.vs-block {
@@ -140,11 +137,17 @@
 		padding: 24px;
 		height: 50px;
 	}
+	.player-name {
+		display: block;
+		width: 75px;
+		text-align: center;
+	}
 
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
-		.player-name {
-			display: block;
+
+		.player-img {
+			display: flex;
 		}
 
 		.player-left .player-img {
@@ -163,6 +166,5 @@
 			margin-left: 20px;
 		}
 	}
-
 
 </style>

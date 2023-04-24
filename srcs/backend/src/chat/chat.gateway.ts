@@ -9,7 +9,7 @@ import { ChannelMessagePayload,
 	DirectMessagePayload,
 	PasswordChannelPayload,
 	TimeUserChannelPayload,
-	UserChannelPayload
+	UserChannelNamePayload
 } from './interfaces';
 
 @WebSocketGateway({cors: true})
@@ -40,46 +40,88 @@ export class ChatGateway {
 	}
 
 	@SubscribeMessage("create-channel")
-	createChannel(client: Socket, channelName: string): void {
+	createChannel(client: Socket, payload: PasswordChannelPayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.createChannel(channelName, user);
+		this.channelsService.createChannel(payload, user);
 	}
 
 	@SubscribeMessage("join-channel")
 	joinChannel(client: Socket, payload: PasswordChannelPayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.userJoinChannel(user, payload);
+		const joined: boolean = this.channelsService.userJoinChannel(user, payload);
+		if (joined) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName,
+				this.gatewayManagerGateway.server,
+				`user <${user.username}> joined the channel.`
+			);
+		}
 	}
 
 	@SubscribeMessage("leave-channel")
 	leaveChannel(client: Socket, channelName: string): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.userLeaveChannel(user, channelName, this.gatewayManagerGateway.server);
+		const left: boolean = this.channelsService.userLeaveChannel(user, channelName, this.gatewayManagerGateway.server);
+		if (left) {
+			this.channelsService.sendServerMessageToChannel(
+				channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${user.username}> left the channel.`
+			);
+		}
 	}
 
 	@SubscribeMessage("ban-user")
 	banUser(client: Socket, payload: TimeUserChannelPayload): void {
 		const banner: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const banned: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
-		this.channelsService.banUser(banner, banned, payload.channelName, payload.time, this.gatewayManagerGateway.server);
+		const bannedOK: boolean = this.channelsService.banUser(banner, banned, payload.channelName, payload.time, this.gatewayManagerGateway.server);
+		if (bannedOK) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${payload.user.username}> was banned for ${payload.time} seconds.`
+			);
+		}
 	}
 
 	@SubscribeMessage("mute-user")
 	muteUser(client: Socket, payload: TimeUserChannelPayload): void {
 		const muter: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const muted: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
-		this.channelsService.muteUser(muter, muted, payload.channelName, payload.time);
+		const mutedOk: boolean = this.channelsService.muteUser(muter, muted, payload.channelName, payload.time);
+		if (mutedOk) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${payload.user.username}> was muted for ${payload.time} seconds.`
+			);
+		}
+	}
+
+	@SubscribeMessage("kick-user")
+	kickUser(client: Socket, payload: UserChannelNamePayload): void {
+		const kicker: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		const kicked: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
+		const kickedOk: boolean = this.channelsService.kickUser(kicker, kicked, payload.channelName, this.gatewayManagerGateway.server);
+		if (kickedOk) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName, 
+				this.gatewayManagerGateway.server,
+				`user <${payload.user.username}> was kicked from the channel.`
+			);
+		}
 	}
 
 	@SubscribeMessage("set-admin")
-	setAdmin(client: Socket, payload: UserChannelPayload): void {
+	setAdmin(client: Socket, payload: UserChannelNamePayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const newAdmin: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
 		this.channelsService.setAdmin(user, newAdmin, payload.channelName, this.gatewayManagerGateway.server);
 	}
 
 	@SubscribeMessage("unset-admin")
-	unsetAdmin(client: Socket, payload: UserChannelPayload): void {
+	unsetAdmin(client: Socket, payload: UserChannelNamePayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		const admin: GatewayUser = this.gatewayManagerService.getClientByUserId(payload.user.id);
 		this.channelsService.unsetAdmin(user, admin, payload.channelName, this.gatewayManagerGateway.server);
@@ -95,5 +137,13 @@ export class ChatGateway {
 	unsetPassword(client: Socket, channelName: string): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 		this.channelsService.unsetPassword(user, channelName, this.gatewayManagerGateway.server);
+	}
+
+	@SubscribeMessage("delete-channel")
+	deleteChannel(client: Socket, channelName: string): void {
+		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+		if (!this.gatewayManagerService.clientIsWebsiteAdmin(user))
+			return;
+		this.channelsService.deleteChannel(channelName, this.gatewayManagerGateway.server);
 	}
 }

@@ -35,7 +35,7 @@ Returns one user
 }
 ```
 
-### GET /users/avatar/:username
+### GET /users/avatar/:id
 
 Returns a user's avatar
 
@@ -59,20 +59,7 @@ Returns a user's friends in the `UserFriend[]` format:
 
 Searches users by a fragment of a username, and returns an array with all the partial matches.
 
-### POST /users
-
-Creates new user and returns the created user
-
-Expected body:
-```json
-{
-	"username": "rcabezas",
-	"email": "rcabezas@student.42madrid.com",
-	"password": "*********"
-}
-```
-
-### POST /users/avatar/:username
+### POST /users/avatar/:id
 
 Posts an image to replace the user's avatar image.
 
@@ -94,4 +81,4 @@ Expected body:
 
 ### DELETE /users/:id
 
-Deletes a user
+Anonymizes a user

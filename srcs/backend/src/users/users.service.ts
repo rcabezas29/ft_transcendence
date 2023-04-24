@@ -20,6 +20,8 @@ import { Stats } from 'src/stats/entities/stats.entity';
 import { FilesService } from 'src/files/files.service';
 import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
 import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
+import { MatchHistoryService } from 'src/match-history/match-history.service';
+import { MatchHistory } from 'src/match-history/entity/match-history.entity';
 
 @Injectable()
 export class UsersService {
@@ -28,6 +30,7 @@ export class UsersService {
     private readonly statsService: StatsService,
     private readonly filesService: FilesService,
     private readonly passwordUtilsService: PasswordUtilsService,
+	private readonly mathcHistoryService: MatchHistoryService,
 
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -180,7 +183,7 @@ export class UsersService {
   }
 
   async anonimizeUser(id: number) {
-    const newUsername: string = this.generateRandomString(15);
+    const newUsername: string = Date.now() + this.generateRandomString(5);
 
     const updateUserDto: UpdateUserDto = {
       username: newUsername,
@@ -239,7 +242,7 @@ export class UsersService {
   }
 
   async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
-    if (!this.findOneById(userId))
+    if (!(await this.findOneById(userId)))
       throw new NotFoundException();
 
     return this.usersRepository.update(userId, {
@@ -248,7 +251,7 @@ export class UsersService {
   }
 
   async turnOnTwoFactorAuthentication(userId: number) {
-    if (!this.findOneById(userId))
+    if (!(await this.findOneById(userId)))
       throw new NotFoundException();
 
     return this.usersRepository.update(userId, {
@@ -257,7 +260,7 @@ export class UsersService {
   }
 
   async turnOffTwoFactorAuthentication(userId: number) {
-    if (!this.findOneById(userId))
+    if (!(await this.findOneById(userId)))
       throw new NotFoundException();
 
     return this.usersRepository.update(userId, {
@@ -272,6 +275,22 @@ export class UsersService {
       u.username.toLowerCase().includes(username.toLowerCase())
     );
   }
+/*
+  async userRoleIsAdmin(userId: number): Promise<boolean> {
+    const user: User = await this.findOneById(userId);
+    if (!user)
+      return false;
+
+    return (user.role == UserRole.ADMIN || user.role == UserRole.OWNER);
+  }
+
+  async userRoleIsOwner(userId: number): Promise<boolean> {
+    const user: User = await this.findOneById(userId);
+    if (!user)
+      return false;
+
+    return (user.role == UserRole.OWNER);
+  }*/
 
   private generateRandomString(length: number): string {
     let result = '';
@@ -283,5 +302,20 @@ export class UsersService {
       counter += 1;
     }
     return result;
+  }
+
+  async getUserMatchHistory(id: number) {
+	const history: MatchHistory[] = await this.mathcHistoryService.findByUser(id);
+	const historyWithUsers = await Promise.all(history.map(async (h) => {
+		const user1: User = await this.findOneById(h.user1Id);
+		const user2: User = await this.findOneById(h.user2Id);
+
+		h["username1"] = user1.username;
+		h["username2"] = user2.username;
+
+		return h;
+	}));
+
+	return historyWithUsers;
   }
 }

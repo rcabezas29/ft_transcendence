@@ -9,9 +9,8 @@ function handleClick(e: Event, channel: string) {
 
 const channels = computed(() => {
 	const channels: Channel[] = [];
-	for (let channel in channelController.channels)
-	{
-		if (channelController.channels[channel].chat)
+	for (let channel in channelController.channels) {
+		if (channelController.channels[channel].chat && channelController.userIsMemberOfChannel(channel))
 			channels.push(channelController.channels[channel]);
 	}
 	return (channels);

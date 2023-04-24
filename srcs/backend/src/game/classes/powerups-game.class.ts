@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { GatewayUser } from "src/gateway-manager/interfaces";
 import { Vector2 } from './vector2';
-import { GameObject, Paddle } from './game-object';
+import { GameObject, Paddle, PowerUp } from './game-object';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
@@ -9,10 +9,10 @@ import Game from './game.class';
 
 const GAME_DURATION = 200; // in seconds
 
-const MAX_BALL_SPEED = 450;
+const MAX_BALL_SPEED = 700;
 
 export class PowerUpsGame extends Game {
-    powerups: GameObject[] = [];
+    powerups: PowerUp[] = [];
     constructor(
         player1: GatewayUser,
         player2: GatewayUser,
@@ -39,12 +39,11 @@ export class PowerUpsGame extends Game {
         }
     }
 
-    apply_powerup() {
-        const result : number = Math.floor(Math.random() * 4);
-        if (result === 0) {
+    apply_powerup(type: number) {
+        if (type === 0) {
             console.log('Maax Speeeed');
             this.ball.speed = MAX_BALL_SPEED;
-        } else if (result === 1) {
+        } else if (type === 1) {
             if (this.ball.direction.x < 0) {
                 console.log('Slowed 0');
                 this.paddles[0].speed /= 2;
@@ -52,16 +51,16 @@ export class PowerUpsGame extends Game {
                 console.log('Slowed 1');
                 this.paddles[1].speed /= 2;
             }
-        } else if (result === 2) {
+        } else if (type === 2) {
             console.log('Change direction');
             this.ball.direction.y *= -1;
-        } else if (result === 3) {
+        } else if (type === 3) {
             if (this.ball.direction.x < 0) {
                 console.log('Increased 1');
-                this.paddles[1].hitBox.bounds.y += 10;
+                this.paddles[1].hitBox.bounds.y += 20;
             } else {
                 console.log('Increased 0');
-                this.paddles[0].hitBox.bounds.y += 10;
+                this.paddles[0].hitBox.bounds.y += 20;
             }
         }
     }
@@ -71,7 +70,7 @@ export class PowerUpsGame extends Game {
         this.powerups.forEach((pow, i) => {
             if (pow.hitBox.overlaps(this.ball.hitBox)) {
                 this.powerups.splice(i, 1);
-                this.apply_powerup();
+                this.apply_powerup(pow.type);
             }
         });
     }
@@ -83,11 +82,12 @@ export class PowerUpsGame extends Game {
             this.end();
         }
         if (this.checkIfTimeToPowerUp(now)) {
-            this.powerups.push(new GameObject(
-                new Vector2(200 - 10, Math.random() * 150 + 25),
+            this.powerups.push(new PowerUp(
+                new Vector2(400 - 20, Math.random() * 350 + 50),
                 new Vector2(0, 0),
-                new Vector2(20, 20),
+                new Vector2(40, 40),
                 0,
+                Math.floor(Math.random() * 4),
             ));
         }
         this.updateObjects(now);

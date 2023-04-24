@@ -15,7 +15,7 @@ onBeforeMount(() => {
 <template>
   <MultiView class="game-window">
     <template #body>
-      <div>
+      <div class="game-body">
         <SearchGame v-if="gameController.state === GameState.None || gameController.state === GameState.Searching"/>
         <PlayingGame v-if="gameController.state === GameState.Playing || gameController.state === GameState.End"/>
       </div>
@@ -32,6 +32,11 @@ onBeforeMount(() => {
 .mode-selector {
   display: flex;
   justify-content: space-around;
+}
+
+.game-body {
+  display: flex;
+  height: 100%;
 }
 
 </style>
