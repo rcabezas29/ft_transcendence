@@ -48,7 +48,7 @@ function	refuseChallenge(friendId: number) {
 </script>
 
 <template>
-	<button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">Challenge</button>
+	<Button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">Challenge</Button>
 
 	<div class="chat-messages">
 		<div v-for="message in currentChat!.messages" class="message">
