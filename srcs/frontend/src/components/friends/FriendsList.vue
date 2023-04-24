@@ -100,7 +100,7 @@ watch(friendsController, () => {
         <!-- <div class="friend -->
         <div class="friend-request">
         <div class="row-number-box">{{ index + 1 }}</div>
-          <img :src="getUserAvatar(friend.userId)" class="user-image" alt="User Image">{{ friend.username }}
+          <img :src="getUserAvatar(friend.userId)" class="user-image" alt="User Image">{{ friend.username }} <!-- Avatar is meassing-->
           <span v-if="isOnline(friend)">Online</span>
           <span v-else-if="isGaming(friend)">Gaming</span>
           <span v-else>Offline</span>
