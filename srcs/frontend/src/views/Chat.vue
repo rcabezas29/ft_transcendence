@@ -9,10 +9,14 @@
 	import ChannelInfo from '@/components/chat/channelInfo/ChannelInfo.vue';
 	import ChatMessagesHeader from '@/components/chat/ChatMessagesHeader.vue';
 	import { channelController } from '@/channelController';
+	import { globalChatNotification } from '@/chat-notification';
 
 	const chatOpened = ref(false);
 	function toggleChatWindow() {
 		chatOpened.value = !chatOpened.value;
+		if (chatOpened.value) {
+			globalChatNotification.value = false;
+		}
 	}
 
 	const channelInfoOpened = ref(false);
@@ -30,11 +34,12 @@
 		channelController.userSelected = null;
 	}
 
+
 </script>
 
 <template>
 	<div class="chat-container">
-		<div class="chat-header" @click="toggleChatWindow">
+		<div class="chat-header" :class="{blink: globalChatNotification}" @click="toggleChatWindow">
 			CHAT.EXE
 		</div>
 		<div class="chat-body" v-if="chatOpened">
@@ -76,6 +81,10 @@
 		display: flex;
 		align-items: center;
 	}
+
+	.blink {
+		animation: blinking 1s infinite;
+	}
 	
 	.chat-body {
 		display: flex;
@@ -100,6 +109,14 @@
 		align-items: center;
 	}
 
+
+	@keyframes blinking {
+        0% {
+        }
+        100% {
+          background-color: #4BFE65;
+        }
+	}
 
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {

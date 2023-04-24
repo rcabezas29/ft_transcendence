@@ -4,6 +4,7 @@ import { user } from './user';
 import { currentChat } from "./currentChat";
 import router from "./router";
 import type { UserUpdatedPayload } from "./friendsController";
+import { globalChatNotification } from "./chat-notification";
 
 interface MessagePayload {
     friendId: FriendId;
@@ -72,7 +73,10 @@ class DirectMessageController {
             friendChat.messages.push(newMessage);
 
         if (friendChat !== currentChat.value)
+        {
             friendChat.notification = true;
+            globalChatNotification.value = true;
+        }
     }
 
     private receiveChallenge(payload: MessagePayload) {
@@ -83,7 +87,10 @@ class DirectMessageController {
 
         friendChat.challenge = true;
         if (friendChat !== currentChat.value)
+        {
             friendChat.notification = true;
+            globalChatNotification.value = true;
+        }
     }
 
     sendDirectMessage(message: string) {
@@ -110,6 +117,7 @@ class DirectMessageController {
 		else {
 			currentChat.value = chat;
 			chat.notification = false;
+            globalChatNotification.value = false;
 		}
 	}
 

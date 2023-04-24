@@ -2,6 +2,7 @@ import { reactive } from "vue";
 import { currentChat } from "./currentChat";
 import type { Chat, Channel, ChatUser, Message } from "./interfaces";
 import { user } from "./user";
+import { globalChatNotification} from './chat-notification';
 
 interface ChannelPayload {
 	name: string;
@@ -370,7 +371,10 @@ class ChannelController {
         if (chat) {
 			chat.messages.push(newMessage);
 			if (chat !== currentChat.value)
+			{
 				chat.notification = true;
+				globalChatNotification.value = true;
+			}
 		}
 	}
 
