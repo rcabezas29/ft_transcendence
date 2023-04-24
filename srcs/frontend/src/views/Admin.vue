@@ -1,6 +1,5 @@
 <script setup lang="ts">
 	import { ref } from 'vue'
-	import { user } from "../user";
 	import AllUsersTable from '../components/admin/AllUsersTable.vue'
 	import ChannelsManagement from '../components/admin/ChannelsManagement.vue'
 	import MultiView from '../components/ui/MultiView.vue';
@@ -29,10 +28,10 @@
 		</template>
 
 		<template #body>
-			<div v-if="multiViewElement == 1">
+			<div v-if="multiViewElement == 1" class="multi-view-element">
 				<AllUsersTable/>
 			</div>
-			<div v-else-if="multiViewElement == 2">
+			<div v-else-if="multiViewElement == 2" class="multi-view-element">
 				<ChannelsManagement/>
 			</div>
 		</template>
@@ -40,5 +39,11 @@
 </template>
 
 <style scoped>
+
+.multi-view-element {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
 
 </style>
