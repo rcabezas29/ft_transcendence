@@ -1,106 +1,192 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
+import { user } from "../../user";
+import type { UserData } from "@/interfaces";
+
+async function getUser(friendId: any) {
+  const usersRequest = await fetch(`http://localhost:3000/users/${friendId}`, {
+    headers: {
+      "Authorization": `Bearer ${user.token}`
+    }
+  });
+
+  if (usersRequest.status != 200) {
+    return null;
+  }
+
+  const userData: UserData = await usersRequest.json();
+  return userData;
+}
+
+async function getUserAvatar(friendId: any): Promise<string | null> {
+  const userData = await getUser(friendId);
+  if (userData) {
+    return userData.avatarURL || userData.avatar;
+  }
+  return null;
+}
 
 function isOnline(friend: any): boolean {
-    return friend.status === FriendStatus.online;
+  return friend.status === FriendStatus.online;
 }
 
 function isGaming(friend: any): boolean {
-    return friend.status === FriendStatus.gaming;
+  return friend.status === FriendStatus.gaming;
 }
 
+// function sendFriendRequest() {
+//   const userId = 2;
+
+//   friendsController.sendFriendRequest(userId);
+// }
+
 const activeFriends = computed(() => {
-    return friendsController.getActiveFriends();
-})
+  return friendsController.getActiveFriends();
+});
 
 const blockedFriends = ref<Friend[]>([]);
 const sentFriendRequests = ref<Friend[]>([]);
 const receivedFriendRequests = ref<Friend[]>([]);
 
 friendsController.getBlockedFriends().then((value) => {
-    blockedFriends.value = value;
+  blockedFriends.value = value;
 });
 friendsController.getSentFriendRequests().then((value) => {
-    sentFriendRequests.value = value;
+  sentFriendRequests.value = value;
 });
 friendsController.getReceivedFriendRequests().then((value) => {
-    receivedFriendRequests.value = value;
+  receivedFriendRequests.value = value;
 });
 
 watch(friendsController, () => {
-    friendsController.getBlockedFriends().then((value) => {
-        blockedFriends.value = value;
-    });
-    friendsController.getSentFriendRequests().then((value) => {
-        sentFriendRequests.value = value;
-    });
-    friendsController.getReceivedFriendRequests().then((value) => {
-        receivedFriendRequests.value = value;
-    });
-})
+  friendsController.getBlockedFriends().then((value) => {
+    blockedFriends.value = value;
+  });
+  friendsController.getSentFriendRequests().then((value) => {
+    sentFriendRequests.value = value;
+  });
+  friendsController.getReceivedFriendRequests().then((value) => {
+    receivedFriendRequests.value = value;
+  });
+});
 
 </script>
 
 <template>
-    <div class="friends-section">
-        <div class="friends-subsection">
-            <h2>Active friends</h2>
-            <div class="active-friend" v-for="friend in activeFriends" :key="friend.userId">
-                <span>{{ friend.username }} ({{ friend.status }})</span>
-				<div class="friend-status" :class="{'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
-                <button @click="() => friendsController.blockUser(friend.userId)">Block</button>
-                <button @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
-            </div>
-        </div>
-        <div class="friends-subsection">
-            <h2>Friends I've blocked</h2>
-            <div v-for="friend in blockedFriends" :key="friend.userId">
-                <span>{{ friend.username }}</span>
-                <button @click="() => friendsController.unblockUser(friend.userId)">Unblock</button>
-            </div>
-        </div>
-        <div class="friends-subsection">
-            <h2>Friend requests</h2>
-            <h3>Sent requests</h3>
-            <div v-for="friend in sentFriendRequests" :key="friend.userId">
-                <span>{{ friend.username }}</span>
-                <button @click="() => friendsController.unfriendUser(friend.userId)">Cancel</button>
-            </div>
-            <h3>Received requests</h3>
-            <div v-for="friend in receivedFriendRequests" :key="friend.userId">
-                <span>{{ friend.username }}</span>
-                <button @click="() => friendsController.acceptFriendRequest(friend.userId)">Accept</button>
-                <button @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>
-            </div>
-        </div>
+  <div class="friends-section">
+    <div class="title-bar">
+      <h2>FRIENDS REQUESTS</h2>
     </div>
+    <div class="friends-subsection">
+      <div class="request-row" v-for="(friend, index) in receivedFriendRequests" :key="friend.userId">
+        <div class="friend-request">
+          <div class="row-number-box">{{ index + 1 }}</div>
+          <img :src="getUserAvatar(friend.userId)" class="user-image" alt="User Image">{{ friend.username }}
+        </div>
+        <div class="friend-request-buttons">
+          <button class="friend-request-bt"
+            @click="() => friendsController.acceptFriendRequest(friend.userId)">Accept</button>
+          <button class="friend-request-bt"
+            @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>
+        </div>
+      </div>
+    </div>
+    <div class="title-bar">
+      <h2># user status</h2>
+    </div>
+    <div class="friends-subsection">
+      <div class="request-row" v-for="(friend, index) in activeFriends" :key="friend.userId">
+        <!-- <div class="friend -->
+        <div class="friend-request">
+        <div class="row-number-box">{{ index + 1 }}</div>
+          <img :src="getUserAvatar(friend.userId)" class="user-image" alt="User Image">{{ friend.username }} <!-- Avatar is meassing-->
+          <span v-if="isOnline(friend)">Online</span>
+          <span v-else-if="isGaming(friend)">Gaming</span>
+          <span v-else>Offline</span>
+        </div>
+        <div class="friend-status"
+          :class="{ 'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
+        <button class="friend-request-bt" @click="() => friendsController.blockUser(friend.userId)">Block</button>
+        <button class="friend-request-bt" @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
+      </div>
+    </div>
+    <!-- <button @click="() => sendFriendRequest()">Enviar solicitud de amistad</button> -->
+  </div>
 </template>
 
 <style scoped>
-    .friends-section {
-        width: 50%;
-        display: flex;
-        justify-content: space-around;
-        margin-bottom: 20px;
-    }
-    
-    .active-friend {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+.friends-section {
+  width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-    .friend-status {
-        height:10px;
-        width: 10px;
-    }
+.title-bar {
+  box-sizing: border-box;
+  font-size: 0.6rem;
+  text-align: center;
+  padding: 0.1rem;
+  background: #1E9052;
+  border: 0.3em solid #4BFE65;
+}
 
-    .friend-status-online {
-        background-color: #07d807;
-    }
+.request-row {
+  display: flex;
+}
 
-    .friend-status-gaming {
-        background-color: #8807d8;
-    }
+.friends-subsection {
+  width: 100%;
+}
+
+.active-friend,
+.friend-request {
+  display: flex;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #08150c;
+  border: 0.1em solid #4BFE65;
+  box-sizing: border-box;
+  margin-bottom: 0;
+  margin-right: 0.5em;
+}
+
+.friend-request-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.friend-request-bt {
+  padding: 0.5rem;
+  box-sizing: border-box;
+  align-items: center;
+  color: #b3f9d7;
+  background: #08150c;
+  box-sizing: border-box;
+  margin-bottom: 0;
+  border: 0.1em solid #4BFE65;
+}
+
+.row-number-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  background-color: #4BFE65;
+  color: #08150c;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.friend-request-bt:hover {
+  background-color: #4BFE65;
+  color: #08150c;
+}
 </style>
