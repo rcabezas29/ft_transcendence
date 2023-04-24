@@ -81,8 +81,9 @@ class DirectMessageController {
             return ;
         const friendChat: Chat | undefined = this.chats[fromUser.id];
 
+        friendChat.challenge = true;
         if (friendChat !== currentChat.value)
-            friendChat.challenge = true;
+            friendChat.notification = true;
     }
 
     sendDirectMessage(message: string) {
@@ -144,6 +145,7 @@ class DirectMessageController {
             user2Id: user.id,
         }
         user.socket?.emit('accept-challenge', challengePlayers);
+        this.chats[friendId].challenge = false;
     }
 
     refuseChallenge(friendId: number) {

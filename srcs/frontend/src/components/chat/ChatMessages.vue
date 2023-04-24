@@ -3,6 +3,7 @@ import { type Ref, ref, onUpdated, onMounted } from 'vue';
 import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
 import { channelController } from '@/channelController';
+import router from '@/router';
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -28,19 +29,32 @@ function scrollDownChatMessages() {
 
 onUpdated(() => {
 	scrollDownChatMessages();
-})
+});
 
 onMounted(() => {
 	scrollDownChatMessages();
-})
+});
+
+function	acceptChallenge(friendId: number) {
+	directMessageController.acceptChallenge(friendId);
+	router.replace('game');
+}
+
+function	refuseChallenge(friendId: number) {
+	directMessageController.refuseChallenge(friendId);
+}
 
 </script>
 
 <template>
-	<button v-if="chatIsDirectMessage(currentChat!)" v-on:click="challengeThroughChat()">Challenge</button>
+	<button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">Challenge</button>
 
 	<div class="chat-messages">
-		<div v-for="message in currentChat!.messages" class="message">
+		<div class="challenge-request" v-if="currentChat?.challenge">
+			<button v-on:click="acceptChallenge(currentChat.target.id)">Accept</button>
+			<button v-on:click="refuseChallenge(currentChat.target.id)">Refuse</button>
+		</div>
+		<div v-else v-for="message in currentChat!.messages" class="message">
 			<div class="chat-message-username">
 				{{ `${message.from}:` }}
 			</div>
