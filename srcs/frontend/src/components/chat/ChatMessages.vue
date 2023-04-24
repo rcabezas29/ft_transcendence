@@ -7,6 +7,7 @@ import router from '@/router';
 import Button from '@/components/ui/Button.vue';
 import { user } from '@/user';
 import { friendsController } from '@/friendsController';
+import type { ChatUser } from '@/interfaces';
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -38,12 +39,12 @@ onMounted(() => {
 	scrollDownChatMessages();
 });
 
-function	acceptChallenge(friendId: number) {
+function acceptChallenge(friendId: number) {
 	directMessageController.acceptChallenge(friendId);
 	router.replace('game');
 }
 
-function	refuseChallenge(friendId: number) {
+function refuseChallenge(friendId: number) {
 	directMessageController.refuseChallenge(friendId);
 }
 
@@ -61,11 +62,11 @@ function	refuseChallenge(friendId: number) {
 				{{ message.message }}
 			</div>
 		</div>
-		<div class="challenge-request" v-if="currentChat?.challenge">
-			<p>{{ currentChat.target.username }} challenged you</p>
+		<div class="challenge-request" v-if="chatIsDirectMessage(currentChat!) && currentChat?.challenge">
+			<div>{{ (<ChatUser>currentChat.target).username }} challenged you</div>
 			<div class="choice-buttons">
-				<Button @click="acceptChallenge(currentChat.target.id)">Accept</Button>
-				<Button @click="refuseChallenge(currentChat.target.id)">Refuse</Button>
+				<Button @click="acceptChallenge((<ChatUser>currentChat.target).id)">ACCEPT</Button>
+				<Button @click="refuseChallenge((<ChatUser>currentChat.target).id)">REFUSE</Button>
 			</div>
 		</div>
 	</div>
@@ -116,14 +117,25 @@ function	refuseChallenge(friendId: number) {
 
 	.challenge-request {
 		display: flex;
+		width: 60%;
 		flex-direction: column;
 		align-items: center;
 		border: solid 1px #4BFE65;
-		margin: 5%;
 		background-color: #1E9052;
+		padding: 10px;
+		gap: 10px;
+		margin: 10px 0px;
 	}
 
 	.choice-buttons {
 		display: flex;
+		width: 100%;
+		justify-content: space-around;
+		/*gap: 20px;*/
+	}
+
+	.choice-buttons button {
+		padding: 10px 10px;
+		width: 40%;
 	}
 </style>
