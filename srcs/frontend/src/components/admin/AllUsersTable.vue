@@ -8,6 +8,7 @@
 	import TextInputField from "../ui/TextInputField.vue";
 	import Button from "../ui/Button.vue";
 	import { UserRole } from "@/interfaces/user-data.interface";
+	import CrossIcon from "../icons/CrossIcon.vue";
 
 	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
@@ -49,11 +50,11 @@
 		return user.role == UserRole.OWNER;
 	}
 
-	async function makeWebsiteAdmin(selectedUser: UserData) {
-		if (!user.isWebsiteOwner() || selectedUser.role != UserRole.USER)
+	async function makeWebsiteAdmin() {
+		if (!user.isWebsiteOwner() || !currentUser.value || currentUser.value.role != UserRole.USER)
 			return;
 
-		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/role/${selectedUser.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/role/${currentUser.value.id}`, {
 			method: "PATCH",
 			headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -67,16 +68,16 @@
 			return;
 		}
 
-		user.socket?.emit("new-website-admin", selectedUser.id);
-		const updatedUser = users.value?.find((u) => u.id == selectedUser.id);
+		user.socket?.emit("new-website-admin", currentUser.value.id);
+		const updatedUser = users.value?.find((u) => u.id == currentUser.value?.id);
 		updatedUser!.role = UserRole.ADMIN;
 	}
 
-	async function removeWebsiteAdmin(selectedUser: UserData) {
-		if (!user.isWebsiteOwner() || selectedUser.role != UserRole.ADMIN)
+	async function removeWebsiteAdmin() {
+		if (!user.isWebsiteOwner() || !currentUser.value || currentUser.value.role != UserRole.ADMIN)
 			return;
 
-		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/role/${selectedUser.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/role/${currentUser.value.id}`, {
 			method: "PATCH",
 			headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -90,16 +91,16 @@
 			return;
 		}
 
-		user.socket?.emit("remove-website-admin", selectedUser.id);
-		const updatedUser = users.value?.find((u) => u.id == selectedUser.id);
+		user.socket?.emit("remove-website-admin", currentUser.value.id);
+		const updatedUser = users.value?.find((u) => u.id == currentUser.value?.id);
 		updatedUser!.role = UserRole.USER;
 	}
 
-	async function banFromWebsite(selectedUser: UserData) {
-		if (!user.isWebsiteAdmin() || selectedUser.role == UserRole.OWNER)
+	async function banFromWebsite() {
+		if (!user.isWebsiteAdmin() || !currentUser.value || currentUser.value.role == UserRole.OWNER)
 			return;
 
-		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${selectedUser.id}/ban`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${currentUser.value.id}/ban`, {
 			method: "PATCH",
 			headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -111,17 +112,17 @@
 			return;
 		}
 
-		user.socket?.emit("ban-from-website", selectedUser.id);
+		user.socket?.emit("ban-from-website", currentUser.value.id);
 
-		const updatedUser = users.value?.find((u) => u.id == selectedUser.id);
+		const updatedUser = users.value?.find((u) => u.id == currentUser.value?.id);
 		updatedUser!.isBanned = true;
 	}
 
-	async function unbanFromWebsite(selectedUser: UserData) {
-		if (!user.isWebsiteAdmin() || selectedUser.role == UserRole.OWNER)
+	async function unbanFromWebsite() {
+		if (!user.isWebsiteAdmin() || !currentUser.value || currentUser.value.role == UserRole.OWNER)
 			return;
 
-		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${selectedUser.id}/unban`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${currentUser.value.id}/unban`, {
 			method: "PATCH",
 			headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -133,8 +134,22 @@
 			return;
 		}
 
-		const updatedUser = users.value?.find((u) => u.id == selectedUser.id);
+		const updatedUser = users.value?.find((u) => u.id == currentUser.value?.id);
 		updatedUser!.isBanned = false;
+	}
+
+	const currentUser = ref<UserData | null>(null);
+	function setCurrentUser(selectedUser: UserData): void {
+		if (!userIsOwner(selectedUser) && selectedUser.id != user.id)
+			currentUser.value = selectedUser;
+	}
+
+	function unsetCurrentUser():void {
+		currentUser.value = null;
+	}
+
+	function isCurrentUser(selectedUser: UserData): boolean {
+		return selectedUser === currentUser.value;
 	}
 
 </script>
@@ -151,17 +166,14 @@
 				<th>#</th>
 				<th>USER</th>
 				<th>ROLE</th>
-				<th></th>
 			</tr>
 		</template>
 		<template #body>
-			<tr v-for="(userRow, index) in filteredUsers">
-				<td>
-					<div class="table-square">
-						<span>{{ userRow.id }}</span>
-					</div>
+			<tr class="table-row" v-for="userRow in filteredUsers" :key="userRow.id" @click="setCurrentUser(userRow)" @mouseenter="setCurrentUser(userRow)" @mouseleave="unsetCurrentUser">
+				<td v-show="!isCurrentUser(userRow)" class="table-square" :class="{banned: userRow.isBanned}">
+					<span>{{ userRow.id }}</span>
 				</td>
-				<td>
+				<td v-show="!isCurrentUser(userRow)">
 					<div class="table-user">
 						<span class="table-user-img">
 							<img :src=userRow.avatarURL />
@@ -171,15 +183,32 @@
 						</span>
 					</div>
 				</td>
-				<td>{{ userRow.role }}</td>
-				<td>
-					<div v-if="user.isWebsiteOwner() && !userIsOwner(userRow)">
-						<button v-if="!userIsAdmin(userRow)" @click="makeWebsiteAdmin(userRow)">Promote to admin</button>
-						<button v-else @click="removeWebsiteAdmin(userRow)">Remove admin</button>
-					</div>
-					<div v-if="!userIsOwner(userRow)">
-						<button v-if="!userRow.isBanned" @click="banFromWebsite(userRow)">Ban User</button>
-						<button v-else @click="unbanFromWebsite(userRow)">Unban User</button>
+				<td v-show="!isCurrentUser(userRow)">
+					<span>{{ userRow.role }}</span>
+				</td>
+				<td class="hovering-row" v-show="isCurrentUser(userRow)" colspan="3">
+					<div class="buttons">
+						<div class="option-buttons" v-if="user.isWebsiteOwner() && !userIsOwner(userRow)">
+							<Button class="row-button" v-if="!userIsAdmin(userRow)" @click.stop="makeWebsiteAdmin()" :selected="true">
+								Promote to admin
+							</Button>
+							<Button class="row-button" v-else @click.stop="removeWebsiteAdmin()" :selected="true">
+								Remove admin
+							</Button>
+						</div>
+						<div class="option-buttons" v-if="!userIsOwner(userRow)">
+							<Button class="row-button" v-if="!userRow.isBanned" @click.stop="banFromWebsite()" :selected="true">
+								Ban User
+							</Button>
+							<Button class="row-button" v-else @click.stop="unbanFromWebsite()" :selected="true">
+								Unban User
+							</Button>
+						</div>
+						<div class="option-buttons cross-button desktop-hidden">
+							<Button class="row-button" :selected="true" @click.stop="unsetCurrentUser">
+								<CrossIcon/>
+							</Button>
+						</div>
 					</div>
 				</td>
 			</tr>
@@ -215,6 +244,10 @@
 		justify-content: center;
 	}
 
+	.banned {
+		background-color: gray;
+	}
+
 	.table-user {
 		display: flex;
 		align-items: center;
@@ -230,13 +263,53 @@
 		margin-left: 12px;
 	}
 
+	.table-row {
+		height: 50px;
+		cursor: default;
+		box-sizing: border-box;
+	}
+
+	.table-row:hover {
+		background-color: #08150C;
+		color: #B3F9D7;
+	}
+
+	.hovering-row {
+		height: 100%;
+		box-sizing: border-box;
+		padding: 2px;
+	}
+
+	.buttons {
+		height: 100%;
+		display: flex;
+		flex-direction: row;
+		gap: 2px;
+		box-sizing: border-box;
+	}
+
+	.option-buttons {
+		height: 100%;
+		display: flex;
+		box-sizing: border-box;
+		flex: 1;
+	}
+
+	.cross-button {
+		flex: 0.25;
+	}
+
+	.row-button {
+		box-sizing: border-box;
+		padding: 9px 12px;
+		border-width: 1px;
+	}
+
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
-
-		.mobile-hidden {
-			display: table-cell;
+		.desktop-hidden {
+			display: none;
 		}
-	
 	}
 
 </style>
