@@ -1,4 +1,6 @@
+import { ChatUser } from "./chat-user.interface";
+
 export interface Message {
-	from: string;
+	from: ChatUser;
 	message: string;
 }

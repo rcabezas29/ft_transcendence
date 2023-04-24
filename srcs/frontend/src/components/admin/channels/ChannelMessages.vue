@@ -28,7 +28,7 @@ onMounted(() => {
 	<div class="chat-messages">
 		<div v-for="message in channel.chat?.messages" class="message">
 			<div class="chat-message-username">
-				{{ `${message.from}:` }}
+				{{ `${message.from.username}:` }}
 			</div>
 			<div class="chat-message">
 				{{ message.message }}

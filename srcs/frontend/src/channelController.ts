@@ -35,7 +35,7 @@ interface TimeUserChannelPayload {
 
 interface ChannelMessagePayload {
 	channel: string;
-	from: string;
+	from: ChatUser;
 	message: string;
 }
 
@@ -98,14 +98,18 @@ class ChannelController {
 
 	sendChannelMessage(message: string): void {
         const toChannel: ChannelName = (<ChannelName>currentChat.value!.target);
+		const from: ChatUser = {
+			id: user.id,
+			username: user.username
+		};
         const payload: ChannelMessagePayload = {
             channel: toChannel,
-			from: user.username,
+			from,
 			message: message
         };
         user.socket?.emit('channel-message', payload);
 
-		this.addMessageToChannelChat(toChannel, "you", payload.message);
+		this.addMessageToChannelChat(toChannel, from, payload.message);
     }
 
 	banUser(bannedUser: ChatUser, channelName: ChannelName, time: string): void {
@@ -356,7 +360,7 @@ class ChannelController {
 		alert(errorMessage);
 	}
 
-	private addMessageToChannelChat(channelName: ChannelName, fromUser: string, message: string): void {
+	private addMessageToChannelChat(channelName: ChannelName, fromUser: ChatUser, message: string): void {
 		const channel = this.channels[channelName];
 		if (!channel)
 			return;

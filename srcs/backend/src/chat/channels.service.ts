@@ -144,7 +144,8 @@ export class ChannelsService {
 			}
 		}
 
-		payload.from = fromUser.username;
+		console.log("sending messagee from: ", payload.from)
+		//payload.from = fromUser.username;
 		channel.addMessage({message: payload.message, from: payload.from});
 		fromUser.socket.to(payload.channel).emit("channel-message", payload);
 	}
@@ -299,9 +300,14 @@ export class ChannelsService {
 		if (!channel)
 			return ;
 
+		const from: ChatUser = {
+			id: -1,
+			username: `#${channelName} server`
+		}
+
 		const payload: ChannelMessagePayload = {
 			channel: channelName,
-			from: `#${channelName} server`,
+			from,
 			message
 		}
 		channel.addMessage({message, from: payload.from});

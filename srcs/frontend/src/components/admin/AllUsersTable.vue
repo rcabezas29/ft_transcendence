@@ -190,18 +190,18 @@
 					<div class="buttons">
 						<div class="option-buttons" v-if="user.isWebsiteOwner() && !userIsOwner(userRow)">
 							<Button class="row-button" v-if="!userIsAdmin(userRow)" @click.stop="makeWebsiteAdmin()" :selected="true">
-								Promote to admin
+								PROMOTE TO ADMIN
 							</Button>
 							<Button class="row-button" v-else @click.stop="removeWebsiteAdmin()" :selected="true">
-								Remove admin
+								REMOVE ADMIN
 							</Button>
 						</div>
 						<div class="option-buttons" v-if="!userIsOwner(userRow)">
 							<Button class="row-button" v-if="!userRow.isBanned" @click.stop="banFromWebsite()" :selected="true">
-								Ban User
+								BAN USER
 							</Button>
 							<Button class="row-button" v-else @click.stop="unbanFromWebsite()" :selected="true">
-								Unban User
+								UNBAN USER
 							</Button>
 						</div>
 						<div class="option-buttons cross-button desktop-hidden">

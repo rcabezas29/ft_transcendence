@@ -5,6 +5,7 @@ import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
 import { channelController } from '@/channelController';
 import router from '@/router';
 import Button from '@/components/ui/Button.vue';
+import { user } from '@/user';
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -53,7 +54,7 @@ function	refuseChallenge(friendId: number) {
 	<div class="chat-messages">
 		<div v-for="message in currentChat!.messages" class="message">
 			<div class="chat-message-username">
-				{{ `${message.from}:` }}
+				{{ `${user.id == message.from.id ? "you" : message.from.username}:` }}
 			</div>
 			<div class="chat-message">
 				{{ message.message }}
