@@ -144,8 +144,6 @@ export class ChannelsService {
 			}
 		}
 
-		console.log("sending messagee from: ", payload.from)
-		//payload.from = fromUser.username;
 		channel.addMessage({message: payload.message, from: payload.from});
 		fromUser.socket.to(payload.channel).emit("channel-message", payload);
 	}

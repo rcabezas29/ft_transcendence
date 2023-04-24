@@ -60,14 +60,15 @@ class DirectMessageController {
     }
 
     private receiveDirectMessage(payload: MessagePayload) {
-        const fromUsername: ChatUser | undefined = this.findFriendById(payload.friendId);
-        if (!fromUsername)
+        const fromUser: ChatUser | undefined = this.findFriendById(payload.friendId);
+        if (!fromUser)
             return;
+
         const newMessage: Message = {
-            from: fromUsername.username,
+            from: fromUser,
             message: payload.message
         }
-        const friendChat: Chat | undefined = this.chats[fromUsername.id];
+        const friendChat: Chat | undefined = this.chats[fromUser.id];
         if (friendChat)
             friendChat.messages.push(newMessage);
 
@@ -94,8 +95,12 @@ class DirectMessageController {
         };
         user.socket?.emit('direct-message', payload);
 
+        const from: ChatUser = {
+            id: user.id,
+            username: user.username
+        }
         const newMessage: Message = {
-            from: "you",
+            from,
             message: message
         }
         const friendChat: Chat | undefined = this.chats[toFriendId];
