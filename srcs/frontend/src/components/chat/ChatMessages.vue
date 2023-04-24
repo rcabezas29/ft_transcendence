@@ -6,6 +6,7 @@ import { channelController } from '@/channelController';
 import router from '@/router';
 import Button from '@/components/ui/Button.vue';
 import { user } from '@/user';
+import { friendsController } from '@/friendsController';
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -52,7 +53,7 @@ function	refuseChallenge(friendId: number) {
 	<Button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">Challenge</Button>
 
 	<div class="chat-messages">
-		<div v-for="message in currentChat!.messages" class="message">
+		<div v-for="message in currentChat!.messages" class="message" v-show="!friendsController.userIsBlocked(message.from.id)">
 			<div class="chat-message-username">
 				{{ `${user.id == message.from.id ? "you" : message.from.username}:` }}
 			</div>
