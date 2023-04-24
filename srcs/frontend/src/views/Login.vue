@@ -17,7 +17,11 @@
 			return;
 		}
 
-		await user.auth(response.access_token);
+		const authOk = await user.auth(response.access_token);
+		if (!authOk) {
+			message.value = "Something went wrong";
+			return;
+		}
 
 		if (await user.checkIfSecondFactorAuthenticationIsNeeded(response.access_token)){
 			router.replace({ "name": "2fa-auth" });
@@ -51,7 +55,7 @@
 			<div :class="messageClass">{{ message }}</div>
 			<div class="form-buttons">
 				<Button type="button" @click="moveToRegister">REGISTER</Button>
-				<Button type="submit" :selected="true" @click="handleSubmit">LOGIN</Button>
+				<Button type="submit" :selected="true">LOGIN</Button>
 			</div>
 			<Button type="button" @click="loginWithIntra" class="button-42">
 				<div class="login-text">
@@ -113,6 +117,10 @@
 
 	.login-text img {
 		margin: 0px 8px;
+	}
+
+	.error-message {
+		color: red;
 	}
 
 	/* Everything bigger than 850px */

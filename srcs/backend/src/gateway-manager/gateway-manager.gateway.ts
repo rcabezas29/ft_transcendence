@@ -95,4 +95,9 @@ export class GatewayManagerGateway implements OnGatewayConnection, OnGatewayDisc
 	notifyOfWebsiteAdminRemoval(client: Socket, adminUserId: number): void {
 		this.gatewayManagerService.onUserRoleUpdated(adminUserId, UserRole.USER);
 	}
+
+	@SubscribeMessage("ban-from-website")
+	notifyOfWebsiteBan(client: Socket, bannedUserId: number): void {
+		this.gatewayManagerService.onUserBanned(bannedUserId);
+	}
 }

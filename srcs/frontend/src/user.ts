@@ -15,6 +15,7 @@ interface FetchedUser {
 	username: string;
 	elo: number;
 	role: UserRole;
+	isBanned: boolean;
 }
 
 class User {
@@ -27,13 +28,14 @@ class User {
 	public avatarImageURL: string = '';
 	public elo : number = 0;
 	public role: UserRole = UserRole.USER;
+	public isBannedFromWebsite: boolean = false;
 
 	private isLogged: boolean = false;
 	private onLogoutCallbacks: Function[] = [];
 
-	async auth(access_token: string): Promise<void> {
+	async auth(access_token: string): Promise<boolean> {
 		if (this.token && this.token === access_token)
-			return;
+			return true;
 
 		this.token = access_token;
 		localStorage.setItem("token", access_token);
@@ -44,7 +46,7 @@ class User {
 			const userData: UserData | null = await this.fetchUserData();
 			if (!userData) {
 				console.log('error fetching user data');
-				return ;
+				return false;
 			}
 
 			const fetchedUser: FetchedUser = userData;
@@ -52,10 +54,17 @@ class User {
 			this.elo = fetchedUser.elo;
 			this.avatarImageURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${this.id}`;
 			this.role = fetchedUser.role;
+			this.isBannedFromWebsite = fetchedUser.isBanned;
+
+			if (this.isBannedFromWebsite) {
+				console.log('user is banned from website');
+				this.logout();
+				return false;
+			}
 
 		} catch (error) {
 			console.log(error, 'error from decoding token');
-			return ;
+			return false;
 		}
 
 		const needSecondFactorAuth = await this.checkIfSecondFactorAuthenticationIsNeeded(this.token);
@@ -69,8 +78,11 @@ class User {
 				this.socket.on("alreadyConnected", () => { this.onAlreadyConnected(); });
 				this.socket.on("website-admin", () => { this.makeWebsiteAdmin(); });
 				this.socket.on("remove-website-admin", () => { this.removeWebsiteAdmin(); });
+				this.socket.on("banned-from-website", () => { this.banFromWebsite(); });
 			}
 		}
+
+		return true;
 	}
 
 	async register(username: string, email: string, password: string) {
@@ -137,6 +149,12 @@ class User {
 
 	isWebsiteOwner() {
 		return this.role == UserRole.OWNER;
+	}
+
+	banFromWebsite() {
+		this.isBannedFromWebsite = true;
+		this.logout();
+		router.replace({ "name": "login" });
 	}
 
 	onConnect(): void {
@@ -245,8 +263,12 @@ class User {
 		if (httpResponse.status != 200) {
 			return false;
 		}
+
 		const { access_token } = await httpResponse.json();
-		await this.auth(access_token);
+
+		if (!(await this.auth(access_token))) {
+			return false;
+		}
 		return true;
 	}
 

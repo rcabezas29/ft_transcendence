@@ -22,5 +22,6 @@ export interface UserData {
     elo: number;
     isTwoFactorAuthenticationEnabled: boolean;
     stats: UserStats;
-	role: UserRole
+	role: UserRole;
+    isBanned: boolean;
 }

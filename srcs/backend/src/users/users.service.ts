@@ -182,6 +182,36 @@ export class UsersService {
       throw new NotFoundException();
   }
 
+  async banFromWebsite(id: number) {
+    const userToUpdate = { id, isBanned: true };
+
+    try {
+      const user = await this.usersRepository.preload(userToUpdate);
+      if (user) {
+        const res = await this.usersRepository.save(user);
+        return res;
+      }
+    } catch (e) {
+      throw new BadRequestException('Failed to ban user');
+    }
+    throw new NotFoundException();
+  }
+
+  async unbanFromWebsite(id: number) {
+    const userToUpdate = { id, isBanned: false };
+
+    try {
+      const user = await this.usersRepository.preload(userToUpdate);
+      if (user) {
+        const res = await this.usersRepository.save(user);
+        return res;
+      }
+    } catch (e) {
+      throw new BadRequestException('Failed to unban user');
+    }
+    throw new NotFoundException();
+  }
+
   async updateStats(userId: number, newStats: UpdateStatsDto) {
     const user = await this.findOneById(userId);
     if (!user)

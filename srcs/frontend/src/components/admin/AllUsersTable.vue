@@ -45,6 +45,10 @@
 		return user.role == UserRole.ADMIN || user.role == UserRole.OWNER;
 	}
 
+	function userIsOwner(user: UserData) {
+		return user.role == UserRole.OWNER;
+	}
+
 	async function makeWebsiteAdmin(selectedUser: UserData) {
 		if (!user.isWebsiteOwner() || selectedUser.role != UserRole.USER)
 			return;
@@ -91,6 +95,48 @@
 		updatedUser!.role = UserRole.USER;
 	}
 
+	async function banFromWebsite(selectedUser: UserData) {
+		if (!user.isWebsiteAdmin() || selectedUser.role == UserRole.OWNER)
+			return;
+
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${selectedUser.id}/ban`, {
+			method: "PATCH",
+			headers: {
+				"Authorization": `Bearer ${user.token}`,
+			}
+		});
+
+		if (httpResponse.status != 200) {
+			console.log("error while banning user");
+			return;
+		}
+
+		user.socket?.emit("ban-from-website", selectedUser.id);
+
+		const updatedUser = users.value?.find((u) => u.id == selectedUser.id);
+		updatedUser!.isBanned = true;
+	}
+
+	async function unbanFromWebsite(selectedUser: UserData) {
+		if (!user.isWebsiteAdmin() || selectedUser.role == UserRole.OWNER)
+			return;
+
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${selectedUser.id}/unban`, {
+			method: "PATCH",
+			headers: {
+				"Authorization": `Bearer ${user.token}`,
+			}
+		});
+
+		if (httpResponse.status != 200) {
+			console.log("error while unbanning user");
+			return;
+		}
+
+		const updatedUser = users.value?.find((u) => u.id == selectedUser.id);
+		updatedUser!.isBanned = false;
+	}
+
 </script>
 
 <template>
@@ -127,9 +173,13 @@
 				</td>
 				<td>{{ userRow.role }}</td>
 				<td>
-					<div v-if="user.isWebsiteOwner()">
+					<div v-if="user.isWebsiteOwner() && !userIsOwner(userRow)">
 						<button v-if="!userIsAdmin(userRow)" @click="makeWebsiteAdmin(userRow)">Promote to admin</button>
 						<button v-else @click="removeWebsiteAdmin(userRow)">Remove admin</button>
+					</div>
+					<div v-if="!userIsOwner(userRow)">
+						<button v-if="!userRow.isBanned" @click="banFromWebsite(userRow)">Ban User</button>
+						<button v-else @click="unbanFromWebsite(userRow)">Unban User</button>
 					</div>
 				</td>
 			</tr>

@@ -50,4 +50,7 @@ export class User {
 
   @Column({ default: UserRole.USER })
   role: UserRole;
+
+  @Column({ default: false })
+  isBanned: boolean;
 }

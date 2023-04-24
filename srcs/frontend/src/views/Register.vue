@@ -26,7 +26,12 @@
 		}
 		const accessToken = loginRet.response.access_token;
 
-		user.auth(accessToken);
+		const authOk = await user.auth(accessToken);
+		if (!authOk) {
+			message.value = "Something went wrong";
+			return;
+		}
+
 		message.value = "Success";
 		messageClass.value = "success-message";
 		router.replace({ "name": "home"});

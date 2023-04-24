@@ -117,6 +117,14 @@ export class GatewayManagerService {
 			adminGatewayUser.socket.emit("remove-website-admin");
 	}
 
+	onUserBanned(userId: number) {
+		const bannedGatewayUser = this.getClientByUserId(userId);
+		if (!bannedGatewayUser)
+			return;
+
+		bannedGatewayUser.socket.emit("banned-from-website");
+	}
+
 	setGatewayUserGamingStatus(id: number) {
 		const user: GatewayUser = this.users.find((u) => u.id == id);
 		if (user)

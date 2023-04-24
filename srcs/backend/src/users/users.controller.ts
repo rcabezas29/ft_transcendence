@@ -45,6 +45,18 @@ export class UsersController {
     return this.usersService.updateRole(id, newRole);
   }
 
+  @UseGuards(JwtTwoFactorGuard, AdminGuard)
+  @Patch(':id/ban')
+  banUser(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.banFromWebsite(id);
+  }
+
+  @UseGuards(JwtTwoFactorGuard, AdminGuard)
+  @Patch(':id/unban')
+  unbanUser(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.unbanFromWebsite(id);
+  }
+
   @UseGuards(JwtTwoFactorGuard, UserGuard)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
