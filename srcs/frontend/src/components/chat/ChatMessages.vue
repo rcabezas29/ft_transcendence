@@ -4,6 +4,7 @@ import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
 import { channelController } from '@/channelController';
 import router from '@/router';
+import Button from '@/components/ui/Button.vue';
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -50,16 +51,19 @@ function	refuseChallenge(friendId: number) {
 	<button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">Challenge</button>
 
 	<div class="chat-messages">
-		<div class="challenge-request" v-if="currentChat?.challenge">
-			<button v-on:click="acceptChallenge(currentChat.target.id)">Accept</button>
-			<button v-on:click="refuseChallenge(currentChat.target.id)">Refuse</button>
-		</div>
-		<div v-else v-for="message in currentChat!.messages" class="message">
+		<div v-for="message in currentChat!.messages" class="message">
 			<div class="chat-message-username">
 				{{ `${message.from}:` }}
 			</div>
 			<div class="chat-message">
 				{{ message.message }}
+			</div>
+		</div>
+		<div class="challenge-request" v-if="currentChat?.challenge">
+			<p>{{ currentChat.target.username }} challenged you</p>
+			<div class="choice-buttons">
+				<Button @click="acceptChallenge(currentChat.target.id)">Accept</Button>
+				<Button @click="refuseChallenge(currentChat.target.id)">Refuse</Button>
 			</div>
 		</div>
 	</div>
@@ -106,5 +110,18 @@ function	refuseChallenge(friendId: number) {
 		width: 100%;
         height: 38px;
         padding: 0 24px;
+	}
+
+	.challenge-request {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		border: solid 1px #4BFE65;
+		margin: 5%;
+		background-color: #1E9052;
+	}
+
+	.choice-buttons {
+		display: flex;
 	}
 </style>
