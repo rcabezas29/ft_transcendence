@@ -7,16 +7,6 @@ function handleClick(e: Event, friendId: number) {
 	directMessageController.setCurrentChat(friendId);
 }
 
-function	acceptChallenge(friendId: number) {
-	directMessageController.acceptChallenge(friendId);
-	router.replace('game');
-}
-
-function	refuseChallenge(friendId: number) {
-	directMessageController.refuseChallenge(friendId);
-	// router.replace('game');
-}
-
 const backendURL = import.meta.env.VITE_BACKEND_URL;
 
 </script>
@@ -34,10 +24,6 @@ const backendURL = import.meta.env.VITE_BACKEND_URL;
 			</div>
 
 			<div class="chat-card-notification" :class="{'chat-card-notification-on': directMessageController.chats[friend.id].notification}"></div>
-			<div v-if="directMessageController.chats[friend.id].challenge">
-				<button v-on:click="acceptChallenge(friend.id)">Accept</button>
-				<button v-on:click="refuseChallenge(friend.id)">Refuse</button>
-			</div>
 		</div>
 	</div>
 </template>
