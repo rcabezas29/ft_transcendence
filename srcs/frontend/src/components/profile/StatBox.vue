@@ -51,7 +51,7 @@
 /* Everything bigger than 850px */
 @media only screen and (min-width: 850px) {
   .stat-square {
-    width: 300px;
+    width: 200px;
     padding: 24px;
   }
 }

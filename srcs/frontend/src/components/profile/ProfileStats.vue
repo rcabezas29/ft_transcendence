@@ -67,13 +67,18 @@
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+  flex-flow: row wrap;
   gap: 24px;
 }
 
   /* Everything bigger than 850px */
 @media only screen and (min-width: 850px) {
   .square-stats-grid {
-    justify-content: space-around;
+    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 1rem;
+    gap: 42px;
   }
 }
 </style>
