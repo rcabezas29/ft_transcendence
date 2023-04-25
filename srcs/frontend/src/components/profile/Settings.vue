@@ -3,7 +3,7 @@
 	import { user } from "../../user";
 	import Button from "../ui/Button.vue";
 	import TextInputField from "../ui/TextInputField.vue";
-	import type { UserData } from "@/interfaces";
+	import type { ReturnMessage, UserData } from "@/interfaces";
 	import AvatarCropper from "../AvatarCropper.vue";
     import FileUploadButton from "../ui/FileUploadButton.vue";
 	import router from "@/router";
@@ -105,7 +105,12 @@
     }
 
 	async function deleteUserAccount() {
-		await user.deleteAccount();
+		const ret: ReturnMessage = await user.deleteAccount();
+		if (!ret.success) {
+			errorMessage.value.push(ret.message!);
+			closeDeleteAccountModal();
+			return;
+		}
 		router.replace({ "name": "login" });
 	}
 
@@ -149,8 +154,8 @@
 				</div>
 			</div>
 		</div>
-		<div>
-			<span class="error-message" v-if="errorMessage.length > 0">{{ errorMessage }}</span>
+		<div class="error-message">
+			<span v-if="errorMessage.length > 0">{{ errorMessage }}</span>
 		</div>
 		<div class="form">
 			<TextInputField v-if="!editMode" placeholder-text="USERNAME" :modelValue="userData?.username" readonly/>
@@ -281,6 +286,11 @@
 	.logout-button:hover {
 		color: #B3F9D7;
 		background-color: #1E9052;
+	}
+
+	.error-message {
+		color: #EC3F74;
+		margin-top: 10px;
 	}
 
 	/* Everything bigger than 850px */

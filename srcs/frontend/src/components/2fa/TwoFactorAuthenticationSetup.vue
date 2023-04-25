@@ -32,8 +32,8 @@ async function generateTwoFactorAuthSecret() {
 async function secondFactorAuthenticate() {
     const code = twoFactorAuthenticationCode.value;
     const authenticated = await user.secondFactorAuthenticate(code);
-    if (!authenticated) {
-        message.value = 'Error while authenticating with 2FA';
+    if (!authenticated.success) {
+        message.value = authenticated.message!;
         return;
     }
     message.value = "You have successfully activated 2FA!";
@@ -96,39 +96,33 @@ onBeforeMount(async () => {
             <img :src="qrCode">
             <form class="form" @submit.prevent="turnOnTwoFactorAuth">
 			    <TextInputField style="height: 60px" placeholder-text="ENTER 6 DIGIT CODE" v-model="twoFactorAuthenticationCode"/>
+                <div :class='messageClass'>
+                    {{ message }}
+                </div>
                 <div class="modal-buttons">
                     <Button type="submit" :selected="true">SUBMIT</Button>
                     <Button type="button" @click="turnOffTwoFactorAuth">CANCEL</Button>
                 </div>
             </form>
         </div>
-        
-        <div :class='messageClass'>
-            {{ message }}
-        </div>
     </Modal>
     <Modal v-if="twoFactorAuthEnabled" :visible="twoFactorAuthModalVisible" @close="closeTwoFactorAuthModal" title="DISABLE 2FA">
         <div class="modal-content">
             <p>Two factor authentication is enabled. Would you like to disable it?</p>
+            <div :class='messageClass'>
+                {{ message }}
+            </div>
             <div class="modal-buttons">
                 <Button @click="turnOffTwoFactorAuth" :selected="true">DEACTIVATE</Button>
                 <Button @click="closeTwoFactorAuthModal">CANCEL</Button>
             </div>
-        </div>
-        
-        <div :class='messageClass'>
-            {{ message }}
         </div>
     </Modal>
 </template>
 
 <style scoped>
 	.error-message {
-		color: red;
-	}
-
-	.success-message {
-		color: green;
+		color: #EC3F74;
 	}
 
     .twofa-button button {

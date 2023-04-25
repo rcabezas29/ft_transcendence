@@ -135,7 +135,7 @@
     }
     
 	.error-message {
-        color: red;
+        color: #EC3F74;
     }
 
     .avatar-section {

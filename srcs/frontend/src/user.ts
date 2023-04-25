@@ -245,9 +245,9 @@ class User {
 		return false;
 	}
 
-	async secondFactorAuthenticate(code: string): Promise<boolean> {
+	async secondFactorAuthenticate(code: string): Promise<ReturnMessage> {
 		if (!this.token)
-			return false;
+			return { success: false, message: "error while authenticating with 2FA: no token" };
 
 		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/2fa/authenticate`, {
 			method: "POST",
@@ -258,15 +258,16 @@ class User {
 			body: JSON.stringify({twoFactorAuthenticationCode: code})
 		});
 		if (httpResponse.status != 200) {
-			return false;
+			return { success: false, message: "error while authenticating with 2FA" };
 		}
 
 		const { access_token } = await httpResponse.json();
 
-		if (!(await this.auth(access_token))) {
-			return false;
+		const authReturn: ReturnMessage = await this.auth(access_token);
+		if (!authReturn.success) {
+			return { success: false, message: `error while authenticating with 2FA: ${authReturn.message!}` };
 		}
-		return true;
+		return { success: true };
 	}
 
 	async turnOffTwoFactorAuth(): Promise<boolean> {
@@ -359,7 +360,6 @@ class User {
 		});
 
 		if (httpResponse.status != 201) {
-			console.log('error while posting image');
 			return false;
 		}
 
@@ -367,7 +367,7 @@ class User {
 		return true;
 	}
 
-	updateAvatarImageURL() {
+	updateAvatarImageURL(): void {
 		let basicURL = this.avatarImageURL;
 		const randomPartIndex = this.avatarImageURL.indexOf("?rand=");
 		if (randomPartIndex != -1)
@@ -377,11 +377,11 @@ class User {
 		this.avatarImageURL = `${basicURL}?rand=${randomKey}`;
 	}
 
-	notifyOfUserChange() {
+	notifyOfUserChange(): void {
 		this.socket?.emit("user-updated");
 	}
 
-	async deleteAccount() {
+	async deleteAccount(): Promise<ReturnMessage> {
 		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${user.id}`, {
 			method: "DELETE",
 			headers: {
@@ -390,10 +390,11 @@ class User {
 		});
 
 		if (httpResponse.status != 200) {
-			console.log("error while deleting user");
-			return;
+			return { success: false, message: "error while deleting user"};
 		}
 		this.logout();
+
+		return { success: true };
 	}
 }
 

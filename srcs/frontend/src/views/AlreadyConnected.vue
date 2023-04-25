@@ -4,7 +4,7 @@
 
 <template>
 
-<h1 style="color: red">You are already connected on a different tab</h1>
+<h1 style="color: #EC3F74">You are already connected on a different tab</h1>
 
 </template>
 

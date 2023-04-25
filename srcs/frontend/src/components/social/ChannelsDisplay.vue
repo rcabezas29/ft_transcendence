@@ -222,7 +222,7 @@
 	}
 
 	.errorMessage {
-		color: red;
+		color: #EC3F74;
 	}
 
 	.channel-name {
