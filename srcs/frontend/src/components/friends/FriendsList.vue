@@ -19,12 +19,8 @@ async function getUser(friendId: any) {
   return userData;
 }
 
-async function getUserAvatar(friendId: any): Promise<string | null> {
-  const userData = await getUser(friendId);
-  if (userData) {
-    return userData.avatarURL || userData.avatar;
-  }
-  return null;
+function getUserAvatar(friendId: any): string {
+  return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${friendId}`;
 }
 
 function isOnline(friend: any): boolean {
@@ -82,7 +78,9 @@ watch(friendsController, () => {
       <div class="request-row" v-for="(friend, index) in receivedFriendRequests" :key="friend.userId">
         <div class="friend-request">
           <div class="row-number-box">{{ index + 1 }}</div>
-          <img :src="getUserAvatar(friend.userId)" class="user-image" alt="User Image">{{ friend.username }}
+          <div class="user-img">
+						<img id="user-image" :src="getUserAvatar(friend.userId)" />
+					</div>
         </div>
         <div class="friend-request-buttons">
           <button class="friend-request-bt"
@@ -99,14 +97,15 @@ watch(friendsController, () => {
       <div class="request-row" v-for="(friend, index) in activeFriends" :key="friend.userId">
         <!-- <div class="friend -->
         <div class="friend-request">
-        <div class="row-number-box">{{ index + 1 }}</div>
-          <img :src="getUserAvatar(friend.userId)" class="user-image" alt="User Image">{{ friend.username }} <!-- Avatar is meassing-->
+          <div class="row-number-box">{{ index + 1 }}</div>
+          <div class="user-img">
+						<img id="user-image" :src="getUserAvatar(friend.userId)" />
+					</div>
           <span v-if="isOnline(friend)">Online</span>
           <span v-else-if="isGaming(friend)">Gaming</span>
           <span v-else>Offline</span>
         </div>
-        <div class="friend-status"
-          :class="{ 'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
+        <div class="friend-status" :class="{ 'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
         <button class="friend-request-bt" @click="() => friendsController.blockUser(friend.userId)">Block</button>
         <button class="friend-request-bt" @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
       </div>
@@ -188,5 +187,10 @@ watch(friendsController, () => {
 .friend-request-bt:hover {
   background-color: #4BFE65;
   color: #08150c;
+}
+
+.user-img img {
+  width: 40px;
+  height: 40px;
 }
 </style>
