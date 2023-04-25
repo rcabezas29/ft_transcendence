@@ -30,6 +30,7 @@
 			errorMessage.value = "please enter a name for the new channel";
 			return;
 		}
+
 		if (!channelController.createChannel(newChannelNameInput.value, newChannelPasswordInput.value)) {
 			errorMessage.value = "channel name already in use. Choose a different one";
 			return;
@@ -88,7 +89,11 @@
 					<LockIcon v-if="channel.isPrivate" fill-colour="#B3F9D7"/>
 				</td>
 				<td>
-					<span>{{ channel.name }}</span>
+					<span class="channel-name">
+						<div class="truncate">
+							{{ channel.name }}
+						</div>
+					</span>
 				</td>
 				<td class="mobile-hidden">
 					<span>{{ channel.users.length }}</span>
@@ -204,6 +209,20 @@
 
 	.errorMessage {
 		color: red;
+	}
+
+	.channel-name {
+		margin-left: 12px;
+		display: table;
+		table-layout: fixed;
+		width: 100%;
+	}
+
+	.truncate {
+		display: table-cell;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	/* Everything bigger than 850px */

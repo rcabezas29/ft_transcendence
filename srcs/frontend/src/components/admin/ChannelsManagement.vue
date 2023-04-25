@@ -77,7 +77,11 @@
 					<LockIcon v-if="channel.isPrivate" fill-colour="#B3F9D7"/>
 				</td>
 				<td v-show="!isChannelSelected(channel)">
-					<span>{{ channel.name }}</span>
+					<span class="channel-name">
+						<div class="truncate">
+							{{ channel.name }}
+						</div>
+					</span>
 				</td>
 				<td v-show="!isChannelSelected(channel)">
 					<span>{{ channel.users.length }}</span>
@@ -173,6 +177,20 @@
 
 	.cross-button {
 		flex: 0.25;
+	}
+
+	.channel-name {
+		margin-left: 12px;
+		display: table;
+		table-layout: fixed;
+		width: 100%;
+	}
+
+	.truncate {
+		display: table-cell;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	/* Everything bigger than 850px */

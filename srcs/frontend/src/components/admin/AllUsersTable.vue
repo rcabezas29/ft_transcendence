@@ -179,7 +179,9 @@
 							<img :src=userRow.avatarURL />
 						</span>
 						<span class="table-username">
-							{{ userRow.username }}
+							<div class="truncate">
+								{{ userRow.username }}
+							</div>
 						</span>
 					</div>
 				</td>
@@ -254,6 +256,10 @@
 		width: fit-content;
 	}
 
+	.table-user-img {
+		display: flex;
+	}
+
 	.table-user-img img {
 		width: 36px;
 		height: 36px;
@@ -261,6 +267,16 @@
 
 	.table-username {
 		margin-left: 12px;
+		display: table;
+		table-layout: fixed;
+		width: 100%;
+	}
+
+	.truncate {
+		display: table-cell;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	.table-row {
