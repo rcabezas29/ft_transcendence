@@ -31,6 +31,11 @@
 			return;
 		}
 
+		if (newChannelNameInput.value.length > 20) {
+			errorMessage.value = "channel name must be 20 characters max";
+			return;
+		}
+
 		if (!channelController.createChannel(newChannelNameInput.value, newChannelPasswordInput.value)) {
 			errorMessage.value = "channel name already in use. Choose a different one";
 			return;
