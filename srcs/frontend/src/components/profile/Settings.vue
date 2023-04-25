@@ -9,6 +9,7 @@
 	import router from "@/router";
 	import Modal from "../ui/Modal.vue";
 	import TwoFactorAuthenticationSetup from '../2fa/TwoFactorAuthenticationSetup.vue';
+import { UserRole } from "@/interfaces/user-data.interface";
 
 	const userData: Ref<UserData | null> = ref(null);
 	const editMode: Ref<boolean> = ref(false);
@@ -123,6 +124,14 @@
 		router.replace({ "name": "login" });
 	}
 
+	function	isAdmin() : boolean {
+		return (user.role === UserRole.ADMIN || user.role === UserRole.OWNER);
+	}
+
+	function	adminpageRedirection() {
+		router.replace('/admin');
+	}
+
 </script>
 
 <template>
@@ -135,9 +144,16 @@
 				</div>
 			</div>
 			<div class="header-buttons">
-				<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
-				<TwoFactorAuthenticationSetup v-if="!editMode"/>
-				<Button @click="logoutUser" v-if="user.checkIsLogged()" class="logout-button">LOGOUT</Button>
+				<div class="settings-buttons">
+					<div class="default-setting-buttons">
+						<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
+						<TwoFactorAuthenticationSetup v-if="!editMode"/>
+						<Button @click="logoutUser" v-if="user.checkIsLogged() && !editMode" class="logout-button">LOGOUT</Button>
+					</div>
+					<div class="admin-page-button" v-if="isAdmin() && !editMode">
+						<Button @click="adminpageRedirection()">ADMIN</Button>
+					</div>
+				</div>
 				
 				<div class="header-editing-buttons">
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
@@ -281,6 +297,22 @@
 	.logout-button:hover {
 		color: #B3F9D7;
 		background-color: #1E9052;
+	}
+
+	.settings-buttons {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.admin-page-button > button {
+		background-color: #04809F;
+		color: #08150C;
+		border-color: #1E9052;
+	}
+
+	.admin-page-button > button:hover {
+		background-color: #B3F9D7;
 	}
 
 	/* Everything bigger than 850px */
