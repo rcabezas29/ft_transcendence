@@ -4,31 +4,32 @@
 	import { user } from "../user";
 	import Button from "../components/ui/Button.vue";
 	import TextInputField from "../components/ui/TextInputField.vue";
+	import type { ReturnMessage } from '../interfaces';
 
 	const email = ref("");
 	const password = ref("");
-	const message = ref("");
+	const infoMessage = ref("");
 	const messageClass = ref("error-message");
 
 	async function handleSubmit(e: Event) {
-		const { loggedSuccessfully, response } = await user.login(email.value, password.value);
-		if (!loggedSuccessfully) {
-			message.value = response.message;
+		const { success, message } = await user.login(email.value, password.value);
+		if (!success) {
+			infoMessage.value = message!;
 			return;
 		}
 
-		const authOk = await user.auth(response.access_token);
-		if (!authOk) {
-			message.value = "Something went wrong";
+		const authOk: ReturnMessage = await user.auth(message!);
+		if (!authOk.success) {
+			infoMessage.value = authOk.message!;
 			return;
 		}
 
-		if (await user.checkIfSecondFactorAuthenticationIsNeeded(response.access_token)){
+		if (await user.checkIfSecondFactorAuthenticationIsNeeded(message!)){
 			router.replace({ "name": "2fa-auth" });
 			return;
 		}
 
-		message.value = "Success";
+		infoMessage.value = "Success";
 		messageClass.value = "success-message";
 
 		router.replace({ "name": "home"});
@@ -52,7 +53,7 @@
 		<form @submit.prevent="handleSubmit">
 			<TextInputField v-model="email" placeholder-text="EMAIL"/>
 			<TextInputField type="password" v-model="password" placeholder-text="PASSWORD"/>
-			<div :class="messageClass">{{ message }}</div>
+			<div :class="messageClass">{{ infoMessage }}</div>
 			<div class="form-buttons">
 				<Button type="button" @click="moveToRegister">REGISTER</Button>
 				<Button type="submit" :selected="true">LOGIN</Button>
@@ -121,7 +122,7 @@
 	}
 
 	.error-message {
-		color: red;
+		color: #EC3F74;
 	}
 
 	/* Everything bigger than 850px */

@@ -4,35 +4,36 @@
 	import { user } from "../user";
 	import Button from "../components/ui/Button.vue";
 	import TextInputField from "../components/ui/TextInputField.vue";
+	import type { ReturnMessage } from "@/interfaces";
 
 	const username = ref<string>("");
 	const email = ref<string>("");
 	const password = ref<string>("");
-	const message = ref<string>("");
+	const infoMessage = ref<string>("");
 	const messageClass = ref<string>("error-message");
 
 	async function handleSubmit(e: Event) {
-		const { registeredSuccessfully, response } = await user.register(username.value, email.value, password.value);
+		const registerRet: ReturnMessage = await user.register(username.value, email.value, password.value);
 	
-		if (!registeredSuccessfully) {
-			message.value = response.message;
+		if (!registerRet.success) {
+			infoMessage.value = registerRet.message!;
 			return;
 		}
 
-		const loginRet = await user.login(email.value, password.value);
-		if (!loginRet.loggedSuccessfully) {
-			message.value = loginRet.response.message;
+		const loginRet: ReturnMessage = await user.login(email.value, password.value);
+		if (!loginRet.success) {
+			infoMessage.value = loginRet.message!;
 			return;
 		}
-		const accessToken = loginRet.response.access_token;
+		const accessToken = loginRet.message!;
 
-		const authOk = await user.auth(accessToken);
-		if (!authOk) {
-			message.value = "Something went wrong";
+		const authOk: ReturnMessage = await user.auth(accessToken);
+		if (!authOk.success) {
+			infoMessage.value = authOk.message!;
 			return;
 		}
 
-		message.value = "Success";
+		infoMessage.value = "Success";
 		messageClass.value = "success-message";
 		router.replace({ "name": "home"});
 	}
@@ -57,7 +58,7 @@
 			<TextInputField v-model="email" placeholder-text="EMAIL"/>
 			<TextInputField type="password" v-model="password" placeholder-text="PASSWORD"/>
 
-			<label :class="messageClass">{{ message }}</label>
+			<label :class="messageClass">{{ infoMessage }}</label>
 			<div class="form-buttons">
 				<Button type="button" @click="moveToLogin">LOGIN</Button>
 				<Button type="submit" :selected="true">REGISTER</Button>
@@ -116,7 +117,7 @@
 	}
 
 	.error-message {
-		color: red;
+		color: #EC3F74;
 	}
 
 	.login-text {
