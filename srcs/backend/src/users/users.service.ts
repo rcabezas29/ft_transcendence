@@ -231,6 +231,8 @@ export class UsersService {
   async anonimizeUser(id: number) {
     const newUsername: string = Date.now() + this.generateRandomString(5);
 
+    this.banFromWebsite(id);
+
     const updateUserDto: UpdateUserDto = {
       username: newUsername,
       intraUsername: newUsername,
