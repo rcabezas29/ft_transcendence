@@ -1,6 +1,4 @@
 <script setup lang="ts">
- 
-import router from '@/router';
 import { directMessageController } from '../../directMessageController';
 
 function handleClick(e: Event, friendId: number) {

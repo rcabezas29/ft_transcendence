@@ -7,7 +7,6 @@
 	import { computed } from "@vue/reactivity";
 	import TextInputField from "../ui/TextInputField.vue";
 
-
 	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
 			headers: {
@@ -38,7 +37,8 @@
 
 	onBeforeMount(async () => {
 		users.value = await getUsers();
-		users.value!.sort((e1, e2) => e2.elo - e1.elo);
+		if (users.value)
+			users.value!.sort((e1, e2) => e2.elo - e1.elo);
 	})
 
 </script>

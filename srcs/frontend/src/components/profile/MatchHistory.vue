@@ -1,7 +1,6 @@
 <script setup lang="ts">
 	import { onBeforeMount, ref, type Ref } from 'vue';
 	import { user } from "../../user";
-	import type { UserData } from "../../interfaces/user-data.interface";
 	
 	interface MatchHistory {
 		id: number;
@@ -23,6 +22,10 @@
 				"Authorization": `Bearer ${user.token}`,
 			}
 		});
+
+		if (httpResponse.status != 200) {
+			return;
+		}
 
 		matchHistory.value = await httpResponse.json();
 		console.log(matchHistory.value);

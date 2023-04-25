@@ -1,23 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
-import { user } from "../../user";
-import type { UserData } from "@/interfaces";
-
-async function getUser(friendId: any) {
-  const usersRequest = await fetch(`http://localhost:3000/users/${friendId}`, {
-    headers: {
-      "Authorization": `Bearer ${user.token}`
-    }
-  });
-
-  if (usersRequest.status != 200) {
-    return null;
-  }
-
-  const userData: UserData = await usersRequest.json();
-  return userData;
-}
 
 function getUserAvatar(friendId: any): string {
   return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${friendId}`;

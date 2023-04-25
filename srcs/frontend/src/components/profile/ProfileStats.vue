@@ -15,7 +15,10 @@
   let scoreRatio = ref<number>(0);
 
   onBeforeMount(async () => {
-    currentUser = await getCurrentUser();
+    currentUser = await user.fetchUserData();
+    if (!currentUser) {
+      return;
+    }
 
     totalWins.value = currentUser?.stats.wonGames ?? 0;
     totalLosses.value = currentUser?.stats.lostGames ?? 0;
@@ -34,20 +37,6 @@
     }
   });
 
-  async function getCurrentUser() {
-    const usersRequest = await fetch(`http://localhost:3000/users/${user.id}`, {
-      headers: {
-        "Authorization": `Bearer ${user.token}`
-      }
-    });
-
-    if (usersRequest.status != 200) {
-      return null;
-    }
-
-    const userData: UserData = await usersRequest.json();
-    return userData;
-}
 </script>
 
 <template>

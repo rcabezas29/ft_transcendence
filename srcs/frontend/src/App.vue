@@ -2,9 +2,12 @@
 	import "./assets/main.css";
 	import { user } from "./user";
 	import AlreadyConnected from './views/AlreadyConnected.vue';
-	import Chat from "./views/Chat.vue"
-	import NavBar from './components/NavBar.vue'
+	import Chat from "./views/Chat.vue";
+	import NavBar from './components/NavBar.vue';
 	import DevBar from "./components/DevBar.vue";
+	import Alert from "./components/ui/Alert.vue";
+	import { alertController } from "./alertController";
+
 </script>
 
 <template>
@@ -20,6 +23,7 @@
 			</div>
 			<Chat v-if="user.checkIsLogged() && user.hasSubmittedFirstTimeLoginForm()"/>
 		</div>
+		<Alert :visible="alertController.active" :message="alertController.message"/>
 	</div>
 	
 </template>

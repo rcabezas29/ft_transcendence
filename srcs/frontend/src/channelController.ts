@@ -3,6 +3,7 @@ import { currentChat } from "./currentChat";
 import type { Chat, Channel, ChatUser, Message, ReturnMessage } from "./interfaces";
 import { user } from "./user";
 import { globalChatNotification} from './chat-notification';
+import { alertController, alertOn, alertOff } from "./alertController";
 
 interface ChannelPayload {
 	name: string;
@@ -322,14 +323,11 @@ class ChannelController {
 	}
 
 	private onUserBanned(payload: TimeUserChannelPayload): void {
-		return this.alertError(`oops! you are banned from '${payload.channelName}'. Remaining ban time: ${payload.time} seconds`);
+		alertOn(`you are banned from '${payload.channelName}'. Remaining ban time: ${payload.time} seconds`);
 	}
 
 	private onUserMuted(payload: TimeUserChannelPayload): void {
-		//const from: ChatUser = {id: -1, username: `#${payload.channelName} server`};
-		//this.addMessageToChannelChat(payload.channelName, from, `you are muted. Your message has NOT been sent. Remaining mute time: ${payload.time} seconds`);
-
-		return this.alertError(`oops! you are muted from '${payload.channelName}'. Your message has NOT been sent. Remaining mute time: ${payload.time} seconds`);
+		alertOn(`you are muted from '${payload.channelName}'. Your message has NOT been sent. Remaining mute time: ${payload.time} seconds`);
 	}
 
 	private onAdminsUpdated(payload: UserArrayChannelPayload): void {
@@ -341,7 +339,7 @@ class ChannelController {
 	}
 
 	private onWrongPassword(channelName: ChannelName): void {
-		return this.alertError(`oops! wrong password for private channel '${channelName}'. Try again`);
+		alertOn(`wrong password for private channel '${channelName}'. Try again`);
 	}
 
 	setCurrentChat(channelName: ChannelName): void {
@@ -374,10 +372,6 @@ class ChannelController {
 		if (channel.users.find(u => u.id === channelUser.id))
 			return true;
 		return false;
-	}
-
-	private alertError(errorMessage: string): void {
-		alert(errorMessage);
 	}
 
 	private addMessageToChannelChat(channelName: ChannelName, fromUser: ChatUser, message: string): void {
