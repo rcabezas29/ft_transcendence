@@ -53,7 +53,7 @@
 		<template #head>
 			<tr>
 				<th>#</th>
-				<th>user</th>
+				<th class="user-column">user</th>
 				<th>elo</th>
 				<th class="mobile-hidden">wins</th>
 				<th class="mobile-hidden">losses</th>
@@ -103,6 +103,16 @@
 
 	.users-table {
 		margin-top: 24px;
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	th {
+		width: 2%;
+	}
+
+	.user-column {
+		width: 10%;
 	}
 
 	.table-square {
@@ -118,7 +128,6 @@
 	.table-user {
 		display: flex;
 		align-items: center;
-		width: fit-content;
 	}
 
 	.table-user-img {

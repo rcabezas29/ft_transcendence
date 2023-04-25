@@ -66,7 +66,7 @@
 		<template #head>
 			<tr>
 				<th class="mobile-hidden">is_private</th>
-				<th class="channel-name">channel_name</th>
+				<th class="channel-name-col">channel_name</th>
 				<th>#participants</th>
 				<th class="mobile-hidden">owner</th>
 			</tr>
@@ -125,10 +125,15 @@
 <style scoped>
 	.channels-table {
 		width: 100%;
+		table-layout: fixed;
 	}
 
-	.channel-name {
-		width: 50%;
+	th {
+		width: 2%;
+	}
+
+	.channel-name-col {
+		width: 10%;
 	}
 
 	.table-square {

@@ -164,7 +164,7 @@
 		<template #head>
 			<tr>
 				<th>#</th>
-				<th>USER</th>
+				<th class="username-col">USER</th>
 				<th>ROLE</th>
 			</tr>
 		</template>
@@ -234,6 +234,16 @@
 
 	.users-table {
 		margin-top: 24px;
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	th {
+		width: 2%;
+	}
+
+	.username-col {
+		width: 10%;
 	}
 
 	.table-square {
