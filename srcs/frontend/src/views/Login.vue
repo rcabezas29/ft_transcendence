@@ -99,6 +99,7 @@
 		margin-top: 14px;
 		background-color: #04809F;
 		border: none;
+		padding: 20px 30px;
 	}
 
 	form {
