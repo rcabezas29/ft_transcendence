@@ -2,15 +2,36 @@
   import { onBeforeMount, ref } from "vue";
   import { user } from "../../user";
   import StatBox from "./StatBox.vue";
-  import Table from "../ui/Table.vue";
   import type { UserData } from "@/interfaces";
-  import { computed } from "@vue/reactivity";
-  import TextInputField from "../ui/TextInputField.vue";
 
   let currentUser: UserData | null = null;
 
+  let totalWins = ref<number>(0);
+  let totalLosses = ref<number>(0);
+  let winLossRatio = ref<number>(0);
+  let scoredGoals = ref<number>(0);
+  let receivedGoals = ref<number>(0);
+  let totalMatches = ref<number>(0);
+  let scoreRatio = ref<number>(0);
+
   onBeforeMount(async () => {
     currentUser = await getCurrentUser();
+
+    totalWins.value = currentUser?.stats.wonGames ?? 0;
+    totalLosses.value = currentUser?.stats.lostGames ?? 0;
+    if (totalLosses.value === 0) {
+      winLossRatio.value = 1;
+    } else {
+      winLossRatio.value = totalWins.value / totalLosses.value ?? 0;
+    }
+    scoredGoals.value = currentUser?.stats.scoredGoals ?? 0;
+    receivedGoals.value = currentUser?.stats.receivedGoals ?? 0;
+    totalMatches.value = totalWins.value + totalLosses.value ?? 0;
+    if (receivedGoals.value === 0) {
+      scoreRatio.value = 1;
+    } else {
+      scoreRatio.value = scoredGoals.value / receivedGoals.value ?? 0;
+    }
   });
 
   async function getCurrentUser() {
@@ -27,14 +48,6 @@
     const userData: UserData = await usersRequest.json();
     return userData;
 }
-
-  const totalWins = computed(() => currentUser?.stats.wonGames ?? 0);
-  const totalLosses = computed(() => currentUser?.stats.lostGames ?? 0);
-  const winLossRatio = computed(() => totalWins.value / totalLosses.value);
-  const scoredGoals = computed(() => currentUser?.stats.scoredGoals ?? 0);
-  const receivedGoals = computed(() => currentUser?.stats.receivedGoals ?? 0);
-  const totalMatches = computed(() => totalWins.value + totalLosses.value);
-  const scoreRatio = computed(() => scoredGoals.value / receivedGoals.value);
 </script>
 
 <template>
