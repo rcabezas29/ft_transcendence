@@ -4,6 +4,14 @@
   import StatBox from "./StatBox.vue";
   import type { UserData } from "@/interfaces";
 
+  interface Props {
+    userId: number
+  }
+
+  const props = withDefaults(defineProps<Props>(), {
+    userId: user.id
+  });
+
   let currentUser: UserData | null = null;
 
   let totalWins = ref<number>(0);
@@ -35,7 +43,7 @@
   });
 
   async function getCurrentUser() {
-    const usersRequest = await fetch(`http://localhost:3000/users/${user.id}`, {
+    const usersRequest = await fetch(`http://localhost:3000/users/${props.userId}`, {
       headers: {
         "Authorization": `Bearer ${user.token}`
       }

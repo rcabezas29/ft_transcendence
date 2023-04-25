@@ -1,8 +1,15 @@
 <script setup lang="ts">
 	import { onBeforeMount, ref, type Ref } from 'vue';
 	import { user } from "../../user";
-	import type { UserData } from "../../interfaces/user-data.interface";
-	
+
+	interface Props {
+		userId: number
+	}
+
+	const props = withDefaults(defineProps<Props>(), {
+		userId: user.id
+	});
+
 	interface MatchHistory {
 		id: number;
 		user1Id: number;
@@ -17,7 +24,7 @@
 	const matchHistory: Ref<MatchHistory[] | null> = ref(null);
 	
 	onBeforeMount(async () => {
-		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/match-history/${user.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/match-history/${props.userId}`, {
 			method: "GET",
 			headers: {
 				"Authorization": `Bearer ${user.token}`,

@@ -6,6 +6,10 @@ import MultiView from "../components/ui/MultiView.vue"
 import MultiViewTab from "../components/ui/MultiViewTab.vue"
 import Settings from "@/components/profile/Settings.vue";
 import MatchHistory from "@/components/profile/MatchHistory.vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+const userId = +route.params.userId;
 
 const multiViewElement = ref(1);
 function multiviewShowElement(index: number) {
@@ -36,10 +40,10 @@ function isSelected(index: number) {
 
 		<template #body>
 			<div v-if="multiViewElement == 1">
-				<ProfileStats />
+				<ProfileStats :userId="userId" />
 			</div>
 			<div v-else-if="multiViewElement == 2">
-				<MatchHistory />
+				<MatchHistory :userId="userId"/>
 			</div>
 			<div v-else-if="multiViewElement == 3">
 				<FriendsList />

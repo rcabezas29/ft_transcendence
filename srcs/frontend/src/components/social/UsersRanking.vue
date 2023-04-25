@@ -6,6 +6,7 @@
 	import type { UserData } from "@/interfaces";
 	import { computed } from "@vue/reactivity";
 	import TextInputField from "../ui/TextInputField.vue";
+	import router from '../../router';
 
 
 	async function getUsers(): Promise<UserData[] | null> {
@@ -41,6 +42,10 @@
 		users.value!.sort((e1, e2) => e2.elo - e1.elo);
 	})
 
+	function redirectToUserProfile(userId: number) {
+		router.push(`/profile/${userId}`);
+	}
+
 </script>
 
 <template>
@@ -61,7 +66,7 @@
 			</tr>
 		</template>
 		<template #body>
-			<tr v-for="(userRow, index) in filteredUsers">
+			<tr v-for="(userRow, index) in filteredUsers" :key="userRow.id" @click="redirectToUserProfile(userRow.id)">
 				<td>
 					<div class="table-square">
 						<span>{{ index + 1 }}</span>

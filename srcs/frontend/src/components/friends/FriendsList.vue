@@ -4,6 +4,14 @@ import { type Friend, friendsController, FriendStatus } from '@/friendsControlle
 import { user } from "../../user";
 import type { UserData } from "@/interfaces";
 
+interface Props {
+	userId: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+	userId: user.id
+});
+
 async function getUser(friendId: any) {
   const usersRequest = await fetch(`http://localhost:3000/users/${friendId}`, {
     headers: {
