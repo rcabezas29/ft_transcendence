@@ -73,8 +73,7 @@ class DirectMessageController {
         if (friendChat)
             friendChat.messages.push(newMessage);
 
-        if (friendChat !== currentChat.value)
-        {
+        if (friendChat !== currentChat.value) {
             friendChat.notification = true;
             globalChatNotification.value = true;
         }
@@ -87,8 +86,7 @@ class DirectMessageController {
         const friendChat: Chat | undefined = this.chats[fromUser.id];
 
         friendChat.challenge = true;
-        if (friendChat !== currentChat.value)
-        {
+        if (friendChat !== currentChat.value) {
             friendChat.notification = true;
             globalChatNotification.value = true;
         }
@@ -127,8 +125,7 @@ class DirectMessageController {
 	}
 
     private appendChatToChatMap(friend: ChatUser): void {
-        if (this.chats && !this.chats[friend.id])
-        {
+        if (this.chats && !this.chats[friend.id]) {
             const newChat: Chat = {
                 target: friend,
                 messages: [],

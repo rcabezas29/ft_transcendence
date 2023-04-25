@@ -140,11 +140,13 @@ class FriendsController {
 
         if (this.userIsActiveFriend(friend.userId)) {
             const chatUser = this.friendIdToChatUser(friend.userId);
-            if (chatUser)
+            if (chatUser) {
                 directMessageController.onFriendConnected(chatUser);
+            }
         }
-        else
+        else {
             directMessageController.onFriendDisconnected(friend.userId);
+        }
     }
 
     private onFriendshipDeleted(payload: FriendId) {

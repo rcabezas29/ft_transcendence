@@ -10,14 +10,7 @@ const props = defineProps<{
     channelName: string
 }>()
 
-const emit = defineEmits(["close"]);
-
 const channel = channelController.channels[props.channelName!];
-
-function closeUsersManagementScreen() {
-    emit("close");
-	channelController.userSelected = null;
-}
 
 const banSettingsOpened = ref<boolean>(false);
 function toggleBanScreen(): void {
@@ -49,8 +42,6 @@ function viewProfile(): void {
 	//TODO: redirect to user profile
 	console.log("REDIRECT TO PROFILE!!!")
 }
-
-// que sea reactive e.g. si echo a alguien y me convierto en owner
 
 </script>
 

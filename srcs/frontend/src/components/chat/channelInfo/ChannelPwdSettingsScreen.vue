@@ -5,8 +5,11 @@ import { channelController } from '../../../channelController';
 import { computed, ref } from 'vue';
 import Button from "../../ui/Button.vue";
 import TextInputField from '@/components/ui/TextInputField.vue';
+import type { ReturnMessage } from '@/interfaces';
 
 const emit = defineEmits(["close-pwd-settings"]);
+
+const errorMessage = ref("");
 
 const currentChannel = computed(() => {
     return channelController.channels[currentChat.value!.target as string];
@@ -14,13 +17,23 @@ const currentChannel = computed(() => {
 
 const newPassword = ref<string>("");
 function setPassword(): void {
-	channelController.setPassword(newPassword.value, currentChannel.value.name);
-	newPassword.value = "";
+	const pwdReturn: ReturnMessage = channelController.setPassword(newPassword.value, currentChannel.value.name);
+	if (!pwdReturn.success) {
+        errorMessage.value = pwdReturn.message!;
+        return;
+    }
+    
+    newPassword.value = "";
     emit("close-pwd-settings");
 }
 
 function unsetPassword(): void {
-	channelController.unsetPassword(currentChannel.value.name);
+	const pwdReturn: ReturnMessage = channelController.unsetPassword(currentChannel.value.name);
+    if (!pwdReturn.success) {
+        errorMessage.value = pwdReturn.message!;
+        return;
+    }
+
     emit("close-pwd-settings");
 }
 
@@ -35,6 +48,9 @@ function closePasswordSettings(): void {
         <form @submit.prevent="setPassword">
             <div class="text-input"> 
                 <TextInputField type="password" placeholder-text="enter new password..." v-model="newPassword"/>
+            </div>
+            <div class="error-message">
+                {{ errorMessage }}
             </div>
             <div class="buttons">
                 <Button type="submit" class="button" :selected="true">

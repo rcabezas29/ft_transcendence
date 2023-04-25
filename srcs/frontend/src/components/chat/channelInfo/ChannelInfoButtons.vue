@@ -42,6 +42,36 @@ function manageAdmin(): void {
 	emit("admin");
 }
 
+const canMute = computed(() => {
+    return (
+        channelController.userIsChannelAdmin(currentChannel.value)
+        && channelController.userSelected
+        && !channelController.userIsChannelOwner(currentChannel.value, channelController.userSelected)
+    );
+});
+
+const canBan = computed(() => {
+    return (
+        channelController.userIsChannelAdmin(currentChannel.value)
+        && channelController.userSelected
+        && !channelController.userIsChannelOwner(currentChannel.value, channelController.userSelected)
+    );
+});
+
+const canKick = computed(() => {
+    return (
+        channelController.userIsChannelAdmin(currentChannel.value)
+        && channelController.userSelected
+        && !channelController.userIsChannelOwner(currentChannel.value, channelController.userSelected)
+    );
+});
+
+const canManageAdmins = computed(() => {
+    return (
+        channelController.userIsChannelOwner(currentChannel.value)
+    );
+});
+
 </script>
 
 <template>
@@ -58,16 +88,16 @@ function manageAdmin(): void {
             <Button class="button" @click="viewProfile" :selected="true">
                 VIEW PROFILE
             </Button>
-            <Button class="button" @click="manageMute" v-if="channelController.userIsChannelAdmin(currentChannel)" :selected="true">
+            <Button class="button" @click="manageMute" v-if="canMute" :selected="true">
                 MUTE
             </Button>
-            <Button class="button" @click="manageBan" v-if="channelController.userIsChannelAdmin(currentChannel)" :selected="true">
+            <Button class="button" @click="manageBan" v-if="canBan" :selected="true">
                 BAN
             </Button>
-            <Button class="button" @click="manageKick" v-if="channelController.userIsChannelAdmin(currentChannel)" :selected="true">
+            <Button class="button" @click="manageKick" v-if="canKick" :selected="true">
                 KICK
             </Button>
-            <Button class="button" @click="manageAdmin" v-if="channelController.userIsChannelOwner(currentChannel)" :selected="true">
+            <Button class="button" @click="manageAdmin" v-if="canManageAdmins" :selected="true">
                 MAKE/REMOVE ADMIN
             </Button>
             <Button class="button" @click="() => channelController.unselectUser()">
