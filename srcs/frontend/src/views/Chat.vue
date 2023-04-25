@@ -16,6 +16,8 @@
 		chatOpened.value = !chatOpened.value;
 		if (chatOpened.value) {
 			globalChatNotification.value = false;
+		} else {
+			currentChat.value = null;
 		}
 	}
 
@@ -39,7 +41,7 @@
 
 <template>
 	<div class="chat-container">
-		<div class="chat-header" :class="{blink: globalChatNotification}" @click="toggleChatWindow">
+		<div class="chat-header" :class="{blink: globalChatNotification && !chatOpened}" @click="toggleChatWindow">
 			CHAT.EXE
 		</div>
 		<div class="chat-body" v-if="chatOpened">
