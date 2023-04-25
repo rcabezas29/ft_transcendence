@@ -51,7 +51,7 @@
 </script>
 
 <template>
-  <div class="SquareStatsGrid">
+  <div class="square-stats-grid">
     <StatBox title="WINS" :stat="totalWins"/>
     <StatBox title="LOSSES" :stat="totalLosses"/>
     <StatBox title="W/L" :stat="winLossRatio"/>
@@ -63,16 +63,17 @@
 </template>
 
 <style scoped>
-  .StatSquare{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 4px solid #4BFE65;
-    padding: 4px;
+.square-stats-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+  /* Everything bigger than 850px */
+@media only screen and (min-width: 850px) {
+  .square-stats-grid {
+    justify-content: space-around;
   }
-  .SquareStatsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    grid-gap: 1rem;
-  }
+}
 </style>

@@ -13,12 +13,12 @@
 </script>
 
 <template>
-  <div class="StatSquare">
-    <div class="BoxContent">
-      <div class="BoxTitle">
+  <div class="stat-square">
+    <div class="box-content">
+      <div>
         {{ props.title }}
       </div>
-      <div class="BoxStat">
+      <div>
         {{ props.stat }}
       </div>
     </div>
@@ -26,32 +26,33 @@
 </template>
 
 <style scoped>
-.StatSquare {
-display: flex;
-  flex-direction: column;
-  gap: 24px;
-  margin-top: 24px;
-}
-
-.BoxContent {
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+.stat-square {
+	width: 70%;
+  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  border: 4px solid #4BFE65;
+  box-sizing: border-box;
+  padding: 12px;
+}
+
+.box-content {
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
   text-align: center;
+  font-size: 2em;
 }
 
-.BoxTitle {
-  font-size: 1.5vw;
-  padding: 0.5em 0;
-}
-
-.BoxStat {
-  font-size: 2.5vw;
-  padding: 0.5em 0;
+/* Everything bigger than 850px */
+@media only screen and (min-width: 850px) {
+  .stat-square {
+    width: 300px;
+    padding: 24px;
+  }
 }
 </style>
