@@ -79,6 +79,7 @@ watch(friendsController, () => {
         <div class="friend-request">
           <div class="row-number-box">{{ index + 1 }}</div>
           <div class="user-img">
+            <p>{{ friend.username }}</p>
 						<img id="user-image" :src="getUserAvatar(friend.userId)" />
 					</div>
         </div>
@@ -91,14 +92,16 @@ watch(friendsController, () => {
       </div>
     </div>
     <div class="title-bar">
-      <h2># user status</h2>
+      <h2>#</h2>
+      <h2>username</h2>
+      <h2>status</h2>
     </div>
     <div class="friends-subsection">
       <div class="request-row" v-for="(friend, index) in activeFriends" :key="friend.userId">
-        <!-- <div class="friend -->
         <div class="friend-request">
           <div class="row-number-box">{{ index + 1 }}</div>
           <div class="user-img">
+            <p>{{ friend.username }}</p>
 						<img id="user-image" :src="getUserAvatar(friend.userId)" />
 					</div>
           <span v-if="isOnline(friend)">Online</span>
@@ -110,7 +113,6 @@ watch(friendsController, () => {
         <button class="friend-request-bt" @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
       </div>
     </div>
-    <!-- <button @click="() => sendFriendRequest()">Enviar solicitud de amistad</button> -->
   </div>
 </template>
 
@@ -131,6 +133,9 @@ watch(friendsController, () => {
   padding: 0.1rem;
   background: #1E9052;
   border: 0.3em solid #4BFE65;
+  display: flex;
+  justify-content: space-between;
+  padding-right: 15%;
 }
 
 .request-row {
@@ -189,6 +194,10 @@ watch(friendsController, () => {
   color: #08150c;
 }
 
+.user-img {
+  display: flex;
+  justify-content: space-between;
+}
 .user-img img {
   width: 40px;
   height: 40px;
