@@ -1,6 +1,15 @@
 <script setup lang="ts">
 	import { onBeforeMount, ref, type Ref } from 'vue';
 	import { user } from "../../user";
+
+	interface Props {
+		userId: number
+	}
+
+	const props = withDefaults(defineProps<Props>(), {
+		userId: user.id
+	});
+
 	
 	interface MatchHistory {
 		id: number;
@@ -16,7 +25,7 @@
 	const matchHistory: Ref<MatchHistory[] | null> = ref(null);
 	
 	onBeforeMount(async () => {
-		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/match-history/${user.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/match-history/${props.userId}`, {
 			method: "GET",
 			headers: {
 				"Authorization": `Bearer ${user.token}`,
@@ -28,7 +37,6 @@
 		}
 
 		matchHistory.value = await httpResponse.json();
-		console.log(matchHistory.value);
 	})
 
 	function getUserImageUrl(userId: number) {

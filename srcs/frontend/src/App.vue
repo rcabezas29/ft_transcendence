@@ -7,6 +7,9 @@
 	import DevBar from "./components/DevBar.vue";
 	import Alert from "./components/ui/Alert.vue";
 	import { alertController } from "./alertController";
+	import { useRoute } from "vue-router";
+
+	const route = useRoute();
 
 </script>
 
@@ -18,7 +21,7 @@
 		<div class="app-container">
 			<NavBar v-if="user.checkIsLogged() && user.hasSubmittedFirstTimeLoginForm()"/>
 			<div class="app-body">
-				<router-view/>
+				<router-view :key="route.path"/>
 			</div>
 			<Chat v-if="user.checkIsLogged() && user.hasSubmittedFirstTimeLoginForm()"/>
 		</div>

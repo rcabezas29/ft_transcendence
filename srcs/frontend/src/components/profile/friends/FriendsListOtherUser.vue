@@ -1,15 +1,22 @@
 <script setup lang="ts">
-
 	import { onBeforeMount, ref } from "vue";
-	import { user } from "../../user";
-	import Table from "../ui/Table.vue";
-	import type { UserData } from "@/interfaces";
+	import { user } from "../../../user";
+	import Table from "../../ui/Table.vue";
 	import { computed } from "@vue/reactivity";
-	import TextInputField from "../ui/TextInputField.vue";
-	import router from '../../router';
+	import TextInputField from "../../ui/TextInputField.vue";
+	import router from '../../../router';
+	import type { UserFriend } from "@/interfaces/user-data.interface";
 
-	async function getUsers(): Promise<UserData[] | null> {
-		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
+	interface Props {
+		userId: number
+	}
+
+	const props = withDefaults(defineProps<Props>(), {
+		userId: user.id
+	});
+
+	async function getUsers(): Promise<UserFriend[] | null> {
+		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${props.userId}/friends`, {
 			headers: {
 				"Authorization": `Bearer ${user.token}`
 			}
@@ -19,15 +26,16 @@
 			return null;
 		}
 
-		const users: UserData[] = await usersRequest.json();
+		const users: UserFriend[] = await usersRequest.json();
+
 		users.map(user => {
-			user.avatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${user.id}`
+			user.avatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${user.userId}`
 		})
 
 		return users;
 	}
 
-	const users = ref<UserData[] | null>([]);
+	const users = ref<UserFriend[] | null>([]);
 	const input = ref<string>("");
 	const filteredUsers = computed(() => {
 		if (users.value == null)
@@ -38,8 +46,6 @@
 
 	onBeforeMount(async () => {
 		users.value = await getUsers();
-		if (users.value)
-			users.value!.sort((e1, e2) => e2.elo - e1.elo);
 	})
 
 	function redirectToUserProfile(userId: number) {
@@ -66,7 +72,7 @@
 			</tr>
 		</template>
 		<template #body>
-			<tr v-for="(userRow, index) in filteredUsers" :key="userRow.id" @click="redirectToUserProfile(userRow.id)">
+			<tr v-for="(userRow, index) in filteredUsers" :key="userRow.userId" @click="redirectToUserProfile(userRow.userId)">
 				<td>
 					<div class="table-square">
 						<span>{{ index + 1 }}</span>
@@ -85,9 +91,9 @@
 					</div>
 				</td>
 				<td>{{ userRow.elo }}</td>
-				<td class="mobile-hidden">{{ userRow.stats.wonGames }}</td>
-				<td class="mobile-hidden">{{ userRow.stats.lostGames }}</td>
-				<td class="mobile-hidden">{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
+				<td class="mobile-hidden">{{ userRow.wonGames }}</td>
+				<td class="mobile-hidden">{{ userRow.lostGames }}</td>
+				<td class="mobile-hidden">{{ (userRow.lostGames == 0) ? 0 : (userRow.wonGames / userRow.lostGames).toFixed(2) }}</td>
 			</tr>
 			<td colspan="2" v-if="input && filteredUsers.length === 0">
 				<p>No users found!</p>

@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import {ref } from "vue";
+import {onMounted, onUnmounted, ref } from "vue";
 import ProfileStats from "@/components/profile/ProfileStats.vue";
 import FriendsList from "@/components/profile/friends/FriendsList.vue";
 import MultiView from "../components/ui/MultiView.vue"
 import MultiViewTab from "../components/ui/MultiViewTab.vue"
 import Settings from "@/components/profile/Settings.vue";
 import MatchHistory from "@/components/profile/MatchHistory.vue";
+import { useRoute } from "vue-router";
 import TrophyIcon from "@/components/icons/TrophyIcon.vue";
 import FaceIcon from "@/components/icons/FaceIcon.vue";
 import SlidersIcon from "@/components/icons/SlidersIcon.vue";
 import BookIcon from "@/components/icons/BookIcon.vue";
+import { user } from "@/user";
+import FriendsListOtherUser from "@/components/profile/friends/FriendsListOtherUser.vue";
+
+const route = useRoute();
+const userId = +route.params.userId;
 
 const multiViewElement = ref(1);
 function multiviewShowElement(index: number) {
@@ -37,7 +43,8 @@ function isSelected(index: number) {
 				<span class="display-desktop">FRIENDS</span>
 				<span class="display-mobile"><FaceIcon width="36" height="36"/></span>
 			</MultiViewTab>
-			<MultiViewTab @click="() => { multiviewShowElement(4)}" :selected="isSelected(4)">
+			
+			<MultiViewTab v-if="userId == user.id" @click="() => { multiviewShowElement(4)}" :selected="isSelected(4)">
 				<span class="display-desktop">SETTINGS</span>
 				<span class="display-mobile"><SlidersIcon width="36" height="36"/></span>
 			</MultiViewTab>
@@ -45,15 +52,16 @@ function isSelected(index: number) {
 
 		<template #body>
 			<div v-if="multiViewElement == 1" class="multi-view-element">
-				<ProfileStats />
+				<ProfileStats :userId="userId"/>
 			</div>
 			<div v-else-if="multiViewElement == 2" class="multi-view-element">
-				<MatchHistory />
+				<MatchHistory :userId="userId"/>
 			</div>
 			<div v-else-if="multiViewElement == 3" class="multi-view-element">
-				<FriendsList />
+				<FriendsList v-if="userId == user.id" />
+				<FriendsListOtherUser v-else :userId="userId"/>
 			</div>
-            <div v-else-if="multiViewElement == 4" class="multi-view-element">
+            <div v-else-if="multiViewElement == 4" v-if="userId == user.id" class="multi-view-element">
                 <Settings />
             </div>
 		</template>

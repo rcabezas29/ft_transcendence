@@ -17,6 +17,7 @@
 	}
 
 	const route = useRoute();
+	const profileRoute = `/profile/${user.id}`
 
 </script>
 
@@ -31,7 +32,7 @@
 				<Button @click="closeMenu()" :selected="route.path == '/social'">SOCIAL</Button>
 			</router-link>
 
-			<router-link to="/profile">
+			<router-link :to="profileRoute">
 				<Button @click="closeMenu()" :selected="route.path == '/profile'">PROFILE</Button>
 			</router-link>
 

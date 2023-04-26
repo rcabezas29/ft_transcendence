@@ -127,6 +127,10 @@ export class UsersService {
           username: friend.username,
           friendshipId: friendship.id,
           friendshipStatus: friendship.status,
+          avatarURL: friend.avatar,
+          elo: friend.elo,
+          wonGames: friend.stats.wonGames,
+          lostGames: friend.stats.lostGames
         };
       },
     );
