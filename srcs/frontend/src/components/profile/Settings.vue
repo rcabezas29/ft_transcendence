@@ -9,7 +9,6 @@
 	import router from "@/router";
 	import Modal from "../ui/Modal.vue";
 	import TwoFactorAuthenticationSetup from '../2fa/TwoFactorAuthenticationSetup.vue';
-	import { UserRole } from "@/interfaces/user-data.interface";
 
 	const userData: Ref<UserData | null> = ref(null);
 	const editMode: Ref<boolean> = ref(false);
@@ -49,6 +48,11 @@
 		let usernameUpdated: boolean = true;
 		let avatarUpdated: boolean = true;
 		let passwordUpdated: boolean = true;
+
+		if (usernameInput.value.length > 20) {
+			errorMessage.value.push("username must be shorter than or equal to 20 characters");
+			return;
+		}
 
 		if (usernameInput.value.length > 0)
 			usernameUpdated = await user.updateUsername(usernameInput.value);
@@ -128,10 +132,6 @@
 		user.logout();
 		router.replace({ "name": "login" });
 	}
-/*
-	function	isAdmin() : boolean {
-		return (user.role === UserRole.ADMIN || user.role === UserRole.OWNER);
-	}*/
 
 	function	adminpageRedirection() {
 		router.replace('/admin');
@@ -149,24 +149,8 @@
 				</div>
 			</div>
 			<div class="header-buttons">
-				<!--
-				<div class="settings-buttons">
-					<div class="default-setting-buttons">
-
-				-->
-						<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
-						<TwoFactorAuthenticationSetup v-if="!editMode"/>
-
-				<!--
-					</div>
-
-					<div class="admin-page-button" v-if="isAdmin() && !editMode">
-						<Button @click="adminpageRedirection()">ADMIN</Button>
-					</div>
-				</div>
-
-				-->
-				
+				<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
+				<TwoFactorAuthenticationSetup v-if="!editMode"/>
 				<div class="header-editing-buttons">
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
 					<Button v-if="editMode" @click="stopEditProfile">CANCEL</Button>
@@ -189,7 +173,7 @@
 			<TextInputField v-if="!editMode" placeholder-text="INTRA USERNAME" :modelValue="userData?.intraUsername" readonly/>
 			<TextInputField v-if="!editMode" placeholder-text="EMAIL" :modelValue="userData?.email" readonly/>
 
-			<TextInputField v-if="editMode" v-model="passwordInput" placeholder-text="NEW PASSWORD" />
+			<TextInputField type="password" v-if="editMode" v-model="passwordInput" placeholder-text="NEW PASSWORD" />
 
 			<Button v-if="editMode" type="button" @click="openDeleteAccountModal" border-color="#EC3F74">DELETE MY ACCOUNT</Button>
 			<Modal :visible="deleteAccountModalVisible" @close="closeDeleteAccountModal" title="WARNING">
