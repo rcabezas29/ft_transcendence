@@ -2,6 +2,7 @@ import { reactive } from "vue";
 import { directMessageController } from "./directMessageController";
 import type { ChatUser } from "./interfaces";
 import { user } from './user';
+import { alertOn } from "./alertController";
 
 enum FriendshipStatus {
     Pending = 0,
@@ -252,7 +253,7 @@ class FriendsController {
         });
 
         if (httpResponse.status != 201) {
-            console.log("error while sending friend request");
+			alertOn(`error while sending friend request`);
             return;
         }
     }
@@ -270,7 +271,7 @@ class FriendsController {
         });
 
         if (httpResponse.status != 200) {
-            console.log("error while accepting friend request");
+			alertOn(`error while accepting friend request`);
             return;
         }
     }
@@ -288,7 +289,7 @@ class FriendsController {
         });
 
         if (httpResponse.status != 200) {
-            console.log("error while denying friend request");
+			alertOn(`error while denying friend request`);
             return;
         }
     }
@@ -306,7 +307,7 @@ class FriendsController {
         });
 
         if (httpResponse.status != 200) {
-            console.log("error while unfriending user");
+			alertOn(`error while unfriending user`);
             return;
         }
     }
@@ -324,7 +325,7 @@ class FriendsController {
         });
 
         if (httpResponse.status != 200) {
-            console.log("error while blocking user");
+			alertOn(`error while blocking user`);
             return;
         }
     }
@@ -342,7 +343,7 @@ class FriendsController {
         });
 
         if (httpResponse.status != 200) {
-            console.log("error while unblocking user");
+			alertOn(`error while unblocking user`);
             return;
         }
     }
@@ -354,8 +355,7 @@ class FriendsController {
 				"Authorization": `Bearer ${user.token}`
             }
         });
-        if (httpResponse.status != 200)
-        {
+        if (httpResponse.status != 200) {
             console.log("error fetching friends");
             return;
         }
