@@ -9,15 +9,15 @@
 	import ChannelInfo from '@/components/chat/channelInfo/ChannelInfo.vue';
 	import ChatMessagesHeader from '@/components/chat/ChatMessagesHeader.vue';
 	import { channelController } from '@/channelController';
-	import { globalChatNotification } from '@/chat-notification';
+	import { globalChatNotification } from '@/globalChatNotification';
 
 	const chatOpened = ref(false);
 	function toggleChatWindow() {
 		chatOpened.value = !chatOpened.value;
-		if (chatOpened.value) {
-			globalChatNotification.value = false;
-		} else {
-			currentChat.value = null;
+		globalChatNotification.value = false;
+		if (!chatOpened.value) {
+			channelInfoOff();
+			unsetCurrentChat();
 		}
 	}
 

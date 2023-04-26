@@ -1,9 +1,9 @@
 import { reactive } from "vue";
-import { currentChat } from "./currentChat";
+import { currentChat, unsetCurrentChat } from "./currentChat";
 import type { Chat, Channel, ChatUser, Message, ReturnMessage } from "./interfaces";
 import { user } from "./user";
-import { globalChatNotification} from './chat-notification';
-import { alertController, alertOn, alertOff } from "./alertController";
+import { globalChatNotification} from './globalChatNotification';
+import { alertOn } from "./alertController";
 
 interface ChannelPayload {
 	name: string;
@@ -297,8 +297,8 @@ class ChannelController {
 
 	private onDeletedChannel(channelName: ChannelName): void {
 		delete(this.channels[channelName]);
-		if (currentChat.value?.target === channelName)
-			currentChat.value = null;
+		if (currentChat.value && currentChat.value.target === channelName)
+			unsetCurrentChat();
 	}
 
 	private onChannelLeft(channel: ChannelPayload): void {
@@ -306,8 +306,8 @@ class ChannelController {
 			this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
 		else
 			this.channels[channel.name] = {...channel, chat: null};
-		if (currentChat.value?.target === channel.name)
-			currentChat.value = null;
+		if (currentChat.value && currentChat.value.target === channel.name)
+			unsetCurrentChat();
 	}
 
 	private onUserLeft(payload: UserIdChannelPayload): void {
@@ -347,7 +347,7 @@ class ChannelController {
 		if (!chat)
 			return;
 		if (chat === currentChat.value)
-			currentChat.value = null;
+			unsetCurrentChat();
 		else {
 			currentChat.value = chat;
 			chat.notification = false;
