@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Table from "../ui/Table.vue";
-import Button from "../ui/Button.vue";
-import CrossIcon from "../icons/CrossIcon.vue";
+import Table from "../../ui/Table.vue";
+import Button from "../../ui/Button.vue";
+import CrossIcon from "../../icons/CrossIcon.vue";
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
 

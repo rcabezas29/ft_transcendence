@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref } from "vue";
 import ProfileStats from "@/components/profile/ProfileStats.vue";
-import FriendsList from "@/components/friends/FriendsList.vue";
+import FriendsList from "@/components/profile/friends/FriendsList.vue";
 import MultiView from "../components/ui/MultiView.vue"
 import MultiViewTab from "../components/ui/MultiViewTab.vue"
 import Settings from "@/components/profile/Settings.vue";
