@@ -190,6 +190,12 @@ function viewProfile() {
 .friends-table {
     width: 100%;
     table-layout: fixed;
+	overflow-y: visible;
+	margin-bottom: 24px;
+}
+
+.friends-table thead tr {
+	position: static;
 }
 
 th {
