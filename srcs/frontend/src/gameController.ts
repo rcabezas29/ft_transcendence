@@ -95,7 +95,7 @@ class GameController {
       this.endGame(gameResult);
     });
     user.socket?.on("update-game", (gamePayload) => {
-      this.updateGame(gamePayload);
+        this.updateGame(gamePayload);
     });
     user.socket?.on("removed-from-queue", () => {
       this.state = GameState.None;
@@ -204,8 +204,7 @@ class GameRenderer {
   }
 
   clearCanvas() {
-    this.canvas.fillStyle = "black";
-    this.canvas.fillRect(0, 0, 800, 400);
+    this.canvas.clearRect(0, 0, 800, 400);
   }
 
   gameEnding(result : string) {
@@ -220,6 +219,18 @@ class GameRenderer {
       this.loseGame();
     } else if (result === 'draw') {
       this.tieGame();
+    }
+  }
+
+  endGameForSpectator(winner : string) {
+    this.clearCanvas();
+    this.canvas.textAlign = "center";
+    this.canvas.font = "30px vp-pixel";
+    this.canvas.fillStyle = "white";
+    if (winner === "") {
+      this.canvas.fillText(`DRAW`, 400, 250);
+    } else {
+      this.canvas.fillText(`WINNER : ${winner}`, 400, 250);
     }
   }
 

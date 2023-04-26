@@ -6,7 +6,7 @@ import { directMessageController } from './directMessageController';
 import { channelController } from './channelController';
 import { gameController } from './gameController';
 import { friendsController } from './friendsController';
-import type { JwtPayload, UserData } from './interfaces';
+import type { JwtPayload, UserData, ReturnMessage } from './interfaces';
 import { UserRole } from './interfaces/user-data.interface';
 import router from './router';
 
@@ -33,9 +33,9 @@ class User {
 	private isLogged: boolean = false;
 	private onLogoutCallbacks: Function[] = [];
 
-	async auth(access_token: string): Promise<boolean> {
+	async auth(access_token: string): Promise<ReturnMessage> {
 		if (this.token && this.token === access_token)
-			return true;
+			return { success: true };
 
 		this.token = access_token;
 		localStorage.setItem("token", access_token);
@@ -45,8 +45,7 @@ class User {
 
 			const userData: UserData | null = await this.fetchUserData();
 			if (!userData) {
-				console.log('error fetching user data');
-				return false;
+				return { success: false, message: "error fetching user data"};
 			}
 
 			const fetchedUser: FetchedUser = userData;
@@ -57,14 +56,12 @@ class User {
 			this.isBannedFromWebsite = fetchedUser.isBanned;
 
 			if (this.isBannedFromWebsite) {
-				console.log('user is banned from website');
 				this.logout();
-				return false;
+				return { success: false, message: "user is banned from website"};
 			}
 
 		} catch (error) {
-			console.log(error, 'error from decoding token');
-			return false;
+			return { success: false, message: "error from decoding token"};
 		}
 
 		const needSecondFactorAuth = await this.checkIfSecondFactorAuthenticationIsNeeded(this.token);
@@ -82,10 +79,10 @@ class User {
 			}
 		}
 
-		return true;
+		return { success: true };
 	}
 
-	async register(username: string, email: string, password: string) {
+	async register(username: string, email: string, password: string): Promise<ReturnMessage> {
 		const createUser = { username, email, password };
 
 		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, {
@@ -99,13 +96,13 @@ class User {
 		const response = await httpResponse.json();
 
 		if (httpResponse.status != 201) {
-			return { registeredSuccessfully: false, response };
+			return { success: false, message: response.message };
 		}
 
-		return { registeredSuccessfully: true, response };
+		return { success: true };
 	}
 
-	async login(email: string, password: string) {
+	async login(email: string, password: string): Promise<ReturnMessage> {
 		const loginUser = { email, password };
 
 		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, {
@@ -119,10 +116,10 @@ class User {
 		const response = await httpResponse.json();
 
 		if (httpResponse.status != 201) {
-			return { loggedSuccessfully: false, response };
+			return { success: false, message: response.message };
 		}	
 	
-		return { loggedSuccessfully: true, response };
+		return { success: true, message: response.access_token };
 	}
 
 	async loginWithIntra(): Promise<void> {
@@ -248,9 +245,9 @@ class User {
 		return false;
 	}
 
-	async secondFactorAuthenticate(code: string): Promise<boolean> {
+	async secondFactorAuthenticate(code: string): Promise<ReturnMessage> {
 		if (!this.token)
-			return false;
+			return { success: false, message: "error while authenticating with 2FA: no token" };
 
 		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/2fa/authenticate`, {
 			method: "POST",
@@ -261,15 +258,16 @@ class User {
 			body: JSON.stringify({twoFactorAuthenticationCode: code})
 		});
 		if (httpResponse.status != 200) {
-			return false;
+			return { success: false, message: "error while authenticating with 2FA" };
 		}
 
 		const { access_token } = await httpResponse.json();
 
-		if (!(await this.auth(access_token))) {
-			return false;
+		const authReturn: ReturnMessage = await this.auth(access_token);
+		if (!authReturn.success) {
+			return { success: false, message: `error while authenticating with 2FA: ${authReturn.message!}` };
 		}
-		return true;
+		return { success: true };
 	}
 
 	async turnOffTwoFactorAuth(): Promise<boolean> {
@@ -362,7 +360,6 @@ class User {
 		});
 
 		if (httpResponse.status != 201) {
-			console.log('error while posting image');
 			return false;
 		}
 
@@ -370,7 +367,7 @@ class User {
 		return true;
 	}
 
-	updateAvatarImageURL() {
+	updateAvatarImageURL(): void {
 		let basicURL = this.avatarImageURL;
 		const randomPartIndex = this.avatarImageURL.indexOf("?rand=");
 		if (randomPartIndex != -1)
@@ -380,11 +377,11 @@ class User {
 		this.avatarImageURL = `${basicURL}?rand=${randomKey}`;
 	}
 
-	notifyOfUserChange() {
+	notifyOfUserChange(): void {
 		this.socket?.emit("user-updated");
 	}
 
-	async deleteAccount() {
+	async deleteAccount(): Promise<ReturnMessage> {
 		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${user.id}`, {
 			method: "DELETE",
 			headers: {
@@ -393,10 +390,11 @@ class User {
 		});
 
 		if (httpResponse.status != 200) {
-			console.log("error while deleting user");
-			return;
+			return { success: false, message: "error while deleting user"};
 		}
 		this.logout();
+
+		return { success: true };
 	}
 }
 

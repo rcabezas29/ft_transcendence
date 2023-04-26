@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { friendsController } from '@/friendsController';
 import { user } from "@/user";
 import type { UserData } from "@/interfaces";
-import TextInputField from "../ui/TextInputField.vue";
+import TextInputField from "../../ui/TextInputField.vue";
 
 interface UserInfo {
     id: number,

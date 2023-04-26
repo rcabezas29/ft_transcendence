@@ -1,10 +1,10 @@
 import { reactive } from "vue";
 import type { Chat, ChatUser, Message } from "./interfaces";
 import { user } from './user';
-import { currentChat } from "./currentChat";
+import { currentChat, unsetCurrentChat } from "./currentChat";
 import router from "./router";
 import type { UserUpdatedPayload } from "./friendsController";
-import { globalChatNotification } from "./chat-notification";
+import { globalChatNotification } from "./globalChatNotification";
 
 interface MessagePayload {
     friendId: FriendId;
@@ -44,7 +44,7 @@ class DirectMessageController {
 
     onFriendDisconnected(payload: FriendId) {
         if (currentChat.value && (<ChatUser>currentChat.value.target).id === payload)
-			currentChat.value = null;
+			unsetCurrentChat();
         this.friends = this.friends.filter((friend) => friend.id != payload);
     }
 
@@ -73,8 +73,7 @@ class DirectMessageController {
         if (friendChat)
             friendChat.messages.push(newMessage);
 
-        if (friendChat !== currentChat.value)
-        {
+        if (friendChat !== currentChat.value) {
             friendChat.notification = true;
             globalChatNotification.value = true;
         }
@@ -87,8 +86,7 @@ class DirectMessageController {
         const friendChat: Chat | undefined = this.chats[fromUser.id];
 
         friendChat.challenge = true;
-        if (friendChat !== currentChat.value)
-        {
+        if (friendChat !== currentChat.value) {
             friendChat.notification = true;
             globalChatNotification.value = true;
         }
@@ -118,7 +116,7 @@ class DirectMessageController {
 	setCurrentChat(friendId: FriendId) {
 		const chat = this.chats[friendId];
 		if (chat === currentChat.value)
-			currentChat.value = null;
+			unsetCurrentChat();
 		else {
 			currentChat.value = chat;
 			chat.notification = false;
@@ -127,8 +125,7 @@ class DirectMessageController {
 	}
 
     private appendChatToChatMap(friend: ChatUser): void {
-        if (this.chats && !this.chats[friend.id])
-        {
+        if (this.chats && !this.chats[friend.id]) {
             const newChat: Chat = {
                 target: friend,
                 messages: [],

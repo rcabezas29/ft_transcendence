@@ -10,6 +10,7 @@
 		userId: user.id
 	});
 
+	
 	interface MatchHistory {
 		id: number;
 		user1Id: number;
@@ -30,6 +31,10 @@
 				"Authorization": `Bearer ${user.token}`,
 			}
 		});
+
+		if (httpResponse.status != 200) {
+			return;
+		}
 
 		matchHistory.value = await httpResponse.json();
 		console.log(matchHistory.value);

@@ -23,7 +23,10 @@
   let scoreRatio = ref<number>(0);
 
   onBeforeMount(async () => {
-    currentUser = await getCurrentUser();
+    currentUser = await user.fetchUserData();
+    if (!currentUser) {
+      return;
+    }
 
     totalWins.value = currentUser?.stats.wonGames ?? 0;
     totalLosses.value = currentUser?.stats.lostGames ?? 0;
@@ -42,31 +45,31 @@
     }
   });
 
-  async function getCurrentUser() {
-    const usersRequest = await fetch(`http://localhost:3000/users/${props.userId}`, {
-      headers: {
-        "Authorization": `Bearer ${user.token}`
-      }
-    });
+	async function getCurrentUser() {
+		const usersRequest = await fetch(`http://localhost:3000/users/${props.userId}`, {
+			headers: {
+			"Authorization": `Bearer ${user.token}`
+			}
+		});
 
-    if (usersRequest.status != 200) {
-      return null;
-    }
+		if (usersRequest.status != 200) {
+			return null;
+		}
 
-    const userData: UserData = await usersRequest.json();
-    return userData;
-}
+		const userData: UserData = await usersRequest.json();
+		return userData;
+	}
 </script>
 
 <template>
   <div class="square-stats-grid">
     <StatBox title="WINS" :stat="totalWins"/>
     <StatBox title="LOSSES" :stat="totalLosses"/>
-    <StatBox title="W/L" :stat="winLossRatio"/>
+    <StatBox title="W/L" :stat="winLossRatio.toFixed(2)"/>
     <StatBox title="SCORED GOALS" :stat="scoredGoals"/>
     <StatBox title="RECEIVED GOALS" :stat="receivedGoals"/>
     <StatBox title="TOTAL MATCHES" :stat="totalMatches"/>
-    <StatBox title="S/R" :stat="scoreRatio"/>
+    <StatBox title="S/R" :stat="scoreRatio.toFixed(2)"/>
   </div>
 </template>
 
@@ -77,6 +80,8 @@
   flex-wrap: wrap;
   flex-flow: row wrap;
   gap: 24px;
+  box-sizing: border-box;
+  padding-bottom: 20px;
 }
 
   /* Everything bigger than 850px */

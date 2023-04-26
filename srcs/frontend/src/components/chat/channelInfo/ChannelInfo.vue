@@ -9,6 +9,7 @@ import { computed, ref } from 'vue';
 import BanSettingsScreen from "./BanSettingsScreen.vue";
 import MuteSettingsScreen from "./MuteSettingsScreen.vue";
 import ChannelPwdSettingsScreen from "./ChannelPwdSettingsScreen.vue";
+import type { ReturnMessage } from '@/interfaces';
 
 const emit = defineEmits(["close"]);
 
@@ -45,7 +46,10 @@ function kickUser(): void {
 	if (!channelController.userSelected)
 		return;
 
-	channelController.kickUser(channelController.userSelected, currentChannel.value.name);
+	const kickRet: ReturnMessage = channelController.kickUser(channelController.userSelected, currentChannel.value.name);
+    if (!kickRet.success) {
+        
+    }
 }
 
 function toggleAdmin(): void {

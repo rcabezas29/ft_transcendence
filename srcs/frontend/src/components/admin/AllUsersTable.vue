@@ -9,6 +9,7 @@
 	import Button from "../ui/Button.vue";
 	import { UserRole } from "@/interfaces/user-data.interface";
 	import CrossIcon from "../icons/CrossIcon.vue";
+import { alertOn } from "@/alertController";
 
 	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
@@ -64,7 +65,7 @@
 		});
 
 		if (httpResponse.status != 200) {
-			console.log("error while making admin");
+			alertOn(`error while making admin`);
 			return;
 		}
 
@@ -87,7 +88,7 @@
 		});
 
 		if (httpResponse.status != 200) {
-			console.log("error while removing admin");
+			alertOn(`error while removing admin`);
 			return;
 		}
 
@@ -108,7 +109,7 @@
 		});
 
 		if (httpResponse.status != 200) {
-			console.log("error while banning user");
+			alertOn(`error while banning user`);
 			return;
 		}
 
@@ -130,7 +131,7 @@
 		});
 
 		if (httpResponse.status != 200) {
-			console.log("error while unbanning user");
+			alertOn(`error while unbanning user`);
 			return;
 		}
 
@@ -257,7 +258,7 @@
 	}
 
 	.banned {
-		background-color: gray;
+		background-color: #474747;
 	}
 
 	.table-user {

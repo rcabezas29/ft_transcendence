@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { CreateUserDto } from './create-user.dto';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
@@ -18,10 +18,10 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsString()
   @MinLength(4)
   @MaxLength(50)
-  //@Matches(
-  //    /(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-  //    message: 'The password must have a Uppercase, lowercase letter and a number'
-  //})
+  @Matches(
+      /(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+      message: 'The password must have a Uppercase, lowercase letter and a number'
+  })
   password?: string;
 
   @IsOptional()

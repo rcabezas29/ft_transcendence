@@ -29,7 +29,7 @@ onBeforeMount(async () => {
 	const response: OauthResponse = await httpResponse.json();
 
 	const authOk = await user.auth(response.access_token);
-	if (!authOk) {
+	if (!authOk.success) {
 		router.replace({ "name": "login" })
 		return;
 	}

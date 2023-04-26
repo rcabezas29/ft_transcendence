@@ -5,19 +5,13 @@ import { ref } from 'vue';
 import BanSettingsScreen from "@/components/chat/channelInfo/BanSettingsScreen.vue";
 import MuteSettingsScreen from "@/components/chat/channelInfo/MuteSettingsScreen.vue";
 import Button from "../../ui/Button.vue";
+import { user } from "@/user";
 
 const props = defineProps<{
     channelName: string
 }>()
 
-const emit = defineEmits(["close"]);
-
 const channel = channelController.channels[props.channelName!];
-
-function closeUsersManagementScreen() {
-    emit("close");
-	channelController.userSelected = null;
-}
 
 const banSettingsOpened = ref<boolean>(false);
 function toggleBanScreen(): void {
@@ -50,8 +44,6 @@ function viewProfile(): void {
 	console.log("REDIRECT TO PROFILE!!!")
 }
 
-// que sea reactive e.g. si echo a alguien y me convierto en owner
-
 </script>
 
 <template>
@@ -66,7 +58,10 @@ function viewProfile(): void {
             <ChatChannelUserList class="info-section user-list" :channel-name="channel.name"/>
 
             <div class="info-section action-buttons" v-if="channelController.userSelected">
-                <div class="buttons-section">
+                <div v-if="channelController.userSelected.id === user.id">
+                    this is you! select another user
+                </div>
+                <div v-else class="buttons-section">
                     <Button class="button" @click="viewProfile" :selected="true">
                         VIEW PROFILE
                     </Button>
