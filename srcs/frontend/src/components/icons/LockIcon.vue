@@ -13,9 +13,9 @@
 </script>
 
 <template>
-    <svg :fill="fillColour" :width="w" :height="h" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 5c.522-2.837 3.032-5 6-5 2.974 0 5.48 2.162 6.001 5H16v11H0V5h2zm2.064 0h7.934a3.885 3.885 0 0 0-3.802-3h-.292a3.941 3.941 0 0 0-3.84 3zM2 7v7h12V7H2zm5 2h2v3H7V9z" fill-rule="evenodd"/>
-    </svg>
+	<svg :fill="fillColour" :width="w" :height="h"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+		<path d="M15 2H9v2H7v4H4v14h16V8h-3V4h-2V2zm0 2v4H9V4h6zm-6 6h9v10H6V10h3zm4 3h-2v4h2v-4z"/>
+	</svg>
 </template>
 
 <style>

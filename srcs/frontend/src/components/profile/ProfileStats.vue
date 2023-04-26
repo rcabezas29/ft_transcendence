@@ -58,6 +58,8 @@
   flex-wrap: wrap;
   flex-flow: row wrap;
   gap: 24px;
+  box-sizing: border-box;
+  padding-bottom: 20px;
 }
 
   /* Everything bigger than 850px */
