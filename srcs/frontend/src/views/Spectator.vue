@@ -1,7 +1,7 @@
 <script setup lang="ts">
-	import { onMounted, onUnmounted, ref, type Ref } from 'vue';
+	import { onMounted, ref, type Ref } from 'vue';
 	import { useRoute } from 'vue-router';
-	import { gameController } from '../gameController';
+	import { gameController, GameState } from '../gameController';
 	import { user } from "../user"
 	import router from "../router"
 	import Button from '@/components/ui/Button.vue';
@@ -28,9 +28,14 @@
 		user.socket?.on("spectate-game", spectate);
 		user.socket?.on("spectate-game-players", setPlayers);
 		user.socket?.emit("spectate-game", matchId.value);
+		user.socket?.on('spectator-end-game', (winner) => gameEndSpectator(winner));
 
 		gameController.initCanvas(canvasRef.value!.getContext("2d")!);
-	})
+	});
+
+	function gameEndSpectator(winner : string) {
+		gameController.gameRenderer?.endGameForSpectator(winner);
+	}
 
 	function spectate(gameExists: boolean) {
 		if (!gameExists) {
@@ -49,7 +54,6 @@
 	function leaveGame() {
 		user.socket?.emit("spectate-leave", matchId.value);
 		router.push("/game")
-		console.log("entra");
 	}
 
 </script>
