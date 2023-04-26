@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { channelController } from '@/channelController';
 import type { Channel } from '@/interfaces';
+import MailUnreadIcon from "@/components/icons/MailUnreadIcon.vue";
 
 function handleClick(e: Event, channel: string) {
 	channelController.setCurrentChat(channel);
@@ -29,7 +30,9 @@ const channels = computed(() => {
 					{{ channel.name }}
 				</div>
 			</div>
-			<div class="chat-card-notification" :class="{'chat-card-notification-on': channel.chat!.notification}"></div>
+			<div class="chat-card-notification" v-show="channel.chat!.notification">
+				<MailUnreadIcon width="20" height="20"/>
+			</div>
 		</div>
 
 	</div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { directMessageController } from '../../directMessageController';
+import MailUnreadIcon from "@/components/icons/MailUnreadIcon.vue";
 
 function handleClick(e: Event, friendId: number) {
 	directMessageController.setCurrentChat(friendId);
@@ -20,8 +21,9 @@ const backendURL = import.meta.env.VITE_BACKEND_URL;
 					{{ friend.username }}
 				</div>
 			</div>
-
-			<div class="chat-card-notification" :class="{'chat-card-notification-on': directMessageController.chats[friend.id].notification}"></div>
+			<div class="chat-card-notification" v-show="directMessageController.chats[friend.id].notification">
+				<MailUnreadIcon width="20" height="20"/>
+			</div>
 		</div>
 	</div>
 </template>
