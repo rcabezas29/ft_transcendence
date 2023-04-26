@@ -258,7 +258,7 @@ import { alertOn } from "@/alertController";
 	}
 
 	.banned {
-		background-color: gray;
+		background-color: #474747;
 	}
 
 	.table-user {

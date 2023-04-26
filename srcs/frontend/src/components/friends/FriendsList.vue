@@ -1,188 +1,279 @@
 <script setup lang="ts">
+import Table from "../ui/Table.vue";
+import Button from "../ui/Button.vue";
+import CrossIcon from "../icons/CrossIcon.vue";
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
 
 function getUserAvatar(friendId: any): string {
-  return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${friendId}`;
+    return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${friendId}`;
 }
 
-function isOnline(friend: any): boolean {
-  return friend.status === FriendStatus.online;
+function isOnline(friend: Friend): boolean {
+    return friend.status === FriendStatus.online;
 }
 
-function isGaming(friend: any): boolean {
-  return friend.status === FriendStatus.gaming;
+function isGaming(friend: Friend): boolean {
+    return friend.status === FriendStatus.gaming;
 }
-
-// function sendFriendRequest() {
-//   const userId = 2;
-
-//   friendsController.sendFriendRequest(userId);
-// }
 
 const activeFriends = computed(() => {
-  return friendsController.getActiveFriends();
-});
+    return friendsController.getActiveFriends();
+})
 
 const blockedFriends = ref<Friend[]>([]);
 const sentFriendRequests = ref<Friend[]>([]);
 const receivedFriendRequests = ref<Friend[]>([]);
 
 friendsController.getBlockedFriends().then((value) => {
-  blockedFriends.value = value;
+    blockedFriends.value = value;
 });
 friendsController.getSentFriendRequests().then((value) => {
-  sentFriendRequests.value = value;
+    sentFriendRequests.value = value;
 });
 friendsController.getReceivedFriendRequests().then((value) => {
-  receivedFriendRequests.value = value;
+    receivedFriendRequests.value = value;
 });
 
 watch(friendsController, () => {
-  friendsController.getBlockedFriends().then((value) => {
-    blockedFriends.value = value;
-  });
-  friendsController.getSentFriendRequests().then((value) => {
-    sentFriendRequests.value = value;
-  });
-  friendsController.getReceivedFriendRequests().then((value) => {
-    receivedFriendRequests.value = value;
-  });
-});
+    friendsController.getBlockedFriends().then((value) => {
+        blockedFriends.value = value;
+    });
+    friendsController.getSentFriendRequests().then((value) => {
+        sentFriendRequests.value = value;
+    });
+    friendsController.getReceivedFriendRequests().then((value) => {
+        receivedFriendRequests.value = value;
+    });
+})
 
+const selectedUser = ref<Friend | null>(null);
+function selectUser(friend: Friend): void {
+	selectedUser.value = friend;
+}
+
+function unselectUser():void {
+	selectedUser.value = null;
+}
+
+function isUserSelected(user: Friend): boolean {
+	return user === selectedUser.value;
+}
+
+function viewProfile() {
+	//TODO: redirect to user profile
+	console.log('REDIRECT TO USER PROFILE!!!')
+}
+    
 </script>
 
 <template>
-  <div class="friends-section">
-    <div class="title-bar">
-      <h2>FRIENDS REQUESTS</h2>
-    </div>
-    <div class="friends-subsection">
-      <div class="request-row" v-for="(friend, index) in receivedFriendRequests" :key="friend.userId">
-        <div class="friend-request">
-          <div class="row-number-box">{{ index + 1 }}</div>
-          <div class="user-img">
-            <p>{{ friend.username }}</p>
-						<img id="user-image" :src="getUserAvatar(friend.userId)" />
+    <Table class="friends-table">
+        <template #head>
+			<tr>
+				<th class="user-column">friend requests</th>
+			</tr>
+		</template>
+		<template #body>
+			<tr class="table-row" v-for="friend in receivedFriendRequests" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
+				<td v-show="!isUserSelected(friend)">
+					<div class="table-user">
+						<span class="table-user-img">
+							<img :src="getUserAvatar(friend.userId)" />
+						</span>
+						<span class="table-username">
+							<div class="truncate">
+								{{ friend.username }}
+							</div>
+						</span>
 					</div>
-        </div>
-        <div class="friend-request-buttons">
-          <button class="friend-request-bt"
-            @click="() => friendsController.acceptFriendRequest(friend.userId)">Accept</button>
-          <button class="friend-request-bt"
-            @click="() => friendsController.denyFriendRequest(friend.userId)">Deny</button>
-        </div>
-      </div>
-    </div>
-    <div class="title-bar">
-      <h2>#</h2>
-      <h2>username</h2>
-      <h2>status</h2>
-    </div>
-    <div class="friends-subsection">
-      <div class="request-row" v-for="(friend, index) in activeFriends" :key="friend.userId">
-        <div class="friend-request">
-          <div class="row-number-box">{{ index + 1 }}</div>
-          <div class="user-img">
-            <p>{{ friend.username }}</p>
-						<img id="user-image" :src="getUserAvatar(friend.userId)" />
+				</td>
+				<td class="hovering-row" v-show="isUserSelected(friend)">
+					<div class="option-buttons">
+						<Button class="row-button" :selected="true" @click="() => friendsController.acceptFriendRequest(friend.userId)">
+							ACCEPT
+						</Button>
+						<Button class="row-button" :selected="true" @click="() => friendsController.denyFriendRequest(friend.userId)">
+							DENY
+						</Button>
+						<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
+							<CrossIcon/>
+						</Button>
 					</div>
-          <span v-if="isOnline(friend)">Online</span>
-          <span v-else-if="isGaming(friend)">Gaming</span>
-          <span v-else>Offline</span>
-        </div>
-        <div class="friend-status" :class="{ 'friend-status-online': isOnline(friend), 'friend-status-gaming': isGaming(friend) }"></div>
-        <button class="friend-request-bt" @click="() => friendsController.blockUser(friend.userId)">Block</button>
-        <button class="friend-request-bt" @click="() => friendsController.unfriendUser(friend.userId)">Unfriend</button>
-      </div>
-    </div>
-  </div>
+				</td>
+			</tr>
+		</template>
+    </Table>
+
+    <Table class="friends-table">
+        <template #head>
+			<tr>
+				<th class="user-column">user</th>
+				<th>status</th>
+			</tr>
+		</template>
+		<template #body>
+			<tr class="table-row" v-for="friend in activeFriends" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
+				<td v-show="!isUserSelected(friend)">
+					<div class="table-user">
+						<span class="table-user-img">
+							<img :src="getUserAvatar(friend.userId)" />
+						</span>
+						<span class="table-username">
+							<div class="truncate">
+								{{ friend.username }}
+							</div>
+						</span>
+					</div>
+				</td>
+				<td v-show="!isUserSelected(friend)">
+					<span v-if="isOnline(friend)">online</span>
+                    <span v-else-if="isGaming(friend)">gaming</span>
+                    <span v-else>offline</span>
+				</td>
+				<td class="hovering-row" v-show="isUserSelected(friend)" colspan="2">
+					<div class="option-buttons">
+						<Button class="row-button" :selected="true" @click="viewProfile">
+							VIEW
+						</Button>
+						<Button class="row-button" :selected="true" @click="() => friendsController.blockUser(friend.userId)">
+							BLOCK
+						</Button>
+						<Button class="row-button" :selected="true" @click="() => friendsController.unfriendUser(friend.userId)">
+							UNFRIEND
+						</Button>
+						<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
+							<CrossIcon/>
+						</Button>
+					</div>
+				</td>
+			</tr>
+
+            <tr class="table-row blocked-section-row" v-for="friend in blockedFriends" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
+				<td v-show="!isUserSelected(friend)">
+					<div class="table-user">
+						<span class="table-user-img">
+							<img :src="getUserAvatar(friend.userId)" />
+						</span>
+						<span class="table-username">
+							<div class="truncate">
+								{{ friend.username }}
+							</div>
+						</span>
+					</div>
+				</td>
+				<td v-show="!isUserSelected(friend)">
+					BLOCKED
+				</td>
+				<td class="hovering-row" v-show="isUserSelected(friend)" colspan="2">
+					<div class="option-buttons">
+						<Button class="row-button" :selected="true" @click="viewProfile">
+							VIEW
+						</Button>
+						<Button class="row-button" :selected="true" @click="() => friendsController.unblockUser(friend.userId)">
+							UNBLOCK
+						</Button>
+						<Button class="row-button" :selected="true" @click="() => friendsController.unfriendUser(friend.userId)">
+							UNFRIEND
+						</Button>
+						<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
+							<CrossIcon/>
+						</Button>
+					</div>
+				</td>
+			</tr>
+		</template>
+    </Table>
 </template>
 
 <style scoped>
-.friends-section {
-  width: 100%;
-  padding: 1rem;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.friends-table {
+    width: 100%;
+    table-layout: fixed;
 }
 
-.title-bar {
-  box-sizing: border-box;
-  font-size: 0.6rem;
-  text-align: center;
-  padding: 0.1rem;
-  background: #1E9052;
-  border: 0.3em solid #4BFE65;
-  display: flex;
-  justify-content: space-between;
-  padding-right: 15%;
+th {
+    width: 2%;
 }
 
-.request-row {
-  display: flex;
+.user-column {
+    width: 10%;
 }
 
-.friends-subsection {
-  width: 100%;
+.table-row {
+	height: 50px;
+	cursor: default;
+	box-sizing: border-box;
 }
 
-.active-friend,
-.friend-request {
-  display: flex;
-  flex-grow: 1;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  background-color: #08150c;
-  border: 0.1em solid #4BFE65;
-  box-sizing: border-box;
-  margin-bottom: 0;
-  margin-right: 0.5em;
+.blocked-section-row {
+	background-color: #474747;
 }
 
-.friend-request-buttons {
-  display: flex;
-  gap: 0.5rem;
+.table-row:hover {
+	background-color: #08150C;
 }
 
-.friend-request-bt {
-  padding: 0.5rem;
-  box-sizing: border-box;
-  align-items: center;
-  color: #b3f9d7;
-  background: #08150c;
-  box-sizing: border-box;
-  margin-bottom: 0;
-  border: 0.1em solid #4BFE65;
+.hovering-row {
+	height: 100%;
+	box-sizing: border-box;
+	padding: 2px;
 }
 
-.row-number-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 24px;
-  height: 24px;
-  background-color: #4BFE65;
-  color: #08150c;
-  font-weight: bold;
-  margin-right: 0.5rem;
+.option-buttons {
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	gap: 2px;
+	box-sizing: border-box;
 }
 
-.friend-request-bt:hover {
-  background-color: #4BFE65;
-  color: #08150c;
+.row-button {
+	box-sizing: border-box;
+	padding: 9px 12px;
+	border-width: 1px;
+	flex: 1;
 }
 
-.user-img {
-  display: flex;
-  justify-content: space-between;
+.cross-button {
+	flex: 0.25;
 }
-.user-img img {
-  width: 40px;
-  height: 40px;
+
+.table-user {
+    display: flex;
+    align-items: center;
+	margin-left: 10px;
 }
+
+.table-user-img {
+    display: flex;
+}
+
+.table-user-img img {
+    width: 36px;
+    height: 36px;
+}
+
+.table-username {
+    margin-left: 12px;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.truncate {
+    display: table-cell;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Everything bigger than 850px */
+@media only screen and (min-width: 850px) {
+
+	.desktop-hidden {
+		display: none;
+	}
+}
+
 </style>
