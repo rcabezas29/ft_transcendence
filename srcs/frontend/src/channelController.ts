@@ -315,7 +315,7 @@ class ChannelController {
 		this.channels[channel.name] = {...channel, chat: this.channels[channel.name].chat};
 		
 		if (this.userSelected && userId == this.userSelected.id)
-			this.userSelected = null;
+			this.unselectUser();
 	}
 
 	private receiveChannelMessage(payload: ChannelMessagePayload): void {

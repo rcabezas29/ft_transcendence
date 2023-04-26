@@ -33,7 +33,7 @@
 	function closeCurrentChat() {
 		unsetCurrentChat();
 		channelInfoOff();
-		channelController.userSelected = null;
+		channelController.unselectUser();
 	}
 
 

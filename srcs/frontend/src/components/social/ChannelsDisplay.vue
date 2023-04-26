@@ -122,7 +122,7 @@
 					</Modal>
 				</td>
 			</tr>
-			<td colspan="2" v-if="Object.keys(channelController.channels).length === 0">
+			<td colspan="3" v-if="Object.keys(channelController.channels).length === 0">
 				There are no channels yet... Would you like to create one? :)
 			</td>
 		</template>
