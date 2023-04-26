@@ -33,6 +33,7 @@ export default class Game {
     startDate: Date;
     gameInterval: NodeJS.Timer;
     server: Server;
+    winner: string = "";
 
     ball: GameObject;
     paddles: Paddle[];
@@ -281,8 +282,10 @@ export default class Game {
 
             if (player.score > otherPlayer.score) {
                 player.result = GameResult.Win;
+                this.winner = player.user.username;
             } else if (player.score < otherPlayer.score) {
                 player.result = GameResult.Lose;
+                this.winner = otherPlayer.user.username;
             } else {
                 player.result = GameResult.Draw;
             }
@@ -307,35 +310,36 @@ export default class Game {
 
     protected removePlayersFromGameChannel(): void {
         this.players.forEach((player) => player.user.socket.leave(this.name));
+        this.viwers.forEach((viwer) => {viwer.socket.leave(this.name)});
     }
 
     // If one of the players ended the game by hand (prematurely),
     // the function will set the game ender as loser
     end(gameEnderIndex: number = -1) {
-		clearInterval(this.gameInterval);
-
+        clearInterval(this.gameInterval);
+        
         if (gameEnderIndex != -1) {
             console.log(`player {${gameEnderIndex}} ended the game {${this.name}} prematurely`);
+            this.winner =  this.players[gameEnderIndex == 0 ? 1 : 0].user.username;
             this.players[gameEnderIndex].result = GameResult.Lose;
             this.players[gameEnderIndex == 0 ? 1 : 0].result = GameResult.Win;
         } else {
             console.log('game end', this.name);
             this.resolvePlayersGameResultFromScore();
         }
-
+        
         this.players.forEach(async (player, index) => {
             const otherPlayer: Player = this.players[(index + 1) % 2];
-  
+            
             player.user.socket.emit('end-game', player.result);
-
+            
             if (player.result !== GameResult.Draw) {
                 this.updateUserElo(player, otherPlayer);
             }
-
+            
             this.updateUserStats(player, otherPlayer);
             this.gatewayManagerService.unsetGatewayUserGamingStatus(player.user.id);
         });
-
         this.callEndGameCallbacks();
     }
     
@@ -382,6 +386,6 @@ export default class Game {
 	}
 
 	protected notifyEndGameToAllUsers() {
-		this.server.to(this.name).emit("spectator-end-game", this.name);
+		this.server.to(this.name).emit("spectator-end-game", this.winner);
 	}
 }

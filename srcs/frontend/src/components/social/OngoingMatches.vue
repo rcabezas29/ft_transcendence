@@ -82,7 +82,7 @@
 
 		</div>
 
-		<div v-if="ongoingGames.length == 0 || ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)">
+		<div v-if="ongoingGames.length == 0 || (ongoingGames.length === 1 && ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username))">
 			NOBODY IS PLAYING RIGHT NOW :(
 		</div>
 
