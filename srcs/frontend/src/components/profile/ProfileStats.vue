@@ -123,7 +123,7 @@
   }
 
   .user-data-container {
-	margin-left: 0;
+	margin: 0;
   }
 }
 </style>
