@@ -37,7 +37,6 @@
 		}
 
 		matchHistory.value = await httpResponse.json();
-		console.log(matchHistory.value);
 	})
 
 	function getUserImageUrl(userId: number) {

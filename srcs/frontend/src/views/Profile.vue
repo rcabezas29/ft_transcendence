@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref } from "vue";
+import {onMounted, onUnmounted, ref } from "vue";
 import ProfileStats from "@/components/profile/ProfileStats.vue";
 import FriendsList from "@/components/profile/friends/FriendsList.vue";
 import MultiView from "../components/ui/MultiView.vue"
