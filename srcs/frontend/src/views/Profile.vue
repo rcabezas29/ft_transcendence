@@ -35,16 +35,16 @@ function isSelected(index: number) {
 		</template>
 
 		<template #body>
-			<div v-if="multiViewElement == 1">
+			<div v-if="multiViewElement == 1" class="multi-view-element">
 				<ProfileStats />
 			</div>
-			<div v-else-if="multiViewElement == 2">
+			<div v-else-if="multiViewElement == 2" class="multi-view-element">
 				<MatchHistory />
 			</div>
-			<div v-else-if="multiViewElement == 3">
+			<div v-else-if="multiViewElement == 3" class="multi-view-element">
 				<FriendsList />
 			</div>
-            <div v-else-if="multiViewElement == 4">
+            <div v-else-if="multiViewElement == 4" class="multi-view-element">
                 <Settings />
             </div>
 		</template>
@@ -53,5 +53,11 @@ function isSelected(index: number) {
 
 
 <style scoped>
+
+.multi-view-element {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
 
 </style>

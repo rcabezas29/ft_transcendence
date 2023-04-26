@@ -110,7 +110,7 @@
 					<Button class="join-button" @click="() => handleJoinClick(channel)" v-if="!channelController.userIsMemberOfChannel(channel.name)" :selected="true">
 						JOIN
 					</Button>
-					<Modal :visible="passwordModalVisible" @close="closePasswordModal" :title="`JOIN PRIVATE CHANNEL ${passwordModalChannelName}`">
+					<Modal :visible="passwordModalVisible" @close="closePasswordModal" :title="`JOIN ${passwordModalChannelName}`">
 						<p class="errorMessage">{{ errorMessage }}</p>
 
 						<TextInputField type="password" v-model="insertedPassword" placeholder-text="ENTER CHANNEL PASSWORD" />
@@ -249,7 +249,7 @@
 			max-width: 300px;
 		}
 
-		.channel-creation .modal-buttons {
+		.modal-buttons {
 			flex-direction: row;
 			justify-content: center;
 		}

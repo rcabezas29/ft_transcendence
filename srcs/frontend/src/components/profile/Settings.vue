@@ -128,10 +128,10 @@
 		user.logout();
 		router.replace({ "name": "login" });
 	}
-
+/*
 	function	isAdmin() : boolean {
 		return (user.role === UserRole.ADMIN || user.role === UserRole.OWNER);
-	}
+	}*/
 
 	function	adminpageRedirection() {
 		router.replace('/admin');
@@ -149,16 +149,23 @@
 				</div>
 			</div>
 			<div class="header-buttons">
+				<!--
 				<div class="settings-buttons">
 					<div class="default-setting-buttons">
+
+				-->
 						<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
 						<TwoFactorAuthenticationSetup v-if="!editMode"/>
-						<Button @click="logoutUser" v-if="user.checkIsLogged() && !editMode" class="logout-button">LOGOUT</Button>
+
+				<!--
 					</div>
+
 					<div class="admin-page-button" v-if="isAdmin() && !editMode">
 						<Button @click="adminpageRedirection()">ADMIN</Button>
 					</div>
 				</div>
+
+				-->
 				
 				<div class="header-editing-buttons">
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
@@ -170,9 +177,11 @@
 				</div>
 			</div>
 		</div>
+
 		<div class="error-message">
 			<span v-if="errorMessage.length > 0">{{ errorMessage }}</span>
 		</div>
+
 		<div class="form">
 			<TextInputField v-if="!editMode" placeholder-text="USERNAME" :modelValue="userData?.username" readonly/>
 			<TextInputField v-if="editMode" v-model="usernameInput" placeholder-text="NEW USERNAME" />
@@ -195,6 +204,10 @@
 				</div>
 			</Modal>
 		</div>
+		<div class="footer-buttons" v-if="!editMode">
+			<Button @click="logoutUser" v-if="user.checkIsLogged()" class="logout-button">LOGOUT</Button>
+			<Button @click="adminpageRedirection()" class="admin-page-button" v-if="user.isWebsiteAdmin()">ADMIN</Button>
+		</div>
 	</div>
 </template>
 
@@ -204,6 +217,7 @@
 		width: 100%;
 		display: flex;
 		flex-direction: column;
+		height: 100%;
 	}
 
 	.header {
@@ -284,7 +298,7 @@
 	}
 
 	.form {
-		margin-top: 30px;
+		margin-top: 18px;
 	}
 
 	.form input {
@@ -309,19 +323,23 @@
 		margin-top: 10px;
 	}
 
-	.settings-buttons {
+	.footer-buttons {
+		margin-top: auto;
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		gap: 12px;
 	}
 
-	.admin-page-button > button {
+	.footer-buttons button {
+		padding: 10px 20px;
+	}
+
+	.admin-page-button {
 		background-color: #04809F;
 		color: #08150C;
 		border-color: #1E9052;
 	}
 
-	.admin-page-button > button:hover {
+	.admin-page-button:hover {
 		background-color: #B3F9D7;
 	}
 
@@ -346,6 +364,11 @@
 			justify-content: flex-start;
 			width: 150px;
 			height: 150px;
+		}
+
+		.footer-buttons {
+			width: 400px;
+			align-self: center;
 		}
 	}
 

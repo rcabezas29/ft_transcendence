@@ -204,6 +204,10 @@
 			display: table-cell;
 		}
 
+		.table-square {
+			display: flex;
+		}
+
 		.desktop-hidden {
 			display: none;
 		}
