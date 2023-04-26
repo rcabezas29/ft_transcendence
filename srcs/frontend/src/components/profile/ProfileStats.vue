@@ -43,11 +43,11 @@
   <div class="square-stats-grid">
     <StatBox title="WINS" :stat="totalWins"/>
     <StatBox title="LOSSES" :stat="totalLosses"/>
-    <StatBox title="W/L" :stat="winLossRatio"/>
+    <StatBox title="W/L" :stat="winLossRatio.toFixed(2)"/>
     <StatBox title="SCORED GOALS" :stat="scoredGoals"/>
     <StatBox title="RECEIVED GOALS" :stat="receivedGoals"/>
     <StatBox title="TOTAL MATCHES" :stat="totalMatches"/>
-    <StatBox title="S/R" :stat="scoreRatio"/>
+    <StatBox title="S/R" :stat="scoreRatio.toFixed(2)"/>
   </div>
 </template>
 

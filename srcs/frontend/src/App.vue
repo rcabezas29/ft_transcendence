@@ -15,7 +15,6 @@
 		<AlreadyConnected/>
 	</div>
 	<div v-else>
-		<DevBar/>
 		<div class="app-container">
 			<NavBar v-if="user.checkIsLogged() && user.hasSubmittedFirstTimeLoginForm()"/>
 			<div class="app-body">
