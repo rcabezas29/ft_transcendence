@@ -66,7 +66,7 @@
 			if (!avatarUpdated)
 				errorMessage.value.push("error while updating avatar");
 			if (!passwordUpdated)
-				errorMessage.value.push("error while updating password");
+				errorMessage.value.push("error while updating password. The password must have a Uppercase, lowercase letter and a number");
 			return;
 		}
 		stopEditProfile();
