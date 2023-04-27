@@ -16,7 +16,6 @@ const INITIAL_BALL_SPEED = 200;
 const WIN_SCORE = 7;
 const GAME_DURATION = 200; // in seconds (?)
 
-// TODO: calculate from game-canvas size
 const BALL_START_POSITION_X = 400;
 const BALL_START_POSITION_Y = 200;
 

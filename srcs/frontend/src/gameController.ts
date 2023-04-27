@@ -32,11 +32,6 @@ interface PlayersUsernames {
   user2: string;
 }
 
-interface GameCustomization {
-  gameSelection: GameSelection;
-  paddleColor: PaddleColorSelection;
-}
-
 export enum GameState {
   None,
   Searching,
@@ -56,7 +51,6 @@ enum GameResult {
   Draw,
 }
 
-//hardcoded for now
 const MappedKeys: string[] = ["ArrowUp", "ArrowDown"];
 
 const gameActions: any = {};
