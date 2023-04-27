@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import { GatewayUser } from "src/gateway-manager/interfaces";
 import { Vector2 } from './vector2';
-import { GameObject, Paddle, PowerUp } from './game-object';
+import { PowerUp } from './game-object';
 import { UsersService } from 'src/users/users.service';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.service';
@@ -41,25 +41,19 @@ export class PowerUpsGame extends Game {
 
     apply_powerup(type: number) {
         if (type === 0) {
-            console.log('Maax Speeeed');
             this.ball.speed = MAX_BALL_SPEED;
         } else if (type === 1) {
             if (this.ball.direction.x < 0) {
-                console.log('Slowed 0');
                 this.paddles[0].speed /= 2;
             } else {
-                console.log('Slowed 1');
                 this.paddles[1].speed /= 2;
             }
         } else if (type === 2) {
-            console.log('Change direction');
             this.ball.direction.y *= -1;
         } else if (type === 3) {
             if (this.ball.direction.x < 0) {
-                console.log('Increased 1');
                 this.paddles[1].hitBox.bounds.y += 20;
             } else {
-                console.log('Increased 0');
                 this.paddles[0].hitBox.bounds.y += 20;
             }
         }

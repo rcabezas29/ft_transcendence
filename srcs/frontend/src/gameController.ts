@@ -85,7 +85,6 @@ class GameController {
   
   setEventHandlers(): void {
     user.socket?.on("game-found", (adversaryName: string) => {
-      console.log('game-found');
       this.gameFound(adversaryName);
     });
     user.socket?.on("start-game", (playersNames: PlayersUsernames) => {

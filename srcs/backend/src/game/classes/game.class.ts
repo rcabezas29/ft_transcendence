@@ -319,12 +319,10 @@ export default class Game {
         clearInterval(this.gameInterval);
         
         if (gameEnderIndex != -1) {
-            console.log(`player {${gameEnderIndex}} ended the game {${this.name}} prematurely`);
             this.winner =  this.players[gameEnderIndex == 0 ? 1 : 0].user.username;
             this.players[gameEnderIndex].result = GameResult.Lose;
             this.players[gameEnderIndex == 0 ? 1 : 0].result = GameResult.Win;
         } else {
-            console.log('game end', this.name);
             this.resolvePlayersGameResultFromScore();
         }
         

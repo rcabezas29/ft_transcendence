@@ -72,12 +72,10 @@ onBeforeMount(async () => {
 });
 
 function sendFriendRequest() {
-    console.log("send friend request")
     friendsController.sendFriendRequest(props.userId);
 }
 
 function unfriendUser() {
-    console.log("unfriend")
     friendsController.unfriendUser(props.userId);
 }
 

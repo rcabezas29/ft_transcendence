@@ -1,7 +1,7 @@
 <script setup lang="ts">
 	import { onMounted, ref, type Ref } from 'vue';
 	import { useRoute } from 'vue-router';
-	import { gameController, GameState } from '../gameController';
+	import { gameController } from '../gameController';
 	import { user } from "../user"
 	import router from "../router"
 	import Button from '@/components/ui/Button.vue';
@@ -18,12 +18,8 @@
 	const canvasRef = ref<HTMLCanvasElement>();
 
 	onMounted(() => {
-		console.log(route.params)
 		const id: string = route.params.matchId as string;
-		console.log("ID: ", id);
 		matchId.value = id
-
-		console.log("Mounted with matchId: ", matchId.value)
 
 		user.socket?.on("spectate-game", spectate);
 		user.socket?.on("spectate-game-players", setPlayers);
@@ -46,7 +42,6 @@
 	}
 
 	function setPlayers(players: GamePlayers) {
-		console.log("set players")
 		gameController.scoreBoard.user1Name = players.player1
 		gameController.scoreBoard.user2Name = players.player2
 	}

@@ -157,7 +157,6 @@ export default class CrazyGame extends Game {
             this.end();
         }
         if (this.checkIfTimeForNewBall(now)) {
-            console.log('Serving new Ball');
             this.balls.push(new GameObject(
                     new Vector2(400, 200),
                     new Vector2(0, 0),
