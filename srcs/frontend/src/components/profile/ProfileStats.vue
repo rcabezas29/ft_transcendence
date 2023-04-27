@@ -81,6 +81,14 @@ function unfriendUser() {
     friendsController.unfriendUser(props.userId);
 }
 
+function userIsFriendable(userId: number): boolean {
+    return (userId != user.id
+        && !friendsController.userIsActiveFriend(userId)
+        && !friendsController.userIsPending(userId)
+        && !friendsController.userIsBlocked(userId)
+    );
+}
+
 </script>
 
 <template>
@@ -91,11 +99,11 @@ function unfriendUser() {
         <div class="user-data">
             <span class="username truncate">{{ username }}</span>
             <span class="elo">ELO: {{ elo }}</span>
-            <div class="friend-management-button" v-if="!(userId == user.id)">
+            <div class="friend-management-button" v-if="userId != user.id">
                 <Button v-if="friendsController.userIsPending(userId)" :selected="true" title="friend request pending" disabled>
                     <ClockIcon width="24" height="24"/>
                 </Button>
-                <Button @click="sendFriendRequest" v-else-if="!friendsController.userIsActiveFriend(userId) && !friendsController.userIsBlocked(userId)" title="send friend request">
+                <Button @click="sendFriendRequest" v-else-if="userIsFriendable(userId)" title="send friend request">
                     <UserPlusIcon width="24" height="24"/>
                 </Button>
                 <Button @click="unfriendUser" v-else :selected="true" title="unfriend">

@@ -106,6 +106,40 @@ function viewProfile(userId: number) {
 			</template>
 		</Table>
 
+		<Table class="friends-table" v-if="sentFriendRequests.length > 0">
+			<template #head>
+				<tr>
+					<th class="user-column">pending friend requests</th>
+				</tr>
+			</template>
+			<template #body>
+				<tr class="table-row" v-for="friend in sentFriendRequests" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
+					<td v-show="!isUserSelected(friend)">
+						<div class="table-user">
+							<span class="table-user-img">
+								<img :src="getUserAvatar(friend.userId)" />
+							</span>
+							<span class="table-username">
+								<div class="truncate">
+									{{ friend.username }}
+								</div>
+							</span>
+						</div>
+					</td>
+					<td class="hovering-row" v-show="isUserSelected(friend)">
+						<div class="option-buttons">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
+								WITHDRAW REQUEST
+							</Button>
+							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
+								<CrossIcon/>
+							</Button>
+						</div>
+					</td>
+				</tr>
+			</template>
+		</Table>
+
 		<Table class="friends-table">
 			<template #head>
 				<tr>
