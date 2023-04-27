@@ -5,7 +5,7 @@
 	import { computed } from "@vue/reactivity";
 	import TextInputField from "../../ui/TextInputField.vue";
 	import router from '../../../router';
-	import type { UserFriend } from "@/interfaces/user-data.interface";
+	import { FriendshipStatus, type UserFriend } from "@/interfaces/user-data.interface";
 
 	interface Props {
 		userId: number
@@ -15,7 +15,7 @@
 		userId: user.id
 	});
 
-	async function getUsers(): Promise<UserFriend[] | null> {
+	async function getFriends(): Promise<UserFriend[] | null> {
 		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${props.userId}/friends`, {
 			headers: {
 				"Authorization": `Bearer ${user.token}`
@@ -26,11 +26,11 @@
 			return null;
 		}
 
-		const users: UserFriend[] = await usersRequest.json();
+		const users: UserFriend[] = (await usersRequest.json()).filter((u: UserFriend) => u.friendshipStatus === FriendshipStatus.Active);
 
 		users.map(user => {
 			user.avatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${user.userId}`
-		})
+		});
 
 		return users;
 	}
@@ -45,7 +45,7 @@
 	});
 
 	onBeforeMount(async () => {
-		users.value = await getUsers();
+		users.value = await getFriends();
 	})
 
 	function redirectToUserProfile(userId: number) {
