@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { alertOn } from '@/alertController';
+
+    const maxSize = 1000000; // 1MB in bytes
+
 	interface Props {
 		bgColor?: string,
 		borderColor?: string
@@ -15,12 +19,18 @@
 
     function loadImage(e: Event) {
         const target = e.target as HTMLInputElement | null;
+
         if (!target || !target.files)
             return;
 
         const image: Blob = target.files[0];
         if (!image)
             return;
+
+        if (image.size > maxSize) {
+            alertOn('File size limit exceeded');
+            return;
+        }
 
         emit("new-file", image);
     }
