@@ -4,6 +4,7 @@ import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
 import type { ChatUser } from '../../interfaces';
 import BackArrow from '@/components/icons/BackArrow.vue';
 import groupAvatar from '@/assets/group_avatar.jpg';
+import router from '@/router';
 
 const emit = defineEmits<{
 	(e: 'channel-info'): void
@@ -33,8 +34,7 @@ const chatAvatar = computed(() => {
 function goToProfile() {
 	if (!currentChat.value)
 		return;
-	//TODO: redirect to user profile
-	console.log(`REDIRECT TO USER PROFILE WITH ID: ${(<ChatUser>currentChat.value.target).id}`)
+	router.push(`/profile/${(<ChatUser>currentChat.value.target).id}`);
 }
 
 function goToChannelInfo() {

@@ -1,11 +1,23 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { channelController } from '../../../channelController';
+import type { ChatUser } from '@/interfaces';
 
 const props = defineProps<{
     channelName: string
 }>()
 
 const channel = channelController.channels[props.channelName!];
+
+const role = computed(() => {
+	return (user: ChatUser) => {
+		if (channelController.userIsChannelOwner(channel, user))
+			return "(owner)";
+		else if (channelController.userIsChannelAdmin(channel, user))
+			return "(admin)";
+		return "";
+	}
+})
 
 </script>
 
@@ -15,11 +27,8 @@ const channel = channelController.channels[props.channelName!];
 			<div class="channel-user-username">
 				{{ user.username }}
 			</div>
-			<div v-if="channelController.userIsChannelOwner(channel, user)" class="user-role">
-				(owner)
-			</div>
-			<div v-else-if="channelController.userIsChannelAdmin(channel, user)" class="user-role">
-				(admin)
+			<div class="user-role">
+				{{ role(user) }}
 			</div>
 		</div>
 	</div>

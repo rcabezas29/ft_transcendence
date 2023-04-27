@@ -71,7 +71,7 @@ const routes = [
 	},
 	{
 		name: 'profile',
-		path: '/profile',
+		path: '/profile/:userId',
 		component: Profile,
 		beforeEnter: authenticationGuard
 	},

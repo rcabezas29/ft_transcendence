@@ -6,6 +6,7 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
   @IsString()
   @MinLength(1)
+  @MaxLength(20)
   username?: string;
 
   @IsOptional()

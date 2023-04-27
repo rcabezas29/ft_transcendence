@@ -33,7 +33,7 @@
 	function closeCurrentChat() {
 		unsetCurrentChat();
 		channelInfoOff();
-		channelController.userSelected = null;
+		channelController.unselectUser();
 	}
 
 
@@ -115,8 +115,10 @@
 	@keyframes blinking {
         0% {
         }
+		50% {
+			background-color: #4BFE65;
+		}
         100% {
-          background-color: #4BFE65;
         }
 	}
 

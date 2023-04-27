@@ -6,6 +6,7 @@ import BanSettingsScreen from "@/components/chat/channelInfo/BanSettingsScreen.v
 import MuteSettingsScreen from "@/components/chat/channelInfo/MuteSettingsScreen.vue";
 import Button from "../../ui/Button.vue";
 import { user } from "@/user";
+import router from '@/router';
 
 const props = defineProps<{
     channelName: string
@@ -40,8 +41,10 @@ function toggleAdmin(): void {
 }
 
 function viewProfile(): void {
-	//TODO: redirect to user profile
-	console.log("REDIRECT TO PROFILE!!!")
+    if (!channelController.userSelected)
+        return;
+	router.push(`/profile/${channelController.userSelected.id}`);
+    channelController.unselectUser();
 }
 
 </script>

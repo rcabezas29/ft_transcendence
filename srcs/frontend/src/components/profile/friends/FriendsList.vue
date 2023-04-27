@@ -4,6 +4,7 @@ import Button from "../../ui/Button.vue";
 import CrossIcon from "../../icons/CrossIcon.vue";
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
+import router from "@/router";
 
 function getUserAvatar(friendId: any): string {
     return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${friendId}`;
@@ -60,134 +61,174 @@ function isUserSelected(user: Friend): boolean {
 	return user === selectedUser.value;
 }
 
-function viewProfile() {
-	//TODO: redirect to user profile
-	console.log('REDIRECT TO USER PROFILE!!!')
+function viewProfile(userId: number) {
+	router.push(`/profile/${userId}`);
 }
     
 </script>
 
 <template>
-    <Table class="friends-table">
-        <template #head>
-			<tr>
-				<th class="user-column">friend requests</th>
-			</tr>
-		</template>
-		<template #body>
-			<tr class="table-row" v-for="friend in receivedFriendRequests" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
-				<td v-show="!isUserSelected(friend)">
-					<div class="table-user">
-						<span class="table-user-img">
-							<img :src="getUserAvatar(friend.userId)" />
-						</span>
-						<span class="table-username">
-							<div class="truncate">
-								{{ friend.username }}
-							</div>
-						</span>
-					</div>
-				</td>
-				<td class="hovering-row" v-show="isUserSelected(friend)">
-					<div class="option-buttons">
-						<Button class="row-button" :selected="true" @click="() => friendsController.acceptFriendRequest(friend.userId)">
-							ACCEPT
-						</Button>
-						<Button class="row-button" :selected="true" @click="() => friendsController.denyFriendRequest(friend.userId)">
-							DENY
-						</Button>
-						<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
-							<CrossIcon/>
-						</Button>
-					</div>
-				</td>
-			</tr>
-		</template>
-    </Table>
+	<div class="container">
+		<Table class="friends-table" v-if="receivedFriendRequests.length > 0">
+			<template #head>
+				<tr>
+					<th class="user-column">friend requests</th>
+				</tr>
+			</template>
+			<template #body>
+				<tr class="table-row" v-for="friend in receivedFriendRequests" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
+					<td v-show="!isUserSelected(friend)">
+						<div class="table-user">
+							<span class="table-user-img">
+								<img :src="getUserAvatar(friend.userId)" />
+							</span>
+							<span class="table-username">
+								<div class="truncate">
+									{{ friend.username }}
+								</div>
+							</span>
+						</div>
+					</td>
+					<td class="hovering-row" v-show="isUserSelected(friend)">
+						<div class="option-buttons">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.acceptFriendRequest(friend.userId)">
+								ACCEPT
+							</Button>
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.denyFriendRequest(friend.userId)">
+								DENY
+							</Button>
+							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
+								<CrossIcon/>
+							</Button>
+						</div>
+					</td>
+				</tr>
+			</template>
+		</Table>
 
-    <Table class="friends-table">
-        <template #head>
-			<tr>
-				<th class="user-column">user</th>
-				<th>status</th>
-			</tr>
-		</template>
-		<template #body>
-			<tr class="table-row" v-for="friend in activeFriends" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
-				<td v-show="!isUserSelected(friend)">
-					<div class="table-user">
-						<span class="table-user-img">
-							<img :src="getUserAvatar(friend.userId)" />
-						</span>
-						<span class="table-username">
-							<div class="truncate">
-								{{ friend.username }}
-							</div>
-						</span>
-					</div>
-				</td>
-				<td v-show="!isUserSelected(friend)">
-					<span v-if="isOnline(friend)">online</span>
-                    <span v-else-if="isGaming(friend)">gaming</span>
-                    <span v-else>offline</span>
-				</td>
-				<td class="hovering-row" v-show="isUserSelected(friend)" colspan="2">
-					<div class="option-buttons">
-						<Button class="row-button" :selected="true" @click="viewProfile">
-							VIEW
-						</Button>
-						<Button class="row-button" :selected="true" @click="() => friendsController.blockUser(friend.userId)">
-							BLOCK
-						</Button>
-						<Button class="row-button" :selected="true" @click="() => friendsController.unfriendUser(friend.userId)">
-							UNFRIEND
-						</Button>
-						<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
-							<CrossIcon/>
-						</Button>
-					</div>
-				</td>
-			</tr>
+		<Table class="friends-table" v-if="sentFriendRequests.length > 0">
+			<template #head>
+				<tr>
+					<th class="user-column">pending friend requests</th>
+				</tr>
+			</template>
+			<template #body>
+				<tr class="table-row" v-for="friend in sentFriendRequests" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
+					<td v-show="!isUserSelected(friend)">
+						<div class="table-user">
+							<span class="table-user-img">
+								<img :src="getUserAvatar(friend.userId)" />
+							</span>
+							<span class="table-username">
+								<div class="truncate">
+									{{ friend.username }}
+								</div>
+							</span>
+						</div>
+					</td>
+					<td class="hovering-row" v-show="isUserSelected(friend)">
+						<div class="option-buttons">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
+								WITHDRAW REQUEST
+							</Button>
+							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
+								<CrossIcon/>
+							</Button>
+						</div>
+					</td>
+				</tr>
+			</template>
+		</Table>
 
-            <tr class="table-row blocked-section-row" v-for="friend in blockedFriends" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
-				<td v-show="!isUserSelected(friend)">
-					<div class="table-user">
-						<span class="table-user-img">
-							<img :src="getUserAvatar(friend.userId)" />
-						</span>
-						<span class="table-username">
-							<div class="truncate">
-								{{ friend.username }}
-							</div>
-						</span>
-					</div>
+		<Table class="friends-table">
+			<template #head>
+				<tr>
+					<th class="user-column">user</th>
+					<th>status</th>
+				</tr>
+			</template>
+			<template #body>
+				<tr class="table-row" v-for="friend in activeFriends" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
+					<td v-show="!isUserSelected(friend)">
+						<div class="table-user">
+							<span class="table-user-img">
+								<img :src="getUserAvatar(friend.userId)" />
+							</span>
+							<span class="table-username">
+								<div class="truncate">
+									{{ friend.username }}
+								</div>
+							</span>
+						</div>
+					</td>
+					<td v-show="!isUserSelected(friend)">
+						<span v-if="isOnline(friend)">online</span>
+						<span v-else-if="isGaming(friend)">gaming</span>
+						<span v-else>offline</span>
+					</td>
+					<td class="hovering-row" v-show="isUserSelected(friend)" colspan="2">
+						<div class="option-buttons">
+							<Button class="row-button" :selected="true" @click.stop="viewProfile(friend.userId)">
+								VIEW
+							</Button>
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.blockUser(friend.userId)">
+								BLOCK
+							</Button>
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
+								UNFRIEND
+							</Button>
+							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
+								<CrossIcon/>
+							</Button>
+						</div>
+					</td>
+				</tr>
+
+				<tr class="table-row blocked-section-row" v-for="friend in blockedFriends" :key="friend.userId" @click="selectUser(friend)" @mouseenter="selectUser(friend)" @mouseleave="unselectUser">
+					<td v-show="!isUserSelected(friend)">
+						<div class="table-user">
+							<span class="table-user-img">
+								<img :src="getUserAvatar(friend.userId)" />
+							</span>
+							<span class="table-username">
+								<div class="truncate">
+									{{ friend.username }}
+								</div>
+							</span>
+						</div>
+					</td>
+					<td v-show="!isUserSelected(friend)">
+						BLOCKED
+					</td>
+					<td class="hovering-row" v-show="isUserSelected(friend)" colspan="2">
+						<div class="option-buttons">
+							<Button class="row-button" :selected="true" @click.stop="viewProfile(friend.userId)">
+								VIEW
+							</Button>
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unblockUser(friend.userId)">
+								UNBLOCK
+							</Button>
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
+								UNFRIEND
+							</Button>
+							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
+								<CrossIcon/>
+							</Button>
+						</div>
+					</td>
+				</tr>
+
+				<td colspan="2" v-if="activeFriends.length == 0 && blockedFriends.length == 0">
+					<p>You have no friends yet!</p>
 				</td>
-				<td v-show="!isUserSelected(friend)">
-					BLOCKED
-				</td>
-				<td class="hovering-row" v-show="isUserSelected(friend)" colspan="2">
-					<div class="option-buttons">
-						<Button class="row-button" :selected="true" @click="viewProfile">
-							VIEW
-						</Button>
-						<Button class="row-button" :selected="true" @click="() => friendsController.unblockUser(friend.userId)">
-							UNBLOCK
-						</Button>
-						<Button class="row-button" :selected="true" @click="() => friendsController.unfriendUser(friend.userId)">
-							UNFRIEND
-						</Button>
-						<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
-							<CrossIcon/>
-						</Button>
-					</div>
-				</td>
-			</tr>
-		</template>
-    </Table>
+			</template>
+		</Table>
+	</div>
 </template>
 
 <style scoped>
 .friends-table {
+	height: fit-content;
     width: 100%;
     table-layout: fixed;
 	overflow-y: visible;

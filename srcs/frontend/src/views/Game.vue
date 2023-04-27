@@ -24,15 +24,6 @@ onBeforeMount(() => {
 </template>
 
 <style scoped>
-.pong-board {
-  display: block;
-  background-color: black;
-}
-
-.mode-selector {
-  display: flex;
-  justify-content: space-around;
-}
 
 .game-body {
   display: flex;

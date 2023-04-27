@@ -25,3 +25,20 @@ export interface UserData {
 	role: UserRole;
     isBanned: boolean;
 }
+
+export enum FriendshipStatus {
+	Pending = 0,
+	Active = 1,
+	Blocked = 2,
+}
+
+export interface UserFriend {
+	userId: number,
+	username: string,
+    friendshipId: number;
+	friendshipStatus: FriendshipStatus;
+	avatarURL: string;
+	elo: number;
+	wonGames: number;
+	lostGames: number;
+}

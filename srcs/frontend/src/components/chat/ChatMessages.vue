@@ -51,7 +51,11 @@ function refuseChallenge(friendId: number) {
 </script>
 
 <template>
-	<Button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">Challenge</Button>
+	<div class="challenge-button">
+		<Button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">
+			Challenge
+		</Button>
+	</div>
 
 	<div class="chat-messages">
 		<div v-for="message in currentChat!.messages" class="message" v-show="!friendsController.userIsBlocked(message.from.id)">
@@ -115,6 +119,19 @@ function refuseChallenge(friendId: number) {
         padding: 0 24px;
 	}
 
+	.challenge-button {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+		padding: 10px;
+		box-sizing: border-box;
+	}
+
+	.challenge-button > button {
+		padding: 10px 10px;
+		width: 100%;
+	}
+
 	.challenge-request {
 		display: flex;
 		width: 60%;
@@ -131,7 +148,6 @@ function refuseChallenge(friendId: number) {
 		display: flex;
 		width: 100%;
 		justify-content: space-around;
-		/*gap: 20px;*/
 	}
 
 	.choice-buttons button {
