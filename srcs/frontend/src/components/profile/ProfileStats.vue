@@ -3,6 +3,11 @@ import { onBeforeMount, ref } from "vue";
 import { user } from "../../user";
 import StatBox from "./StatBox.vue";
 import type { UserData } from "@/interfaces";
+import Button from "../ui/Button.vue";
+import UserPlusIcon from "@/components/icons/UserPlusIcon.vue";
+import UserMinusIcon from "@/components/icons/UserMinusIcon.vue";
+import ClockIcon from "@/components/icons/ClockIcon.vue";
+import { friendsController } from "@/friendsController";
 
 interface Props {
     userId: number
@@ -24,6 +29,21 @@ let scoreRatio = ref<number>(0);
 let username = ref<string>("");
 let elo = ref<number>(0);
 let avatarUrl = ref<string>("");
+
+async function getCurrentUser() {
+    const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${props.userId}`, {
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        }
+    });
+    
+    if (usersRequest.status != 200) {
+        return null;
+    }
+    
+    const userData: UserData = await usersRequest.json();
+    return userData;
+}
 
 onBeforeMount(async () => {
     currentUser = await getCurrentUser();
@@ -51,20 +71,16 @@ onBeforeMount(async () => {
     }
 });
 
-async function getCurrentUser() {
-    const usersRequest = await fetch(`http://localhost:3000/users/${props.userId}`, {
-        headers: {
-            "Authorization": `Bearer ${user.token}`
-        }
-    });
-    
-    if (usersRequest.status != 200) {
-        return null;
-    }
-    
-    const userData: UserData = await usersRequest.json();
-    return userData;
+function sendFriendRequest() {
+    console.log("send friend request")
+    friendsController.sendFriendRequest(props.userId);
 }
+
+function unfriendUser() {
+    console.log("unfriend")
+    friendsController.unfriendUser(props.userId);
+}
+
 </script>
 
 <template>
@@ -73,8 +89,20 @@ async function getCurrentUser() {
             <img :src=avatarUrl />
         </div>
         <div class="user-data">
-            <h1 class="truncate">{{ username }}</h1>
-            <h2>ELO: {{ elo }}</h2>
+            <span class="username truncate">{{ username }}</span>
+            <span class="elo">ELO: {{ elo }}</span>
+            <div class="friend-management-button" v-if="!(userId == user.id)">
+                <Button v-if="friendsController.userIsPending(userId)" :selected="true" title="friend request pending" disabled>
+                    <ClockIcon width="24" height="24"/>
+                </Button>
+                <Button @click="sendFriendRequest" v-else-if="!friendsController.userIsActiveFriend(userId) && !friendsController.userIsBlocked(userId)" title="send friend request">
+                    <UserPlusIcon width="24" height="24"/>
+                </Button>
+                <Button @click="unfriendUser" v-else :selected="true" title="unfriend">
+                    <UserMinusIcon width="24" height="24"/>
+                </Button>
+            </div>
+            
         </div>
     </div>
     <div class="square-stats-grid">
@@ -121,6 +149,7 @@ async function getCurrentUser() {
     justify-content: center;
     width: 50%;
     flex: 1;
+    gap: 10px;
 }
 
 .truncate {
@@ -141,12 +170,28 @@ async function getCurrentUser() {
     margin-top: 24px;
 }
 
-h1 {
+.username {
     font-size: 1.5em;
 }
 
-h2 {
+.elo {
     font-size: 1em;
+}
+
+.friend-management-button {
+    width: 50px;
+    height: 50px;
+    box-sizing: border-box;
+}
+
+.friend-management-button button {
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 /* Everything bigger than 850px */
@@ -164,11 +209,11 @@ h2 {
         height: 150px;
     }
 
-    h1 {
+    .username {
         font-size: 1.8em;
     }
 
-    h2 {
+    .elo {
         font-size: 1.3em;
     }
 }
