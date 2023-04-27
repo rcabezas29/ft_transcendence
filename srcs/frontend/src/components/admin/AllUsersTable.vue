@@ -10,6 +10,7 @@
 	import { UserRole } from "@/interfaces/user-data.interface";
 	import CrossIcon from "../icons/CrossIcon.vue";
 import { alertOn } from "@/alertController";
+import router from "@/router";
 
 	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
@@ -139,9 +140,13 @@ import { alertOn } from "@/alertController";
 		updatedUser!.isBanned = false;
 	}
 
+	function viewProfile(userId: number): void {
+		router.push(`/profile/${userId}`);
+	}
+
 	const currentUser = ref<UserData | null>(null);
 	function setCurrentUser(selectedUser: UserData): void {
-		if (!userIsOwner(selectedUser) && selectedUser.id != user.id)
+		if (selectedUser.id != user.id)
 			currentUser.value = selectedUser;
 	}
 
@@ -191,6 +196,11 @@ import { alertOn } from "@/alertController";
 				</td>
 				<td class="hovering-row" v-show="isCurrentUser(userRow)" colspan="3">
 					<div class="buttons">
+						<div class="option-buttons">
+							<Button class="row-button" :selected="true" @click.stop="viewProfile(userRow.id)">
+								VIEW PROFILE
+							</Button>
+						</div>
 						<div class="option-buttons" v-if="user.isWebsiteOwner() && !userIsOwner(userRow)">
 							<Button class="row-button" v-if="!userIsAdmin(userRow)" @click.stop="makeWebsiteAdmin()" :selected="true">
 								PROMOTE TO ADMIN
