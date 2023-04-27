@@ -432,6 +432,10 @@ class FriendsController {
             username: this.friends[friendId].username
         }
     }
+
+	public spectate(friendId: FriendId) {
+		
+	}
 };
 
 export const friendsController = reactive<FriendsController>(new FriendsController());

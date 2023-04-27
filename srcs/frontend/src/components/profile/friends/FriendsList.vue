@@ -177,6 +177,9 @@ function viewProfile(userId: number) {
 							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
 								UNFRIEND
 							</Button>
+							<Button v-if="friend.status == FriendStatus.gaming" class="row-button" :selected="true" @click.stop="() => friendsController.spectate(friend.userId)">
+								SPECTATE
+							</Button>
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
 								<CrossIcon/>
 							</Button>
