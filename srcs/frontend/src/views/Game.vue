@@ -13,7 +13,7 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <MultiView class="game-window">
+  <MultiView>
     <template #body>
       <div class="game-body">
         <SearchGame v-if="gameController.state === GameState.None || gameController.state === GameState.Searching"/>

@@ -50,9 +50,7 @@
 	<div>
 
 		<div class="match-exterior-container" v-for="match in matchHistory">
-			
 			<div class="match-interior-container">
-
 				<div class="player player-left">
 					<span class="player-name">
 						<div class="truncate">
@@ -84,7 +82,6 @@
 						</div>
 					</span>
 				</div>
-
 			</div>
 		</div>
 
