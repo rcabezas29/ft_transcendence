@@ -4,6 +4,7 @@ import type { Chat, Channel, ChatUser, Message, ReturnMessage } from "./interfac
 import { user } from "./user";
 import { globalChatNotification} from './globalChatNotification';
 import { alertOn } from "./alertController";
+import { friendsController } from "./friendsController";
 
 interface ChannelPayload {
 	name: string;
@@ -387,7 +388,7 @@ class ChannelController {
         const chat: Chat | null = channel.chat;
         if (chat) {
 			chat.messages.push(newMessage);
-			if (chat !== currentChat.value) {
+			if (chat !== currentChat.value && !friendsController.userIsBlocked(fromUser.id)) {
 				chat.notification = true;
 				globalChatNotification.value = true;
 			}
