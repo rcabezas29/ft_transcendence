@@ -43,6 +43,7 @@
 	function manageUsersOff() {
 		manageUsersModalOpened.value = false;
 		unselectChannel();
+		channelController.unselectUser();
 	}
 
 	const currentChannelName = computed<string>(() => {
@@ -117,7 +118,7 @@
 	</Modal>
 
 	<Modal :visible="manageUsersModalOpened" @close="manageUsersOff" title="USERS MANAGEMENT">
-		<ChannelUsersManagement :channel-name="currentChannelName" @close="manageUsersOff"/>
+		<ChannelUsersManagement :channel-name="currentChannelName"/>
 	</Modal>
 
 </template>

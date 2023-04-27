@@ -89,7 +89,7 @@
 				<td class="mobile-hidden">{{ userRow.stats.lostGames }}</td>
 				<td class="mobile-hidden">{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
 			</tr>
-			<td colspan="2" v-if="input && filteredUsers.length === 0">
+			<td colspan="2" v-if="filteredUsers.length === 0">
 				<p>No users found!</p>
 			</td>
 		</template>

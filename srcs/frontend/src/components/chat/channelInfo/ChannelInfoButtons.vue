@@ -21,8 +21,6 @@ function leaveChannel(): void {
 }
 
 function viewProfile(): void {
-	//TODO: redirect to user profile
-	console.log("REDIRECT TO PROFILE!!!")
 	emit("profile")
 }
 

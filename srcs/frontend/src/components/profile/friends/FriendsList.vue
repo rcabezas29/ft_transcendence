@@ -4,6 +4,7 @@ import Button from "../../ui/Button.vue";
 import CrossIcon from "../../icons/CrossIcon.vue";
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
+import router from "@/router";
 
 function getUserAvatar(friendId: any): string {
     return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${friendId}`;
@@ -60,9 +61,8 @@ function isUserSelected(user: Friend): boolean {
 	return user === selectedUser.value;
 }
 
-function viewProfile() {
-	//TODO: redirect to user profile
-	console.log('REDIRECT TO USER PROFILE!!!')
+function viewProfile(userId: number) {
+	router.push(`/profile/${userId}`);
 }
     
 </script>
@@ -91,10 +91,10 @@ function viewProfile() {
 					</td>
 					<td class="hovering-row" v-show="isUserSelected(friend)">
 						<div class="option-buttons">
-							<Button class="row-button" :selected="true" @click="() => friendsController.acceptFriendRequest(friend.userId)">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.acceptFriendRequest(friend.userId)">
 								ACCEPT
 							</Button>
-							<Button class="row-button" :selected="true" @click="() => friendsController.denyFriendRequest(friend.userId)">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.denyFriendRequest(friend.userId)">
 								DENY
 							</Button>
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
@@ -134,13 +134,13 @@ function viewProfile() {
 					</td>
 					<td class="hovering-row" v-show="isUserSelected(friend)" colspan="2">
 						<div class="option-buttons">
-							<Button class="row-button" :selected="true" @click="viewProfile">
+							<Button class="row-button" :selected="true" @click.stop="viewProfile(friend.userId)">
 								VIEW
 							</Button>
-							<Button class="row-button" :selected="true" @click="() => friendsController.blockUser(friend.userId)">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.blockUser(friend.userId)">
 								BLOCK
 							</Button>
-							<Button class="row-button" :selected="true" @click="() => friendsController.unfriendUser(friend.userId)">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
 								UNFRIEND
 							</Button>
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
@@ -168,13 +168,13 @@ function viewProfile() {
 					</td>
 					<td class="hovering-row" v-show="isUserSelected(friend)" colspan="2">
 						<div class="option-buttons">
-							<Button class="row-button" :selected="true" @click="viewProfile">
+							<Button class="row-button" :selected="true" @click.stop="viewProfile(friend.userId)">
 								VIEW
 							</Button>
-							<Button class="row-button" :selected="true" @click="() => friendsController.unblockUser(friend.userId)">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unblockUser(friend.userId)">
 								UNBLOCK
 							</Button>
-							<Button class="row-button" :selected="true" @click="() => friendsController.unfriendUser(friend.userId)">
+							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
 								UNFRIEND
 							</Button>
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
