@@ -115,8 +115,10 @@
 	@keyframes blinking {
         0% {
         }
+		50% {
+			background-color: #4BFE65;
+		}
         100% {
-          background-color: #4BFE65;
         }
 	}
 
