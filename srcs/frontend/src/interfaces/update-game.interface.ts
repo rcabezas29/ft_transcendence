@@ -31,5 +31,5 @@ export interface UpdateGamePayload {
   score: number[];
   balls: GameObject[];
   currentTime: Date;
-  powerups: GameObject[];
+  powerups: PowerUp[];
 }
