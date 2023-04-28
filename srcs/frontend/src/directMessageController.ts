@@ -95,10 +95,33 @@ class DirectMessageController {
 
     private onChallengeRefused(friendId: FriendId) {
         this.chats[friendId].challenge = ChallengeState.None;
+
+        const newMessage: Message = {
+            from: { id: -1, username: "server"},
+            message: `user refused your challenge`
+        }
+        this.chats[friendId].messages.push(newMessage);
+
+        if (this.chats[friendId] !== currentChat.value) {
+            this.chats[friendId].notification = true;
+            globalChatNotification.value = true;
+        }
     }
 
     private onChallengeAccepted(friendId: FriendId) {
         this.chats[friendId].challenge = ChallengeState.None;
+
+        const newMessage: Message = {
+            from: { id: -1, username: "server"},
+            message: `user accepted your challenge`
+        }
+        this.chats[friendId].messages.push(newMessage);
+
+        if (this.chats[friendId] !== currentChat.value) {
+            this.chats[friendId].notification = true;
+            globalChatNotification.value = true;
+        }
+
         router.replace('game');
     }
 
