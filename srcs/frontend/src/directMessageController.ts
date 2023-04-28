@@ -1,9 +1,10 @@
 import { reactive } from "vue";
 import type { Chat, ChatUser, Message } from "./interfaces";
 import { user } from './user';
-import { currentChat } from "./currentChat";
+import { currentChat, unsetCurrentChat } from "./currentChat";
 import router from "./router";
 import type { UserUpdatedPayload } from "./friendsController";
+import { globalChatNotification } from "./globalChatNotification";
 
 interface MessagePayload {
     friendId: FriendId;
@@ -43,7 +44,7 @@ class DirectMessageController {
 
     onFriendDisconnected(payload: FriendId) {
         if (currentChat.value && (<ChatUser>currentChat.value.target).id === payload)
-			currentChat.value = null;
+			unsetCurrentChat();
         this.friends = this.friends.filter((friend) => friend.id != payload);
     }
 
@@ -60,19 +61,22 @@ class DirectMessageController {
     }
 
     private receiveDirectMessage(payload: MessagePayload) {
-        const fromUsername: ChatUser | undefined = this.findFriendById(payload.friendId);
-        if (!fromUsername)
+        const fromUser: ChatUser | undefined = this.findFriendById(payload.friendId);
+        if (!fromUser)
             return;
+
         const newMessage: Message = {
-            from: fromUsername.username,
+            from: fromUser,
             message: payload.message
         }
-        const friendChat: Chat | undefined = this.chats[fromUsername.id];
+        const friendChat: Chat | undefined = this.chats[fromUser.id];
         if (friendChat)
             friendChat.messages.push(newMessage);
 
-        if (friendChat !== currentChat.value)
+        if (friendChat !== currentChat.value) {
             friendChat.notification = true;
+            globalChatNotification.value = true;
+        }
     }
 
     private receiveChallenge(payload: MessagePayload) {
@@ -82,8 +86,10 @@ class DirectMessageController {
         const friendChat: Chat | undefined = this.chats[fromUser.id];
 
         friendChat.challenge = true;
-        if (friendChat !== currentChat.value)
+        if (friendChat !== currentChat.value) {
             friendChat.notification = true;
+            globalChatNotification.value = true;
+        }
     }
 
     sendDirectMessage(message: string) {
@@ -94,8 +100,12 @@ class DirectMessageController {
         };
         user.socket?.emit('direct-message', payload);
 
+        const from: ChatUser = {
+            id: user.id,
+            username: user.username
+        }
         const newMessage: Message = {
-            from: "you",
+            from,
             message: message
         }
         const friendChat: Chat | undefined = this.chats[toFriendId];
@@ -106,16 +116,16 @@ class DirectMessageController {
 	setCurrentChat(friendId: FriendId) {
 		const chat = this.chats[friendId];
 		if (chat === currentChat.value)
-			currentChat.value = null;
+			unsetCurrentChat();
 		else {
 			currentChat.value = chat;
 			chat.notification = false;
+            globalChatNotification.value = false;
 		}
 	}
 
     private appendChatToChatMap(friend: ChatUser): void {
-        if (this.chats && !this.chats[friend.id])
-        {
+        if (this.chats && !this.chats[friend.id]) {
             const newChat: Chat = {
                 target: friend,
                 messages: [],

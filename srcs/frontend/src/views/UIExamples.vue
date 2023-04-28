@@ -6,18 +6,15 @@
 	import MultiViewTab from "../components/ui/MultiViewTab.vue";
 	import TextInputField from "../components/ui/TextInputField.vue";
 	import FileUploadButton from "@/components/ui/FileUploadButton.vue";
-import { computed } from "@vue/reactivity";
 
 	//----------------------------- MODAL -----------------------------
 
 	let modalVisible = ref<boolean>(false);
 	function openModal() {
-		console.log("open modal")
 		modalVisible.value = true;
 	}
 
 	function closeModal() {
-		console.log("close modal")
 		modalVisible.value = false;
 	}
 

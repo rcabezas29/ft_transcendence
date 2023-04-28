@@ -20,6 +20,7 @@ import { Stats } from 'src/stats/entities/stats.entity';
 import { FilesService } from 'src/files/files.service';
 import { PasswordUtilsService } from 'src/password-utils/password-utils.service';
 import { UpdateStatsDto } from 'src/stats/dto/update-stats.dto';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { MatchHistoryService } from 'src/match-history/match-history.service';
 import { MatchHistory } from 'src/match-history/entity/match-history.entity';
 
@@ -126,6 +127,10 @@ export class UsersService {
           username: friend.username,
           friendshipId: friendship.id,
           friendshipStatus: friendship.status,
+          avatarURL: friend.avatar,
+          elo: friend.elo,
+          wonGames: friend.stats.wonGames,
+          lostGames: friend.stats.lostGames
         };
       },
     );
@@ -166,6 +171,51 @@ export class UsersService {
     throw new NotFoundException();
   }
 
+  async updateRole(id: number, newRoleDto: UpdateUserRoleDto) {
+      const userToUpdate = { id, ...newRoleDto };
+
+      try {
+        const user = await this.usersRepository.preload(userToUpdate);
+        if (user) {
+          const res = await this.usersRepository.save(user);
+          return res;
+        }
+      } catch (e) {
+        throw new BadRequestException('Failed to update user role');
+      }
+      throw new NotFoundException();
+  }
+
+  async banFromWebsite(id: number) {
+    const userToUpdate = { id, isBanned: true };
+
+    try {
+      const user = await this.usersRepository.preload(userToUpdate);
+      if (user) {
+        const res = await this.usersRepository.save(user);
+        return res;
+      }
+    } catch (e) {
+      throw new BadRequestException('Failed to ban user');
+    }
+    throw new NotFoundException();
+  }
+
+  async unbanFromWebsite(id: number) {
+    const userToUpdate = { id, isBanned: false };
+
+    try {
+      const user = await this.usersRepository.preload(userToUpdate);
+      if (user) {
+        const res = await this.usersRepository.save(user);
+        return res;
+      }
+    } catch (e) {
+      throw new BadRequestException('Failed to unban user');
+    }
+    throw new NotFoundException();
+  }
+
   async updateStats(userId: number, newStats: UpdateStatsDto) {
     const user = await this.findOneById(userId);
     if (!user)
@@ -184,6 +234,8 @@ export class UsersService {
 
   async anonimizeUser(id: number) {
     const newUsername: string = Date.now() + this.generateRandomString(5);
+
+    this.banFromWebsite(id);
 
     const updateUserDto: UpdateUserDto = {
       username: newUsername,
@@ -305,17 +357,17 @@ export class UsersService {
   }
 
   async getUserMatchHistory(id: number) {
-	const history: MatchHistory[] = await this.mathcHistoryService.findByUser(id);
-	const historyWithUsers = await Promise.all(history.map(async (h) => {
-		const user1: User = await this.findOneById(h.user1Id);
-		const user2: User = await this.findOneById(h.user2Id);
+    const history: MatchHistory[] = await this.mathcHistoryService.findByUser(id);
+    const historyWithUsers = await Promise.all(history.map(async (h) => {
+      const user1: User = await this.findOneById(h.user1Id);
+      const user2: User = await this.findOneById(h.user2Id);
 
-		h["username1"] = user1.username;
-		h["username2"] = user2.username;
+      h["username1"] = user1.username;
+      h["username2"] = user2.username;
 
-		return h;
-	}));
+      return h;
+    }));
 
-	return historyWithUsers;
+    return historyWithUsers;
   }
 }

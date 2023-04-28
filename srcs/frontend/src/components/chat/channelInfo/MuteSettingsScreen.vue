@@ -4,6 +4,7 @@ import { channelController } from '../../../channelController';
 import { ref } from 'vue';
 import Button from "../../ui/Button.vue";
 import TextInputField from '@/components/ui/TextInputField.vue';
+import type { ReturnMessage } from '@/interfaces';
 
 const emit = defineEmits(["close-mute-settings"]);
 
@@ -15,11 +16,17 @@ const channel = channelController.channels[props.channelName!];
 
 const amountOfMuteTime = ref("");
 
+const errorMessage = ref("");
+
 function muteUser(): void {
 	if (!channelController.userSelected)
 		return;
 	
-	channelController.muteUser(channelController.userSelected, channel.name, amountOfMuteTime.value);
+	const muteRet: ReturnMessage = channelController.muteUser(channelController.userSelected, channel.name, amountOfMuteTime.value);
+    if (!muteRet.success) {
+        errorMessage.value = muteRet.message!;
+        return;
+    }
 	amountOfMuteTime.value = "";
     emit("close-mute-settings");
 }
@@ -35,6 +42,9 @@ function closeMuteSettings(): void {
         <form @submit.prevent="muteUser">
             <div class="text-input">
                 <TextInputField placeholder-text="enter amount of time in seconds..." v-model="amountOfMuteTime"/>
+            </div>
+            <div class="error-message">
+                {{ errorMessage }}
             </div>
             <div class="buttons">
                 <Button type="submit" class="button" :selected="true">

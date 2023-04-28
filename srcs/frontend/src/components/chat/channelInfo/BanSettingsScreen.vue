@@ -4,6 +4,7 @@ import { channelController } from '../../../channelController';
 import { ref } from 'vue';
 import Button from "../../ui/Button.vue";
 import TextInputField from '@/components/ui/TextInputField.vue';
+import type { ReturnMessage } from '@/interfaces';
 
 const emit = defineEmits(["close-ban-settings"]);
 
@@ -15,12 +16,18 @@ const channel = channelController.channels[props.channelName!];
 
 const amountOfBanTime = ref("");
 
+const errorMessage = ref("");
+
 function banUser(): void {
 	if (!channelController.userSelected)
 		return;
 
-	channelController.banUser(channelController.userSelected, channel.name, amountOfBanTime.value);
-	amountOfBanTime.value = "";
+	const banRet: ReturnMessage = channelController.banUser(channelController.userSelected, channel.name, amountOfBanTime.value);
+	if (!banRet.success) {
+        errorMessage.value = banRet.message!;
+        return;
+    }
+    amountOfBanTime.value = "";
     emit("close-ban-settings");
 }
 
@@ -35,6 +42,9 @@ function closeBanSettings(): void {
         <form @submit.prevent="banUser">
             <div class="text-input">
                 <TextInputField placeholder-text="enter amount of time in seconds..." v-model="amountOfBanTime"/>
+            </div>
+            <div class="error-message">
+                {{ errorMessage }}
             </div>
             <div class="buttons">
                 <Button type="submit" class="button" :selected="true">

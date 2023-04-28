@@ -11,7 +11,6 @@ const FPS = 60;
 const FRAME_TIME = 1 / FPS;
 const INITIAL_BALL_SPEED = 200;
 
-// TODO: calculate from game-canvas size
 const BALL_START_POSITION_X = 400;
 const BALL_START_POSITION_Y = 200;
 
@@ -157,7 +156,6 @@ export default class CrazyGame extends Game {
             this.end();
         }
         if (this.checkIfTimeForNewBall(now)) {
-            console.log('Serving new Ball');
             this.balls.push(new GameObject(
                     new Vector2(400, 200),
                     new Vector2(0, 0),

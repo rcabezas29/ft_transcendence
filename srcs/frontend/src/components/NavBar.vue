@@ -4,6 +4,7 @@
 	import { useRoute } from "vue-router";
 	import Button from "./ui/Button.vue"
 	import BurguerMenu from "./icons/BurguerMenu.vue";
+	import CrossIcon from "./icons/CrossIcon.vue";
 
 	const menuClosed = ref(true);
 
@@ -16,11 +17,12 @@
 	}
 
 	const route = useRoute();
+	const profileRoute = `/profile/${user.id}`
 
 </script>
 
 <template>
-	<div class="nav-header">
+	<div class="nav-header" :class="{openmenu: !menuClosed}">
 		<div class="nav-buttons" :class="{ hiddenMenu: menuClosed}">
 			<router-link to="/game">
 				<Button @click="closeMenu()" :selected="route.path == '/game'">PONG.EXE</Button>
@@ -30,7 +32,7 @@
 				<Button @click="closeMenu()" :selected="route.path == '/social'">SOCIAL</Button>
 			</router-link>
 
-			<router-link to="/profile">
+			<router-link :to="profileRoute">
 				<Button @click="closeMenu()" :selected="route.path == '/profile'">PROFILE</Button>
 			</router-link>
 
@@ -40,7 +42,8 @@
 		</div>
 		<div class="right-nav-container">
 			<div class="hamburger-menu">
-				<BurguerMenu :w="48" :h="48" class="burguer-menu" @click="toggleMenu()"/>
+				<BurguerMenu v-if="menuClosed" :w="48" :h="48" class="burguer-menu" @click="toggleMenu()"/>
+				<CrossIcon v-else :w="48" :h="48" class="burguer-menu" @click="toggleMenu()"/>
 			</div>
 			<div class="user-info">
 				<div class="user-stats">
@@ -61,6 +64,18 @@
 		display: flex;
 		flex-direction: column-reverse;
 		position: relative;
+		background-color: #08150C;
+		box-sizing: border-box;
+	}
+
+	.openmenu {
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 100%;
+		padding: 24px 24px;
+		z-index: 1;
 	}
 
 	.burguer-menu {
@@ -73,6 +88,8 @@
 		flex-direction: column;
 		gap: 24px;
 		margin-top: 24px;
+		background-color: #08150C;
+		height: 100%;
 	}
 
 	.hiddenMenu {
@@ -108,7 +125,6 @@
 		width: 75px;
 	}
 
-
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
 
@@ -130,6 +146,10 @@
 			flex-direction: row;
 			align-items: center;
 			margin-top: 0;
+		}
+
+		.nav-buttons button {
+			padding: 20px 42px;
 		}
 	}
 

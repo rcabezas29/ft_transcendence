@@ -5,6 +5,7 @@
     import 'vue-advanced-cropper/dist/style.css';
     import Button from "../components/ui/Button.vue";
     import Modal from "../components/ui/Modal.vue";
+    import { alertOn } from "@/alertController";
 
     const cropperRef = ref<any>(null);
 
@@ -38,7 +39,7 @@
                 'image/jpeg'
             );
         } catch(e) {
-            console.log("Error:", e);
+            alertOn(`Error: ${e}`);
         }
     }
 

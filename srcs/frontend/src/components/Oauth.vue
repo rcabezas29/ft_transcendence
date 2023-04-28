@@ -28,7 +28,11 @@ onBeforeMount(async () => {
 	}
 	const response: OauthResponse = await httpResponse.json();
 
-	await user.auth(response.access_token);
+	const authOk = await user.auth(response.access_token);
+	if (!authOk.success) {
+		router.replace({ "name": "login" })
+		return;
+	}
 
 	if (await user.checkIfSecondFactorAuthenticationIsNeeded(response.access_token)){
 		router.replace({ "name": "2fa-auth" });

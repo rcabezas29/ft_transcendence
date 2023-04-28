@@ -3,7 +3,7 @@
 	import { user } from "../../user";
 	import Button from "../ui/Button.vue";
 	import TextInputField from "../ui/TextInputField.vue";
-	import type { UserData } from "@/interfaces";
+	import type { ReturnMessage, UserData } from "@/interfaces";
 	import AvatarCropper from "../AvatarCropper.vue";
     import FileUploadButton from "../ui/FileUploadButton.vue";
 	import router from "@/router";
@@ -49,6 +49,11 @@
 		let avatarUpdated: boolean = true;
 		let passwordUpdated: boolean = true;
 
+		if (usernameInput.value.length > 20) {
+			errorMessage.value.push("username must be shorter than or equal to 20 characters");
+			return;
+		}
+
 		if (usernameInput.value.length > 0)
 			usernameUpdated = await user.updateUsername(usernameInput.value);
 		if (croppedAvatarImage.value)
@@ -65,7 +70,7 @@
 			if (!avatarUpdated)
 				errorMessage.value.push("error while updating avatar");
 			if (!passwordUpdated)
-				errorMessage.value.push("error while updating password");
+				errorMessage.value.push("error while updating password. The password must have a Uppercase, lowercase letter and a number");
 			return;
 		}
 		stopEditProfile();
@@ -105,7 +110,12 @@
     }
 
 	async function deleteUserAccount() {
-		await user.deleteAccount();
+		const ret: ReturnMessage = await user.deleteAccount();
+		if (!ret.success) {
+			errorMessage.value.push(ret.message!);
+			closeDeleteAccountModal();
+			return;
+		}
 		router.replace({ "name": "login" });
 	}
 
@@ -123,6 +133,10 @@
 		router.replace({ "name": "login" });
 	}
 
+	function	adminpageRedirection() {
+		router.replace('/admin');
+	}
+
 </script>
 
 <template>
@@ -137,8 +151,6 @@
 			<div class="header-buttons">
 				<Button v-if="!editMode" @click="startEditProfile">EDIT PROFILE</Button>
 				<TwoFactorAuthenticationSetup v-if="!editMode"/>
-				<Button @click="logoutUser" v-if="user.checkIsLogged()" class="logout-button">LOGOUT</Button>
-				
 				<div class="header-editing-buttons">
 					<Button v-if="editMode" @click="saveProfileChanges">SAVE</Button>
 					<Button v-if="editMode" @click="stopEditProfile">CANCEL</Button>
@@ -149,9 +161,11 @@
 				</div>
 			</div>
 		</div>
-		<div>
-			<span class="error-message" v-if="errorMessage.length > 0">{{ errorMessage }}</span>
+
+		<div class="error-message">
+			<span v-if="errorMessage.length > 0">{{ errorMessage }}</span>
 		</div>
+
 		<div class="form">
 			<TextInputField v-if="!editMode" placeholder-text="USERNAME" :modelValue="userData?.username" readonly/>
 			<TextInputField v-if="editMode" v-model="usernameInput" placeholder-text="NEW USERNAME" />
@@ -159,7 +173,7 @@
 			<TextInputField v-if="!editMode" placeholder-text="INTRA USERNAME" :modelValue="userData?.intraUsername" readonly/>
 			<TextInputField v-if="!editMode" placeholder-text="EMAIL" :modelValue="userData?.email" readonly/>
 
-			<TextInputField v-if="editMode" v-model="passwordInput" placeholder-text="NEW PASSWORD" />
+			<TextInputField type="password" v-if="editMode" v-model="passwordInput" placeholder-text="NEW PASSWORD" />
 
 			<Button v-if="editMode" type="button" @click="openDeleteAccountModal" border-color="#EC3F74">DELETE MY ACCOUNT</Button>
 			<Modal :visible="deleteAccountModalVisible" @close="closeDeleteAccountModal" title="WARNING">
@@ -174,6 +188,10 @@
 				</div>
 			</Modal>
 		</div>
+		<div class="footer-buttons" v-if="!editMode">
+			<Button @click="logoutUser" v-if="user.checkIsLogged()" class="logout-button">LOGOUT</Button>
+			<Button @click="adminpageRedirection()" class="admin-page-button" v-if="user.isWebsiteAdmin()">ADMIN</Button>
+		</div>
 	</div>
 </template>
 
@@ -183,6 +201,7 @@
 		width: 100%;
 		display: flex;
 		flex-direction: column;
+		height: 100%;
 	}
 
 	.header {
@@ -263,7 +282,7 @@
 	}
 
 	.form {
-		margin-top: 30px;
+		margin-top: 18px;
 	}
 
 	.form input {
@@ -281,6 +300,31 @@
 	.logout-button:hover {
 		color: #B3F9D7;
 		background-color: #1E9052;
+	}
+
+	.error-message {
+		color: #EC3F74;
+		margin-top: 10px;
+	}
+
+	.footer-buttons {
+		margin-top: auto;
+		display: flex;
+		gap: 12px;
+	}
+
+	.footer-buttons button {
+		padding: 10px 20px;
+	}
+
+	.admin-page-button {
+		background-color: #04809F;
+		color: #08150C;
+		border-color: #1E9052;
+	}
+
+	.admin-page-button:hover {
+		background-color: #B3F9D7;
 	}
 
 	/* Everything bigger than 850px */
@@ -304,6 +348,11 @@
 			justify-content: flex-start;
 			width: 150px;
 			height: 150px;
+		}
+
+		.footer-buttons {
+			width: 400px;
+			align-self: center;
 		}
 	}
 

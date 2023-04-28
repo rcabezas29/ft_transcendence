@@ -12,8 +12,8 @@ const twoFactorAuthenticationCode = ref<string>('');
 async function secondFactorAuthenticate() {
     const code = twoFactorAuthenticationCode.value;
     const authenticated = await user.secondFactorAuthenticate(code);
-    if (!authenticated) {
-        errorMessage.value = 'Error while authenticating with 2FA';
+    if (!authenticated.success) {
+        errorMessage.value = authenticated.message!;
         twoFactorAuthenticationCode.value = "";
         return;
     }
@@ -77,7 +77,7 @@ function moveToLogin() {
 	}
 
     .error-message {
-        color: red;
+        color: #EC3F74;
     }
 
     /* Everything bigger than 850px */

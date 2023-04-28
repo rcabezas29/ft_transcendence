@@ -5,19 +5,14 @@ import { ref } from 'vue';
 import BanSettingsScreen from "@/components/chat/channelInfo/BanSettingsScreen.vue";
 import MuteSettingsScreen from "@/components/chat/channelInfo/MuteSettingsScreen.vue";
 import Button from "../../ui/Button.vue";
+import { user } from "@/user";
+import router from '@/router';
 
 const props = defineProps<{
     channelName: string
 }>()
 
-const emit = defineEmits(["close"]);
-
 const channel = channelController.channels[props.channelName!];
-
-function closeUsersManagementScreen() {
-    emit("close");
-	channelController.userSelected = null;
-}
 
 const banSettingsOpened = ref<boolean>(false);
 function toggleBanScreen(): void {
@@ -46,11 +41,11 @@ function toggleAdmin(): void {
 }
 
 function viewProfile(): void {
-	//TODO: redirect to user profile
-	console.log("REDIRECT TO PROFILE!!!")
+    if (!channelController.userSelected)
+        return;
+	router.push(`/profile/${channelController.userSelected.id}`);
+    channelController.unselectUser();
 }
-
-// que sea reactive e.g. si echo a alguien y me convierto en owner
 
 </script>
 
@@ -66,7 +61,10 @@ function viewProfile(): void {
             <ChatChannelUserList class="info-section user-list" :channel-name="channel.name"/>
 
             <div class="info-section action-buttons" v-if="channelController.userSelected">
-                <div class="buttons-section">
+                <div v-if="channelController.userSelected.id === user.id">
+                    this is you! select another user
+                </div>
+                <div v-else class="buttons-section">
                     <Button class="button" @click="viewProfile" :selected="true">
                         VIEW PROFILE
                     </Button>
@@ -87,10 +85,7 @@ function viewProfile(): void {
                     </Button>
                 </div>
             </div>
-            <!--
-                en lugar de este mensaje, hacer que se desactiven los botones?
-            -->
-            <div v-else>Select a user</div>
+            <div v-else class="info-section no-user-selected">SELECT A USER</div>
         </div>
 
         
@@ -165,6 +160,11 @@ function viewProfile(): void {
 	padding: 14px 30px;
 	border-width: 1px;
 	height: 50px;
+}
+
+.no-user-selected {
+    align-items: center;
+    justify-content: center;
 }
 
 /* Everything bigger than 850px */

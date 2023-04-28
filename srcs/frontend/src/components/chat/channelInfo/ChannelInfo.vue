@@ -9,6 +9,8 @@ import { computed, ref } from 'vue';
 import BanSettingsScreen from "./BanSettingsScreen.vue";
 import MuteSettingsScreen from "./MuteSettingsScreen.vue";
 import ChannelPwdSettingsScreen from "./ChannelPwdSettingsScreen.vue";
+import type { ReturnMessage } from '@/interfaces';
+import router from '@/router';
 
 const emit = defineEmits(["close"]);
 
@@ -45,7 +47,10 @@ function kickUser(): void {
 	if (!channelController.userSelected)
 		return;
 
-	channelController.kickUser(channelController.userSelected, currentChannel.value.name);
+	const kickRet: ReturnMessage = channelController.kickUser(channelController.userSelected, currentChannel.value.name);
+    if (!kickRet.success) {
+        
+    }
 }
 
 function toggleAdmin(): void {
@@ -55,6 +60,12 @@ function toggleAdmin(): void {
 		channelController.makeChannelAdmin(channelController.userSelected, currentChannel.value.name);
 	else
 		channelController.removeChannelAdmin(channelController.userSelected, currentChannel.value.name);
+}
+
+function viewProfile(): void {
+    if (!channelController.userSelected)
+        return;
+	router.push(`/profile/${channelController.userSelected.id}`);
 }
 
 </script>
@@ -83,6 +94,7 @@ function toggleAdmin(): void {
                     <ChannelInfoButtons class="info-section action-buttons"
                         @leave="leaveChannel(currentChannel.name)"
                         @password="togglePasswordScreen"
+                        @profile="viewProfile"
                         @mute="toggleMuteScreen"
                         @ban="toggleBanScreen"
                         @kick="kickUser"

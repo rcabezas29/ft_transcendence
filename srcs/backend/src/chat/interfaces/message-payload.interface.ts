@@ -1,3 +1,5 @@
+import { ChatUser } from "./chat-user.interface";
+
 export interface DirectMessagePayload {
     friendId: number;
     message: string;
@@ -5,6 +7,6 @@ export interface DirectMessagePayload {
 
 export interface ChannelMessagePayload {
 	channel: string;
-	from: string;
+	from: ChatUser;
 	message: string;
 }

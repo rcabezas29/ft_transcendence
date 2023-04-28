@@ -39,4 +39,11 @@
 		background-color: #4BFE65;
 		color: #08150C;
 	}
+
+	button:disabled {
+		border-color: #999999;
+		background-color: #cccccc;
+		color: #666666;
+		cursor: default;
+	}
 </style>

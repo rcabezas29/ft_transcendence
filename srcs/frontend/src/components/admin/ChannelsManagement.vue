@@ -43,6 +43,7 @@
 	function manageUsersOff() {
 		manageUsersModalOpened.value = false;
 		unselectChannel();
+		channelController.unselectUser();
 	}
 
 	const currentChannelName = computed<string>(() => {
@@ -66,7 +67,7 @@
 		<template #head>
 			<tr>
 				<th class="mobile-hidden">is_private</th>
-				<th class="channel-name">channel_name</th>
+				<th class="channel-name-col">channel_name</th>
 				<th>#participants</th>
 				<th class="mobile-hidden">owner</th>
 			</tr>
@@ -77,7 +78,11 @@
 					<LockIcon v-if="channel.isPrivate" fill-colour="#B3F9D7"/>
 				</td>
 				<td v-show="!isChannelSelected(channel)">
-					<span>{{ channel.name }}</span>
+					<span class="channel-name">
+						<div class="truncate">
+							{{ channel.name }}
+						</div>
+					</span>
 				</td>
 				<td v-show="!isChannelSelected(channel)">
 					<span>{{ channel.users.length }}</span>
@@ -113,7 +118,7 @@
 	</Modal>
 
 	<Modal :visible="manageUsersModalOpened" @close="manageUsersOff" title="USERS MANAGEMENT">
-		<ChannelUsersManagement :channel-name="currentChannelName" @close="manageUsersOff"/>
+		<ChannelUsersManagement :channel-name="currentChannelName"/>
 	</Modal>
 
 </template>
@@ -121,10 +126,15 @@
 <style scoped>
 	.channels-table {
 		width: 100%;
+		table-layout: fixed;
 	}
 
-	.channel-name {
-		width: 50%;
+	th {
+		width: 2%;
+	}
+
+	.channel-name-col {
+		width: 10%;
 	}
 
 	.table-square {
@@ -175,10 +185,28 @@
 		flex: 0.25;
 	}
 
+	.channel-name {
+		margin-left: 12px;
+		display: table;
+		table-layout: fixed;
+		width: 100%;
+	}
+
+	.truncate {
+		display: table-cell;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+	}
+
 	/* Everything bigger than 850px */
 	@media only screen and (min-width: 850px) {
 		.mobile-hidden {
 			display: table-cell;
+		}
+
+		.table-square {
+			display: flex;
 		}
 
 		.desktop-hidden {

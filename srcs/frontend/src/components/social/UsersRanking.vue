@@ -6,7 +6,7 @@
 	import type { UserData } from "@/interfaces";
 	import { computed } from "@vue/reactivity";
 	import TextInputField from "../ui/TextInputField.vue";
-
+	import router from '../../router';
 
 	async function getUsers(): Promise<UserData[] | null> {
 		const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users`, {
@@ -38,8 +38,13 @@
 
 	onBeforeMount(async () => {
 		users.value = await getUsers();
-		users.value!.sort((e1, e2) => e2.elo - e1.elo);
+		if (users.value)
+			users.value!.sort((e1, e2) => e2.elo - e1.elo);
 	})
+
+	function redirectToUserProfile(userId: number) {
+		router.push(`/profile/${userId}`);
+	}
 
 </script>
 
@@ -53,7 +58,7 @@
 		<template #head>
 			<tr>
 				<th>#</th>
-				<th>user</th>
+				<th class="user-column">user</th>
 				<th>elo</th>
 				<th class="mobile-hidden">wins</th>
 				<th class="mobile-hidden">losses</th>
@@ -61,7 +66,7 @@
 			</tr>
 		</template>
 		<template #body>
-			<tr v-for="(userRow, index) in filteredUsers">
+			<tr v-for="(userRow, index) in filteredUsers" :key="userRow.id" @click="redirectToUserProfile(userRow.id)">
 				<td>
 					<div class="table-square">
 						<span>{{ index + 1 }}</span>
@@ -73,7 +78,9 @@
 							<img :src=userRow.avatarURL />
 						</span>
 						<span class="table-username">
-							{{ userRow.username }}
+							<div class="truncate">
+								{{ userRow.username }}
+							</div>
 						</span>
 					</div>
 				</td>
@@ -82,10 +89,9 @@
 				<td class="mobile-hidden">{{ userRow.stats.lostGames }}</td>
 				<td class="mobile-hidden">{{ (userRow.stats.lostGames == 0) ? 0 : (userRow.stats.wonGames / userRow.stats.lostGames).toFixed(2) }}</td>
 			</tr>
-			<td colspan="2" v-if="input && filteredUsers.length === 0">
+			<td colspan="2" v-if="filteredUsers.length === 0">
 				<p>No users found!</p>
 			</td>
-			
 		</template>
 	</Table>
 	
@@ -102,6 +108,16 @@
 
 	.users-table {
 		margin-top: 24px;
+		width: 100%;
+		table-layout: fixed;
+	}
+
+	th {
+		width: 2%;
+	}
+
+	.user-column {
+		width: 10%;
 	}
 
 	.table-square {
@@ -117,7 +133,10 @@
 	.table-user {
 		display: flex;
 		align-items: center;
-		width: fit-content;
+	}
+
+	.table-user-img {
+		display: flex;
 	}
 
 	.table-user-img img {
@@ -127,6 +146,16 @@
 
 	.table-username {
 		margin-left: 12px;
+		display: table;
+		table-layout: fixed;
+		width: 100%;
+	}
+
+	.truncate {
+		display: table-cell;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	.mobile-hidden {

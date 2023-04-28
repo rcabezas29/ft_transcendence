@@ -1,7 +1,15 @@
 <script setup lang="ts">
 	import { onBeforeMount, ref, type Ref } from 'vue';
 	import { user } from "../../user";
-	import type { UserData } from "../../interfaces/user-data.interface";
+
+	interface Props {
+		userId: number
+	}
+
+	const props = withDefaults(defineProps<Props>(), {
+		userId: user.id
+	});
+
 	
 	interface MatchHistory {
 		id: number;
@@ -17,15 +25,18 @@
 	const matchHistory: Ref<MatchHistory[] | null> = ref(null);
 	
 	onBeforeMount(async () => {
-		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/match-history/${user.id}`, {
+		const httpResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/match-history/${props.userId}`, {
 			method: "GET",
 			headers: {
 				"Authorization": `Bearer ${user.token}`,
 			}
 		});
 
+		if (httpResponse.status != 200) {
+			return;
+		}
+
 		matchHistory.value = await httpResponse.json();
-		console.log(matchHistory.value);
 	})
 
 	function getUserImageUrl(userId: number) {
@@ -39,11 +50,13 @@
 	<div>
 
 		<div class="match-exterior-container" v-for="match in matchHistory">
-			
 			<div class="match-interior-container">
-
 				<div class="player player-left">
-					<span class="player-name">{{match.username1}}</span>
+					<span class="player-name">
+						<div class="truncate">
+							{{match.username1}}
+						</div>
+					</span>
 					<div class="player-img">
 						<img id="user-image" :src="getUserImageUrl(match.user1Id)" />
 					</div>
@@ -63,11 +76,13 @@
 					<div class="player-img">
 						<img id="user-image" :src="getUserImageUrl(match.user2Id)"/>
 					</div>
-					<span class="player-name">{{match.username2}}</span>
+					<span class="player-name">
+						<div class="truncate">
+							{{match.username2}}
+						</div>
+					</span>
 				</div>
-
 			</div>
-
 		</div>
 
 		<div v-if="matchHistory?.length == 0">
@@ -82,18 +97,21 @@
 	.match-exterior-container {
 		border: 1px solid #4BFE65;
 		height: 50px;
+		margin-bottom: 10px;
 	}
 
 	.match-interior-container {
 		margin: auto;
 		display: flex;
-		width: fit-content;
+		justify-content: center;
 	}
 
 	.player {
 		display: flex;
 		align-items: center;
 		height: 50px;
+		flex: 1;
+		min-width: 50px;
 	}
 
 	.player-img {
@@ -122,13 +140,31 @@
 		align-items: center;
 		justify-content: center;
 		box-sizing: border-box;
-		padding: 24px;
+		width: 50px;
 		height: 50px;
 	}
+
+	.player-left {
+		text-align: right;
+		justify-content: flex-end;
+	}
+
+	.player-right {
+		text-align: left;
+		justify-content: flex-start;
+	}
+
 	.player-name {
 		display: block;
-		width: 75px;
-		text-align: center;
+		width: 100%;
+		min-width: 50px;
+		padding: 0px 10px;
+	}
+
+	.truncate {
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	/* Everything bigger than 850px */

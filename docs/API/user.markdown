@@ -79,6 +79,29 @@ Expected body:
 }
 ```
 
+### PATCH /users/role/:id
+
+Updates a user's role (receives an enum, see `UpdateUserRoleDto`).
+
+Expected body:
+```json
+{
+	"role": "admin"
+}
+```
+
+### PATCH /users/:id/ban
+
+Bans a user from the website.
+
+No expected body.
+
+### PATCH /users/:id/unban
+
+Unbans a user from the website.
+
+No expected body.
+
 ### DELETE /users/:id
 
 Anonymizes a user

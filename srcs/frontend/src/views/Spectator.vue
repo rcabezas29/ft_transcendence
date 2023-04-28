@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { onMounted, onUnmounted, ref, type Ref } from 'vue';
+	import { onMounted, ref, type Ref } from 'vue';
 	import { useRoute } from 'vue-router';
 	import { gameController } from '../gameController';
 	import { user } from "../user"
@@ -7,6 +7,7 @@
 	import Button from '@/components/ui/Button.vue';
 	import GameBoard from '@/components/ui/GameBoard.vue';
 	import ScoreBoard from '@/components/ScoreBoard.vue';
+	import MultiView from "@/components/ui/MultiView.vue";
 
 	interface GamePlayers {
 		player1: string;
@@ -18,58 +19,80 @@
 	const canvasRef = ref<HTMLCanvasElement>();
 
 	onMounted(() => {
-		console.log(route.params)
 		const id: string = route.params.matchId as string;
-		console.log("ID: ", id);
 		matchId.value = id
-
-		console.log("Mounted with matchId: ", matchId.value)
 
 		user.socket?.on("spectate-game", spectate);
 		user.socket?.on("spectate-game-players", setPlayers);
 		user.socket?.emit("spectate-game", matchId.value);
+		user.socket?.on('spectator-end-game', (winner) => gameEndSpectator(winner));
 
 		gameController.initCanvas(canvasRef.value!.getContext("2d")!);
-	})
+	});
+
+	function gameEndSpectator(winner : string) {
+		gameController.gameRenderer?.endGameForSpectator(winner);
+	}
 
 	function spectate(gameExists: boolean) {
 		if (!gameExists) {
-			router.push("/game")
-			return
+			router.push("/game");
+			return;
 		}
 
 	}
 
 	function setPlayers(players: GamePlayers) {
-		console.log("set players")
-		gameController.scoreBoard.user1Name = players.player1
-		gameController.scoreBoard.user2Name = players.player2
+		gameController.scoreBoard.user1Name = players.player1;
+		gameController.scoreBoard.user2Name = players.player2;
 	}
 
 	function leaveGame() {
 		user.socket?.emit("spectate-leave", matchId.value);
-		router.push("/game")
-		console.log("entra");
+		router.push("/social");
 	}
 
 </script>
 
 <template>
-	<h1>SPECTATING</h1>
-	
-	<GameBoard>
-		<canvas ref="canvasRef" class="pong-board" height="400" width="800"> </canvas>
-		<ScoreBoard/>
-		<Button @click="leaveGame">LEAVE GAME</Button>
-	</GameBoard>
+	<MultiView class="multi-view">
+		<template #body>
+			<div class="container">
+				<div class="title">SPECTATING</div>
 
+				<GameBoard class="game-board">
+					<canvas ref="canvasRef" class="pong-board" height="400" width="800"> </canvas>
+					<ScoreBoard/>
+					<Button @click="leaveGame">LEAVE GAME</Button>
+				</GameBoard>
+			</div>
+			
+		</template>
+	</MultiView>
 </template>
 
 <style scoped>
 
-	.pong-board {
-		display: block;
-		background-color: black;
-	}
+.container {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.multi-view {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.pong-board {
+	display: block;
+	background-color: black;
+}
+
+.title {
+  text-align: center;
+  margin-top: 1px;
+}
 
 </style>

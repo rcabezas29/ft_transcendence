@@ -66,7 +66,6 @@ export class MatchmakingService {
 		this.queues.forEach((queue) => {
 			const index = queue.indexOf(playerToRemove);
 			if (index != -1) {
-				console.log('Removing player from queue');
 				playerToRemove.socket.emit('removed-from-queue');
 				queue.splice(index, 1);
 			}

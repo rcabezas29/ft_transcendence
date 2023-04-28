@@ -19,8 +19,8 @@
 
 	function fetchOngoingGames(games: OngoingGame[]) {
 		games.map(game => {
-			game.player1AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player1Id}`
-			game.player2AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player2Id}`
+			game.player1AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player1Id}`;
+			game.player2AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player2Id}`;
 		})
 		ongoingGames.value = games;
 	}
@@ -47,15 +47,17 @@
 </script>
 
 <template>
-
 	<div class="ongoing-matches">
-
 		<div class="match-exterior-container" v-for="game in ongoingGames"  v-if="!ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)" @click="watchGame(game.name)">
 			
 			<div class="match-interior-container">
 
 				<div class="player player-left">
-					<span class="player-name">{{ game.player1 }}</span>
+					<span class="player-name">
+						<div class="truncate">
+							{{ game.player1 }}
+						</div>
+					</span>
 					<div class="player-img">
 						<img id="user-image" :src="game.player1AvatarURL" />
 					</div>
@@ -75,17 +77,19 @@
 					<div class="player-img">
 						<img id="user-image" :src="game.player2AvatarURL" />
 					</div>
-					<span class="player-name">{{ game.player2 }}</span>
+					<span class="player-name">
+						<div class="truncate">
+							{{ game.player2 }}
+						</div>
+					</span>
 				</div>
 
 			</div>
-
 		</div>
 
-		<div v-if="ongoingGames.length == 0 || ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)">
+		<div v-if="ongoingGames.length == 0 || (ongoingGames.length === 1 && ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username))">
 			NOBODY IS PLAYING RIGHT NOW :(
 		</div>
-
 	</div>
 </template>
 
@@ -94,18 +98,22 @@
 	.match-exterior-container {
 		border: 1px solid #4BFE65;
 		height: 50px;
+		cursor: pointer;
+		margin-bottom: 10px;
 	}
 
 	.match-interior-container {
 		margin: auto;
 		display: flex;
-		width: fit-content;
+		justify-content: center;
 	}
 
 	.player {
 		display: flex;
 		align-items: center;
 		height: 50px;
+		flex: 1;
+		min-width: 50px;
 	}
 
 	.player-img {
@@ -134,13 +142,31 @@
 		align-items: center;
 		justify-content: center;
 		box-sizing: border-box;
-		padding: 24px;
+		width: 50px;
 		height: 50px;
 	}
+
+	.player-left {
+		text-align: right;
+		justify-content: flex-end;
+	}
+
+	.player-right {
+		text-align: left;
+		justify-content: flex-start;
+	}
+
 	.player-name {
 		display: block;
-		width: 75px;
-		text-align: center;
+		width: 100%;
+		min-width: 50px;
+		padding: 0px 10px;
+	}
+
+	.truncate {
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	/* Everything bigger than 850px */

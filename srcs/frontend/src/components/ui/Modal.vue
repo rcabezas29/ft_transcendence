@@ -37,7 +37,7 @@
 
 <style scoped>
 	.background {
-		background-color: black;
+		background-color: rgb(0, 0, 0, 0.9);
 		height: 100vh;
 		position: absolute;
 		left: 0;
@@ -50,7 +50,7 @@
 	}
 
 	.modal {
-		background-color: #08150C;
+		background-color: #08150c;
 		border: 1px solid #4BFE65;
 		position: absolute;
 		width: 90%;

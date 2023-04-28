@@ -10,11 +10,13 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard, JwtTwoFactorGuard, UserGuard } from 'src/auth/guards';
+import { JwtAuthGuard, JwtTwoFactorGuard, UserGuard, AdminGuard, OwnerGuard } from 'src/auth/guards';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 
 @Controller('users')
 export class UsersController {
@@ -36,6 +38,24 @@ export class UsersController {
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
+  }
+
+  @UseGuards(JwtTwoFactorGuard, OwnerGuard)
+  @Patch('role/:id')
+  updateRole(@Param('id', ParseIntPipe) id: number, @Body() newRole: UpdateUserRoleDto) {
+    return this.usersService.updateRole(id, newRole);
+  }
+
+  @UseGuards(JwtTwoFactorGuard, AdminGuard)
+  @Patch(':id/ban')
+  banUser(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.banFromWebsite(id);
+  }
+
+  @UseGuards(JwtTwoFactorGuard, AdminGuard)
+  @Patch(':id/unban')
+  unbanUser(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.unbanFromWebsite(id);
   }
 
   @UseGuards(JwtTwoFactorGuard, UserGuard)

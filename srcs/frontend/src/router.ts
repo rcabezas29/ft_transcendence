@@ -6,7 +6,6 @@ import Home from './views/Home.vue';
 import Register from "./views/Register.vue";
 import Oauth from './components/Oauth.vue';
 import Game from './views/Game.vue';
-import Friends from './views/Friends.vue';
 import TwoFactorAuthentication from './components/2fa/TwoFactorAuthentication.vue';
 import Social from './views/Social.vue'
 import Profile from './views/Profile.vue';
@@ -65,12 +64,6 @@ const routes = [
 		beforeEnter: authenticationGuard
 	},
 	{
-		name: 'friends',
-		path: '/friends',
-		component: Friends,
-		beforeEnter: authenticationGuard
-	},
-	{
 		name: '2fa-auth',
 		path: '/2fa-auth',
 		component: TwoFactorAuthentication,
@@ -78,7 +71,7 @@ const routes = [
 	},
 	{
 		name: 'profile',
-		path: '/profile',
+		path: '/profile/:userId',
 		component: Profile,
 		beforeEnter: authenticationGuard
 	},

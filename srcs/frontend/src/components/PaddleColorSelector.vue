@@ -14,8 +14,6 @@ enum    PaddleColorSelection {
 
 function  changePaddleColor(paddleColor : PaddleColorSelection) {
   gameController.paddleColor = paddleColor;
-  console.log('Color changed to', paddleColor);
-  console.log('In Game controller', gameController.paddleColor);
 }
 
 </script>

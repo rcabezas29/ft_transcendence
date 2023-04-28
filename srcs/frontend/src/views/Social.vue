@@ -5,6 +5,9 @@
 	import  OngoingMatchesVue from '@/components/social/OngoingMatches.vue';
 	import MultiView from "../components/ui/MultiView.vue"
 	import MultiViewTab from "../components/ui/MultiViewTab.vue"
+	import UsersIcon from "@/components/icons/UsersIcon.vue";
+	import EyeIcon from "@/components/icons/EyeIcon.vue";
+	import MessageIcon from "@/components/icons/MessageIcon.vue";
 
 	const multiViewElement = ref(1);
 	function multiviewShowElement(index: number) {
@@ -21,13 +24,16 @@
 	<MultiView>
 		<template #tabs>
 			<MultiViewTab @click="() => { multiviewShowElement(1)}" :selected="isSelected(1)">
-				PEOPLE
+				<span class="display-desktop">PEOPLE</span>
+				<span class="display-mobile"><UsersIcon width="36" height="36"/></span>
 			</MultiViewTab>
 			<MultiViewTab @click="() => { multiviewShowElement(2)}" :selected="isSelected(2)">
-				ONGOING MATCHES
+				<span class="display-desktop">ONGOING MATCHES</span>
+				<span class="display-mobile"><EyeIcon width="36" height="36"/></span>
 			</MultiViewTab>
 			<MultiViewTab @click="() => { multiviewShowElement(3)}" :selected="isSelected(3)">
-				CHANNELS
+				<span class="display-desktop">CHANNELS</span>
+				<span class="display-mobile"><MessageIcon width="36" height="36"/></span>
 			</MultiViewTab>
 		</template>
 
@@ -52,5 +58,27 @@
 	display: flex;
 	flex-direction: column;
 }
+
+.display-desktop {
+	display: none;
+}
+
+.display-mobile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Everything bigger than 850px */
+@media only screen and (min-width: 850px) {
+	.display-desktop {
+		display: block;
+	}
+
+	.display-mobile {
+		display: none;
+	}
+}
+
 
 </style>

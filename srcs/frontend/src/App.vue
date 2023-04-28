@@ -2,9 +2,15 @@
 	import "./assets/main.css";
 	import { user } from "./user";
 	import AlreadyConnected from './views/AlreadyConnected.vue';
-	import Chat from "./views/Chat.vue"
-	import NavBar from './components/NavBar.vue'
+	import Chat from "./views/Chat.vue";
+	import NavBar from './components/NavBar.vue';
 	import DevBar from "./components/DevBar.vue";
+	import Alert from "./components/ui/Alert.vue";
+	import { alertController } from "./alertController";
+	import { useRoute } from "vue-router";
+
+	const route = useRoute();
+
 </script>
 
 <template>
@@ -12,14 +18,14 @@
 		<AlreadyConnected/>
 	</div>
 	<div v-else>
-		<DevBar/>
 		<div class="app-container">
 			<NavBar v-if="user.checkIsLogged() && user.hasSubmittedFirstTimeLoginForm()"/>
 			<div class="app-body">
-				<router-view/>
+				<router-view :key="route.path"/>
 			</div>
 			<Chat v-if="user.checkIsLogged() && user.hasSubmittedFirstTimeLoginForm()"/>
 		</div>
+		<Alert :visible="alertController.active" :message="alertController.message"/>
 	</div>
 	
 </template>

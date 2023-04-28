@@ -30,6 +30,12 @@
 			errorMessage.value = "please enter a name for the new channel";
 			return;
 		}
+
+		if (newChannelNameInput.value.length > 20) {
+			errorMessage.value = "channel name must be 20 characters max";
+			return;
+		}
+
 		if (!channelController.createChannel(newChannelNameInput.value, newChannelPasswordInput.value)) {
 			errorMessage.value = "channel name already in use. Choose a different one";
 			return;
@@ -76,7 +82,7 @@
 		<template #head>
 			<tr>
 				<th>is_private</th>
-				<th>channel_name</th>
+				<th class="channel-name-col">channel_name</th>
 				<th class="mobile-hidden">#participants</th>
 				<th class="mobile-hidden">owner</th>
 				<th class="join-column"></th>
@@ -88,7 +94,11 @@
 					<LockIcon v-if="channel.isPrivate" fill-colour="#B3F9D7"/>
 				</td>
 				<td>
-					<span>{{ channel.name }}</span>
+					<span class="channel-name">
+						<div class="truncate">
+							{{ channel.name }}
+						</div>
+					</span>
 				</td>
 				<td class="mobile-hidden">
 					<span>{{ channel.users.length }}</span>
@@ -100,7 +110,7 @@
 					<Button class="join-button" @click="() => handleJoinClick(channel)" v-if="!channelController.userIsMemberOfChannel(channel.name)" :selected="true">
 						JOIN
 					</Button>
-					<Modal :visible="passwordModalVisible" @close="closePasswordModal" :title="`JOIN PRIVATE CHANNEL ${passwordModalChannelName}`">
+					<Modal :visible="passwordModalVisible" @close="closePasswordModal" :title="`JOIN ${passwordModalChannelName}`">
 						<p class="errorMessage">{{ errorMessage }}</p>
 
 						<TextInputField type="password" v-model="insertedPassword" placeholder-text="ENTER CHANNEL PASSWORD" />
@@ -112,7 +122,7 @@
 					</Modal>
 				</td>
 			</tr>
-			<td colspan="2" v-if="Object.keys(channelController.channels).length === 0">
+			<td colspan="3" v-if="Object.keys(channelController.channels).length === 0">
 				There are no channels yet... Would you like to create one? :)
 			</td>
 		</template>
@@ -145,6 +155,15 @@
 
 	.channels-table {
 		width: 100%;
+		table-layout: fixed;
+	}
+
+	th {
+		width: 2%;
+	}
+
+	.channel-name-col {
+		width: 10%;
 	}
 
 	.table-square {
@@ -203,7 +222,21 @@
 	}
 
 	.errorMessage {
-		color: red;
+		color: #EC3F74;
+	}
+
+	.channel-name {
+		margin-left: 12px;
+		display: table;
+		table-layout: fixed;
+		width: 100%;
+	}
+
+	.truncate {
+		display: table-cell;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	/* Everything bigger than 850px */
@@ -216,7 +249,7 @@
 			max-width: 300px;
 		}
 
-		.channel-creation .modal-buttons {
+		.modal-buttons {
 			flex-direction: row;
 			justify-content: center;
 		}

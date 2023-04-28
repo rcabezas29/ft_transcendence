@@ -8,11 +8,6 @@ import PaddleColorSelector from "@/components/PaddleColorSelector.vue";
 import Modal from "@/components/ui/Modal.vue";
 import RadarAnimation from '../components/ui/RadarAnimation.vue';
 
-interface GameCustomization {
-  gameSelection: GameSelection;
-  paddleColor: string;
-}
-
 function findGame() {
   gameController.searchGame();
 }
@@ -29,10 +24,6 @@ function openModal() {
 function closeModal() {
   searchGameModalVisible.value = false;
   gameController.cancelSearch();
-}
-
-function cancelSearchGame() {
-  //TODO: implement method
 }
 
 </script>
