@@ -21,6 +21,11 @@ export class GameService {
     ) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser, gameSelection: GameSelection) {
+    const user1IsAlreadyPlaying = this.findGameByPlayerUserId(user1.id);
+    const user2IsAlreadyPlaying = this.findGameByPlayerUserId(user2.id);
+    if (user1IsAlreadyPlaying || user2IsAlreadyPlaying) {
+      return;
+    }
 
     let game: Game;
     if (gameSelection === GameSelection.Original) {

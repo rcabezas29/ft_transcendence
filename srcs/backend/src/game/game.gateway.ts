@@ -63,6 +63,13 @@ export class GameGateway implements OnGatewayInit {
 
   @SubscribeMessage('accept-challenge')
   challengeGame(client: Socket, players: ChallengePlayers) {
+    const user1IsAlreadyPlaying = this.gameService.findGameByPlayerUserId(players.user1Id);
+    const user2IsAlreadyPlaying = this.gameService.findGameByPlayerUserId(players.user2Id);
+    if (user1IsAlreadyPlaying || user2IsAlreadyPlaying) {
+      this.refuseGame(client, players.user1Id);
+      return;
+    }
+
     const user1: GatewayUser = this.gatewayManagerService.getClientByUserId(
       players.user1Id,
     );
