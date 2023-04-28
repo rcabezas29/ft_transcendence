@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { type Ref, ref, onUpdated, onMounted } from 'vue'; 
+import { type Ref, ref, onUpdated, onMounted, computed } from 'vue'; 
 import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
 import { channelController } from '@/channelController';
 import router from '@/router';
 import Button from '@/components/ui/Button.vue';
 import { user } from '@/user';
-import { friendsController } from '@/friendsController';
+import { friendsController, type Friend, FriendStatus } from '@/friendsController';
 import type { ChatUser } from '@/interfaces';
+import { ChallengeState } from '@/interfaces/chat/chat.interface';
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -48,13 +49,49 @@ function refuseChallenge(friendId: number) {
 	directMessageController.refuseChallenge(friendId);
 }
 
+const canChallenge = computed(() => {
+	if (!currentChat.value)
+		return false;
+
+	const friendId = (<ChatUser>currentChat.value.target).id;
+	const friend: Friend = friendsController.friends[friendId];
+
+	return (chatIsDirectMessage(currentChat.value)
+		&& currentChat.value.challenge === ChallengeState.None
+		&& friend.status != FriendStatus.gaming
+		&& !user.isGaming()
+	);
+});
+/*
+const canWatchGame = computed(() => {
+	if (!currentChat.value)
+		return false;
+
+	const friendId = (<ChatUser>currentChat.value.target).id;
+	const friend: Friend = friendsController.friends[friendId];
+
+	return (chatIsDirectMessage(currentChat.value)
+		//&& !currentChat.value.challenge
+		&& friend.status === FriendStatus.gaming
+		// && self status isnt gaming either
+	);
+});
+*/
 </script>
 
 <template>
 	<div class="challenge-button">
-		<Button v-if="chatIsDirectMessage(currentChat!) && !currentChat?.challenge" v-on:click="challengeThroughChat()">
-			Challenge
+		<Button v-if="canChallenge" v-on:click="challengeThroughChat">
+			challenge
 		</Button>
+		<Button v-else-if="currentChat?.challenge === ChallengeState.Challenger" :selected="true">
+			challenge is pending
+		</Button>
+		<!--
+		<Button v-else-if="canWatchGame">
+			watch game
+		</Button>
+		-->
 	</div>
 
 	<div class="chat-messages">
@@ -66,7 +103,7 @@ function refuseChallenge(friendId: number) {
 				{{ message.message }}
 			</div>
 		</div>
-		<div class="challenge-request" v-if="chatIsDirectMessage(currentChat!) && currentChat?.challenge">
+		<div class="challenge-request" v-if="chatIsDirectMessage(currentChat!) && currentChat?.challenge === ChallengeState.Challenged">
 			<div>{{ (<ChatUser>currentChat.target).username }} challenged you</div>
 			<div class="choice-buttons">
 				<Button @click="acceptChallenge((<ChatUser>currentChat.target).id)">ACCEPT</Button>

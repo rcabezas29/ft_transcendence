@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { onBeforeMount, onBeforeUnmount, ref, type Ref, computed } from 'vue';
+	import { onBeforeMount, onBeforeUnmount, ref, type Ref } from 'vue';
 	import { user } from "../../user"
 	import router from "../../router"
 

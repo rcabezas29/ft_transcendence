@@ -16,11 +16,11 @@ export class ChatService {
 		const toUser: GatewayUser = this.gatewayManagerService.getClientByUserId(receivedPayload.friendId);
 
 		if (!toUser)
-			return ;
+			return;
 
 		const usersAreFriends = await this.friendshipsService.usersAreFriends(fromUser.id, toUser.id);
 		if (!usersAreFriends)
-			return ;
+			return;
 
 		const payloadToSend: DirectMessagePayload = {
 			friendId: fromUser.id,
@@ -33,11 +33,14 @@ export class ChatService {
 		const toUser: GatewayUser = this.gatewayManagerService.getClientByUserId(receivedPayload.friendId);
 
 		if (!toUser)
-			return ;
+			return;
+
+		if (fromUser.isGaming || toUser.isGaming)
+			return;
 
 		const usersAreFriends = await this.friendshipsService.usersAreFriends(fromUser.id, toUser.id);
 		if (!usersAreFriends)
-			return ;
+			return;
 
 		const payloadToSend: DirectMessagePayload = {
 			friendId: fromUser.id,

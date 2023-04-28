@@ -69,7 +69,7 @@ export class GameGateway implements OnGatewayInit {
     const user2: GatewayUser = this.gatewayManagerService.getClientByUserId(
       players.user2Id,
     );
-    user1.socket.emit('challenge-accepted');
+    user1.socket.emit('challenge-accepted', this.gatewayManagerService.getClientBySocketId(client.id).id);
     this.gameService.createGame(user1, user2, GameSelection.Original);
   }
 
