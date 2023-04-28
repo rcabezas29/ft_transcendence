@@ -21,7 +21,7 @@ import { PasswordUtilsModule } from 'src/password-utils/password-utils.module';
       useFactory: () => {
         return {
           secret: process.env.JWT_SECRET || 'default_jwt_secret_value',
-          signOptions: {expiresIn: '2h'}
+          signOptions: {expiresIn: '24h'}
         }
       }
     }),
