@@ -65,9 +65,22 @@ export class GameGateway implements OnGatewayInit {
   challengeGame(client: Socket, players: ChallengePlayers) {
     const user1IsAlreadyPlaying = this.gameService.findGameByPlayerUserId(players.user1Id);
     const user2IsAlreadyPlaying = this.gameService.findGameByPlayerUserId(players.user2Id);
-    if (user1IsAlreadyPlaying || user2IsAlreadyPlaying) {
-      this.refuseGame(client, players.user1Id);
+   /*if (user1IsAlreadyPlaying || user2IsAlreadyPlaying) {
+      //this.refuseGame(client, players.user1Id);
+      const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+      this.gameService.endGamePrematurely(user.id);
       return;
+    }*/
+
+    //TODO: si yo acepto un challenge mientras yo juego, me saca de la partida actual;
+    // si yo he mandado muchos challenges y me aceptan uno (o ya estoy jugando), que en
+    //cuanto empiezo a jugar, me cancele todos los challenges que haya mandado yo
+    if (user1IsAlreadyPlaying) {
+      this.gameService.endGamePrematurely(players.user1Id);
+    }
+
+    if (user2IsAlreadyPlaying) {
+      this.gameService.endGamePrematurely(players.user2Id);
     }
 
     const user1: GatewayUser = this.gatewayManagerService.getClientByUserId(
