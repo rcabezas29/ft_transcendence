@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button.vue';
 function logoutUser(): void {
     user.logout();
     user.alreadyConnected = false;
-    router.replace('/login');
+    router.replace({ "name": "login" });
 }
 </script>
 

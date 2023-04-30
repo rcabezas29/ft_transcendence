@@ -122,7 +122,7 @@ class DirectMessageController {
             globalChatNotification.value = true;
         }
 
-        router.replace('game');
+        router.replace({ "name": "game" });
     }
 
     sendDirectMessage(message: string) {

@@ -42,7 +42,7 @@ onMounted(() => {
 
 function acceptChallenge(friendId: number) {
 	directMessageController.acceptChallenge(friendId);
-	router.replace('game');
+	router.replace({ "name": "game" });
 }
 
 function refuseChallenge(friendId: number) {
@@ -106,8 +106,8 @@ const canWatchGame = computed(() => {
 		<div class="challenge-request" v-if="chatIsDirectMessage(currentChat!) && currentChat?.challenge === ChallengeState.Challenged">
 			<div>{{ (<ChatUser>currentChat.target).username }} challenged you</div>
 			<div class="choice-buttons">
-				<Button @click="acceptChallenge((<ChatUser>currentChat.target).id)">ACCEPT</Button>
-				<Button @click="refuseChallenge((<ChatUser>currentChat.target).id)">REFUSE</Button>
+				<Button @click="acceptChallenge((<ChatUser>currentChat!.target).id)">ACCEPT</Button>
+				<Button @click="refuseChallenge((<ChatUser>currentChat!.target).id)">REFUSE</Button>
 			</div>
 		</div>
 	</div>

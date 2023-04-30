@@ -134,7 +134,7 @@
 	}
 
 	function	adminpageRedirection() {
-		router.replace('/admin');
+		router.replace({ "name": "admin" });
 	}
 
 </script>
