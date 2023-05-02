@@ -124,12 +124,12 @@ export class GameService {
       return;
     }
     
-	const viwerIndex: number = this.ongoingGames[gameIndex].viwers.findIndex(viwer => {
-		if (viwer.id == spectator.id)
-			return viwer;
-	})
+    const viwerIndex: number = this.ongoingGames[gameIndex].viwers.findIndex(viwer => {
+      if (viwer.id == spectator.id)
+        return viwer;
+    })
 
-	delete this.ongoingGames[gameIndex].viwers[viwerIndex];
+	  delete this.ongoingGames[gameIndex].viwers[viwerIndex];
 
     spectator.socket.leave(gameName);
   }
@@ -147,7 +147,7 @@ export class GameService {
   }
 
   findPlayerIndexByGame(playerId: number, game: Game): number {
-    if (game.players[0].user.id === playerId)
+    if (game.players[0]?.user.id === playerId)
       return 0;
     else if (game.players[1].user.id === playerId)
       return 1;
