@@ -91,7 +91,7 @@ export class GameService {
 
   joinPlayerToGame(player: GatewayUser) {
     for (const game of this.ongoingGames) {
-      if (this.isPlayerInAGame(player.id)) {
+      if (player && this.isPlayerInAGame(player.id)) {
         game.rejoinPlayer(player);
         player.socket.emit('rejoin-game', {
           user1: game.players[0].user.username,
@@ -149,7 +149,7 @@ export class GameService {
   }
 
   findPlayerIndexByGame(playerId: number, game: Game): number {
-    if (game.players[0].user.id === playerId)
+    if (game.players[0]?.user.id === playerId)
       return 0;
     else if (game.players[1].user.id === playerId)
       return 1;

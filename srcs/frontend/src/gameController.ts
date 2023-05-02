@@ -171,7 +171,7 @@ class GameController {
     this.timestamp = new Date(gamePayload.currentTime).getTime();
     this.scoreBoard.user1Score = gamePayload.score[0];
     this.scoreBoard.user2Score = gamePayload.score[1];
-    this.gameRenderer!.drawFrame(gamePayload);
+    this.gameRenderer?.drawFrame(gamePayload);
   }
 
   initCanvas(canvasContext: CanvasRenderingContext2D) {
