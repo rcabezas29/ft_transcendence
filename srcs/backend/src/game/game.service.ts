@@ -89,7 +89,7 @@ export class GameService {
 
   joinPlayerToGame(player: GatewayUser) {
     for (const game of this.ongoingGames) {
-      if (this.isPlayerInAGame(player.id)) {
+      if (player && this.isPlayerInAGame(player.id)) {
         game.rejoinPlayer(player);
         player.socket.emit('rejoin-game', {
           user1: game.players[0].user.username,

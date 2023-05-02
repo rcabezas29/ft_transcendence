@@ -52,6 +52,7 @@ export default class Game {
         protected gatewayManagerService: GatewayManagerService
     ) {
         this.server = server;
+        server.setMaxListeners(0);
 
         const player1interface: Player = {
             user: player1,
