@@ -9,14 +9,9 @@ import { GatewayUser } from 'src/gateway-manager/interfaces/gateway-user.interfa
 import { MatchmakingService } from './matchmaking.service';
 import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
-import { GameSelection } from './interfaces/game-selection.interface';
+import { GameSelection, ChallengePlayers } from './interfaces';
 
-interface ChallengePlayers {
-  user1Id: number,
-  user2Id: number,
-}
-
-enum    PaddleColorSelection {
+enum PaddleColorSelection {
   Gray = "#D9D9D9",
   Orange = "#D64B24",
   Sky = "#45D7E7",
@@ -63,46 +58,28 @@ export class GameGateway implements OnGatewayInit {
 
   @SubscribeMessage('accept-challenge')
   challengeGame(client: Socket, players: ChallengePlayers) {
-    const user1IsAlreadyPlaying = this.gameService.findGameByPlayerUserId(players.user1Id);
-    const user2IsAlreadyPlaying = this.gameService.findGameByPlayerUserId(players.user2Id);
-   /*if (user1IsAlreadyPlaying || user2IsAlreadyPlaying) {
-      //this.refuseGame(client, players.user1Id);
-      const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-      this.gameService.endGamePrematurely(user.id);
-      return;
-    }*/
+    const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    return this.gameService.acceptChallenge(user.id, players);
+  }
 
-    //TODO: si yo acepto un challenge mientras yo juego, me saca de la partida actual;
-    // si yo he mandado muchos challenges y me aceptan uno (o ya estoy jugando), que en
-    //cuanto empiezo a jugar, me cancele todos los challenges que haya mandado yo
-    if (user1IsAlreadyPlaying) {
-      this.gameService.endGamePrematurely(players.user1Id);
-    }
+  @SubscribeMessage('refuse-challenge')
+  refuseChallenge(client: Socket, challengerId: number) {
+    const challenger: GatewayUser = this.gatewayManagerService.getClientByUserId(challengerId);
+    const challenged: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    this.gameService.refuseChallenge(challenger, challenged.id);
+  }
 
-    if (user2IsAlreadyPlaying) {
-      this.gameService.endGamePrematurely(players.user2Id);
-    }
-
-    const user1: GatewayUser = this.gatewayManagerService.getClientByUserId(
-      players.user1Id,
-    );
-    const user2: GatewayUser = this.gatewayManagerService.getClientByUserId(
-      players.user2Id,
-    );
-    user1.socket.emit('challenge-accepted', this.gatewayManagerService.getClientBySocketId(client.id).id);
-    this.gameService.createGame(user1, user2, GameSelection.Original);
+  @SubscribeMessage('cancel-challenge')
+  cancelChallenge(client: Socket, challengerId: number) {
+    const challenger: GatewayUser = this.gatewayManagerService.getClientByUserId(challengerId);
+    const challenged: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    this.gameService.cancelChallenge(challenger, challenged);
   }
 
   @SubscribeMessage('ongoing-games')
   getOngoingGames(client: Socket) {
 	const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
 	this.gameService.sendOngoingMatchesToUser(user);
-  }
-  
-  @SubscribeMessage('refuse-challenge')
-  refuseGame(client: Socket, challengerId: number) {
-    const challenger: GatewayUser = this.gatewayManagerService.getClientByUserId(challengerId);
-    challenger.socket.emit('challenge-refused', this.gatewayManagerService.getClientBySocketId(client.id).id);
   }
 
   @SubscribeMessage('check-game-continuity')

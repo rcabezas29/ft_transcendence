@@ -3,7 +3,6 @@ import { type Ref, ref, onUpdated, onMounted, computed } from 'vue';
 import { directMessageController } from '@/directMessageController';
 import { currentChat, chatIsChannel, chatIsDirectMessage } from '@/currentChat';
 import { channelController } from '@/channelController';
-import router from '@/router';
 import Button from '@/components/ui/Button.vue';
 import { user } from '@/user';
 import { friendsController, type Friend, FriendStatus } from '@/friendsController';
@@ -40,13 +39,17 @@ onMounted(() => {
 	scrollDownChatMessages();
 });
 
-function acceptChallenge(friendId: number) {
-	directMessageController.acceptChallenge(friendId);
-	router.replace({ "name": "game" });
+function acceptChallenge() {
+	directMessageController.acceptChallenge();
 }
 
-function refuseChallenge(friendId: number) {
-	directMessageController.refuseChallenge(friendId);
+function refuseChallenge() {
+	directMessageController.refuseChallenge();
+}
+
+function cancelChallenge() {
+	if (currentChat.value)
+		directMessageController.cancelChallenge((<ChatUser>currentChat.value.target).id);
 }
 
 const canChallenge = computed(() => {
@@ -81,10 +84,10 @@ const canWatchGame = computed(() => {
 
 <template>
 	<div class="challenge-button">
-		<Button v-if="canChallenge" v-on:click="challengeThroughChat">
+		<Button v-if="canChallenge" @click="challengeThroughChat">
 			challenge
 		</Button>
-		<Button v-else-if="currentChat?.challenge === ChallengeState.Challenger" :selected="true">
+		<Button v-else-if="currentChat?.challenge === ChallengeState.Challenger" :selected="true" @click="cancelChallenge">
 			challenge is pending
 		</Button>
 		<!--
@@ -106,8 +109,8 @@ const canWatchGame = computed(() => {
 		<div class="challenge-request" v-if="chatIsDirectMessage(currentChat!) && currentChat?.challenge === ChallengeState.Challenged">
 			<div>{{ (<ChatUser>currentChat.target).username }} challenged you</div>
 			<div class="choice-buttons">
-				<Button @click="acceptChallenge((<ChatUser>currentChat!.target).id)">ACCEPT</Button>
-				<Button @click="refuseChallenge((<ChatUser>currentChat!.target).id)">REFUSE</Button>
+				<Button @click="acceptChallenge">ACCEPT</Button>
+				<Button @click="refuseChallenge">REFUSE</Button>
 			</div>
 		</div>
 	</div>

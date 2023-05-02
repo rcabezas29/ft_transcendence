@@ -7,7 +7,7 @@ import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.servi
 import Game from './classes/game.class';
 import CrazyGame from './classes/crazy-game.class';
 import { PowerUpsGame } from './classes/powerups-game.class';
-import { GameSelection } from './interfaces/game-selection.interface';
+import { GameSelection, ChallengePlayers } from './interfaces';
 
 @Injectable()
 export class GameService {
@@ -21,9 +21,8 @@ export class GameService {
     ) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser, gameSelection: GameSelection) {
-    const user1IsAlreadyPlaying = this.findGameByPlayerUserId(user1.id);
-    const user2IsAlreadyPlaying = this.findGameByPlayerUserId(user2.id);
-    if (user1IsAlreadyPlaying || user2IsAlreadyPlaying) {
+    if (this.isPlayerInAGame(user1.id) || this.isPlayerInAGame(user2.id)) {
+      console.log("Cannot create game: one of the players is already in a game.");
       return;
     }
 
@@ -85,10 +84,8 @@ export class GameService {
   }
 
   isPlayerInAGame(playerId: number): boolean {
-    for (const game of this.ongoingGames) {
-      if (game.players[0].user.id === playerId || game.players[1].user.id === playerId)
-        return true;
-    }
+    if (this.findGameByPlayerUserId(playerId))
+      return true;
     return false;
   }
 
@@ -139,8 +136,8 @@ export class GameService {
     spectator.socket.leave(gameName);
   }
 
-  findGameByPlayerUserId(playerId: number): Game {
-    const game: Game = this.ongoingGames.find((game) =>
+  findGameByPlayerUserId(playerId: number): Game | undefined {
+    const game: Game | undefined = this.ongoingGames.find((game) =>
       (game.players[0].user.id === playerId || game.players[1].user.id === playerId)
     );
     return game;
@@ -188,5 +185,36 @@ export class GameService {
     friends.forEach(friend => {
         friend.socket.emit('friend-game-ended', player1Id);
     });
+  }
+
+  /* user1 is the one who invited, user2 is the one who accepts the challenge */
+  acceptChallenge(clientId: number, players: ChallengePlayers): boolean {
+    const inviterUser: GatewayUser = this.gatewayManagerService.getClientByUserId(
+      players.user1Id,
+    );
+    const invitedUser: GatewayUser = this.gatewayManagerService.getClientByUserId(
+      players.user2Id,
+    );
+
+    if (this.isPlayerInAGame(players.user1Id)) {
+      return false;
+    }
+
+    if (this.isPlayerInAGame(players.user2Id)) {
+      this.endGamePrematurely(players.user2Id);
+    }
+
+    inviterUser.socket.emit('challenge-accepted', clientId);
+    this.createGame(inviterUser, invitedUser, GameSelection.Original);
+    return true;
+  }
+
+  refuseChallenge(challenger: GatewayUser, refuserId: number) {
+    challenger.socket.emit('challenge-refused', refuserId);
+  }
+
+  cancelChallenge(user1: GatewayUser, user2: GatewayUser) {
+    user1.socket.emit('challenge-canceled', user2.id);
+    user2.socket.emit('challenge-canceled', user1.id);
   }
 }

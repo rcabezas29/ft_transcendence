@@ -6,8 +6,9 @@ import type {
   UpdateGamePayload,
   PowerUp,
 } from "./interfaces/update-game.interface";
-import type { UserData } from "./interfaces";
+import type { Chat, ChatUser, UserData } from "./interfaces";
 import { user } from "./user";
+import { directMessageController } from "./directMessageController";
 
 enum    PaddleColorSelection {
   Gray = "#D9D9D9",
@@ -106,6 +107,13 @@ class GameController {
   getScoreBoard() : ScoreBoard { return this.scoreBoard; }
 
   searchGame() {
+    for (let friendId in directMessageController.chats) {
+      const chat = directMessageController.chats[friendId];
+      if (chat.challenge) {
+        directMessageController.cancelChallenge((<ChatUser>chat.target).id);
+      }
+    }
+
     user.socket?.emit("search-game", {
       gameSelection: this.gameSelection,
       paddleColor : this.paddleColor,
