@@ -52,7 +52,6 @@ export default class Game {
         protected gatewayManagerService: GatewayManagerService
     ) {
         this.server = server;
-        server.setMaxListeners(0);
 
         const player1interface: Player = {
             user: player1,
@@ -92,6 +91,7 @@ export default class Game {
 
         for (const i in this.players) {
             this.players[i].user.socket.join(this.name);
+            this.players[i].user.socket.setMaxListeners(0);
         }
 
         this.startDate = new Date();
@@ -346,6 +346,7 @@ export default class Game {
             if (this.players[i].user.socket.connected === false)
             this.players[i].user.socket = player.socket;
             this.players[i].user.socket.join(this.name);
+            this.players[i].user.socket.setMaxListeners(0);
             this.players[i].user.socket.on('move', (movementIndex: number, pressed: boolean) => {
                 this.playerActions[i][movementIndex].input = pressed;
             });
