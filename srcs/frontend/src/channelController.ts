@@ -5,6 +5,7 @@ import { user } from "./user";
 import { globalChatNotification} from './globalChatNotification';
 import { alertOn } from "./alertController";
 import { friendsController } from "./friendsController";
+import { ChallengeState } from "./interfaces/chat/chat.interface";
 
 interface ChannelPayload {
 	name: string;
@@ -352,7 +353,7 @@ class ChannelController {
 		else {
 			currentChat.value = chat;
 			chat.notification = false;
-			chat.challenge = false;
+			chat.challenge = ChallengeState.None;
 		}
 	}
 
@@ -401,7 +402,7 @@ class ChannelController {
                 target: channelName,
                 messages: [],
                 notification: false,
-				challenge: false
+				challenge: ChallengeState.None
             }
             this.channels[channelName].chat = newChat;
         }

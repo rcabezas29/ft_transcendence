@@ -6,8 +6,9 @@ import type {
   UpdateGamePayload,
   PowerUp,
 } from "./interfaces/update-game.interface";
-import type { UserData } from "./interfaces";
+import type { Chat, ChatUser, UserData } from "./interfaces";
 import { user } from "./user";
+import { directMessageController } from "./directMessageController";
 
 enum    PaddleColorSelection {
   Gray = "#D9D9D9",
@@ -32,11 +33,6 @@ interface PlayersUsernames {
   user2: string;
 }
 
-interface GameCustomization {
-  gameSelection: GameSelection;
-  paddleColor: PaddleColorSelection;
-}
-
 export enum GameState {
   None,
   Searching,
@@ -56,7 +52,6 @@ enum GameResult {
   Draw,
 }
 
-//hardcoded for now
 const MappedKeys: string[] = ["ArrowUp", "ArrowDown"];
 
 const gameActions: any = {};
@@ -112,6 +107,13 @@ class GameController {
   getScoreBoard() : ScoreBoard { return this.scoreBoard; }
 
   searchGame() {
+    for (let friendId in directMessageController.chats) {
+      const chat = directMessageController.chats[friendId];
+      if (chat.challenge) {
+        directMessageController.cancelChallenge((<ChatUser>chat.target).id);
+      }
+    }
+
     user.socket?.emit("search-game", {
       gameSelection: this.gameSelection,
       paddleColor : this.paddleColor,
@@ -169,7 +171,7 @@ class GameController {
     this.timestamp = new Date(gamePayload.currentTime).getTime();
     this.scoreBoard.user1Score = gamePayload.score[0];
     this.scoreBoard.user2Score = gamePayload.score[1];
-    this.gameRenderer!.drawFrame(gamePayload);
+    this.gameRenderer?.drawFrame(gamePayload);
   }
 
   initCanvas(canvasContext: CanvasRenderingContext2D) {

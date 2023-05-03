@@ -1,7 +1,7 @@
 <script setup lang="ts">
 	import router from '@/router';
 	
-	router.replace('/game')
+	router.replace({ "name": "game" })
 </script>
 
 <template>

@@ -7,7 +7,7 @@ import { GatewayManagerService } from 'src/gateway-manager/gateway-manager.servi
 import Game from './classes/game.class';
 import CrazyGame from './classes/crazy-game.class';
 import { PowerUpsGame } from './classes/powerups-game.class';
-import { GameSelection } from './interfaces/game-selection.interface';
+import { GameSelection, ChallengePlayers } from './interfaces';
 
 @Injectable()
 export class GameService {
@@ -21,6 +21,10 @@ export class GameService {
     ) {}
 
   createGame(user1: GatewayUser, user2: GatewayUser, gameSelection: GameSelection) {
+    if (this.isPlayerInAGame(user1.id) || this.isPlayerInAGame(user2.id)) {
+      console.log("Cannot create game: one of the players is already in a game.");
+      return;
+    }
 
     let game: Game;
     if (gameSelection === GameSelection.Original) {
@@ -80,16 +84,14 @@ export class GameService {
   }
 
   isPlayerInAGame(playerId: number): boolean {
-    for (const game of this.ongoingGames) {
-      if (game.players[0].user.id === playerId || game.players[1].user.id === playerId)
-        return true;
-    }
+    if (this.findGameByPlayerUserId(playerId))
+      return true;
     return false;
   }
 
   joinPlayerToGame(player: GatewayUser) {
     for (const game of this.ongoingGames) {
-      if (this.isPlayerInAGame(player.id)) {
+      if (player && this.isPlayerInAGame(player.id)) {
         game.rejoinPlayer(player);
         player.socket.emit('rejoin-game', {
           user1: game.players[0].user.username,
@@ -108,12 +110,12 @@ export class GameService {
     this.ongoingGames[gameIndex].viwers.push(spectator);
     spectator.socket.join(gameName);
 	
-	const gamePlayers = {
-		player1: this.ongoingGames[gameIndex].players[0].user.username,
-		player2: this.ongoingGames[gameIndex].players[1].user.username
-	};
+    const gamePlayers = {
+      player1: this.ongoingGames[gameIndex].players[0].user.username,
+      player2: this.ongoingGames[gameIndex].players[1].user.username
+    };
 
-	spectator.socket.emit("spectate-game-players", gamePlayers);
+    spectator.socket.emit("spectate-game-players", gamePlayers);
   }
 
   deleteSpectatorFromGame(spectator: GatewayUser, gameName: string) {
@@ -123,18 +125,18 @@ export class GameService {
       return;
     }
     
-	const viwerIndex: number = this.ongoingGames[gameIndex].viwers.findIndex(viwer => {
-		if (viwer.id == spectator.id)
-			return viwer;
-	})
+    const viwerIndex: number = this.ongoingGames[gameIndex].viwers.findIndex(viwer => {
+      if (viwer.id == spectator.id)
+        return viwer;
+    })
 
-	delete this.ongoingGames[gameIndex].viwers[viwerIndex];
+    delete this.ongoingGames[gameIndex].viwers[viwerIndex];
 
     spectator.socket.leave(gameName);
   }
 
-  findGameByPlayerUserId(playerId: number): Game {
-    const game: Game = this.ongoingGames.find((game) =>
+  findGameByPlayerUserId(playerId: number): Game | undefined {
+    const game: Game | undefined = this.ongoingGames.find((game) =>
       (game.players[0].user.id === playerId || game.players[1].user.id === playerId)
     );
     return game;
@@ -146,7 +148,7 @@ export class GameService {
   }
 
   findPlayerIndexByGame(playerId: number, game: Game): number {
-    if (game.players[0].user.id === playerId)
+    if (game.players[0]?.user.id === playerId)
       return 0;
     else if (game.players[1].user.id === playerId)
       return 1;
@@ -182,5 +184,36 @@ export class GameService {
     friends.forEach(friend => {
         friend.socket.emit('friend-game-ended', player1Id);
     });
+  }
+
+  /* user1 is the one who invited, user2 is the one who accepts the challenge */
+  acceptChallenge(clientId: number, players: ChallengePlayers): boolean {
+    const inviterUser: GatewayUser = this.gatewayManagerService.getClientByUserId(
+      players.user1Id,
+    );
+    const invitedUser: GatewayUser = this.gatewayManagerService.getClientByUserId(
+      players.user2Id,
+    );
+
+    if (this.isPlayerInAGame(players.user1Id)) {
+      return false;
+    }
+
+    if (this.isPlayerInAGame(players.user2Id)) {
+      this.endGamePrematurely(players.user2Id);
+    }
+
+    inviterUser.socket.emit('challenge-accepted', clientId);
+    this.createGame(inviterUser, invitedUser, GameSelection.Original);
+    return true;
+  }
+
+  refuseChallenge(challenger: GatewayUser, refuserId: number) {
+    challenger.socket.emit('challenge-refused', refuserId);
+  }
+
+  cancelChallenge(user1: GatewayUser, user2: GatewayUser) {
+    user1.socket.emit('challenge-canceled', user2.id);
+    user2.socket.emit('challenge-canceled', user1.id);
   }
 }

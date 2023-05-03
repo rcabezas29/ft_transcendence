@@ -3,7 +3,7 @@ import router from "@/router";
 import { user } from "@/user";
 
 if (!user.checkIsLogged())
-	router.replace('/login');
+	router.replace({ "name": "login" });
 
 </script>
 

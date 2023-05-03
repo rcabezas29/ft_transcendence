@@ -42,7 +42,14 @@ export class ChatGateway {
 	@SubscribeMessage("create-channel")
 	createChannel(client: Socket, payload: PasswordChannelPayload): void {
 		const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-		this.channelsService.createChannel(payload, user);
+		const created: boolean = this.channelsService.createChannel(payload, user);
+		if (created) {
+			this.channelsService.sendServerMessageToChannel(
+				payload.channelName,
+				this.gatewayManagerGateway.server,
+				`user <${user.username}> created the channel.`
+			);
+		}
 	}
 
 	@SubscribeMessage("join-channel")

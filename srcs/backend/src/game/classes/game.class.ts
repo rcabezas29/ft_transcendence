@@ -16,7 +16,6 @@ const INITIAL_BALL_SPEED = 200;
 const WIN_SCORE = 7;
 const GAME_DURATION = 200; // in seconds (?)
 
-// TODO: calculate from game-canvas size
 const BALL_START_POSITION_X = 400;
 const BALL_START_POSITION_Y = 200;
 
@@ -92,6 +91,7 @@ export default class Game {
 
         for (const i in this.players) {
             this.players[i].user.socket.join(this.name);
+            this.players[i].user.socket.setMaxListeners(0);
         }
 
         this.startDate = new Date();
@@ -346,6 +346,7 @@ export default class Game {
             if (this.players[i].user.socket.connected === false)
             this.players[i].user.socket = player.socket;
             this.players[i].user.socket.join(this.name);
+            this.players[i].user.socket.setMaxListeners(0);
             this.players[i].user.socket.on('move', (movementIndex: number, pressed: boolean) => {
                 this.playerActions[i][movementIndex].input = pressed;
             });

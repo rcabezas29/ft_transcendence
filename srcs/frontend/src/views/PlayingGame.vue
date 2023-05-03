@@ -5,7 +5,6 @@ import { GameState } from "@/gameController";
 import Button from '@/components/ui/Button.vue';
 import ScoreBoard from "@/components/ScoreBoard.vue";
 import GameBoard from "@/components/ui/GameBoard.vue";
-import router from "../router"
 
 const canvasRef = ref<HTMLCanvasElement>();
 

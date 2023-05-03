@@ -5,6 +5,7 @@ import { currentChat, unsetCurrentChat } from "./currentChat";
 import router from "./router";
 import type { UserUpdatedPayload } from "./friendsController";
 import { globalChatNotification } from "./globalChatNotification";
+import { ChallengeState } from "./interfaces/chat/chat.interface";
 
 interface MessagePayload {
     friendId: FriendId;
@@ -28,8 +29,9 @@ class DirectMessageController {
 	setEventsHandlers() {
         user.socket?.on('direct-message', (payload: MessagePayload) => {this.receiveDirectMessage(payload)});
         user.socket?.on('challenge', (payload: MessagePayload) => {this.receiveChallenge(payload)});
-        user.socket?.on('challenge-accepted', () => router.replace('game'));
-        user.socket?.on('challenge-refused', (friendId) => {this.chats[friendId].challenge = false;});
+        user.socket?.on('challenge-accepted', (friendId: FriendId) => {this.onChallengeAccepted(friendId)});
+        user.socket?.on('challenge-refused', (friendId: FriendId) => {this.onChallengeRefused(friendId)});
+        user.socket?.on('challenge-canceled', (friendId: FriendId) => {this.onChallengeCanceled(friendId)});
     }
 
     onConnectedFriends(payload: ChatUser[]) {
@@ -80,16 +82,55 @@ class DirectMessageController {
     }
 
     private receiveChallenge(payload: MessagePayload) {
-        const fromUser: ChatUser | undefined = this.friends.find((friend) => payload.friendId === friend.id);
+        const fromUser: ChatUser | undefined = this.findFriendById(payload.friendId);
         if (!fromUser)
             return ;
         const friendChat: Chat | undefined = this.chats[fromUser.id];
 
-        friendChat.challenge = true;
+        this.imitateServerMessage("you have been challenged!", fromUser.id);
+
+        friendChat.challenge = ChallengeState.Challenged;
         if (friendChat !== currentChat.value) {
             friendChat.notification = true;
             globalChatNotification.value = true;
         }
+    }
+
+    private onChallengeRefused(friendId: FriendId) {
+        this.chats[friendId].challenge = ChallengeState.None;
+
+        this.imitateServerMessage("user refused your challenge", friendId);
+
+        if (this.chats[friendId] !== currentChat.value) {
+            this.chats[friendId].notification = true;
+            globalChatNotification.value = true;
+        }
+    }
+
+    private onChallengeAccepted(friendId: FriendId) {
+        this.chats[friendId].challenge = ChallengeState.None;
+
+        this.imitateServerMessage("user accepted your challenge", friendId);
+
+        if (this.chats[friendId] !== currentChat.value) {
+            this.chats[friendId].notification = true;
+            globalChatNotification.value = true;
+        }
+
+        router.replace({ "name": "game" });
+    }
+
+    private onChallengeCanceled(friendId: FriendId) {
+        this.imitateServerMessage("challenge has been cancelled...", friendId);
+        this.chats[friendId].challenge = ChallengeState.None;
+    }
+
+    private imitateServerMessage(message: string, friendId: number) {
+        const newMessage: Message = {
+            from: { id: -1, username: "server"},
+            message: message
+        }
+        this.chats[friendId].messages.push(newMessage);
     }
 
     sendDirectMessage(message: string) {
@@ -125,14 +166,17 @@ class DirectMessageController {
 	}
 
     private appendChatToChatMap(friend: ChatUser): void {
-        if (this.chats && !this.chats[friend.id]) {
+        if (!this.chats[friend.id]) {
             const newChat: Chat = {
                 target: friend,
                 messages: [],
                 notification: false,
-                challenge: false
+                challenge: ChallengeState.None
             }
             this.chats[friend.id] = newChat;
+        }
+        else {
+            this.chats[friend.id].challenge = ChallengeState.None;
         }
     }
 
@@ -141,7 +185,12 @@ class DirectMessageController {
     }
 
     sendChallenge() {
-        const toFriendId: FriendId = (<ChatUser>currentChat.value!.target).id;
+        if (!currentChat.value)
+            return;
+
+        currentChat.value.challenge = ChallengeState.Challenger;
+
+        const toFriendId: FriendId = (<ChatUser>currentChat.value.target).id;
          const payload: MessagePayload = {
             friendId: toFriendId,
             message: 'challenge'
@@ -149,18 +198,39 @@ class DirectMessageController {
         user.socket?.emit('challenge', payload);
     }
 
-    acceptChallenge(friendId: number) {
+    acceptChallenge() {
+        if (!currentChat.value)
+            return;
+
+        const friendId: FriendId = (<ChatUser>currentChat.value.target).id;
+
         const challengePlayers: ChallengePlayers = {
             user1Id: friendId,
             user2Id: user.id,
         }
-        user.socket?.emit('accept-challenge', challengePlayers);
-        this.chats[friendId].challenge = false;
+        user.socket?.emit('accept-challenge', challengePlayers, (acceptedOk: string) => {
+            if (acceptedOk) {
+                this.chats[friendId].challenge = ChallengeState.None;
+                router.replace({ "name": "game" });
+            } else {
+                this.imitateServerMessage("cannot accept challenge because user is playing. Please wait for their game to end and try again.", friendId);
+            }
+        });
     }
 
-    refuseChallenge(friendId: number) {
+    refuseChallenge() {
+        if (!currentChat.value)
+            return;
+
+        const friendId: FriendId = (<ChatUser>currentChat.value.target).id;
+
         user.socket?.emit('refuse-challenge', friendId);
-        this.chats[friendId].challenge = false;
+        currentChat.value.challenge = ChallengeState.None;
+    }
+
+    cancelChallenge(friendId: FriendId) {
+        user.socket?.emit('cancel-challenge', friendId);
+        this.chats[friendId].challenge = ChallengeState.None;
     }
 };
 

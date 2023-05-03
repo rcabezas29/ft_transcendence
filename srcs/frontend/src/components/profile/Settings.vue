@@ -119,7 +119,7 @@
 		router.replace({ "name": "login" });
 	}
 
-	let deleteAccountModalVisible = ref<boolean>(false);
+	const deleteAccountModalVisible = ref<boolean>(false);
 	function openDeleteAccountModal() {
 		deleteAccountModalVisible.value = true;
 	}
@@ -134,7 +134,7 @@
 	}
 
 	function	adminpageRedirection() {
-		router.replace('/admin');
+		router.replace({ "name": "admin" });
 	}
 
 </script>

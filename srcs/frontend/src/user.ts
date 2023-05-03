@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import jwt_decode from "jwt-decode";
 import { directMessageController } from './directMessageController';
 import { channelController } from './channelController';
-import { gameController } from './gameController';
+import { GameState, gameController } from './gameController';
 import { friendsController } from './friendsController';
 import type { JwtPayload, UserData, ReturnMessage } from './interfaces';
 import { UserRole } from './interfaces/user-data.interface';
@@ -397,6 +397,12 @@ class User {
 		this.logout();
 
 		return { success: true };
+	}
+
+	isGaming(): boolean {
+		return (gameController.state != GameState.None
+			&& gameController.state != GameState.End
+		);
 	}
 }
 
