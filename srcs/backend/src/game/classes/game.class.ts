@@ -96,8 +96,6 @@ export default class Game {
 
         this.startDate = new Date();
 
-        this.setStartGameCallback(() => this.notifyNewGameToAllUsers());
-
         this.setEndGameCallback(() => this.notifyEndGameToAllUsers());
         this.setEndGameCallback(() => this.createMatchHistory());
         this.setEndGameCallback(() => this.removePlayersFromGameChannel());
@@ -372,16 +370,6 @@ export default class Game {
 		this.startGameCallbacks.forEach(fn => {
 			fn(this.name)
 		});
-	}
-
-	protected notifyNewGameToAllUsers() {
-		const game = {
-			"name": this.name,
-			"player1": this.players[0].user.username,
-			"player2": this.players[1].user.username
-		}
-	
-		this.server.emit("spectator-new-game", game);
 	}
 
 	protected notifyEndGameToAllUsers() {

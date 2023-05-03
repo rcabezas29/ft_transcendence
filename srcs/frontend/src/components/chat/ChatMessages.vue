@@ -8,6 +8,7 @@ import { user } from '@/user';
 import { friendsController, type Friend, FriendStatus } from '@/friendsController';
 import type { ChatUser } from '@/interfaces';
 import { ChallengeState } from '@/interfaces/chat/chat.interface';
+import { spectatorController, type OngoingGame } from "@/spectatorController";
 
 const messageInput: Ref<string> = ref<string>("");
 
@@ -65,7 +66,7 @@ const canChallenge = computed(() => {
 		&& !user.isGaming()
 	);
 });
-/*
+
 const canWatchGame = computed(() => {
 	if (!currentChat.value)
 		return false;
@@ -74,12 +75,19 @@ const canWatchGame = computed(() => {
 	const friend: Friend = friendsController.friends[friendId];
 
 	return (chatIsDirectMessage(currentChat.value)
-		//&& !currentChat.value.challenge
 		&& friend.status === FriendStatus.gaming
-		// && self status isnt gaming either
+		&& !user.isGaming()
 	);
 });
-*/
+
+function watchGame() {
+	if (!currentChat.value)
+		return;
+
+	const friendId = (<ChatUser>currentChat.value.target).id;
+	spectatorController.findGame(friendId);
+}
+
 </script>
 
 <template>
@@ -90,11 +98,9 @@ const canWatchGame = computed(() => {
 		<Button v-else-if="currentChat?.challenge === ChallengeState.Challenger" :selected="true" @click="cancelChallenge">
 			challenge is pending
 		</Button>
-		<!--
-		<Button v-else-if="canWatchGame">
+		<Button v-else-if="canWatchGame" @click="watchGame">
 			watch game
 		</Button>
-		-->
 	</div>
 
 	<div class="chat-messages">
