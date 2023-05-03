@@ -109,8 +109,11 @@ export class GameService {
       spectator.socket.emit("spectate-game", false);
       return;
     }
-    this.ongoingGames[gameIndex].viwers.push(spectator);
-    spectator.socket.join(gameName);
+
+    if (!this.ongoingGames[gameIndex].viwers.find((viewer) => viewer.id === spectator.id)) {
+      this.ongoingGames[gameIndex].viwers.push(spectator);
+      spectator.socket.join(gameName);
+    }
 	
     const gamePlayers = {
       player1: this.ongoingGames[gameIndex].players[0].user.username,

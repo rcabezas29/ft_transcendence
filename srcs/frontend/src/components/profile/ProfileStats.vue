@@ -126,7 +126,11 @@ function isFriendGaming() {
                 </div>
             </div>
         </div>
-        <Button class="watch-button" @click.stop="() => spectatorController.findGame(userId)" border-color="#bc89e6" v-if="isFriendGaming()">
+        <Button class="watch-button"
+            @click.stop="() => spectatorController.findGame(userId)"
+            border-color="#bc89e6"
+            v-if="isFriendGaming() && !user.isGaming()"
+        >
             WATCH CURRENT GAME
         </Button>
     </div>

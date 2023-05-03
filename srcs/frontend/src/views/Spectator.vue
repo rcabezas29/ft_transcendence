@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { onMounted, ref, type Ref } from 'vue';
+	import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue';
 	import { useRoute } from 'vue-router';
 	import { gameController } from '../gameController';
 	import { user } from "../user";
@@ -8,6 +8,7 @@
 	import GameBoard from '@/components/ui/GameBoard.vue';
 	import ScoreBoard from '@/components/ScoreBoard.vue';
 	import MultiView from "@/components/ui/MultiView.vue";
+	import { spectatorController } from '@/spectatorController';
 
 	interface GamePlayers {
 		player1: string;
@@ -30,7 +31,7 @@
 		gameController.initCanvas(canvasRef.value!.getContext("2d")!);
 	});
 
-	function gameEndSpectator(winner : string) {
+	function gameEndSpectator(winner: string) {
 		gameController.gameRenderer?.endGameForSpectator(winner);
 	}
 
@@ -47,9 +48,16 @@
 	}
 
 	function leaveGame() {
-		user.socket?.emit("spectate-leave", matchId.value);
+		spectatorController.stopSpectating(matchId.value);
 		router.push("/social");
 	}
+
+	onBeforeUnmount(() => {
+		spectatorController.stopSpectating(matchId.value);
+		user.socket?.off("spectate-game");
+		user.socket?.off("spectate-game-players");
+		user.socket?.off("spectator-end-game");
+	});
 
 </script>
 

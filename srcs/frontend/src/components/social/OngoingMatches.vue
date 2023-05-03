@@ -1,14 +1,7 @@
 <script setup lang="ts">
 	import { spectatorController } from '@/spectatorController';
 	import { user } from '../../user'
-	/*
 
-	onBeforeUnmount(() => {
-		user.socket?.off("spectator-new-game");
-		user.socket?.off("spectator-end-game");
-		user.socket?.off("ongoing-games");
-	})
-*/
 </script>
 
 <template>

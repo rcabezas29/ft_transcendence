@@ -79,20 +79,20 @@ export class GameGateway implements OnGatewayInit {
   @SubscribeMessage('check-game-continuity')
   playerContinuity(client: Socket, playerId: number) {
     if (this.gameService.isPlayerInAGame(playerId)) {
-      let player: GatewayUser = this.gatewayManagerService.getClientByUserId(playerId);
+      const player: GatewayUser = this.gatewayManagerService.getClientByUserId(playerId);
       this.gameService.joinPlayerToGame(player);
     }
   }
 
   @SubscribeMessage('spectate-game')
   spectateGame(client: Socket, gameName: string) {
-    let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    const spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
     this.gameService.joinSpectatorToGame(spectator, gameName);
   }
 
   @SubscribeMessage('spectate-leave')
   spectateLeave(client: Socket, gameName: string) {
-    let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    const spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
     this.gameService.deleteSpectatorFromGame(spectator, gameName);
   }
 
