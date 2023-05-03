@@ -119,7 +119,7 @@
 		router.replace({ "name": "login" });
 	}
 
-	let deleteAccountModalVisible = ref<boolean>(false);
+	const deleteAccountModalVisible = ref<boolean>(false);
 	function openDeleteAccountModal() {
 		deleteAccountModalVisible.value = true;
 	}

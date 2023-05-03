@@ -65,14 +65,25 @@ function isUserSelected(user: Friend): boolean {
 function viewProfile(userId: number) {
 	router.push(`/profile/${userId}`);
 }
-    
-let unfriendModalVisible = ref<boolean>(false);
+
+const unfriendModalVisible = ref<boolean>(false);
+const userToBeUnfriended = ref<Friend | null>(null);
 function openUnfriendModal() {
+	userToBeUnfriended.value = selectedUser.value;
 	unfriendModalVisible.value = true;
 }
 
 function closeUnfriendModal() {
 	unfriendModalVisible.value = false;
+	userToBeUnfriended.value = null;
+}
+
+function unfriendUser() {
+	if (!userToBeUnfriended.value)
+		return;
+
+	friendsController.unfriendUser(userToBeUnfriended.value.userId);
+	closeUnfriendModal();
 }
 
 </script>
@@ -184,20 +195,9 @@ function closeUnfriendModal() {
 							<Button class="row-button" :selected="true" @click.stop="() => friendsController.blockUser(friend.userId)">
 								BLOCK
 							</Button>
-							<Button class="row-button" :selected="true" @click.stop="() => openUnfriendModal()">
+							<Button class="row-button" :selected="true" @click.stop="openUnfriendModal">
 								UNFRIEND
 							</Button>
-							<Modal :visible="unfriendModalVisible" @close="closeUnfriendModal" title="WARNING">
-								<p style="color: #B3F9D7;">
-									This action will finish your friendship relation with {{ friend.username }}
-									<br>
-									Are you sure you want to continue?
-								</p>
-								<div class="unfriend-modal-buttons">
-									<Button @click="friendsController.unfriendUser(friend.userId)" border-color="#EC3F74">CONFIRM</Button>
-									<Button @click="closeUnfriendModal">CANCEL</Button>
-								</div>
-							</Modal>
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
 								<CrossIcon/>
 							</Button>
@@ -229,7 +229,7 @@ function closeUnfriendModal() {
 							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unblockUser(friend.userId)">
 								UNBLOCK
 							</Button>
-							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
+							<Button class="row-button" :selected="true" @click.stop="openUnfriendModal">
 								UNFRIEND
 							</Button>
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
@@ -244,6 +244,17 @@ function closeUnfriendModal() {
 				</td>
 			</template>
 		</Table>
+		<Modal :visible="unfriendModalVisible" @close="closeUnfriendModal" title="WARNING" colspan="0">
+			<p style="color: #B3F9D7;">
+				This action will finish your friendship relation with {{ userToBeUnfriended?.username }}
+				<br>
+				Are you sure you want to continue?
+			</p>
+			<div class="unfriend-modal-buttons">
+				<Button @click="unfriendUser" border-color="#EC3F74">CONFIRM</Button>
+				<Button @click="closeUnfriendModal">CANCEL</Button>
+			</div>
+		</Modal>
 	</div>
 </template>
 
