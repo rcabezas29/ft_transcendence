@@ -2,8 +2,8 @@
 	import { onMounted, ref, type Ref } from 'vue';
 	import { useRoute } from 'vue-router';
 	import { gameController } from '../gameController';
-	import { user } from "../user"
-	import router from "../router"
+	import { user } from "../user";
+	import router from "../router";
 	import Button from '@/components/ui/Button.vue';
 	import GameBoard from '@/components/ui/GameBoard.vue';
 	import ScoreBoard from '@/components/ScoreBoard.vue';
@@ -20,7 +20,7 @@
 
 	onMounted(() => {
 		const id: string = route.params.matchId as string;
-		matchId.value = id
+		matchId.value = id;
 
 		user.socket?.on("spectate-game", spectate);
 		user.socket?.on("spectate-game-players", setPlayers);
@@ -39,7 +39,6 @@
 			router.push("/game");
 			return;
 		}
-
 	}
 
 	function setPlayers(players: GamePlayers) {

@@ -1,4 +1,4 @@
-import { reactive, type Ref, ref } from 'vue';
+import { reactive } from 'vue';
 import { user } from './user';
 import router from './router';
 
@@ -19,8 +19,7 @@ class SpectatorController {
 	public ongoingGames: OngoingGame[] = [];
 
 	setEventHandlers() {
-		user.socket?.on("ongoing-games", (games) => { this.fetchOngoingGames(games) });
-		user.socket?.emit("ongoing-games");
+		user.socket?.on("ongoing-games", (games: OngoingGame[]) => { this.fetchOngoingGames(games) });
 	}
 
 	fetchOngoingGames(games: OngoingGame[]) {

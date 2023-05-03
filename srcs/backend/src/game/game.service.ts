@@ -18,7 +18,9 @@ export class GameService {
     private usersService: UsersService,
     private matchHistoryService: MatchHistoryService,
     private gatewayManagerService: GatewayManagerService
-    ) {}
+    ) {
+      this.gatewayManagerService.addOnNewConnectionCallback((client: GatewayUser) => this.sendOngoingMatchesToUser(client))
+    }
 
   createGame(user1: GatewayUser, user2: GatewayUser, gameSelection: GameSelection) {
     if (this.isPlayerInAGame(user1.id) || this.isPlayerInAGame(user2.id)) {
@@ -124,13 +126,13 @@ export class GameService {
       spectator.socket.emit("spectate-game", false);
       return;
     }
-    
-    const viwerIndex: number = this.ongoingGames[gameIndex].viwers.findIndex(viwer => {
-      if (viwer.id == spectator.id)
-        return viwer;
+
+    const viewerIndex: number = this.ongoingGames[gameIndex].viwers.findIndex(viewer => {
+      if (viewer.id == spectator.id)
+        return viewer;
     })
 
-    delete this.ongoingGames[gameIndex].viwers[viwerIndex];
+    this.ongoingGames[gameIndex].viwers.splice(viewerIndex, 1);
 
     spectator.socket.leave(gameName);
   }

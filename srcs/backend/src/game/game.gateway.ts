@@ -76,12 +76,6 @@ export class GameGateway implements OnGatewayInit {
     this.gameService.cancelChallenge(challenger, challenged);
   }
 
-  @SubscribeMessage('ongoing-games')
-  getOngoingGames(client: Socket) {
-	const user: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-	this.gameService.sendOngoingMatchesToUser(user);
-  }
-
   @SubscribeMessage('check-game-continuity')
   playerContinuity(client: Socket, playerId: number) {
     if (this.gameService.isPlayerInAGame(playerId)) {
@@ -92,14 +86,14 @@ export class GameGateway implements OnGatewayInit {
 
   @SubscribeMessage('spectate-game')
   spectateGame(client: Socket, gameName: string) {
-	let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-	this.gameService.joinSpectatorToGame(spectator, gameName);
+    let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    this.gameService.joinSpectatorToGame(spectator, gameName);
   }
 
   @SubscribeMessage('spectate-leave')
   spectateLeave(client: Socket, gameName: string) {
-	let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
-	this.gameService.deleteSpectatorFromGame(spectator, gameName);
+    let spectator: GatewayUser = this.gatewayManagerService.getClientBySocketId(client.id);
+    this.gameService.deleteSpectatorFromGame(spectator, gameName);
   }
 
   @SubscribeMessage('end-game-prematurely')
