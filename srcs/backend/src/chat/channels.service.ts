@@ -48,10 +48,10 @@ export class ChannelsService {
 		return null;
 	}
 
-	createChannel(payload: PasswordChannelPayload, owner: GatewayUser): void {
+	createChannel(payload: PasswordChannelPayload, owner: GatewayUser): boolean {
 		const { channelName, password } = payload;
 		if (this.getChannelbyName(channelName))
-			return;
+			return false;
 
 		const newChannel: Channel = new Channel(channelName, owner);
 		if (password != "")
@@ -69,6 +69,8 @@ export class ChannelsService {
 		
 		const channelPayload: ChannelPayload = this.channelToChannelPayload(newChannel);
 		owner.socket.broadcast.emit('new-channel', channelPayload);
+
+		return true;
 	}
 
 	userJoinChannel(user: GatewayUser, payload: PasswordChannelPayload): boolean {
