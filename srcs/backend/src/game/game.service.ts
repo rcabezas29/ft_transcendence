@@ -152,7 +152,7 @@ export class GameService {
   findPlayerIndexByGame(playerId: number, game: Game): number {
     if (game.players[0]?.user.id === playerId)
       return 0;
-    else if (game.players[1].user.id === playerId)
+    else if (game.players[1]?.user.id === playerId)
       return 1;
     else
       return -1;
