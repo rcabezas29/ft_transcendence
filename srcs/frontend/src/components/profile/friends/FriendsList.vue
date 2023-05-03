@@ -5,6 +5,7 @@ import CrossIcon from "../../icons/CrossIcon.vue";
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
 import router from "@/router";
+import Modal from "@/components/ui/Modal.vue";
 
 function getUserAvatar(friendId: any): string {
     return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${friendId}`;
@@ -65,6 +66,15 @@ function viewProfile(userId: number) {
 	router.push(`/profile/${userId}`);
 }
     
+let unfriendModalVisible = ref<boolean>(false);
+function openUnfriendModal() {
+	unfriendModalVisible.value = true;
+}
+
+function closeUnfriendModal() {
+	unfriendModalVisible.value = false;
+}
+
 </script>
 
 <template>
@@ -174,9 +184,20 @@ function viewProfile(userId: number) {
 							<Button class="row-button" :selected="true" @click.stop="() => friendsController.blockUser(friend.userId)">
 								BLOCK
 							</Button>
-							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
+							<Button class="row-button" :selected="true" @click.stop="() => openUnfriendModal()">
 								UNFRIEND
 							</Button>
+							<Modal :visible="unfriendModalVisible" @close="closeUnfriendModal" title="WARNING">
+								<p style="color: #B3F9D7;">
+									This action will finish your friendship relation with {{ friend.username }}
+									<br>
+									Are you sure you want to continue?
+								</p>
+								<div class="unfriend-modal-buttons">
+									<Button @click="friendsController.unfriendUser(friend.userId)" border-color="#EC3F74">CONFIRM</Button>
+									<Button @click="closeUnfriendModal">CANCEL</Button>
+								</div>
+							</Modal>
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
 								<CrossIcon/>
 							</Button>
@@ -313,6 +334,15 @@ th {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+.unfriend-modal-buttons {
+	display: flex;
+	flex-direction: row ;
+	align-items: center;
+	width: 100%;
+	gap: 10px;
+	color: #B3F9D7;
 }
 
 /* Everything bigger than 850px */
