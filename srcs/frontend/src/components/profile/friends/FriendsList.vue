@@ -245,7 +245,7 @@ function unfriendUser() {
 			</template>
 		</Table>
 		<Modal :visible="unfriendModalVisible" @close="closeUnfriendModal" title="WARNING" colspan="0">
-			<p style="color: #B3F9D7;">
+			<p>
 				This action will finish your friendship relation with {{ userToBeUnfriended?.username }}
 				<br>
 				Are you sure you want to continue?
@@ -349,11 +349,10 @@ th {
 
 .unfriend-modal-buttons {
 	display: flex;
-	flex-direction: row ;
+	flex-direction: column ;
 	align-items: center;
 	width: 100%;
 	gap: 10px;
-	color: #B3F9D7;
 }
 
 /* Everything bigger than 850px */
@@ -361,6 +360,10 @@ th {
 
 	.desktop-hidden {
 		display: none;
+	}
+
+	.unfriend-modal-buttons {
+		flex-direction: row;
 	}
 }
 
