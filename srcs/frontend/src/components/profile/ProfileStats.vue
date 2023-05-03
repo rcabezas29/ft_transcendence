@@ -7,7 +7,9 @@ import Button from "../ui/Button.vue";
 import UserPlusIcon from "@/components/icons/UserPlusIcon.vue";
 import UserMinusIcon from "@/components/icons/UserMinusIcon.vue";
 import ClockIcon from "@/components/icons/ClockIcon.vue";
-import { friendsController } from "@/friendsController";
+import { friendsController, FriendStatus } from "@/friendsController";
+import GamePadIcon from '../icons/GamePadIcon.vue';
+import { spectatorController } from "@/spectatorController";
 
 interface Props {
     userId: number
@@ -19,16 +21,16 @@ const props = withDefaults(defineProps<Props>(), {
 
 let currentUser: UserData | null = null;
 
-let totalWins = ref<number>(0);
-let totalLosses = ref<number>(0);
-let winLossRatio = ref<number>(0);
-let scoredGoals = ref<number>(0);
-let receivedGoals = ref<number>(0);
-let totalMatches = ref<number>(0);
-let scoreRatio = ref<number>(0);
-let username = ref<string>("");
-let elo = ref<number>(0);
-let avatarUrl = ref<string>("");
+const totalWins = ref<number>(0);
+const totalLosses = ref<number>(0);
+const winLossRatio = ref<number>(0);
+const scoredGoals = ref<number>(0);
+const receivedGoals = ref<number>(0);
+const totalMatches = ref<number>(0);
+const scoreRatio = ref<number>(0);
+const username = ref<string>("");
+const elo = ref<number>(0);
+const avatarUrl = ref<string>("");
 
 async function getCurrentUser() {
     const usersRequest = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/${props.userId}`, {
@@ -87,30 +89,48 @@ function userIsFriendable(userId: number): boolean {
     );
 }
 
+function isFriendGaming() {
+    if (friendsController.userIsActiveFriend(props.userId)
+        && friendsController.friends[props.userId].status === FriendStatus.gaming) {
+        return true;
+    }
+    return false;
+}
+
 </script>
 
 <template>
-    <div class="user-data-container">
-        <div class="user-image">
-            <img :src=avatarUrl />
-        </div>
-        <div class="user-data">
-            <span class="username truncate">{{ username }}</span>
-            <span class="elo">ELO: {{ elo }}</span>
-            <div class="friend-management-button" v-if="userId != user.id">
-                <Button v-if="friendsController.userIsPending(userId)" :selected="true" title="friend request pending" disabled>
-                    <ClockIcon width="24" height="24"/>
-                </Button>
-                <Button @click="sendFriendRequest" v-else-if="userIsFriendable(userId)" title="send friend request">
-                    <UserPlusIcon width="24" height="24"/>
-                </Button>
-                <Button @click="unfriendUser" v-else :selected="true" title="unfriend">
-                    <UserMinusIcon width="24" height="24"/>
-                </Button>
+    <div class="header">
+        <div class="user-data-container">
+            <div class="user-image">
+                <img :src=avatarUrl />
             </div>
-            
+            <div class="user-data">
+                <div class="username-status">
+                    <span class="username truncate">{{ username }}</span>
+                    <div class="friend-status" v-show="isFriendGaming()">
+                        <GamePadIcon width="20" height="20"/>
+                    </div>
+                </div>
+                <span class="elo">ELO: {{ elo }}</span>
+                <div class="friend-management-button" v-if="userId != user.id">
+                    <Button v-if="friendsController.userIsPending(userId)" :selected="true" title="friend request pending" disabled>
+                        <ClockIcon width="24" height="24"/>
+                    </Button>
+                    <Button @click="sendFriendRequest" v-else-if="userIsFriendable(userId)" title="send friend request">
+                        <UserPlusIcon width="24" height="24"/>
+                    </Button>
+                    <Button @click="unfriendUser" v-else :selected="true" title="unfriend">
+                        <UserMinusIcon width="24" height="24"/>
+                    </Button>
+                </div>
+            </div>
         </div>
+        <Button class="watch-button" @click.stop="() => spectatorController.findGame(userId)" border-color="#bc89e6" v-if="isFriendGaming()">
+            WATCH CURRENT GAME
+        </Button>
     </div>
+    
     <div class="square-stats-grid">
         <StatBox title="WINS" :stat="totalWins"/>
         <StatBox title="LOSSES" :stat="totalLosses"/>
@@ -200,6 +220,29 @@ function userIsFriendable(userId: number): boolean {
     box-sizing: border-box;
 }
 
+.watch-button {
+	padding: 20px 12px;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.username-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.friend-status {
+    height: 20px;
+    width: 20px;
+    color: #bc89e6;
+}
+
 /* Everything bigger than 850px */
 @media only screen and (min-width: 850px) {
     .square-stats-grid {
@@ -221,6 +264,15 @@ function userIsFriendable(userId: number): boolean {
 
     .elo {
         font-size: 1.3em;
+    }
+
+    .header {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .watch-button {
+        width: 300px;
     }
 }
 </style>

@@ -5,7 +5,6 @@ import CrossIcon from "../../icons/CrossIcon.vue";
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
 import router from "@/router";
-import { spectatorController } from "@/spectatorController";
 import Modal from "@/components/ui/Modal.vue";
 
 function getUserAvatar(friendId: any): string {
@@ -199,10 +198,13 @@ function unfriendUser() {
 							<Button class="row-button" :selected="true" @click.stop="openUnfriendModal">
 								UNFRIEND
 							</Button>
+							<!--
 							<Button v-if="friend.status == FriendStatus.gaming" class="row-button" :selected="true"
 									@click.stop="() => spectatorController.findGame(friend.userId)">
 								SPECTATE
 							</Button>
+							-->
+							
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">
 								<CrossIcon/>
 							</Button>

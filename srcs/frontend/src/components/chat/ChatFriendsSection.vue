@@ -35,4 +35,11 @@ const backendURL = import.meta.env.VITE_BACKEND_URL;
 
 <style scoped lang="scss">
 	@import "./chatSectionStyles.scss";
+
+	.chat-card-friend-status {
+		height: 20px;
+		width: 20px;
+		color: #bc89e6;
+		margin-left: 10px;
+	}
 </style>
