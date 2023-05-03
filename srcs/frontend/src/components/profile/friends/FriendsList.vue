@@ -5,6 +5,7 @@ import CrossIcon from "../../icons/CrossIcon.vue";
 import { computed, ref, watch } from "vue";
 import { type Friend, friendsController, FriendStatus } from '@/friendsController';
 import router from "@/router";
+import { spectatorController } from "@/spectatorController";
 
 function getUserAvatar(friendId: any): string {
     return `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${friendId}`;
@@ -177,7 +178,8 @@ function viewProfile(userId: number) {
 							<Button class="row-button" :selected="true" @click.stop="() => friendsController.unfriendUser(friend.userId)">
 								UNFRIEND
 							</Button>
-							<Button v-if="friend.status == FriendStatus.gaming" class="row-button" :selected="true" @click.stop="() => friendsController.spectate(friend.userId)">
+							<Button v-if="friend.status == FriendStatus.gaming" class="row-button" :selected="true"
+									@click.stop="() => spectatorController.findGame(friend.userId)">
 								SPECTATE
 							</Button>
 							<Button class="row-button cross-button desktop-hidden" :selected="true" @click.stop="unselectUser">

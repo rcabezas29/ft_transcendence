@@ -116,7 +116,6 @@ export class GameService {
 	spectator.socket.emit("spectate-game-players", gamePlayers);
   }
 
-
   deleteSpectatorFromGame(spectator: GatewayUser, gameName: string) {
     const gameIndex = this.ongoingGames.findIndex((game) => game.name == gameName);
     if (gameIndex == -1) {

@@ -8,6 +8,7 @@ import { gameController } from './gameController';
 import { friendsController } from './friendsController';
 import type { JwtPayload, UserData, ReturnMessage } from './interfaces';
 import { UserRole } from './interfaces/user-data.interface';
+import { spectatorController } from './spectatorController';
 import router from './router';
 
 interface FetchedUser {
@@ -160,6 +161,7 @@ class User {
 		directMessageController.setEventsHandlers();
 		channelController.setEventsHandlers();
 		gameController.setEventHandlers();
+		spectatorController.setEventHandlers();
 	}
 
 	onDisconnect(): void {

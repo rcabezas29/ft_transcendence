@@ -1,54 +1,15 @@
 <script setup lang="ts">
-	import { onBeforeMount, onBeforeUnmount, ref, type Ref, computed } from 'vue';
-	import { user } from "../../user"
-	import router from "../../router"
-
-	interface OngoingGame {
-		name: string;
-		player1: string;
-		player1Id: number;
-		player1AvatarURL: string;
-		player1Score: number;
-		player2: string;
-		player2Id: number;
-		player2AvatarURL: string;
-		player2Score: number;
-	}
-
-	const ongoingGames: Ref<OngoingGame[]> = ref([]);
-
-	function fetchOngoingGames(games: OngoingGame[]) {
-		games.map(game => {
-			game.player1AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player1Id}`;
-			game.player2AvatarURL = `${import.meta.env.VITE_BACKEND_URL}/users/avatar/${game.player2Id}`;
-		})
-		ongoingGames.value = games;
-	}
-
-	function watchGame(gameName: string) {
-		router.push({
-			name: "spectate",
-			params: { matchId: gameName }
-		})
-	}
-
-	onBeforeMount(() => {
-		user.socket?.on("ongoing-games", (games) => { fetchOngoingGames(games) });
-		user.socket?.emit("ongoing-games");
-
-	})
-
-	onBeforeUnmount(() => {
-		user.socket?.off("spectator-new-game");
-		user.socket?.off("spectator-end-game");
-		user.socket?.off("ongoing-games");
-	})
-
+	import { spectatorController } from '@/spectatorController';
+	import { user } from '../../user'
 </script>
 
 <template>
 	<div class="ongoing-matches">
-		<div class="match-exterior-container" v-for="game in ongoingGames"  v-if="!ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)" @click="watchGame(game.name)">
+		<div class="match-exterior-container"
+			v-for="game in spectatorController.ongoingGames"
+			v-if="!spectatorController.ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username)"
+			@click="spectatorController.watchGame(game.name)"
+		>
 			
 			<div class="match-interior-container">
 
@@ -87,7 +48,13 @@
 			</div>
 		</div>
 
-		<div v-if="ongoingGames.length == 0 || (ongoingGames.length === 1 && ongoingGames.find((game) => game.player1 === user.username || game.player2 === user.username))">
+		<div v-if="
+				spectatorController.ongoingGames.length == 0
+				|| 
+				(spectatorController.ongoingGames.length === 1
+				&& spectatorController.ongoingGames.find((game) => game.player1 === user.username
+				|| game.player2 === user.username)
+				)">
 			NOBODY IS PLAYING RIGHT NOW :(
 		</div>
 	</div>
