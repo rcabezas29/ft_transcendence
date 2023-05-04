@@ -17,7 +17,6 @@ export interface OngoingGame {
 class SpectatorController {
 
 	public ongoingGames: OngoingGame[] = [];
-	public watchingGamesNames: string[] = [];
 
 	setEventHandlers() {
 		user.socket?.on("ongoing-games", (games: OngoingGame[]) => { this.fetchOngoingGames(games) });
@@ -36,7 +35,6 @@ class SpectatorController {
 			name: "spectate",
 			params: { matchId: gameName }
 		})
-		this.watchingGamesNames.push(gameName);
 	}
 
 	findGame(userId: number) {
@@ -53,7 +51,6 @@ class SpectatorController {
 
 	stopSpectating(matchId: string) {
 		user.socket?.emit("spectate-leave", matchId);
-		this.watchingGamesNames = this.watchingGamesNames.filter((name) => name != matchId);
 	}
 }
 
