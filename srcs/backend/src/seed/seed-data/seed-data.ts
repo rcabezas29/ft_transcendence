@@ -30,72 +30,94 @@ export const initialData: SeedData = {
             password: bcrypt.hashSync('1234', 10),
 			role: UserRole.OWNER
         },
+		{
+            email: 'eustaquio@admin.com',
+            username: 'eustaquio',
+			avatar: "default_avatar.jpg",
+            password: bcrypt.hashSync('1234', 10),
+			role: UserRole.ADMIN
+        },
         {
-            email: 'user1@example.com',
-            username: 'user1',
+            email: 'pepe@example.com',
+            username: 'pepitogrill0',
 			avatar: "default_avatar.jpg",
             password: bcrypt.hashSync('1234', 10),
         },
         {
-            email: 'user2@example.com',
-            username: 'user2',
+            email: 'maria@example.com',
+            username: 'maria',
 			avatar: "default_avatar.jpg",
             password: bcrypt.hashSync('1234', 10),
         },
         {
-            email: 'user3@example.com',
-            username: 'user3',
+            email: 'juan@example.com',
+            username: 'juan',
 			avatar: "default_avatar.jpg",
             password: bcrypt.hashSync('1234', 10),
         },
         {
-            email: 'user4@example.com',
-            username: 'user4',
+            email: 'lola@example.com',
+            username: 'lola',
 			avatar: "default_avatar.jpg",
             password: bcrypt.hashSync('1234', 10),
         },
 		{
-            email: 'user5@example.com',
-            username: 'user5',
+            email: 'john@example.com',
+            username: 'john',
 			avatar: "default_avatar.jpg",
             password: bcrypt.hashSync('1234', 10),
         },
     ],
 	friendships: [
 		{
-			user1: 'user1',
-			user2: 'user2',
+			user1: 'owner',
+			user2: 'pepitogrill0',
 			status: FriendshipStatus.Active
 		},
 		{
-			user1: 'user1',
-			user2: 'user3',
+			user1: 'owner',
+			user2: 'eustaquio',
+			status: FriendshipStatus.Active
+		},
+		{
+			user1: 'owner',
+			user2: 'maria',
 			status: FriendshipStatus.Pending
 		},
 		{
-			user1: 'user1',
-			user2: 'user4',
+			user1: 'owner',
+			user2: 'juan',
 			status: FriendshipStatus.Blocked
 		},
 		{
-			user1: 'user5',
-			user2: 'user1',
+			user1: 'lola',
+			user2: 'owner',
 			status: FriendshipStatus.Active
 		},
 		{
-			user1: 'user2',
-			user2: 'user3',
+			user1: 'pepitogrill0',
+			user2: 'maria',
 			status: FriendshipStatus.Active
 		},
 		{
-			user1: 'user2',
-			user2: 'user4',
+			user1: 'pepitogrill0',
+			user2: 'juan',
 			status: FriendshipStatus.Pending
 		},
 		{
-			user1: 'user5',
-			user2: 'user3',
+			user1: 'lola',
+			user2: 'maria',
 			status: FriendshipStatus.Blocked
+		},
+		{
+			user1: 'lola',
+			user2: 'john',
+			status: FriendshipStatus.Active
+		},
+		{
+			user1: 'juan',
+			user2: 'john',
+			status: FriendshipStatus.Active
 		},
 	]
 }

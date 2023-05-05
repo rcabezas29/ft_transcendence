@@ -22,6 +22,7 @@ import { MatchHistory } from './match-history/entity/match-history.entity';
 import { TwoFactorAuthenticationModule } from './two-factor-authentication/two-factor-authentication.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { PasswordUtilsModule } from './password-utils/password-utils.module';
+import { AppService } from './app.service';
 
 
 @Module({
@@ -30,6 +31,7 @@ import { PasswordUtilsModule } from './password-utils/password-utils.module';
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
     },
+    AppService
   ],
   imports: [
     IntraAuthModule,

@@ -47,9 +47,12 @@ async function getCurrentUser() {
     return userData;
 }
 
+const userExists = ref<boolean>(true);
+
 onBeforeMount(async () => {
     currentUser = await getCurrentUser();
     if (!currentUser) {
+        userExists.value = false;
         return;
     }
     
@@ -100,7 +103,7 @@ function isFriendGaming() {
 </script>
 
 <template>
-    <div class="header">
+    <div v-if="userExists" class="header">
         <div class="user-data-container">
             <div class="user-image">
                 <img :src=avatarUrl />
@@ -135,7 +138,7 @@ function isFriendGaming() {
         </Button>
     </div>
     
-    <div class="square-stats-grid">
+    <div v-if="userExists" class="square-stats-grid">
         <StatBox title="WINS" :stat="totalWins"/>
         <StatBox title="LOSSES" :stat="totalLosses"/>
         <StatBox title="W/L" :stat="winLossRatio.toFixed(2)"/>
@@ -144,6 +147,9 @@ function isFriendGaming() {
         <StatBox title="TOTAL MATCHES" :stat="totalMatches"/>
         <StatBox title="S/R" :stat="scoreRatio.toFixed(2)"/>
     </div>
+
+    <span v-else>user with id {{ userId }} not found</span>
+
 </template>
 
 <style scoped>

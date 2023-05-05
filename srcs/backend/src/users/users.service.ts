@@ -31,7 +31,7 @@ export class UsersService {
     private readonly statsService: StatsService,
     private readonly filesService: FilesService,
     private readonly passwordUtilsService: PasswordUtilsService,
-	private readonly mathcHistoryService: MatchHistoryService,
+	  private readonly mathcHistoryService: MatchHistoryService,
 
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -84,8 +84,12 @@ export class UsersService {
     });
   }
 
-  findOneById(id: number): Promise<User> {
-    return this.usersRepository.findOneBy({ id: id });
+  async findOneById(id: number): Promise<User> {
+    const found: User = await this.usersRepository.findOneBy({ id: id });
+    if (!found) {
+      throw new NotFoundException();
+    }
+    return found;
   }
 
   async findOneByUsername(username: string): Promise<User> {
@@ -95,25 +99,7 @@ export class UsersService {
   async findOneByEmail(email: string) {
     return await this.usersRepository.findOneBy({ email: email });
   }
-  /*
-    async findUserFriendsByStatus(id: number, status: FriendshipStatus): Promise<User[]> {
-        const friendsIds = await this.friendshipsService.findUserFriendsIdsByStatus(id, status);
-        const friends = await this.findAllByIds(friendsIds);
-        return friends;
-    }
-    
-    findUserActiveFriends(id: number) {
-        return this.findUserFriendsByStatus(id, FriendshipStatus.Active);
-    }
-    
-    findUserFriendRequests(id: number) {
-        return this.findUserFriendsByStatus(id, FriendshipStatus.Pending);
-    }
-    
-    findUserBlockedFriends(id: number) {
-        return this.findUserFriendsByStatus(id, FriendshipStatus.Blocked);
-    }
-    */
+
   async getAllUserFriends(userId: number): Promise<UserFriend[]> {
     const friendsRelations: Friendship[] =
       await this.friendshipsService.findAllUserFriendships(userId);
@@ -327,22 +313,6 @@ export class UsersService {
       u.username.toLowerCase().includes(username.toLowerCase())
     );
   }
-/*
-  async userRoleIsAdmin(userId: number): Promise<boolean> {
-    const user: User = await this.findOneById(userId);
-    if (!user)
-      return false;
-
-    return (user.role == UserRole.ADMIN || user.role == UserRole.OWNER);
-  }
-
-  async userRoleIsOwner(userId: number): Promise<boolean> {
-    const user: User = await this.findOneById(userId);
-    if (!user)
-      return false;
-
-    return (user.role == UserRole.OWNER);
-  }*/
 
   private generateRandomString(length: number): string {
     let result = '';
