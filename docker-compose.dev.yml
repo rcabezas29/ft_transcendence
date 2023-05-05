@@ -1,84 +1,42 @@
 version: '3'
 
 services:
-  docs:
-    build:
-      context: ./docs
-      dockerfile: Dockerfile
-    container_name: docs
-    ports:
-     - "4000:4000"
-    volumes:
-     - ./docs/:/app/
+
   database:
-    image: 'postgres:bullseye'
-    container_name: database
-    restart: always
-    env_file:
-      - ./.env
     ports:
       - 5432:5432
     volumes:
       - "database_volume:/var/lib/postgresql/data"
+
   backend:
-    build:
-      context: ./requirements/backend
-      dockerfile: Dockerfile
-    container_name: backend
     tty: true
-    restart: always
-    env_file:
-      - ./.env
     volumes:
       - type: bind
         source: ./srcs/backend
         target: /app
     ports:
       - 3000:3000
+    entrypoint: bash
+
   frontend:
     build:
-      context: ./requirements/frontend
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./requirements/frontend/Dockerfile
     container_name: frontend
-    tty: true
     restart: always
+    env_file:
+      - ./srcs/frontend/.env-dev
+    tty: true
     volumes:
       - type: bind
         source: ./srcs/frontend
         target: /app
     ports:
       - 5173:5173
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
-  pixelizer:
-    build:
-      context: ./requirements/pixelizer
-      dockerfile: Dockerfile
-    container_name: pixelizer
-    tty: true
-    restart: always
-    volumes:
-      - type: bind
-        source: ./srcs/pixelizer
-        target: /app
-    ports:
-      - 3001:3001
-    environment:
-      - WORK_PATH=/app
+    entrypoint: bash
+
   nginx:
-    build:
-      context: ./requirements/nginx
-      dockerfile: Dockerfile
-    container_name: nginx
-    depends_on:
-      - frontend
-    restart: always
-    ports:
-      - 80:80
-      - 443:443
+    entrypoint: bash
 
 volumes:
     database_volume:

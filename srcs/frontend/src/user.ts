@@ -70,7 +70,7 @@ class User {
 			this.isLogged = true;
 
 			if (!this.socket) {
-				this.socket = io(`${import.meta.env.VITE_BACKEND_URL}/`, {auth: {token: access_token}});
+				this.socket = io(`${import.meta.env.VITE_BACKEND_SOCKET_URL}`, {auth: {token: access_token}});
 				this.socket.on("connect", () => { this.onConnect(); });
 				this.socket.on("disconnect", () => { this.onDisconnect(); });
 				this.socket.on("alreadyConnected", () => { this.onAlreadyConnected(); });
