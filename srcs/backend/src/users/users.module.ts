@@ -18,7 +18,7 @@ import { MatchHistoryModule } from 'src/match-history/match-history.module';
     StatsModule,
     FilesModule,
     PasswordUtilsModule,
-	MatchHistoryModule
+	  MatchHistoryModule
   ],
   exports: [UsersService, TypeOrmModule],
 })

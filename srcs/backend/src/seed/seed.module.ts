@@ -8,6 +8,7 @@ import { FriendshipsModule } from 'src/friendships/friendships.module';
 @Module({
   controllers: [SeedController],
   providers: [SeedService],
-  imports: [UsersModule, FriendshipsModule, BlockedFriendshipsModule]
+  imports: [UsersModule, FriendshipsModule, BlockedFriendshipsModule],
+  exports: [SeedService]
 })
 export class SeedModule {}
