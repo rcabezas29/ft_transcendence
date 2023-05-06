@@ -271,7 +271,7 @@ export class UsersService {
       const updateUserDto: UpdateUserDto = {
         avatar: newFileName
       }
-      this.update(user.id, updateUserDto);
+      await this.update(user.id, updateUserDto);
     }
   }
 

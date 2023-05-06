@@ -48,6 +48,7 @@
             return;
         }
 
+		user.notifyOfUserChange();
         router.replace({ "name": "home"});
     }
 

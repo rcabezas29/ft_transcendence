@@ -25,7 +25,7 @@ export class IntraAuthService {
             client_id: process.env.INTRA_API_UID,
             client_secret: process.env.INTRA_API_SECRET,
             code: code,
-            redirect_uri: 'http://localhost/oauth',
+            redirect_uri: `${process.env.FRONTEND_URL}/oauth`,
             state: process.env.STATE_STRING
         };
 
