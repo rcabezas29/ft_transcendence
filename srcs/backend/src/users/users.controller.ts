@@ -11,12 +11,14 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard, JwtTwoFactorGuard, UserGuard, AdminGuard, OwnerGuard } from 'src/auth/guards';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { User } from './entities/user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -30,8 +32,12 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOneById(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const user: User = await this.usersService.findOneById(id);
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    return user;
   }
 
   @UseGuards(JwtTwoFactorGuard, UserGuard)
