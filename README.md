@@ -1,5 +1,7 @@
 # ft_transcendence
 
+Real-time multiplayer online Pong game as a social network, featuring an admin view, chat with moderators, possibility to watch live games, friendships, 2FA... Written in Typescript, using NestJS and Vue frameworks, with a PostgreSQL database.
+
 [Project documentation](https://rcabezas29.github.io/ft_transcendence/)
 
 ## How to use
